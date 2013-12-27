@@ -1,7 +1,7 @@
 /************************************
 ** Edition: Demo
 ** Author:  Kingsley Chen
-** Date:    2013/12/18
+** Date:    2013/12/27
 ** Purpose: AtExitManager implementation
 ************************************/
 
@@ -15,55 +15,55 @@ using std::mutex;
 
 namespace KBase {
 
-static AtExitManager* g_topExitManager = nullptr;
+static AtExitManager* g_top_exit_manager = nullptr;
 
-AtExitManager::AtExitManager() : _nextAtExitManager(g_topExitManager)
+AtExitManager::AtExitManager() : next_at_exit_manager_(g_top_exit_manager)
 {
-    g_topExitManager = this;
+    g_top_exit_manager = this;
 }
 
 AtExitManager::~AtExitManager()
 {
-    if (!g_topExitManager) {
+    if (!g_top_exit_manager) {
         assert(false);
         // logging("try to ~AtExitManager without an AtExitManager");
         return;
     }
 
-    assert(g_topExitManager == this);
+    assert(g_top_exit_manager == this);
 
     ProcessCallbackNow();
-    g_topExitManager = _nextAtExitManager;
+    g_top_exit_manager = next_at_exit_manager_;
 }
 
 // static
 void AtExitManager::RegisterCallback(const AtExitCallbackType& callback, void* param)
 {
-    if (!g_topExitManager) {
+    if (!g_top_exit_manager) {
         assert(false);
         // logging("try to RegisterCallback without an AtExitManager");
         return;
     }
 
-    lock_guard<mutex> lock(g_topExitManager->_lock);
-    g_topExitManager->_callbackStack.push(std::bind(callback, param));
+    lock_guard<mutex> lock(g_top_exit_manager->lock_);
+    g_top_exit_manager->callback_stack_.push(std::bind(callback, param));
 }
 
 // static
 void AtExitManager::ProcessCallbackNow()
 {
-    if (!g_topExitManager) {
+    if (!g_top_exit_manager) {
         assert(false);
         // logging("try to ProcessCallbackNow without an AtExitManager");
         return;
     }
 
-    lock_guard<mutex> lock(g_topExitManager->_lock);
+    lock_guard<mutex> lock(g_top_exit_manager->lock_);
 
-    while (!g_topExitManager->_callbackStack.empty()) {
-        auto task = g_topExitManager->_callbackStack.top();
+    while (!g_top_exit_manager->callback_stack_.empty()) {
+        auto task = g_top_exit_manager->callback_stack_.top();
         task();
-        g_topExitManager->_callbackStack.pop();
+        g_top_exit_manager->callback_stack_.pop();
     }
 }
 

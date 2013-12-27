@@ -16,26 +16,26 @@ class ScopeGuard
 {
     public:
         explicit ScopeGuard(std::function<void()> callback)
-            : _onScopeExit(callback), _dismissed(false)
+            : on_scope_exit_(callback), dismissed_(false)
         {
         }
 
         ~ScopeGuard()
         {
-            if (!_dismissed)
+            if (!dismissed_)
             {
-                _onScopeExit();
+                on_scope_exit_();
             }
         }
 
         void Dismiss()
         {
-            _dismissed = true;
+            dismissed_ = true;
         }
 
     private:
-        std::function<void()> _onScopeExit;
-        bool _dismissed;
+        std::function<void()> on_scope_exit_;
+        bool dismissed_;
 };
 
 #define DISABLE_COPYABLE(TypeName) \
