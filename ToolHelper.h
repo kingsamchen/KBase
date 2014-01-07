@@ -12,30 +12,28 @@
 #define SCOPE_GUARD_NAME(name, line) SCOPE_GUARD_NAME_CAT(name, line)
 #define ON_SCOPE_EXIT(callback) ScopeGuard SCOPE_GUARD_NAME(EXIT, __LINE__)(callback)
 
-class ScopeGuard
-{
-    public:
-        explicit ScopeGuard(std::function<void()> callback)
-            : on_scope_exit_(callback), dismissed_(false)
-        {
-        }
+class ScopeGuard {
+public:
+    explicit ScopeGuard(std::function<void()> callback)
+        : on_scope_exit_(callback), dismissed_(false)
+    {
+    }
 
-        ~ScopeGuard()
-        {
-            if (!dismissed_)
-            {
-                on_scope_exit_();
-            }
+    ~ScopeGuard()
+    {
+        if (!dismissed_) {
+            on_scope_exit_();
         }
+    }
 
-        void Dismiss()
-        {
-            dismissed_ = true;
-        }
+    void Dismiss()
+    {
+        dismissed_ = true;
+    }
 
-    private:
-        std::function<void()> on_scope_exit_;
-        bool dismissed_;
+private:
+    std::function<void()> on_scope_exit_;
+    bool dismissed_;
 };
 
 #define DISABLE_COPYABLE(TypeName) \
