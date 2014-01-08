@@ -1,6 +1,7 @@
 
 #include "Pickle.h"
 
+#include <algorithm>
 #include <cassert>
 #include <cstdlib>
 #include <cstring>
@@ -9,18 +10,18 @@ namespace KBase{
 
 // static
 const int Pickle::kPayloadUnit = 64;
-static const int kCapacityReadOnly = static_cast<size_t>(-1);
+static const size_t kCapacityReadOnly = static_cast<size_t>(-1);
 
-Pickle::Pickle() : header_(nullptr), capacity_(0), buffer_offset(0)
+Pickle::Pickle() : header_(nullptr), capacity_(0), buffer_offset_(0)
 {
     Resize(kPayloadUnit);
     header_->payload_size = 0;
 }
 
-Pickle::Pickle(const char* data, int data_len) 
+Pickle::Pickle(const char* data, int) 
     : header_(reinterpret_cast<Header*>(const_cast<char*>(data))),
       capacity_(kCapacityReadOnly),
-      buffer_offset(0)
+      buffer_offset_(0)
 {}
 
 /*
@@ -28,7 +29,7 @@ Pickle::Pickle(const char* data, int data_len)
     a deep copy of an Pickle object
 */
 Pickle::Pickle(const Pickle& other) : header_(nullptr), capacity_(0),
-                                      buffer_offset(other.buffer_offset)
+                                      buffer_offset_(other.buffer_offset_)
 {
     // if [other] is constructed from a const buffer, its capacity value is
     // kCapacityReadOnly. therefore, calculate its capacity on hand.
@@ -63,7 +64,7 @@ Pickle& Pickle::operator=(const Pickle& rhs)
     assert(resized);
 
     memcpy_s(header_, capacity_, rhs.header_, capacity);
-    buffer_offset = rhs.buffer_offset;
+    buffer_offset_ = rhs.buffer_offset_;
 
     return *this;
 }
@@ -97,6 +98,63 @@ bool Pickle::Resize(size_t new_capacity)
 size_t Pickle::AlignInt(size_t i, int alignment)
 {
     return i + (alignment - i % alignment) % alignment;
+}
+
+// proper only for PoD types
+bool Pickle::WriteByte(const void* data, int data_len)
+{
+    if (capacity_ == kCapacityReadOnly) {
+        assert(false);
+        return false;
+    }
+
+    char* dest = BeginWrite(data_len);
+    if (!dest) {
+        return false;
+    }
+
+    size_t extra_size = capacity_ - (dest - reinterpret_cast<char*>(header_));
+    memcpy_s(dest, extra_size, data, data_len);
+    EndWrite(dest, data_len);
+
+    return true;
+}
+
+/*
+ @ brief
+    locate to the next uint32-aligned offset. and resize internal buffer if
+    necessary.
+ @ return
+    the location that the data should be written at, or
+    nullptr if an error occured.
+*/
+char* Pickle::BeginWrite(size_t length)
+{
+    // write at a uint32-aligned offset from the begining of head
+    size_t offset = AlignInt(header_->payload_size, sizeof(uint32_t));
+    size_t required_size = offset + length;
+    size_t total_required_size = required_size + sizeof(Header);
+
+    if (total_required_size > capacity_ &&
+        !Resize(std::max(capacity_ << 1, total_required_size))) {
+        return nullptr;
+    }
+
+    header_->payload_size = static_cast<uint32_t>(required_size);
+
+    return payload() + offset;
+}
+
+/*
+ @ brief
+    zero pading memory; otherwise some memory detectors may complain about
+    uninitialized memory.
+*/
+void Pickle::EndWrite(char* dest, size_t length)
+{
+    if (length % sizeof(uint32_t)) {
+        memset(dest + length, 0, sizeof(uint32_t) - (length % sizeof(uint32_t)));
+    }
 }
 
 }
