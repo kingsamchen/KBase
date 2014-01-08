@@ -20,18 +20,6 @@
 
 namespace KBase {
 
-// provide a facility similar to the CRT atexit().
-// actually is a imitation of base::AtExitManager
-
-// the usage is simple. early in the main() or WinMain() scope 
-// create an object on the stack:    
-// int main()
-// {
-//     KBase::AtExitManager exitManager;
-// }
-// when the object goes out of scope, all registered callbacks
-// and the singleton destructors will be called
-
 class AtExitManager {
 public:
     typedef std::function<void(void*)> AtExitCallbackType;    
