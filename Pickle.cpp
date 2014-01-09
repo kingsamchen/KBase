@@ -12,6 +12,12 @@ namespace KBase{
 const int Pickle::kPayloadUnit = 64;
 static const size_t kCapacityReadOnly = static_cast<size_t>(-1);
 
+PickleIterator::PickleIterator(const Pickle& pickle)
+    : read_ptr_(pickle.payload()), read_end_ptr_(pickle.end_of_payload())
+{}
+
+// payload is uint32 aligned
+
 Pickle::Pickle() : header_(nullptr), capacity_(0), buffer_offset_(0)
 {
     Resize(kPayloadUnit);
@@ -100,7 +106,30 @@ size_t Pickle::AlignInt(size_t i, int alignment)
     return i + (alignment - i % alignment) % alignment;
 }
 
-// proper only for PoD types
+bool Pickle::WriteString(const std::string& value)
+{
+    if (!WriteInt(static_cast<int>(value.size()))) {
+        return false;
+    }
+
+    return WriteByte(value.data(), static_cast<int>(value.size()));
+}
+
+bool Pickle::WriteWString(const std::wstring& value)
+{
+    if (!WriteInt(static_cast<int>(value.size()))) {
+        return false;
+    }
+
+    return WriteByte(value.data(), static_cast<int>(value.size() * sizeof(wchar_t)));
+}
+
+/*
+ @ brief
+    serialize data in byte with specified length. PoD types only
+    the function guarantees the internal data remains unchanged if this
+    funtion fails.
+*/
 bool Pickle::WriteByte(const void* data, int data_len)
 {
     if (capacity_ == kCapacityReadOnly) {
@@ -142,7 +171,7 @@ char* Pickle::BeginWrite(size_t length)
 
     header_->payload_size = static_cast<uint32_t>(required_size);
 
-    return payload() + offset;
+    return mutable_payload() + offset;
 }
 
 /*
