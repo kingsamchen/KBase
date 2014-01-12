@@ -18,10 +18,27 @@ public:
     PickleIterator() : read_ptr_(nullptr), read_end_ptr_(nullptr) {}
     explicit PickleIterator(const Pickle& pickle);
 
+    bool ReadBool(bool* result);
+    bool ReadInt(int* result);
+    bool ReadUInt32(uint32_t* result);
+    bool ReadInt64(int64_t* result);
+    bool ReadUInt64(uint64_t* result);
+    bool ReadFloat(float* result);
+    bool ReadDouble(double* result);
+    bool ReadString(std::string* result);
+    bool ReadWString(std::wstring* result);
+    bool ReadBytes(const char** data, int length);
+
 private:
     const char* read_ptr_;
     const char* read_end_ptr_;
 };
+
+// <------------capacity----------->
+// +------+----+----+---+----+-----+
+// |header|seg1|seg2|...|segn|     |
+// +------+----+----+---+----+-----+
+//        <-----payload------>
 
 class Pickle {
 public:
