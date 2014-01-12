@@ -86,6 +86,19 @@ bool PickleIterator::ReadWString(std::wstring* result)
     return true;
 }
 
+bool PickleIterator::ReadBytes(const char** data, int length)
+{
+    assert(data);
+    const char* read_from = GetReadPointerAndAdvance(length);
+    if (!read_from) {
+        *data = nullptr;
+        return false;
+    }
+
+    *data = read_from;
+    return true;
+}
+
 // sizeof comparison in if statement causes constant expression warning
 // disable the warning temporarily
 #pragma warning(push)

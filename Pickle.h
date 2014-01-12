@@ -28,12 +28,16 @@ public:
     bool ReadString(std::string* result);
     bool ReadWString(std::wstring* result);
     bool ReadBytes(const char** data, int length);
+    bool ReadData(const char** data, int* read_length);
+    bool SkipBytes(int num_bytes);
 
 private:
     template<typename T>
     inline bool ReadBuiltIninType(T* result);
     template<typename T>
     inline const char* GetReadPointerAndAdvance();
+    const char* GetReadPointerAndAdvance(int num_bytes);
+    const char* GetReadPointerAndAdvance(int num_elements, size_t element_size);
 
 private:
     const char* read_ptr_;
@@ -70,6 +74,7 @@ public:
     bool WriteString(const std::string& value);
     bool WriteWString(const std::wstring& value);
     bool WriteByte(const void* data, int data_len);
+    bool WriteData(const char* data, int length);
 
     struct Header {
         uint32_t payload_size;
