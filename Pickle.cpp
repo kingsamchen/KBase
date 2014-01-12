@@ -54,6 +54,38 @@ bool PickleIterator::ReadDouble(double* result)
     return ReadBuiltIninType(result);
 }
 
+bool PickleIterator::ReadString(std::string* result)
+{
+    int str_length;
+    if (!ReadInt(&str_length)) {
+        return false;
+    }
+
+    const char* read_from = GetReadPointerAndAdvance(str_length);
+    if (!read_from) {
+        return false;
+    }
+
+    result->assign(read_from, str_length);
+    return true;
+}
+
+bool PickleIterator::ReadWString(std::wstring* result)
+{
+    int str_length;
+    if (!ReadInt(&str_length)) {
+        return false;
+    }
+
+    const char* read_from = GetReadPointerAndAdvance(str_length, sizeof(wchar_t));
+    if (!read_from) {
+        return false;
+    }
+
+    result->assign(reinterpret_cast<const wchar_t*>(read_from), str_length);
+    return true;
+}
+
 // sizeof comparison in if statement causes constant expression warning
 // disable the warning temporarily
 #pragma warning(push)
@@ -97,6 +129,35 @@ inline const char* PickleIterator::GetReadPointerAndAdvance()
 }
 
 #pragma warning(pop)
+
+const char* PickleIterator::GetReadPointerAndAdvance(int num_bytes)
+{
+    const char* curr_read_ptr = read_ptr_;
+
+    if (num_bytes < 0 || read_ptr_ + num_bytes > read_end_ptr_) {
+        return nullptr;
+    }
+
+    read_ptr_ += Pickle::AlignInt(num_bytes, sizeof(uint32_t));
+
+    return curr_read_ptr;
+}
+
+/*
+ @ brief
+    when the size of element doesn't equal to sizeof(char), use this function
+    for safety consieration. this function runs overflow check on int32 num_bytes.
+*/
+const char* PickleIterator::GetReadPointerAndAdvance(int num_elements, size_t element_size)
+{
+    int64_t num_bytes = static_cast<int64_t>(num_elements) * element_size;
+    int num_bytes32 = static_cast<int>(num_bytes);
+    if (num_bytes != static_cast<int64_t>(num_bytes32)) {
+        return nullptr;
+    }
+
+    return GetReadPointerAndAdvance(num_bytes32);
+}
 
 // payload is uint32 aligned
 
