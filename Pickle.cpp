@@ -99,6 +99,24 @@ bool PickleIterator::ReadBytes(const char** data, int length)
     return true;
 }
 
+bool PickleIterator::ReadData(const char** data, int* read_length)
+{
+    assert(data);
+
+    if (!ReadInt(read_length)) {
+        *data = nullptr;
+        *read_length = 0;
+        return false;
+    }
+
+    return ReadBytes(data, *read_length);
+}
+
+bool PickleIterator::SkipBytes(int num_bytes)
+{
+    return !!GetReadPointerAndAdvance(num_bytes);
+}
+
 // sizeof comparison in if statement causes constant expression warning
 // disable the warning temporarily
 #pragma warning(push)
@@ -303,6 +321,11 @@ bool Pickle::WriteByte(const void* data, int data_len)
     EndWrite(dest, data_len);
 
     return true;
+}
+
+bool Pickle::WriteData(const char* data, int length)
+{
+    return length >= 0 && WriteInt(length) && WriteByte(data, length);
 }
 
 /*
