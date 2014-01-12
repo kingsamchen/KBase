@@ -1,4 +1,7 @@
 
+
+
+
 #include "Pickle.h"
 
 #include <algorithm>
@@ -15,6 +18,85 @@ static const size_t kCapacityReadOnly = static_cast<size_t>(-1);
 PickleIterator::PickleIterator(const Pickle& pickle)
     : read_ptr_(pickle.payload()), read_end_ptr_(pickle.end_of_payload())
 {}
+
+bool PickleIterator::ReadBool(bool* result)
+{
+    return ReadBuiltIninType(result);
+}
+
+bool PickleIterator::ReadInt(int* result)
+{
+    return ReadBuiltIninType(result);
+}
+
+bool PickleIterator::ReadUInt32(uint32_t* result)
+{
+    return ReadBuiltIninType(result);
+}
+
+bool PickleIterator::ReadInt64(int64_t* result)
+{
+    return ReadBuiltIninType(result);
+}
+
+bool PickleIterator::ReadUInt64(uint64_t* result)
+{
+    return ReadBuiltIninType(result);
+}
+
+bool PickleIterator::ReadFloat(float* result)
+{
+    return ReadBuiltIninType(result);
+}
+
+bool PickleIterator::ReadDouble(double* result)
+{
+    return ReadBuiltIninType(result);
+}
+
+// sizeof comparison in if statement causes constant expression warning
+// disable the warning temporarily
+#pragma warning(push)
+#pragma warning(disable:4127)
+
+template<typename T>
+inline bool PickleIterator::ReadBuiltIninType(T* result)
+{
+    const char* read_from = GetReadPointerAndAdvance<T>();
+
+    if (!read_from) {
+        return false;
+    }
+
+    if (sizeof(T) > sizeof(uint32_t)) {
+        memcpy_s(result, sizeof(*result), read_from, sizeof(*result));
+    } else {
+        *result = *reinterpret_cast<const T*>(read_from);
+    }
+
+    return true;
+}
+
+template<typename T>
+inline const char* PickleIterator::GetReadPointerAndAdvance()
+{
+    const char* curr_read_ptr = read_ptr_;
+
+    if (read_ptr_ + sizeof(T) > read_end_ptr_) {
+        return nullptr;
+    }
+
+    // skip the memory hole if size of the type is less than uint32
+    if (sizeof(T) < sizeof(uint32_t)) {
+        read_ptr_ += Pickle::AlignInt(sizeof(T), sizeof(uint32_t));
+    } else {
+        read_ptr_ += sizeof(T);
+    }
+
+    return curr_read_ptr;
+}
+
+#pragma warning(pop)
 
 // payload is uint32 aligned
 

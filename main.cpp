@@ -15,16 +15,23 @@ int main(int /*argc*/, char* /*argv[]*/)
 {
     std::string s = "hello world";
     Pickle pickle;
-    pickle.WriteString(s);
-    pickle.WriteInt(123);
-    char* p = static_cast<char*>(const_cast<void*>(pickle.data()));
-    cout << *(int*)p << endl;
-    p += 4;
-    int len = *(int*)p;
-    p += 4;
-    cout << len << endl;
-    std::string st(p, p + len);
-    cout << st;
+    pickle.WriteInt(0x1234);
+    pickle.WriteBool(true);
+    pickle.WriteDouble(3.14159);
+
+    cout << "marshal data complete" << endl;
+
+    int protocol = 0;
+    bool flag = false;
+    double pi = 0.0;
+
+    KBase::PickleIterator it(pickle);
+    it.ReadInt(&protocol);
+    it.ReadBool(&flag);
+    it.ReadDouble(&pi);
+
+    cout << "unmarshal:" << protocol << " " << flag << " " << pi << endl;
+
     _getch();
     return 0;
 }

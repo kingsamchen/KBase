@@ -30,10 +30,19 @@ public:
     bool ReadBytes(const char** data, int length);
 
 private:
+    template<typename T>
+    inline bool ReadBuiltIninType(T* result);
+    template<typename T>
+    inline const char* GetReadPointerAndAdvance();
+
+private:
     const char* read_ptr_;
     const char* read_end_ptr_;
 };
 
+
+// Note: every segment in payload is uint32 aligned, thus there might be a gap
+// between two logically consective segments.
 // <------------capacity----------->
 // +------+----+----+---+----+-----+
 // |header|seg1|seg2|...|segn|     |
