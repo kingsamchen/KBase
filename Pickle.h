@@ -171,6 +171,6 @@ inline bool Pickle::WriteDouble(double value)
     return WriteByte(&value, sizeof(value));
 }
 
-}
+}   // namespace KBase
 
 #endif  // KBASE_PICKLE_H_
