@@ -69,3 +69,22 @@ it.ReadString(&str);
 ```
 
 for complete functions and their usage, see the source code.
+
+### AutoReset
+
+provides a facility that set a given object a new value within a scope, and
+restores its original value automatically when goes out of scope.
+
+usage:
+
+```c++
+std::string str("hello world");
+    
+{
+    cout << "stage 1:" << str << endl;  // hello world
+    KBase::AutoReset<std::string> auto_str(&str, "kingsamchen");
+    cout << "stage 2:" << str << endl;  // kingsamchen
+}
+
+cout << "stage 3:" << str << endl;  // hello world
+```

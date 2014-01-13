@@ -3,45 +3,24 @@
 #include <conio.h>
 #include <iostream>
 #include <memory>
+#include <string>
 
-#include "Pickle.h"
+#include "auto_reset.h"
 
 using std::cout;
 using std::endl;
 
 int main(int /*argc*/, char* /*argv[]*/)
 {
-    std::string s = "hello world";
-
-    KBase::Pickle pickle;
-    // serialize
-    pickle.WriteInt(0x1234);
-    pickle.WriteBool(true);
-    pickle.WriteDouble(3.14159);
-    pickle.WriteString("hell world");
-
-    std::cout << "marshal data complete" << std::endl;
-
-    // transmit serialized data if necessary
-    size_t buffer_size = pickle.size();
-    std::unique_ptr<char[]> buff(new char[buffer_size]);
-    memcpy(buff.get(), pickle.data(), buffer_size);
-
-    KBase::Pickle pickle_out(buff.get(), buffer_size);
+    std::string str("hello world");
     
-    int protocol = 0;
-    bool flag = false;
-    double pi = 0.0;
-    std::string str;
+    {
+        cout << "stage 1:" << str << endl;
+        KBase::AutoReset<std::string> auto_str(&str, "kingsamchen");
+        cout << "stage 2:" << str << endl;
+    }
 
-    // deserialize
-    KBase::PickleIterator it(pickle_out);
-    it.ReadInt(&protocol);
-    it.ReadBool(&flag);
-    it.ReadDouble(&pi);
-    it.ReadString(&str);
-
-    cout << "unmarshal:" << protocol << endl  << flag << endl << pi << endl << str;
+    cout << "stage 3:" << str << endl;
 
     _getch();
     return 0;
