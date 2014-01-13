@@ -1,3 +1,9 @@
+/************************************
+** Edition: Demo
+** Author:  Kingsley Chen
+** Date:    2014/01/13
+** Purpose: Pickle declaration
+************************************/
 
 #if _MSC_VER > 1000
 #pragma once
@@ -100,7 +106,7 @@ private:
     friend class PickleIterator;
 /////////// exposed as dump function /////////
 #ifdef _DEBUG
-    friend void _dump(const Pickle& pk);
+    friend void _pickle_dump(const Pickle& pk);
 #endif
 };
 

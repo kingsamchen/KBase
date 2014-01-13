@@ -1,6 +1,9 @@
-
-
-
+/************************************
+** Edition: Demo
+** Author:  Kingsley Chen
+** Date:    2014/01/13
+** Purpose: Pickle definition
+************************************/
 
 #include "Pickle.h"
 
