@@ -74,9 +74,14 @@
   <ItemGroup>
     <ClCompile Include="AtExitManager.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Pickle.cpp" />
+    <ClCompile Include="strings\string_piece.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AtExitManager.h" />
+    <ClInclude Include="auto_reset.h" />
+    <ClInclude Include="Pickle.h" />
+    <ClInclude Include="strings\string_piece.h" />
     <ClInclude Include="ToolHelper.h" />
   </ItemGroup>
   <ItemGroup>

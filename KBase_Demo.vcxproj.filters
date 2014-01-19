@@ -1,34 +1,30 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Source Files">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-    </Filter>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
-    </Filter>
     <Filter Include="Resource Files">
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
     </Filter>
+    <Filter Include="strings">
+      <UniqueIdentifier>{f2d9cb75-3a3d-4794-8139-2c56f4366ae3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="AtExitManager.cpp">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="AtExitManager.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="Pickle.cpp" />
+    <ClCompile Include="strings\string_piece.cpp">
+      <Filter>strings</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="AtExitManager.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="AtExitManager.h" />
+    <ClInclude Include="Pickle.h" />
+    <ClInclude Include="ToolHelper.h" />
+    <ClInclude Include="strings\string_piece.h">
+      <Filter>strings</Filter>
     </ClInclude>
-    <ClInclude Include="ToolHelper.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
+    <ClInclude Include="auto_reset.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />
