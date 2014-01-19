@@ -1,11 +1,8 @@
+
 #include "string_piece.h"
 
+namespace KBase {
 
-BasicStringPiece::BasicStringPiece(void)
-{
 }
 
 
-BasicStringPiece::~BasicStringPiece(void)
-{
-}
