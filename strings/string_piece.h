@@ -183,6 +183,32 @@ StringPieceDetail<STRING_TYPE>::npos =
 
 template<typename STRING_TYPE>
 class BasicStringPiece : public internal::StringPieceDetail<STRING_TYPE> {
+public:
+    typedef typename internal::StringPieceDetail<STRING_TYPE>::value_type 
+        value_type;
+    typedef typename internal::StringPieceDetail<STRING_TYPE>::size_type
+        size_type;
+
+public:
+    BasicStringPiece()
+    {}
+
+    BasicStringPiece(const value_type* str)
+        : internal::StringPieceDetail<STRING_TYPE>(str)
+    {}
+
+    BasicStringPiece(const value_type* data, size_type len)
+        : internal::StringPieceDetail<STRING_TYPE>(data, len)
+    {}
+
+    BasicStringPiece(const STRING_TYPE& str)
+        : internal::StringPieceDetail<STRING_TYPE>(str)
+    {}
+
+    BasicStringPiece(const typename STRING_TYPE::const_iterator& cbegin,
+                     const typename STRING_TYPE::const_iterator& cend)
+        : internal::StringPieceDetail<STRING_TYPE>(cbegin, cend)
+    {}
 
 };
 
