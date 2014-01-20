@@ -10,6 +10,8 @@
 #ifndef KBASE_STRINGS_STRING_PIECE_H_
 #define KBASE_STRINGS_STRING_PIECE_H_
 
+// try to include few header files as you could to speed up compilation
+
 #include <iosfwd>
 #include <string>
 
@@ -48,8 +50,8 @@ public:
         : ptr_(str.data()), length_(str.length())
     {}
 
-    StringPieceDetail(const value_type* ptr, size_type len) 
-        : ptr_(ptr), length_(len)
+    StringPieceDetail(const value_type* data, size_type len) 
+        : ptr_(data), length_(len)
     {}
 
     StringPieceDetail(const typename STRING_TYPE::const_iterator& cbegin,
@@ -58,6 +60,114 @@ public:
           length_(cbegin < cend ? static_cast<size_type>(cend - cbegin) : 0)
     {}
 
+    
+    const value_type* data() const
+    {
+        return ptr_;
+    }
+
+    size_type length() const
+    {
+        return length_;
+    }
+
+    size_type size() const
+    {
+        return length_;
+    }
+
+    size_type capacity() const
+    {
+        // since we cannot change the memory the internal string resides,
+        // we simply treat its capacity same with the length.
+        return size();
+    }
+
+    bool empty() const
+    {
+        return length_ == 0;
+    }
+
+    void clear()
+    {
+        ptr_ = nullptr;
+        length_ = 0;
+    }
+
+    void set(const value_type* str)
+    {
+        ptr_ = str;
+        length_ = STRING_TYPE::traits_type::length(str);
+    }
+
+    void set(const value_type* data, size_type len)
+    {
+        ptr_ = data;
+        length_ = len;
+    }
+
+    value_type operator[](size_type i) const
+    {
+        return ptr_[i];
+    }
+
+    int compare(const BasicStringPiece<STRING_TYPE>& other) const
+    {
+        size_type min_length = length_ < other.length_ ? length_ : other.length_;
+        int ret = wordmemcmp(ptr_, other.ptr_, min_length);
+        
+        if (ret == 0) {
+            if (length_ < other.length_) {
+                return -1;
+            } else {
+                return 1;
+            }
+        }
+
+        return ret;
+    }
+    
+    void RemovePrefix(size_type n)
+    {
+        ptr_ += n;
+        length_ -= n;
+    }
+
+    void RemoveSuffix(size_type n)
+    {
+        length_ -= n;
+    }
+
+    static int wordmemcmp(const value_type* str1, const value_type* str2,
+                          size_type n)
+    {
+        return STRING_TYPE::traits_type::compare(str1, str2, n);
+    }
+
+    STRING_TYPE as_string() const
+    {
+        return empty() ? STRING_TYPE() : STRING_TYPE(ptr_, length_);
+    }
+
+    const_iterator cbegin() const
+    {
+        return ptr_;
+    }
+
+    const_iterator cend() const
+    {
+        return ptr_ + length_;
+    }
+
+    const_reverse_iterator crbegin() const
+    {
+        return const_reverse_iterator(ptr_ + length_);
+    }
+
+    const_reverse_iterator crend() const
+    {
+        return const_reverse_iterator(ptr_);
+    }
 
 protected:
     const value_type* ptr_;
