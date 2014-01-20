@@ -88,3 +88,5 @@ std::string str("hello world");
 
 cout << "stage 3:" << str << endl;  // hello world
 ```
+
+### StringPiece [to be continued...]
