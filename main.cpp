@@ -5,22 +5,18 @@
 #include <memory>
 #include <string>
 
-#include "auto_reset.h"
+#include "strings\string_piece.h"
 
 using std::cout;
 using std::endl;
 
 int main(int /*argc*/, char* /*argv[]*/)
 {
-    std::string str("hello world");
-    
-    {
-        cout << "stage 1:" << str << endl;
-        KBase::AutoReset<std::string> auto_str(&str, "kingsamchen");
-        cout << "stage 2:" << str << endl;
-    }
-
-    cout << "stage 3:" << str << endl;
+    KBase::StringPiece sp("this is my new stringpiece");
+    cout << sp.StartsWith("this") << endl;
+    cout << sp.StartsWith("thiss") << endl;
+    cout << sp.EndsWith("piece") << endl;
+    cout << sp.EndsWith(" piece");    
 
     _getch();
     return 0;

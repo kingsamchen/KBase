@@ -3,6 +3,10 @@
 
 namespace KBase {
 
+namespace internal {
+
+}
+
 }
 
 

@@ -1,5 +1,5 @@
 // Author:  Kingsley Chen
-// Date:    2014/01/20
+// Date:    2014/01/22
 // Purpose: core implementation of BasicStringPiece
 //          and its underlying StringPieceDetail
 
@@ -13,6 +13,7 @@
 // try to include few header files as you could to speed up compilation
 
 #include <iosfwd>
+#include <algorithm>
 #include <string>
 
 namespace KBase {
@@ -60,7 +61,6 @@ public:
           length_(cbegin < cend ? static_cast<size_type>(cend - cbegin) : 0)
     {}
 
-    
     const value_type* data() const
     {
         return ptr_;
@@ -113,7 +113,7 @@ public:
 
     int compare(const BasicStringPiece<STRING_TYPE>& other) const
     {
-        size_type min_length = length_ < other.length_ ? length_ : other.length_;
+        size_type min_length = std::min(length_, other.length_);
         int ret = wordmemcmp(ptr_, other.ptr_, min_length);
         
         if (ret == 0) {
@@ -179,6 +179,34 @@ const typename StringPieceDetail<STRING_TYPE>::size_type
 StringPieceDetail<STRING_TYPE>::npos = 
     static_cast<typename StringPieceDetail<STRING_TYPE>::size_type>(-1);
 
+// internal helper functions
+
+template<typename STRING_TYPE>
+void CopyToString(const BasicStringPiece<STRING_TYPE>& self, STRING_TYPE* target)
+{
+    target->assign(self.cbegin(), self.cend());
+}
+
+template<typename STRING_TYPE>
+void AppendToString(const BasicStringPiece<STRING_TYPE>& self, STRING_TYPE* target)
+{
+    target->append(self.cbegin(), self.cend());
+}
+
+template<typename STRING_TYPE>
+typename BasicStringPiece<STRING_TYPE>::size_type
+    copy(const BasicStringPiece<STRING_TYPE>& self,
+         typename BasicStringPiece<STRING_TYPE>::value_type* data,
+         typename BasicStringPiece<STRING_TYPE>::size_type n,
+         typename BasicStringPiece<STRING_TYPE>::size_type pos)
+{
+    typename BasicStringPiece<STRING_TYPE>::size_type remain
+        = std::min(self.size() - pos, n);
+    memcpy_s(data, n, self.data() + pos, remain);
+
+    return remain;
+}
+
 }   // namespace internal
 
 template<typename STRING_TYPE>
@@ -210,6 +238,32 @@ public:
         : internal::StringPieceDetail<STRING_TYPE>(cbegin, cend)
     {}
 
+    void CopyToString(STRING_TYPE* target) const
+    {
+        internal::CopyToString(*this, target);
+    }
+
+    void AppendToString(STRING_TYPE* target) const
+    {
+        internal::AppendToString(*this, target);
+    }
+
+    size_type copy(value_type* data, size_type n, size_type pos = 0) const
+    {
+        return internal::copy(*this, data, n, pos);
+    }
+
+    bool StartsWith(const BasicStringPiece& token) const
+    {
+        return ((length_ >= token.length_) &&
+                (wordmemcmp(ptr_, token.ptr_, token.length_) == 0));
+    }
+
+    bool EndsWith(const BasicStringPiece& token) const
+    {
+        return ((length_ >= token.length_) &&
+                (wordmemcmp(ptr_ + length_ - token.length_, token.ptr_, token.length_) == 0));
+    }
 };
 
 }   // namespace KBase
