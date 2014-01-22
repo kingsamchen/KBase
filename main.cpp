@@ -13,14 +13,11 @@ using std::endl;
 
 int main(int /*argc*/, char* /*argv[]*/)
 {
-    KBase::StringPiece sp("this is my new stringpiece");
-    std::string s("this is my new stringpiece");
-
-    assert(sp.rfind("new") == s.rfind("new"));
-    assert(sp.rfind("st") == s.rfind("st"));
-    assert(sp.rfind("i", 22) == s.rfind("i", 22));
-    assert(sp.rfind("i", 21) == s.rfind("i", 21));
-    
+    KBase::WStringPiece sp(L"this is my new stringpiece");
+    //std::bitset<0U> table;
+    //KBase::internal::BuildLookupTable<std::string>(words, &table);
+    //cout << table.count();
+    cout << sp.find_first_of(L"xz");
     _getch();
     return 0;
 }

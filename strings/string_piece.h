@@ -1,5 +1,5 @@
 // Author:  Kingsley Chen
-// Date:    2014/01/22
+// Date:    2014/01/23
 // Purpose: core implementation of BasicStringPiece
 //          and its underlying StringPieceDetail
 
@@ -14,6 +14,7 @@
 
 #include <iosfwd>
 #include <algorithm>
+#include <bitset>
 #include <string>
 
 namespace KBase {
@@ -281,20 +282,31 @@ typename BasicStringPiece<STRING_TYPE>::size_type
 }
 
 template<typename STRING_TYPE>
-void BuildLookupTable(const BasicStringPiece<STRING_TYPE>& characters,
-                      std::bitset<UCHAR_MAX + 1>* table)
-{
-
-}
-
-template<typename STRING_TYPE>
 typename BasicStringPiece<STRING_TYPE>::size_type
     find_first_of(const BasicStringPiece<STRING_TYPE>& self,
                   const BasicStringPiece<STRING_TYPE>& s,
                   typename BasicStringPiece<STRING_TYPE>::size_type pos)
 {
-    return -1;
+    if (self.empty() || s.empty())
+        return BasicStringPiece<STRING_TYPE>::npos;
+
+    for (BasicStringPiece<STRING_TYPE>::size_type i = pos; i < self.size(); ++i) {
+        for (BasicStringPiece<STRING_TYPE>::size_type j = 0; j < s.size(); ++j) {
+            if (self[i] == s[j])
+                return i;
+        }
+    }
+
+    return BasicStringPiece<STRING_TYPE>::npos;
 }
+
+// specialized internal find_*_of operations for std::string
+
+StringPieceDetail<std::string>::size_type 
+    find_first_of(const StringPiece& self,
+                  const StringPiece& s,
+                  StringPieceDetail<std::string>::size_type pos = 0);
+
 
 }   // namespace internal
 
@@ -378,7 +390,10 @@ public:
         return internal::rfind(*this, ch, pos);
     }
 
-    size_type find_first_of(const BasicStringPiece& s, size_type pos = 0) const;
+    size_type find_first_of(const BasicStringPiece& s, size_type pos = 0) const
+    {
+        return internal::find_first_of(*this, s, pos);
+    }
 
     size_type find_first_not_of(const BasicStringPiece& s, size_type pos = 0) const;
 
@@ -387,7 +402,15 @@ public:
     size_type find_last_not_of(const BasicStringPiece& s, size_type pos = npos) const;
 };
 
+// specialized find_*_of operations for std::string
+
+template<>
+StringPiece::size_type
+    BasicStringPiece<std::string>::find_first_of(const StringPiece& s, size_type pos) const
+{
+    return internal::find_first_of(*this, s, pos);
+}
+
 }   // namespace KBase
 
 #endif  // KBASE_STRINGS_STRING_PIECE_H_
-
