@@ -280,6 +280,22 @@ typename BasicStringPiece<STRING_TYPE>::size_type
         BasicStringPiece<STRING_TYPE>::npos;
 }
 
+template<typename STRING_TYPE>
+void BuildLookupTable(const BasicStringPiece<STRING_TYPE>& characters,
+                      std::bitset<UCHAR_MAX + 1>* table)
+{
+
+}
+
+template<typename STRING_TYPE>
+typename BasicStringPiece<STRING_TYPE>::size_type
+    find_first_of(const BasicStringPiece<STRING_TYPE>& self,
+                  const BasicStringPiece<STRING_TYPE>& s,
+                  typename BasicStringPiece<STRING_TYPE>::size_type pos)
+{
+    return -1;
+}
+
 }   // namespace internal
 
 template<typename STRING_TYPE>
@@ -361,6 +377,14 @@ public:
     {
         return internal::rfind(*this, ch, pos);
     }
+
+    size_type find_first_of(const BasicStringPiece& s, size_type pos = 0) const;
+
+    size_type find_first_not_of(const BasicStringPiece& s, size_type pos = 0) const;
+
+    size_type find_last_of(const BasicStringPiece& s, size_type pos = npos) const;
+
+    size_type find_last_not_of(const BasicStringPiece& s, size_type pos = npos) const;
 };
 
 }   // namespace KBase
