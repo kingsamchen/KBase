@@ -1,4 +1,5 @@
 
+#include <cassert>
 #include <cstdio>
 #include <conio.h>
 #include <iostream>
@@ -13,11 +14,13 @@ using std::endl;
 int main(int /*argc*/, char* /*argv[]*/)
 {
     KBase::StringPiece sp("this is my new stringpiece");
-    cout << sp.StartsWith("this") << endl;
-    cout << sp.StartsWith("thiss") << endl;
-    cout << sp.EndsWith("piece") << endl;
-    cout << sp.EndsWith(" piece");    
+    std::string s("this is my new stringpiece");
 
+    assert(sp.rfind("new") == s.rfind("new"));
+    assert(sp.rfind("st") == s.rfind("st"));
+    assert(sp.rfind("i", 22) == s.rfind("i", 22));
+    assert(sp.rfind("i", 21) == s.rfind("i", 21));
+    
     _getch();
     return 0;
 }

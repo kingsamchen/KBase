@@ -207,6 +207,79 @@ typename BasicStringPiece<STRING_TYPE>::size_type
     return remain;
 }
 
+template<typename STRING_TYPE>
+typename BasicStringPiece<STRING_TYPE>::size_type
+    find(const BasicStringPiece<STRING_TYPE>& self,
+         const BasicStringPiece<STRING_TYPE>& s,
+         typename BasicStringPiece<STRING_TYPE>::size_type pos)
+{
+    if (self.size() < s.size() + pos)
+        return BasicStringPiece<STRING_TYPE>::npos;
+
+    // if no matched range found, |std::search| returns self.cend()
+    // but a valid return value must be within [begin, end - s.length + 1)
+    auto result_it = std::search(self.cbegin() + pos, self.cend(), s.cbegin(), s.cend());
+    typename BasicStringPiece<STRING_TYPE>::size_type xpos =
+        static_cast<size_t>(result_it - self.cbegin());
+
+    return (xpos + s.size() <= self.size()) ?
+                xpos : BasicStringPiece<STRING_TYPE>::npos;
+}
+
+template<typename STRING_TYPE>
+typename BasicStringPiece<STRING_TYPE>::size_type
+    find(const BasicStringPiece<STRING_TYPE>& self,
+         typename BasicStringPiece<STRING_TYPE>::value_type ch,
+         typename BasicStringPiece<STRING_TYPE>::size_type pos)
+{
+    if (self.size() <= pos)
+        return BasicStringPiece<STRING_TYPE>::npos;
+
+    auto result_it = std::find(self.cbegin() + pos, self.cend(), ch);
+    
+    return result_it != self.cend() ? 
+        static_cast<size_t>(result_it - self.cbegin()) :
+        BasicStringPiece<STRING_TYPE>::npos;
+}
+
+template<typename STRING_TYPE>
+typename BasicStringPiece<STRING_TYPE>::size_type
+    rfind(const BasicStringPiece<STRING_TYPE>& self,
+          const BasicStringPiece<STRING_TYPE>& s,
+          typename BasicStringPiece<STRING_TYPE>::size_type pos)
+{
+    if (self.size() < s.size())
+        return BasicStringPiece<STRING_TYPE>::npos;
+
+    // refer to http://en.cppreference.com/w/cpp/string/basic_string/rfind
+    if (s.empty())
+        return std::min(pos, s.size() - 1);
+
+    auto last = self.cbegin() + std::min(self.size() - s.size(), pos) + s.size();
+    auto result_it = std::find_end(self.cbegin(), last, s.cbegin(), s.cend());
+
+    return result_it != last ? 
+        static_cast<size_t>(result_it - self.cbegin()) : 
+        BasicStringPiece<STRING_TYPE>::npos;
+}
+
+template<typename STRING_TYPE>
+typename BasicStringPiece<STRING_TYPE>::size_type
+    rfind(const BasicStringPiece<STRING_TYPE>& self,
+          typename BasicStringPiece<STRING_TYPE>::value_type ch,
+          typename BasicStringPiece<STRING_TYPE>::size_type pos)
+{
+    typename BasicStringPiece<STRING_TYPE>::size_type begin_pos =
+        std::min(pos, self.size() - 1);
+
+    auto result_it = 
+        std::find(self.crbegin() + ((self.size() - 1) - begin_pos), self.crend(), ch);
+    
+    return result_it != self.crend() ?
+        static_cast<size_t>(result_it.base() - 1 - self.cbegin()) :
+        BasicStringPiece<STRING_TYPE>::npos;
+}
+
 }   // namespace internal
 
 template<typename STRING_TYPE>
@@ -263,6 +336,30 @@ public:
     {
         return ((length_ >= token.length_) &&
                 (wordmemcmp(ptr_ + length_ - token.length_, token.ptr_, token.length_) == 0));
+    }
+
+    size_type find(const BasicStringPiece& s, size_type pos = 0) const
+    {
+        return internal::find(*this, s, pos);
+    }
+
+    size_type find(value_type ch, size_type pos = 0) const
+    {
+        return internal::find(*this, ch, pos);
+    }
+
+    // |rfind| functions find the last substring equal to the given character
+    // sequence within the range [begin, pos + s.size]. 
+    // therefor, substring that begins at which following the pos is passed
+
+    size_type rfind(const BasicStringPiece& s, size_type pos = npos) const
+    {
+        return internal::rfind(*this, s, pos);
+    }
+
+    size_type rfind(value_type ch, size_type pos = npos) const
+    {
+        return internal::rfind(*this, ch, pos);
     }
 };
 
