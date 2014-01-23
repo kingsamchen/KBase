@@ -14,8 +14,11 @@ using std::endl;
 int main(int /*argc*/, char* /*argv[]*/)
 {
     KBase::StringPiece sp("this");
-    auto sub = sp.substr(123, 123);
-    cout << sub.as_string();
+    KBase::WStringPiece wsp(L"that");
+
+    std::cout << sp << endl;
+    std::wcout << wsp << endl;
+    
     _getch();
     return 0;
 }

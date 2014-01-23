@@ -1,5 +1,5 @@
 // Author:  Kingsley Chen
-// Date:    2014/01/23
+// Date:    2014/01/24
 // Purpose: core implementation of BasicStringPiece
 //          and its underlying StringPieceDetail
 
@@ -119,8 +119,8 @@ public:
         
         if (ret == 0) {
             if (length_ < other.length_) {
-                return -1;
-            } else {
+                return -1
+            } else if (length_ > other.length_) {
                 return 1;
             }
         }
@@ -537,6 +537,61 @@ StringPiece::size_type
 {
     return internal::find_last_not_of(*this, s, pos);
 }
+
+// comparison operators
+
+template<typename STRING_TYPE>
+inline bool operator==(const BasicStringPiece<STRING_TYPE>& lhs,
+                       const BasicStringPiece<STRING_TYPE>& rhs)
+{
+    if (lhs.size() != rhs.size())
+        return false;
+
+    return internal::StringPieceDetail<STRING_TYPE>::wordmemcmp(lhs.data(),
+                                                                rhs.data(),
+                                                                lhs.size()) == 0;
+}
+
+template<typename STRING_TYPE>
+inline bool operator!=(const BasicStringPiece<STRING_TYPE>& lhs,
+                       const BasicStringPiece<STRING_TYPE>& rhs)
+{
+    return !(lhs == rhs);
+}
+
+template<typename STRING_TYPE>
+inline bool operator<(const BasicStringPiece<STRING_TYPE>& lhs,
+                      const BasicStringPiece<STRING_TYPE>& rhs)
+{
+    return lhs.compare(rhs) < 0;
+}
+
+template<typename STRING_TYPE>
+inline bool operator>(const BasicStringPiece<STRING_TYPE>& lhs,
+                      const BasicStringPiece<STRING_TYPE>& rhs)
+{
+    return rhs < lhs;
+}
+
+template<typename STRING_TYPE>
+inline bool operator<=(const BasicStringPiece<STRING_TYPE>& lhs,
+                       const BasicStringPiece<STRING_TYPE>& rhs)
+{
+    return !(lhs > rhs);
+}
+
+template<typename STRING_TYPE>
+inline bool operator>=(const BasicStringPiece<STRING_TYPE>& lhs,
+                       const BasicStringPiece<STRING_TYPE>& rhs)
+{
+    return !(lhs < rhs);
+}
+
+// ostream overload operators
+
+std::ostream& operator<<(std::ostream& os, const StringPiece& s);
+std::wostream& operator<<(std::wostream& os, const WStringPiece& s);
+
 
 }   // namespace KBase
 

@@ -1,11 +1,11 @@
 // Author:  Kingsley Chen
-// Date:    2014/01/23
+// Date:    2014/01/24
 // Purpose: implementation for specialized find_*_of operations
 //          for std::string         
 
 #include "string_piece.h"
 
-#include <iostream>
+#include <ostream>
 
 namespace KBase {
 
@@ -137,6 +137,20 @@ StringPiece::size_type find_last_not_of(const StringPiece& self,
 }
 
 }   // namespace internal
+
+std::ostream& operator<<(std::ostream& os, const StringPiece& s)
+{
+    os.write(s.data(), static_cast<std::streamsize>(s.size()));
+
+    return os;
+}
+
+std::wostream& operator<<(std::wostream& os, const WStringPiece& s)
+{
+    os.write(s.data(), static_cast<std::streamsize>(s.size()));
+
+    return os;
+}
 
 }   // namespace KBase
 
