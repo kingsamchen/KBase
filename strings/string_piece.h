@@ -300,6 +300,72 @@ typename BasicStringPiece<STRING_TYPE>::size_type
     return BasicStringPiece<STRING_TYPE>::npos;
 }
 
+template<typename STRING_TYPE>
+typename BasicStringPiece<STRING_TYPE>::size_type
+    find_first_not_of(const BasicStringPiece<STRING_TYPE>& self,
+                      const BasicStringPiece<STRING_TYPE>& s,
+                      typename BasicStringPiece<STRING_TYPE>::size_type pos)
+{
+    if (self.empty() || s.empty())
+        return BasicStringPiece<STRING_TYPE>::npos;
+
+    for (BasicStringPiece<STRING_TYPE>::size_type i = pos; i < self.size(); ++i) {
+        for (BasicStringPiece<STRING_TYPE>::size_type j = 0; j < s.size(); ++j) {
+            if (self[i] != s[j])
+                return i;
+        }
+    }
+
+    return BasicStringPiece<STRING_TYPE>::npos;
+}
+
+// for find_last_*_of functions, only substring in the range [0, pos] will
+// be examined
+
+template<typename STRING_TYPE>
+typename BasicStringPiece<STRING_TYPE>::size_type
+    find_last_of(const BasicStringPiece<STRING_TYPE>& self,
+                 const BasicStringPiece<STRING_TYPE>& s,
+                 typename BasicStringPiece<STRING_TYPE>::size_type pos)
+{
+    if (self.empty() || s.empty())
+        return BasicStringPiece<STRING_TYPE>::npos;
+
+    auto begin_pos = std::min(pos, self.size() - 1);
+    for (BasicStringPiece<STRING_TYPE>::size_type i = begin_pos; ; --i) {
+        for (BasicStringPiece<STRING_TYPE>::size_type j = 0; j < s.size(); ++j) {
+            if (self[i] == s[j])
+                return i;
+        }
+
+        if (i == 0) break;
+    }
+    
+    return BasicStringPiece<STRING_TPYE>::npos;
+}
+
+template<typename STRING_TYPE>
+typename BasicStringPiece<STRING_TYPE>::size_type
+    find_last_not_of(const BasicStringPiece<STRING_TYPE>& self,
+                     const BasicStringPiece<STRING_TYPE>& s,
+                     typename BasicStringPiece<STRING_TYPE>::size_type pos)
+{
+    if (self.empty() || s.empty())
+        return BasicStringPiece<STRING_TYPE>::npos;
+
+    auto begin_pos = std::min(pos, self.size() - 1);
+    for (BasicStringPiece<STRING_TYPE>::size_type i = begin_pos; ; --i) {
+        for (BasicStringPiece<STRING_TYPE>::size_type j = 0; j < s.size(); ++j) {
+            if (self[i] != s[j])
+                return i;
+        }
+
+        if (i == 0) break;
+    }
+
+    return BasicStringPiece<STRING_TYPE>::npos;
+}
+
 // specialized internal find_*_of operations for std::string
 
 StringPieceDetail<std::string>::size_type 
@@ -307,6 +373,20 @@ StringPieceDetail<std::string>::size_type
                   const StringPiece& s,
                   StringPieceDetail<std::string>::size_type pos = 0);
 
+StringPieceDetail<std::string>::size_type 
+    find_first_not_of(const StringPiece& self,
+                      const StringPiece& s,
+                      StringPieceDetail<std::string>::size_type pos = 0);
+
+StringPieceDetail<std::string>::size_type
+    find_last_of(const StringPiece& self,
+                 const StringPiece& s,
+                 StringPieceDetail<std::string>::size_type pos = 0);
+
+StringPieceDetail<std::string>::size_type
+    find_last_not_of(const StringPiece& self,
+                     const StringPiece& s,
+                     StringPieceDetail<std::string>::size_type pos = 0);
 
 }   // namespace internal
 
@@ -395,11 +475,20 @@ public:
         return internal::find_first_of(*this, s, pos);
     }
 
-    size_type find_first_not_of(const BasicStringPiece& s, size_type pos = 0) const;
+    size_type find_first_not_of(const BasicStringPiece& s, size_type pos = 0) const
+    {
+        return internal::find_first_not_of(*this, s, pos);
+    }
 
-    size_type find_last_of(const BasicStringPiece& s, size_type pos = npos) const;
+    size_type find_last_of(const BasicStringPiece& s, size_type pos = npos) const
+    {
+        return internal::find_last_of(*this, s, pos);
+    }
 
-    size_type find_last_not_of(const BasicStringPiece& s, size_type pos = npos) const;
+    size_type find_last_not_of(const BasicStringPiece& s, size_type pos = npos) const
+    {
+        return internal::find_last_not_of(*this, s, pos);
+    }
 };
 
 // specialized find_*_of operations for std::string
@@ -409,6 +498,27 @@ StringPiece::size_type
     BasicStringPiece<std::string>::find_first_of(const StringPiece& s, size_type pos) const
 {
     return internal::find_first_of(*this, s, pos);
+}
+
+template<>
+StringPiece::size_type
+    BasicStringPiece<std::string>::find_first_not_of(const StringPiece& s, size_type pos) const
+{
+    return internal::find_first_not_of(*this, s, pos);
+}
+
+template<>
+StringPiece::size_type
+    BasicStringPiece<std::string>::find_last_of(const StringPiece& s, size_type pos) const
+{
+    return internal::find_last_of(*this, s, pos);
+}
+
+template<>
+StringPiece::size_type
+    BasicStringPiece<std::string>::find_last_not_of(const StringPiece& s, size_type pos) const
+{
+    return internal::find_last_not_of(*this, s, pos);
 }
 
 }   // namespace KBase

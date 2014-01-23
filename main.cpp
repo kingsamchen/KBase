@@ -13,11 +13,11 @@ using std::endl;
 
 int main(int /*argc*/, char* /*argv[]*/)
 {
-    KBase::WStringPiece sp(L"this is my new stringpiece");
+    KBase::StringPiece sp("this is my new stringpiece");
     //std::bitset<0U> table;
     //KBase::internal::BuildLookupTable<std::string>(words, &table);
     //cout << table.count();
-    cout << sp.find_first_of(L"xz");
+    cout << sp.find_first_not_of("xz");
     _getch();
     return 0;
 }
