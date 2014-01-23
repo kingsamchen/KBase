@@ -366,6 +366,18 @@ typename BasicStringPiece<STRING_TYPE>::size_type
     return BasicStringPiece<STRING_TYPE>::npos;
 }
 
+template<typename STRING_TYPE>
+BasicStringPiece<STRING_TYPE> substr(const BasicStringPiece<STRING_TYPE>& self,
+                                     typename BasicStringPiece<STRING_TYPE>::size_type pos,
+                                     typename BasicStringPiece<STRING_TYPE>::size_type n)
+{
+    auto begin_pos = std::min(pos, self.size());
+    if (begin_pos + n > self.size())
+        n = self.size() - begin_pos;
+        
+    return BasicStringPiece<STRING_TYPE>(self.data() + begin_pos, n);
+}
+
 // specialized internal find_*_of operations for std::string
 
 StringPieceDetail<std::string>::size_type 
@@ -488,6 +500,11 @@ public:
     size_type find_last_not_of(const BasicStringPiece& s, size_type pos = npos) const
     {
         return internal::find_last_not_of(*this, s, pos);
+    }
+
+    BasicStringPiece substr(size_type pos, size_type n = npos) const
+    {
+        return internal::substr(*this, pos, n);
     }
 };
 

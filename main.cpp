@@ -13,11 +13,9 @@ using std::endl;
 
 int main(int /*argc*/, char* /*argv[]*/)
 {
-    KBase::StringPiece sp("this is my new stringpiece");
-    //std::bitset<0U> table;
-    //KBase::internal::BuildLookupTable<std::string>(words, &table);
-    //cout << table.count();
-    cout << sp.find_first_not_of("xz");
+    KBase::StringPiece sp("this");
+    auto sub = sp.substr(123, 123);
+    cout << sub.as_string();
     _getch();
     return 0;
 }

@@ -136,8 +136,8 @@ StringPiece::size_type find_last_not_of(const StringPiece& self,
     return StringPiece::npos;
 }
 
-}
+}   // namespace internal
 
-}
+}   // namespace KBase
 
 
