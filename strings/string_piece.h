@@ -15,6 +15,7 @@
 #include <iosfwd>
 #include <algorithm>
 #include <bitset>
+#include <functional>
 #include <string>
 
 namespace KBase {
@@ -592,7 +593,36 @@ inline bool operator>=(const BasicStringPiece<STRING_TYPE>& lhs,
 std::ostream& operator<<(std::ostream& os, const StringPiece& s);
 std::wostream& operator<<(std::wostream& os, const WStringPiece& s);
 
+// this hash calculation is copied from chromium
+#define HASH_STRING_PIECE(string_piece)                                       \
+    size_t result = 0;                                                        \
+    for (auto it = string_piece.cbegin(); it != string_piece.cend(); ++it) {  \
+        result = (result * 131) + *it;                                        \
+    }                                                                         \
+    return result;                                                            \
 
 }   // namespace KBase
+
+// specialize std::hash for our string_piece types
+
+namespace std {
+
+template<>
+struct std::hash<KBase::StringPiece> {
+    size_t operator()(const KBase::StringPiece& sp)
+    {
+        HASH_STRING_PIECE(sp);
+    }
+};
+
+template<>
+struct std::hash<KBase::WStringPiece> {
+    size_t operator()(const KBase::WStringPiece& sp)
+    {
+        HASH_STRING_PIECE(sp);
+    }
+};
+
+}   // namespace std
 
 #endif  // KBASE_STRINGS_STRING_PIECE_H_
