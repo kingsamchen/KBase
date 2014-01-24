@@ -1,9 +1,6 @@
-/************************************
-** Edition: Demo
-** Author:  Kingsley Chen
-** Date:    2014/01/14
-** Purpose: AutoReset class
-************************************/
+// Author:  Kingsley Chen
+// Date:    2014/01/25
+// Purpose: a scoped-assignment facility  
 
 #if _MSC_VER > 1000
 #pragma once

@@ -1,9 +1,6 @@
-/************************************
-** Edition: Demo
-** Author:  Kingsley Chen
-** Date:    2013/12/27
-** Purpose: AtExitManager Declaration
-************************************/
+// Author:  Kingsley Chen
+// Date:    2014/01/25
+// Purpose: object-orinted manager for at_exit
 
 #if _MSC_VER > 1000
 #pragma once

@@ -1,9 +1,6 @@
-/************************************
-** Edition: Demo
-** Author:  Kingsley Chen
-** Date:    2014/01/13
-** Purpose: Pickle definition
-************************************/
+// Author:  Kingsley Chen
+// Date:    2014/01/25
+// Purpose: serialization/deserialization facility implementation
 
 #include "Pickle.h"
 

@@ -1,9 +1,6 @@
-/************************************
-** Edition: Demo
-** Author:  Kingsley Chen
-** Date:    2014/01/13
-** Purpose: Pickle declaration
-************************************/
+// Author:  Kingsley Chen
+// Date:    2014/01/25
+// Purpose: serialization/deserialization facility declaration
 
 #if _MSC_VER > 1000
 #pragma once

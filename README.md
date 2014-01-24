@@ -89,4 +89,24 @@ std::string str("hello world");
 cout << "stage 3:" << str << endl;  // hello world
 ```
 
-### StringPiece [to be continued...]
+### StringPiece and WStringPiece
+
+a light-weight referential string class. it internally contains a pointer to 
+a raw-string and along with its length.
+
+this class intends to reduce overhead resulted from conversions between stl-strings
+and raw-strings.
+
+the actual type of the class is `BasicStringPiece<STRING_TYPE>`, and `StringPiece`
+and `WStringPiece` are merely
+
+```c++
+typedef BasicStringPiece<std::string> StringPiece;
+typedef BasicStringPiece<std::wstring> WStringPiece;
+```
+respectively.
+
+it provides a large amount of methods compatible with normal strings, including
+hash-calculation.
+
+for a complete list of its functionalities, please see the file `string_piece.h`.
