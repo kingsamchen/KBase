@@ -6,19 +6,19 @@
 #include <memory>
 #include <string>
 
-#include "strings\string_piece.h"
+#include "strings/string_util.h"
 
 using std::cout;
 using std::endl;
 
 int main(int /*argc*/, char* /*argv[]*/)
 {
-    KBase::StringPiece sp("this");
-    KBase::WStringPiece wsp(L"that");
+    std::wstring s = L"hello world";
+    std::wstring ns;
+    cout << KBase::StringUtil::RemoveChars(s, L"ol ", &ns) << endl;
+    std::wcout << s << endl;
+    std::wcout << ns;
 
-    std::cout << sp << endl;
-    std::wcout << wsp << endl;
-    
     _getch();
     return 0;
 }
