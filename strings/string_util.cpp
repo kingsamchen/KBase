@@ -1,7 +1,6 @@
 // Author:  Kingsley Chen
 // Date:    2014/01/27
-// Purpose: 
-
+// Purpose: core implementations of string util collection
 
 #include "string_util.h"
 
@@ -68,6 +67,24 @@ void ReplaceSubstr(std::string* str, const std::string& find_with,
                    const std::string& replace_with, std::string::size_type pos)
 {
     ReplaceSubstrHelper(str, find_with, replace_with, pos, true);
+}
+
+void ReplaceSubstr(std::wstring* str, const std::wstring& find_with,
+                   const std::wstring& replace_with, std::wstring::size_type pos)
+{
+    ReplaceSubstrHelper(str, find_with, replace_with, pos, true);
+}
+
+void ReplaceFirstSubstr(std::string* str, const std::string& find_with,
+                        const std::string& replace_with, std::string::size_type pos)
+{
+    ReplaceSubstrHelper(str, find_with, replace_with, pos, false);
+}
+
+void ReplaceFirstSubstr(std::wstring* str, const std::wstring& find_with,
+                        const std::wstring& replace_with, std::wstring::size_type pos)
+{
+    ReplaceSubstrHelper(str, find_with, replace_with, pos, false);
 }
 
 }   // namespace StringUtil

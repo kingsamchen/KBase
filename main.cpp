@@ -14,7 +14,7 @@ using std::endl;
 int main(int /*argc*/, char* /*argv[]*/)
 {
     std::string s = "hello world";
-    KBase::StringUtil::ReplaceSubstr(&s, "or", "XOR");
+    KBase::StringUtil::ReplaceSubstr(&s, "o", "XOR", 123);
     cout << s;
 
     _getch();
