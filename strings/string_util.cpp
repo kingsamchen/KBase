@@ -1,5 +1,5 @@
 // Author:  Kingsley Chen
-// Date:    2014/01/27
+// Date:    2014/01/28
 // Purpose: core implementations of string util collection
 
 #include "string_util.h"
@@ -7,7 +7,6 @@
 #include <algorithm>
 #include <cassert>
 #include <functional>
-#include <string>
 
 #include "string_piece.h"
 
@@ -85,6 +84,76 @@ void ReplaceFirstSubstr(std::wstring* str, const std::wstring& find_with,
                         const std::wstring& replace_with, std::wstring::size_type pos)
 {
     ReplaceSubstrHelper(str, find_with, replace_with, pos, false);
+}
+
+enum TrimPosition {
+    TRIM_NONE = 0,
+    TRIM_LEADING = 0x1,
+    TRIM_TAILING = 0x2,
+    TRIM_ALL = TRIM_LEADING | TRIM_TAILING
+};
+
+template<typename strT>
+TrimPosition TrimStringHelper(const strT& in, const typename strT::value_type trim_chars[],
+                      TrimPosition pos, strT* out)
+{
+    typename strT::size_type last = in.length() - 1;
+    typename strT::size_type not_matched_first = (pos & TrimPosition::TRIM_LEADING) ?
+        in.find_first_not_of(trim_chars) : 0;
+    typename strT::size_type not_matched_last = (pos & TrimPosition::TRIM_TAILING) ?
+        in.find_last_not_of(trim_chars) : last;
+
+    // in any case, we should clear |out|
+    if (in.empty() || 
+        not_matched_first == strT::npos || not_matched_last == strT::npos) {
+        out->clear();
+        return in.empty() ? TrimPosition::TRIM_NONE : pos;
+    }
+
+    *out = in.substr(not_matched_first, not_matched_last - not_matched_first + 1);
+    
+    unsigned leading_case = not_matched_first != 0 ?
+        TrimPosition::TRIM_LEADING : TrimPosition::TRIM_NONE;
+    unsigned tailing_case = not_matched_last != last ?
+        TrimPosition::TRIM_TAILING : TrimPosition::TRIM_NONE;
+
+    return static_cast<TrimPosition>(leading_case | tailing_case);
+}
+
+bool TrimString(const std::string& in, const char trim_chars[], std::string* out)
+{
+    return TrimStringHelper(in, trim_chars, TrimPosition::TRIM_ALL, out) !=
+        TrimPosition::TRIM_NONE;
+}
+
+bool TrimString(const std::wstring& in, const wchar_t trim_chars[], std::wstring* out)
+{
+    return TrimStringHelper(in, trim_chars, TrimPosition::TRIM_ALL, out) !=
+        TrimPosition::TRIM_NONE;
+}
+
+bool TrimLeadingStr(const std::string& in, const char trim_chars[], std::string* out)
+{
+    return TrimStringHelper(in, trim_chars, TrimPosition::TRIM_LEADING, out) ==
+        TrimPosition::TRIM_LEADING;
+}
+
+bool TrimLeadingStr(const std::wstring& in, const wchar_t trim_chars[], std::wstring* out)
+{
+    return TrimStringHelper(in, trim_chars, TrimPosition::TRIM_LEADING, out) ==
+        TrimPosition::TRIM_LEADING;
+}
+
+bool TrimTailingStr(const std::string& in, const char trim_chars[], std::string* out)
+{
+    return TrimStringHelper(in, trim_chars, TrimPosition::TRIM_TAILING, out) ==
+        TrimPosition::TRIM_TAILING;
+}
+
+bool TrimTailingStr(const std::wstring& in, const wchar_t trim_chars[], std::wstring* out)
+{
+    return TrimStringHelper(in, trim_chars, TrimPosition::TRIM_TAILING, out) ==
+        TrimPosition::TRIM_TAILING;
 }
 
 }   // namespace StringUtil

@@ -1,5 +1,5 @@
 // Author:  Kingsley Chen
-// Date:    2014/01/27
+// Date:    2014/01/28
 // Purpose: exposed interfaces of string util collection.
 
 #if _MSC_VER > 1000
@@ -14,9 +14,6 @@
 namespace KBase {
 
 namespace StringUtil {
-
-class StringPiece;
-class WStringPiece;
 
 /*
  @ brief:
@@ -61,6 +58,26 @@ void ReplaceFirstSubstr(std::wstring* str,
                         const std::wstring& find_with,
                         const std::wstring& replace_with,
                         std::wstring::size_type pos = 0);
+
+/*
+ @ brief:
+    remove characters in |trim_chars| in a certain range of |in|.
+ @ params:
+    trim_chars[in] charaters that need to be removed from |in|. must be
+    null-terminated.
+ @ return:
+    true, if having trimed.
+    false, otherwise.
+*/
+
+bool TrimString(const std::string& in, const char trim_chars[], std::string* out);
+bool TrimString(const std::wstring& in, const wchar_t trim_chars[], std::wstring* out);
+
+bool TrimLeadingStr(const std::string& in, const char trim_chars[], std::string* out);
+bool TrimLeadingStr(const std::wstring& in, const wchar_t trim_chars[], std::wstring* out);
+
+bool TrimTailingStr(const std::string& in, const char trim_chars[], std::string* out);
+bool TrimTailingStr(const std::wstring& in, const wchar_t trim_chars[], std::wstring* out);
 
 }   // namespace StringUtil
 

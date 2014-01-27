@@ -13,10 +13,10 @@ using std::endl;
 
 int main(int /*argc*/, char* /*argv[]*/)
 {
-    std::string s = "hello world";
-    KBase::StringUtil::ReplaceSubstr(&s, "o", "XOR", 123);
-    cout << s;
-
+    std::string str = "l=lhello world=|=l=";
+    std::string out;
+    KBase::StringUtil::TrimTailingStr(str, "l=", &out);
+    cout << out;
     _getch();
     return 0;
 }
