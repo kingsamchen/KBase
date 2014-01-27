@@ -31,15 +31,17 @@ bool RemoveChars(const std::wstring& in,
                  const wchar_t remove_chars[],
                  std::wstring* out);
 
+
+
 void ReplaceSubstr(std::string* str,
-                   const StringPiece& find_with,
-                   const StringPiece& replace_with,
-                   size_t pos = 0);
+                   const std::string& find_with,
+                   const std::string& replace_with,
+                   std::string::size_type pos = 0);
 
 void ReplaceSubstr(std::wstring* str,
-                   const WStringPiece& find_with,
-                   const WStringPiece& replace_with,
-                   size_t pos = 0);
+                   const std::wstring& find_with,
+                   const std::wstring& replace_with,
+                   std::wstring::size_type pos = 0);
 
 void ReplaceFirstSubStr();
 

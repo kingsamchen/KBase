@@ -13,11 +13,9 @@ using std::endl;
 
 int main(int /*argc*/, char* /*argv[]*/)
 {
-    std::wstring s = L"hello world";
-    std::wstring ns;
-    cout << KBase::StringUtil::RemoveChars(s, L"ol ", &ns) << endl;
-    std::wcout << s << endl;
-    std::wcout << ns;
+    std::string s = "hello world";
+    KBase::StringUtil::ReplaceSubstr(&s, "or", "XOR");
+    cout << s;
 
     _getch();
     return 0;

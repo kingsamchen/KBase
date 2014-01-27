@@ -16,6 +16,9 @@
     <ClCompile Include="strings\string_piece.cpp">
       <Filter>strings</Filter>
     </ClCompile>
+    <ClCompile Include="strings\string_util.cpp">
+      <Filter>strings</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AtExitManager.h" />
@@ -25,6 +28,9 @@
       <Filter>strings</Filter>
     </ClInclude>
     <ClInclude Include="auto_reset.h" />
+    <ClInclude Include="strings\string_util.h">
+      <Filter>strings</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />
