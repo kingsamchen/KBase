@@ -79,6 +79,16 @@ bool TrimLeadingStr(const std::wstring& in, const wchar_t trim_chars[], std::wst
 bool TrimTailingStr(const std::string& in, const char trim_chars[], std::string* out);
 bool TrimTailingStr(const std::wstring& in, const wchar_t trim_chars[], std::wstring* out);
 
+/*
+ @ return:
+    true, if the |in| is empty or contains only characters in |chars|
+    false, otherwise
+*/
+
+bool ContainsOnlyChars(const std::string& in, const char chars[]);
+bool ContainsOnlyChars(const std::wstring& in, const wchar_t chars[]);
+
+
 }   // namespace StringUtil
 
 }   // namespace KBase

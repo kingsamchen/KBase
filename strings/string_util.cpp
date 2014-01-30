@@ -156,6 +156,22 @@ bool TrimTailingStr(const std::wstring& in, const wchar_t trim_chars[], std::wst
         TrimPosition::TRIM_TAILING;
 }
 
+template<typename strT>
+bool ContainsOnlyCharsT(const strT& in, const typename strT::value_type chars[])
+{
+    return in.find_first_not_of(chars, 0) == strT::npos;
+}
+
+bool ContainsOnlyChars(const std::string& in, const char chars[])
+{
+    return ContainsOnlyCharsT(in, chars);
+}
+
+bool ContainsOnlyChars(const std::wstring& in, const wchar_t chars[])
+{
+    return ContainsOnlyCharsT(in, chars);
+}
+
 }   // namespace StringUtil
 
 }   // namespace KBase

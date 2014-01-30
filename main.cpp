@@ -13,10 +13,10 @@ using std::endl;
 
 int main(int /*argc*/, char* /*argv[]*/)
 {
-    std::string str = "l=lhello world=|=l=";
+    std::string str = "";
     std::string out;
-    KBase::StringUtil::TrimTailingStr(str, "l=", &out);
-    cout << out;
+    bool ret = KBase::StringUtil::ContainsOnlyChars(str, "=|lheord w");
+    cout << ret ;
     _getch();
     return 0;
 }
