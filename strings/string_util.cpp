@@ -172,6 +172,63 @@ bool ContainsOnlyChars(const std::wstring& in, const wchar_t chars[])
     return ContainsOnlyCharsT(in, chars);
 }
 
+template<typename strT>
+bool StartsWithT(const strT& str, const strT& token, bool case_sensitive)
+{
+    if (str.length() < token.length())
+        return false;
+
+    if (case_sensitive) {
+        return str.compare(0, token.length(), token) == 0;
+    } else {
+        auto icmp = [](typename strT::value_type lhs, typename strT::value_type rhs) -> bool {
+            return ToLowerASCII(lhs) == ToLowerASCII(rhs);
+        };
+
+        return std::equal(token.cbegin(), token.cend(), str.cbegin(), icmp); 
+    }
+}
+
+bool StartsWith(const std::string& str, const std::string& token, bool case_sensitive)
+{
+    return StartsWithT(str, token, case_sensitive);
+}
+
+bool StartsWith(const std::wstring& str, const std::wstring& token, bool case_sensitive)
+{
+    return StartsWithT(str, token, case_sensitive);
+}
+
+template<typename strT>
+bool EndsWithT(const strT& str, const strT& token, bool case_sensitive)
+{
+    if (str.length() < token.length())
+        return false;
+
+    typename strT::size_type offset = str.length() - token.length();
+    if (case_sensitive) {
+        return str.compare(offset, token.length(), token)
+            == 0;
+    } else {
+        auto icmp = [](typename strT::value_type lhs, typename strT::value_type rhs) -> bool {
+            return ToLowerASCII(lhs) == ToLowerASCII(rhs);
+        };
+
+        return std::equal(token.cbegin(), token.cend(), str.cbegin() + offset, icmp);
+    }
+}
+
+bool EndsWith(const std::string& str, const std::string& token, bool case_sensitive)
+{
+    return EndsWithT(str, token, case_sensitive);
+}
+
+
+bool EndsWith(const std::wstring& str, const std::wstring& token, bool case_sensitive)
+{
+    return EndsWithT(str, token, case_sensitive);
+}
+
 }   // namespace StringUtil
 
 }   // namespace KBase

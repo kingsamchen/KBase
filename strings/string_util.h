@@ -16,11 +16,11 @@ namespace KBase {
 namespace StringUtil {
 
 /*
- @ brief:
-    remove any characters specified by |remove_chars| in string |in|
- @ return:
-    true, if any charaters are removed
-    false, otherwise
+ @ brief
+    remove any characters specified by |remove_chars| in string |in|.
+ @ return
+    true, if any charaters are removed.
+    false, otherwise.
 */
 
 bool RemoveChars(const std::string& in,
@@ -32,9 +32,9 @@ bool RemoveChars(const std::wstring& in,
                  std::wstring* out);
 
 /*
- @ brief:
+ @ brief
     replace |find_with| with |replace_with| in |str|.
- @ params:
+ @ params
     pos[in] indicates the search beginning. if |pos| equals to |npos| or is
     greater than the length of |str|, these functions do nothing.
 */
@@ -60,12 +60,12 @@ void ReplaceFirstSubstr(std::wstring* str,
                         std::wstring::size_type pos = 0);
 
 /*
- @ brief:
+ @ brief
     remove characters in |trim_chars| in a certain range of |in|.
- @ params:
+ @ params
     trim_chars[in] charaters that need to be removed from |in|. must be
     null-terminated.
- @ return:
+ @ return
     true, if having trimed.
     false, otherwise.
 */
@@ -80,15 +80,16 @@ bool TrimTailingStr(const std::string& in, const char trim_chars[], std::string*
 bool TrimTailingStr(const std::wstring& in, const wchar_t trim_chars[], std::wstring* out);
 
 /*
- @ return:
-    true, if the |in| is empty or contains only characters in |chars|
-    false, otherwise
+ @ return
+    true, if the |in| is empty or contains only characters in |chars|.
+    false, otherwise.
 */
 
 bool ContainsOnlyChars(const std::string& in, const char chars[]);
 bool ContainsOnlyChars(const std::wstring& in, const wchar_t chars[]);
 
-// it is legal to implicitly promotes a char to a wchar_t
+// it is legal to implicitly promotes a char to a wchar_t.
+// following functions toggle case only for ascii-characters.
 
 template<typename charT>
 inline charT ToLowerASCII(charT ch)
@@ -133,6 +134,34 @@ strT StringToUpperASCII(const strT& str)
     StringToUpperASCII(&tmp);
     return tmp;
 }
+
+/*
+ @ return
+    true, if |str| starts with |token|.
+    false, otherwise.
+*/
+
+bool StartsWith(const std::string& str, 
+                const std::string& token, 
+                bool case_sensitive = true);
+
+bool StartsWith(const std::wstring& str, 
+                const std::wstring& token, 
+                bool case_sensitive = true);
+
+/*
+ @ return
+    true, if |str| ends with |token|.
+    false, otherwise.
+*/
+
+bool EndsWith(const std::string& str,
+              const std::string& token,
+              bool case_sensitive = true);
+
+bool EndsWith(const std::wstring& str,
+              const std::wstring& token,
+              bool case_sensitive = true);
 
 }   // namespace StringUtil
 

@@ -14,8 +14,7 @@ using std::endl;
 int main(int /*argc*/, char* /*argv[]*/)
 {
     std::string str = "hello world";
-    KBase::StringUtil::StringToUpperASCII(&str);
-    cout << str;
+    cout << KBase::StringUtil::EndsWith(str, "word");
     _getch();
     return 0;
 }
