@@ -163,6 +163,30 @@ bool EndsWith(const std::wstring& str,
               const std::wstring& token,
               bool case_sensitive = true);
 
+/*
+ @ brief
+    set up enough memory in |str| to accomodate a c-style string with length 
+    of |length_including_null|. be wary of that real size of the string data
+    does not count the null-terminate character. this function is useful when
+    interaction between a string object and a legacy API is required.
+ @ return
+    pointer to the underlying data of a string object.
+*/
+template<typename strT>
+inline typename strT::value_type* WriteInto(strT* str, 
+                                            size_t length_including_null)
+{
+    // if the length is equal to 1, the underlying string size is 0,
+    // operator[] may then result in an undefined behavior in this situation.
+    assert(length_including_null > 1U);
+    if (str->length() < length_including_null) {
+        str->reserve(length_including_null);
+        str->resize(length_including_null - 1);
+    }
+
+    return (&(*str)[0]);
+}
+
 }   // namespace StringUtil
 
 }   // namespace KBase
