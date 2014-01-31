@@ -88,6 +88,51 @@ bool TrimTailingStr(const std::wstring& in, const wchar_t trim_chars[], std::wst
 bool ContainsOnlyChars(const std::string& in, const char chars[]);
 bool ContainsOnlyChars(const std::wstring& in, const wchar_t chars[]);
 
+// it is legal to implicitly promotes a char to a wchar_t
+
+template<typename charT>
+inline charT ToLowerASCII(charT ch)
+{
+    return (ch >= 'A' && ch <= 'Z') ? ch + 'a' - 'A' : ch;
+}
+
+template<typename charT>
+inline charT ToUpperASCII(charT ch)
+{
+    return (ch >= 'a' && ch <= 'z') ? ch - 'a' + 'A' : ch;
+}
+
+template<typename strT>
+void StringToLowerASCII(strT* str)
+{
+    for (auto it = str->begin(); it != str->end(); ++it) {
+        *it = ToLowerASCII(*it);
+    }
+}
+
+template<typename strT>
+strT StringToLowerASCII(const strT& str)
+{
+    strT tmp(str);
+    StringToLowerASCII(&tmp);
+    return tmp;
+}
+
+template<typename strT>
+void StringToUpperASCII(strT* str)
+{
+    for (auto it = str->begin(); it != str->end(); ++it) {
+        *it = ToUpperASCII(*it);
+    }
+}
+
+template<typename strT>
+strT StringToUpperASCII(const strT& str)
+{
+    strT tmp(str);
+    StringToUpperASCII(&tmp);
+    return tmp;
+}
 
 }   // namespace StringUtil
 

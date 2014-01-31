@@ -13,10 +13,9 @@ using std::endl;
 
 int main(int /*argc*/, char* /*argv[]*/)
 {
-    std::string str = "";
-    std::string out;
-    bool ret = KBase::StringUtil::ContainsOnlyChars(str, "=|lheord w");
-    cout << ret ;
+    std::string str = "hello world";
+    KBase::StringUtil::StringToUpperASCII(&str);
+    cout << str;
     _getch();
     return 0;
 }
