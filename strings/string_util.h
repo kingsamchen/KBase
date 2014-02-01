@@ -179,10 +179,8 @@ inline typename strT::value_type* WriteInto(strT* str,
     // if the length is equal to 1, the underlying string size is 0,
     // operator[] may then result in an undefined behavior in this situation.
     assert(length_including_null > 1U);
-    if (str->length() < length_including_null) {
-        str->reserve(length_including_null);
-        str->resize(length_including_null - 1);
-    }
+    str->reserve(length_including_null);
+    str->resize(length_including_null - 1);
 
     return (&(*str)[0]);
 }
