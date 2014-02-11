@@ -1,5 +1,5 @@
 // Author:  Kingsley Chen
-// Date:    2014/02/11
+// Date:    2014/02/12
 // Purpose: core implementations of string util collection
 
 #include "string_util.h"
@@ -15,7 +15,7 @@ namespace KBase {
 namespace StringUtil {
 
 template<typename strT>
-bool RemoveCharsT(const strT& in, const KBase::BasicStringPiece<strT>& remove_chars, strT* out)
+static bool RemoveCharsT(const strT& in, const KBase::BasicStringPiece<strT>& remove_chars, strT* out)
 {
     strT tmp(in.size(), 0);
 
@@ -43,8 +43,8 @@ bool RemoveChars(const std::wstring& in, const wchar_t remove_chars[], std::wstr
 }
 
 template<typename strT>
-void ReplaceSubstrHelper(strT* str, const strT& find_with, const strT& replace_with,
-                         typename strT::size_type pos, bool replace_all)
+static void ReplaceSubstrHelper(strT* str, const strT& find_with, const strT& replace_with,
+                                typename strT::size_type pos, bool replace_all)
 {
     if (pos == strT::npos || pos + find_with.length() > str->length()) {
         return;
@@ -94,8 +94,9 @@ enum TrimPosition {
 };
 
 template<typename strT>
-TrimPosition TrimStringHelper(const strT& in, const typename strT::value_type trim_chars[],
-                      TrimPosition pos, strT* out)
+static TrimPosition TrimStringHelper(const strT& in,
+                                     const typename strT::value_type trim_chars[],
+                                     TrimPosition pos, strT* out)
 {
     typename strT::size_type last = in.length() - 1;
     typename strT::size_type not_matched_first = (pos & TrimPosition::TRIM_LEADING) ?
@@ -157,7 +158,7 @@ bool TrimTailingStr(const std::wstring& in, const wchar_t trim_chars[], std::wst
 }
 
 template<typename strT>
-bool ContainsOnlyCharsT(const strT& in, const typename strT::value_type chars[])
+static bool ContainsOnlyCharsT(const strT& in, const typename strT::value_type chars[])
 {
     return in.find_first_not_of(chars, 0) == strT::npos;
 }
@@ -173,7 +174,7 @@ bool ContainsOnlyChars(const std::wstring& in, const wchar_t chars[])
 }
 
 template<typename strT>
-bool StartsWithT(const strT& str, const strT& token, bool case_sensitive)
+static bool StartsWithT(const strT& str, const strT& token, bool case_sensitive)
 {
     if (str.length() < token.length())
         return false;
@@ -200,7 +201,7 @@ bool StartsWith(const std::wstring& str, const std::wstring& token, bool case_se
 }
 
 template<typename strT>
-bool EndsWithT(const strT& str, const strT& token, bool case_sensitive)
+static bool EndsWithT(const strT& str, const strT& token, bool case_sensitive)
 {
     if (str.length() < token.length())
         return false;
@@ -230,7 +231,7 @@ bool EndsWith(const std::wstring& str, const std::wstring& token, bool case_sens
 }
 
 template<typename strT>
-size_t TokenizeT(const strT& str, const strT& delimiters, std::vector<strT>* tokens)
+static size_t TokenizeT(const strT& str, const strT& delimiters, std::vector<strT>* tokens)
 {
     tokens->clear();
 
@@ -258,6 +259,41 @@ size_t Tokenize(const std::wstring& str, const std::wstring& delimiters,
     return TokenizeT(str, delimiters, tokens);
 }
 
+
+template<typename strT>
+static strT JoinStringT(const std::vector<strT>& tokens, const strT& sep)
+{
+    if (tokens.empty())
+        return strT();
+
+    strT str(tokens[0]);
+    for (auto it = tokens.cbegin() + 1; it != tokens.cend(); ++it) {
+        str.append(sep);
+        str.append(*it);
+    }
+
+    return str;
+}
+
+std::string JoinString(const std::vector<std::string>& tokens, char sep)
+{
+    return JoinStringT(tokens, std::string(sep, 1));
+}
+
+std::wstring JoinString(const std::vector<std::wstring>& tokens, wchar_t sep)
+{
+    return JoinStringT(tokens, std::wstring(sep, 1));
+}
+
+std::string JoinString(const std::vector<std::string>& tokens, const std::string& sep)
+{
+    return JoinStringT(tokens, sep);
+}
+
+std::wstring JoinString(const std::vector<std::wstring>& tokens, const std::wstring& sep)
+{
+    return JoinStringT(tokens, sep);
+}
 
 }   // namespace StringUtil
 

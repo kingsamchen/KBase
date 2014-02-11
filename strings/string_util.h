@@ -1,5 +1,5 @@
 // Author:  Kingsley Chen
-// Date:    2014/02/11
+// Date:    2014/02/12
 // Purpose: exposed interfaces of string util collection.
 
 #if _MSC_VER > 1000
@@ -195,6 +195,30 @@ size_t Tokenize(const std::string& str,
 size_t Tokenize(const std::wstring& str,
                 const std::wstring& delimiters,
                 std::vector<std::wstring>* tokens);
+
+/*
+ @ brief
+    combines string parts in |tokens| by using |sep| as speparator
+ @ return
+    combined string
+*/
+
+std::string JoinString(const std::vector<std::string>& tokens,
+                       char sep);
+std::wstring JoinString(const std::vector<std::wstring>& tokens,
+                        wchar_t sep);
+std::string JoinString(const std::vector<std::string>& tokens,
+                       const std::string& sep);
+std::wstring JoinString(const std::vector<std::wstring>& tokens,
+                        const std::wstring& sep);
+
+/*
+ @ brief
+    pattern matching algorithm, also supports wildcards
+*/
+bool MatchPattern(const std::string& str, const std::string& pat);
+bool MatchPattern(const std::wstring& str, const std::wstring& pat);
+
 
 }   // namespace StringUtil
 

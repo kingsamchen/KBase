@@ -16,10 +16,8 @@ using std::endl;
 int main(int /*argc*/, char* /*argv[]*/)
 {
     std::string str;
-    std::vector<std::string> vec;
-    size_t cnt = KBase::StringUtil::Tokenize("hello", " ,", &vec);
-    cout << cnt << endl;    
-    copy(vec.begin(), vec.end(), std::ostream_iterator<std::string>(cout, "\n"));
+    std::vector<std::string> parts = {"a", "b", "c", "d"};
+    std::cout << KBase::StringUtil::JoinString(parts, " -|- ");
     
     _getch();
     return 0;
