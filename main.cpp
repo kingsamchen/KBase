@@ -3,8 +3,10 @@
 #include <cstdio>
 #include <conio.h>
 #include <iostream>
+#include <iterator>
 #include <memory>
 #include <string>
+#include <vector>
 
 #include "strings/string_util.h"
 
@@ -13,8 +15,12 @@ using std::endl;
 
 int main(int /*argc*/, char* /*argv[]*/)
 {
-    std::string str = "hello world";
-    cout << KBase::StringUtil::EndsWith(str, "word");
+    std::string str;
+    std::vector<std::string> vec;
+    size_t cnt = KBase::StringUtil::Tokenize("hello", " ,", &vec);
+    cout << cnt << endl;    
+    copy(vec.begin(), vec.end(), std::ostream_iterator<std::string>(cout, "\n"));
+    
     _getch();
     return 0;
 }

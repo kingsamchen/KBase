@@ -1,5 +1,5 @@
 // Author:  Kingsley Chen
-// Date:    2014/01/28
+// Date:    2014/02/11
 // Purpose: exposed interfaces of string util collection.
 
 #if _MSC_VER > 1000
@@ -10,6 +10,7 @@
 #define KBASE_STRINGS_STRING_UTIL_H_ 
 
 #include <string>
+#include <vector>
 
 namespace KBase {
 
@@ -26,7 +27,6 @@ namespace StringUtil {
 bool RemoveChars(const std::string& in,
                  const char remove_chars[],
                  std::string* out);
-
 bool RemoveChars(const std::wstring& in,
                  const wchar_t remove_chars[],
                  std::wstring* out);
@@ -43,7 +43,6 @@ void ReplaceSubstr(std::string* str,
                    const std::string& find_with,
                    const std::string& replace_with,
                    std::string::size_type pos = 0);
-
 void ReplaceSubstr(std::wstring* str,
                    const std::wstring& find_with,
                    const std::wstring& replace_with,
@@ -53,7 +52,6 @@ void ReplaceFirstSubstr(std::string* str,
                         const std::string& find_with,
                         const std::string& replace_with,
                         std::string::size_type pos = 0);
-
 void ReplaceFirstSubstr(std::wstring* str,
                         const std::wstring& find_with,
                         const std::wstring& replace_with,
@@ -144,7 +142,6 @@ strT StringToUpperASCII(const strT& str)
 bool StartsWith(const std::string& str, 
                 const std::string& token, 
                 bool case_sensitive = true);
-
 bool StartsWith(const std::wstring& str, 
                 const std::wstring& token, 
                 bool case_sensitive = true);
@@ -158,7 +155,6 @@ bool StartsWith(const std::wstring& str,
 bool EndsWith(const std::string& str,
               const std::string& token,
               bool case_sensitive = true);
-
 bool EndsWith(const std::wstring& str,
               const std::wstring& token,
               bool case_sensitive = true);
@@ -184,6 +180,21 @@ inline typename strT::value_type* WriteInto(strT* str,
 
     return (&(*str)[0]);
 }
+
+/*
+ @ brief
+    split a string into fields delimieted by any of the characters in
+    |delimiters|. fields are added into |tokens|.
+ @ return
+    the number of tokens found.
+*/
+
+size_t Tokenize(const std::string& str,
+                const std::string& delimiters,
+                std::vector<std::string>* tokens);
+size_t Tokenize(const std::wstring& str,
+                const std::wstring& delimiters,
+                std::vector<std::wstring>* tokens);
 
 }   // namespace StringUtil
 

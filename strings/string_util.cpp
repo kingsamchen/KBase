@@ -1,5 +1,5 @@
 // Author:  Kingsley Chen
-// Date:    2014/01/28
+// Date:    2014/02/11
 // Purpose: core implementations of string util collection
 
 #include "string_util.h"
@@ -228,6 +228,36 @@ bool EndsWith(const std::wstring& str, const std::wstring& token, bool case_sens
 {
     return EndsWithT(str, token, case_sensitive);
 }
+
+template<typename strT>
+size_t TokenizeT(const strT& str, const strT& delimiters, std::vector<strT>* tokens)
+{
+    tokens->clear();
+
+    typename strT::size_type begin = 0, end;
+    while ((begin = str.find_first_not_of(delimiters, begin)) != strT::npos) {
+        end = str.find_first_of(delimiters, begin);
+        if (end == strT::npos)
+            end = str.length();
+        tokens->push_back(str.substr(begin, end - begin));
+        begin = end + 1;
+    }
+
+    return tokens->size();
+}
+
+size_t Tokenize(const std::string& str, const std::string& delimiters,
+                std::vector<std::string>* tokens)
+{
+    return TokenizeT(str, delimiters, tokens);
+}
+
+size_t Tokenize(const std::wstring& str, const std::wstring& delimiters,
+                std::vector<std::wstring>* tokens)
+{
+    return TokenizeT(str, delimiters, tokens);
+}
+
 
 }   // namespace StringUtil
 
