@@ -1,6 +1,6 @@
-// Author:  Kingsley Chen
-// Date:    2014/01/25
-// Purpose: serialization/deserialization facility implementation
+/*
+ @ Kingsley Chen
+*/
 
 #include "Pickle.h"
 

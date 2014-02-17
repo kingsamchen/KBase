@@ -1,6 +1,6 @@
-// Author:  Kingsley Chen
-// Date:    2014/02/12
-// Purpose: core implementations of string util collection
+/*
+ @ Kingsley Chen
+*/
 
 #include "string_util.h"
 

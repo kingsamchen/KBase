@@ -1,6 +1,6 @@
-// Author:  Kingsley Chen
-// Date:    2014/01/25
-// Purpose: serialization/deserialization facility declaration
+/*
+ @ Kingsley Chen
+*/
 
 #if _MSC_VER > 1000
 #pragma once

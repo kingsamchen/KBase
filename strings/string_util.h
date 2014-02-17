@@ -1,6 +1,6 @@
-// Author:  Kingsley Chen
-// Date:    2014/02/12
-// Purpose: exposed interfaces of string util collection.
+/*
+ @ Kingsley Chen
+*/
 
 #if _MSC_VER > 1000
 #pragma once

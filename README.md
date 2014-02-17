@@ -110,3 +110,9 @@ it provides a large amount of methods compatible with normal strings, including
 hash-calculation.
 
 for a complete list of its functionalities, please see the file `string_piece.h`.
+
+### String_Utils
+
+offers a lot of handy string utility functions.
+
+see the file `string_util.h` for great details.

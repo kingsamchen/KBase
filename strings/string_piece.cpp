@@ -1,7 +1,6 @@
-// Author:  Kingsley Chen
-// Date:    2014/01/24
-// Purpose: implementation for specialized find_*_of operations
-//          for std::string         
+/*
+ @ Kingsley Chen
+*/
 
 #include "string_piece.h"
 
