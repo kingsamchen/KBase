@@ -12,8 +12,6 @@
 
 namespace KBase {
 
-namespace StringUtil {
-
 template<typename strT>
 static bool RemoveCharsT(const strT& in, const KBase::BasicStringPiece<strT>& remove_chars, strT* out)
 {
@@ -295,6 +293,55 @@ std::wstring JoinString(const std::vector<std::wstring>& tokens, const std::wstr
     return JoinStringT(tokens, sep);
 }
 
-}   // namespace StringUtil
+template<typename charT>
+bool MatchPatternT(const charT* str, const charT* pat)
+{
+    bool on_star = false;
+    const charT* s;
+    const charT* p;
+
+LoopStart:
+    for (s = str, p = pat; *s; ++s, ++p) {
+        switch (*p) {
+        case '?':
+            if (*s == '.')
+                goto StarCheck;
+            break;
+        case '*':
+            on_star = true;
+            str = s, pat = p;
+            do {
+                ++pat;
+            } while (*pat == '*');
+            if (!*pat) return true;
+            goto LoopStart;
+            break;
+        default:
+            if (*s != *p)
+                goto StarCheck;
+            break;
+        }
+    }
+
+    while (*p == '*')
+        ++p;
+
+    return !*p;
+
+StarCheck:
+    if (!on_star) return false;
+    ++str;
+    goto LoopStart;
+}
+
+bool MatchPattern(const std::string& str, const std::string& pat)
+{
+    return MatchPatternT(str.c_str(), pat.c_str());
+}
+
+bool MatchPattern(const std::wstring& str, const std::wstring& pat)
+{
+    return MatchPatternT(str.c_str(), pat.c_str());
+}
 
 }   // namespace KBase

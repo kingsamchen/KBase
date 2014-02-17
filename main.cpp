@@ -15,10 +15,8 @@ using std::endl;
 
 int main(int /*argc*/, char* /*argv[]*/)
 {
-    std::string str;
-    std::vector<std::string> parts = {"a", "b", "c", "d"};
-    std::cout << KBase::StringUtil::JoinString(parts, " -|- ");
     
+    cout << KBase::MatchPattern(L"aaabbc", L"a*b*");
     _getch();
     return 0;
 }

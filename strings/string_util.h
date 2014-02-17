@@ -14,8 +14,6 @@
 
 namespace KBase {
 
-namespace StringUtil {
-
 /*
  @ brief
     remove any characters specified by |remove_chars| in string |in|.
@@ -214,13 +212,12 @@ std::wstring JoinString(const std::vector<std::wstring>& tokens,
 
 /*
  @ brief
-    pattern matching algorithm, also supports wildcards
+    pattern matching algorithm, also supports wildcards, in case-sensitive mode.
+    metacharacter |?| matches exactly one character unless the character is a |.|
+    metacharacter |*| matches any sequence of zero or more characters.
 */
 bool MatchPattern(const std::string& str, const std::string& pat);
 bool MatchPattern(const std::wstring& str, const std::wstring& pat);
-
-
-}   // namespace StringUtil
 
 }   // namespace KBase
 
