@@ -19,27 +19,47 @@ class Pickle;
 class PickleIterator {
 public:
     PickleIterator() : read_ptr_(nullptr), read_end_ptr_(nullptr) {}
+
     explicit PickleIterator(const Pickle& pickle);
 
     bool ReadBool(bool* result);
+
     bool ReadInt(int* result);
+
     bool ReadUInt32(uint32_t* result);
+
     bool ReadInt64(int64_t* result);
+
     bool ReadUInt64(uint64_t* result);
+    
     bool ReadFloat(float* result);
+    
     bool ReadDouble(double* result);
+    
     bool ReadString(std::string* result);
+    
     bool ReadWString(std::wstring* result);
+    
     bool ReadBytes(const char** data, int length);
+    
     bool ReadData(const char** data, int* read_length);
+    
     bool SkipBytes(int num_bytes);
 
 private:
     template<typename T>
     inline bool ReadBuiltIninType(T* result);
+    
     template<typename T>
     inline const char* GetReadPointerAndAdvance();
+    
     const char* GetReadPointerAndAdvance(int num_bytes);
+
+    /*
+     @ brief
+        when the size of element doesn't equal to sizeof(char), use this function
+        for safety consieration. this function runs overflow check on int32 num_bytes.
+    */
     const char* GetReadPointerAndAdvance(int num_elements, size_t element_size);
 
 private:
@@ -59,24 +79,49 @@ private:
 class Pickle {
 public:
     Pickle();
+
     Pickle(const char* data, int data_len);
+
+    /*
+     @ brief
+        a deep copy of an Pickle object
+    */
     Pickle(const Pickle& other);
+    
     ~Pickle();
 
     Pickle& operator=(const Pickle& rhs);
 
     inline size_t size() const;
+    
     inline const void* data() const;
+    
     inline bool WriteBool(bool value);
+    
     inline bool WriteInt(int value);
+    
     inline bool WriteUInt32(uint32_t value);
+    
     inline bool WriteInt64(int64_t value);
+    
     inline bool WriteUInt64(uint64_t value);
+    
     inline bool WriteFloat(float value);
+    
     inline bool WriteDouble(double value);
+    
     bool WriteString(const std::string& value);
+    
     bool WriteWString(const std::wstring& value);
+
+    /*
+     @ brief
+        serialize data in byte with specified length. PoD types only
+        the function guarantees the internal data remains unchanged if this
+        funtion fails.
+    */
     bool WriteByte(const void* data, int data_len);
+
     bool WriteData(const char* data, int length);
 
     struct Header {
@@ -84,20 +129,51 @@ public:
     };
 
     inline char* mutable_payload() const;
+    
     inline const char* payload() const;
+    
     inline const char* end_of_payload() const;
+    
     inline size_t payload_size() const;
 
 private:
+    /*
+     @ brief
+        resize the capacity of internal buffer. this function internally rounds the
+        [new_capacity] up to the next multiple of predefined alignment
+     @ params
+        new_capacity[in] new capacity of internal buffer and will be aligned internally.
+        be wary of that, the new_capacity actually includes internal header size.
+        e.g. new_capacity = header_size + your_desired_payload_size
+    */
     bool Resize(size_t new_capacity);
+    
     static size_t AlignInt(size_t i, int alignment);
+    
+    /*
+     @ brief
+        locate to the next uint32-aligned offset. and resize internal buffer if
+        necessary.
+     @ return
+        the location that the data should be written at, or
+        nullptr if an error occured.
+    */
     char* BeginWrite(size_t length);
+    
+    /*
+     @ brief
+        zero pading memory; otherwise some memory detectors may complain about
+        uninitialized memory.
+    */
     void EndWrite(char* dest, size_t length);
 
 private:
     static const int kPayloadUnit;
+    
     Header* header_;
+    
     size_t capacity_;
+    
     size_t buffer_offset_;
 
     friend class PickleIterator;

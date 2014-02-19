@@ -174,11 +174,6 @@ const char* PickleIterator::GetReadPointerAndAdvance(int num_bytes)
     return curr_read_ptr;
 }
 
-/*
- @ brief
-    when the size of element doesn't equal to sizeof(char), use this function
-    for safety consieration. this function runs overflow check on int32 num_bytes.
-*/
 const char* PickleIterator::GetReadPointerAndAdvance(int num_elements, size_t element_size)
 {
     int64_t num_bytes = static_cast<int64_t>(num_elements) * element_size;
@@ -204,10 +199,6 @@ Pickle::Pickle(const char* data, int)
       buffer_offset_(0)
 {}
 
-/*
- @ brief
-    a deep copy of an Pickle object
-*/
 Pickle::Pickle(const Pickle& other) : header_(nullptr), capacity_(0),
                                       buffer_offset_(other.buffer_offset_)
 {
@@ -249,15 +240,6 @@ Pickle& Pickle::operator=(const Pickle& rhs)
     return *this;
 }
 
-/*
- @ brief
-    resize the capacity of internal buffer. this function internally rounds the
-    [new_capacity] up to the next multiple of predefined alignment
- @ params
-    new_capacity[in] new capacity of internal buffer and will be aligned internally.
-    be wary of that, the new_capacity actually includes internal header size.
-    e.g. new_capacity = header_size + your_desired_payload_size
-*/
 bool Pickle::Resize(size_t new_capacity)
 {
     assert(capacity_ != kCapacityReadOnly);
@@ -298,12 +280,6 @@ bool Pickle::WriteWString(const std::wstring& value)
     return WriteByte(value.data(), static_cast<int>(value.size() * sizeof(wchar_t)));
 }
 
-/*
- @ brief
-    serialize data in byte with specified length. PoD types only
-    the function guarantees the internal data remains unchanged if this
-    funtion fails.
-*/
 bool Pickle::WriteByte(const void* data, int data_len)
 {
     if (capacity_ == kCapacityReadOnly) {
@@ -328,14 +304,6 @@ bool Pickle::WriteData(const char* data, int length)
     return length >= 0 && WriteInt(length) && WriteByte(data, length);
 }
 
-/*
- @ brief
-    locate to the next uint32-aligned offset. and resize internal buffer if
-    necessary.
- @ return
-    the location that the data should be written at, or
-    nullptr if an error occured.
-*/
 char* Pickle::BeginWrite(size_t length)
 {
     // write at a uint32-aligned offset from the begining of head
@@ -353,11 +321,6 @@ char* Pickle::BeginWrite(size_t length)
     return mutable_payload() + offset;
 }
 
-/*
- @ brief
-    zero pading memory; otherwise some memory detectors may complain about
-    uninitialized memory.
-*/
 void Pickle::EndWrite(char* dest, size_t length)
 {
     if (length % sizeof(uint32_t)) {

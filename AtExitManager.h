@@ -22,9 +22,11 @@ public:
     typedef std::function<void(void*)> AtExitCallbackType;    
 
     AtExitManager();
+
     ~AtExitManager();
 
     static void RegisterCallback(const AtExitCallbackType& callback, void* param);
+    
     static void ProcessCallbackNow();
 
 private:
