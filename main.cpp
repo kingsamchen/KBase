@@ -15,8 +15,8 @@ using std::endl;
 
 int main(int /*argc*/, char* /*argv[]*/)
 {
-    
-    cout << KBase::MatchPattern(L"aaabbc", L"a*b*");
+    const int kBufSize = 10;
+    char buf[kBufSize];
     _getch();
     return 0;
 }
