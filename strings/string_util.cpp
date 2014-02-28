@@ -294,7 +294,7 @@ std::wstring JoinString(const std::vector<std::wstring>& tokens, const std::wstr
 }
 
 template<typename charT>
-bool MatchPatternT(const charT* str, const charT* pat)
+static bool MatchPatternT(const charT* str, const charT* pat)
 {
     bool on_star = false;
     const charT* s;

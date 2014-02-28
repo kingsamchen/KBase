@@ -19,6 +19,9 @@
     <ClCompile Include="strings\string_util.cpp">
       <Filter>strings</Filter>
     </ClCompile>
+    <ClCompile Include="strings\string_format.cpp">
+      <Filter>strings</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AtExitManager.h" />
@@ -29,6 +32,9 @@
     </ClInclude>
     <ClInclude Include="auto_reset.h" />
     <ClInclude Include="strings\string_util.h">
+      <Filter>strings</Filter>
+    </ClInclude>
+    <ClInclude Include="strings\string_format.h">
       <Filter>strings</Filter>
     </ClInclude>
   </ItemGroup>

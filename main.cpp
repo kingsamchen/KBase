@@ -9,14 +9,16 @@
 #include <vector>
 
 #include "strings/string_util.h"
+#include "strings/string_format.h"
 
 using std::cout;
 using std::endl;
 
 int main(int /*argc*/, char* /*argv[]*/)
 {
-    const int kBufSize = 10;
-    char buf[kBufSize];
+    std::string s = "hello";
+    KBase::StringAppendF(&s, ", %s!\n%d", "world", 2014);
+    std::cout << s;
     _getch();
     return 0;
 }
