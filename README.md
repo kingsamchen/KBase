@@ -1,13 +1,17 @@
 KBase_Demo
 ==========
 
-some imitations of a series of remarkable infrastructures.
+### Disclaimer
 
-some will be re-written with C++11 features; and the most will be modified to adapt to my personal needs.
+Some imitations of a collection of remarkable infrastructures.
+
+Some will be re-written with C++11 features; and the majority will be modified to adapt to my personal needs.
+
+Since I wrote these files by using Visual Studio 2013, which uses unportable implementations for some parts of standard library or recommends its own alternatives, such as secured-string-runtime, you may need to replace with standard counterparts on your own, if you want compiled with another compilers.
 
 ### AtExitManager
 
-provide a facility similar to the CRT `atexit()`. actually is a imitation of `base::AtExitManager`
+provides a facility similar to the CRT `atexit()`. actually is a imitation of `base::AtExitManager`
 
 the usage is simple. early in the `main()` or `WinMain()` scope create an object on the stack:
 

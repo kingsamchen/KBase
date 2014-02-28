@@ -18,22 +18,23 @@ template<typename T>
 class AutoReset {
 public:
     AutoReset(T* scoped_var, T new_value)
-        : scoped_var_(scoped_var), original_value(*scoped_var)
+        : scoped_var_(scoped_var), original_value_(*scoped_var)
     {
         *scoped_var_ = new_value;
     }
 
     ~AutoReset()
     {
-        *scoped_var_ = original_value;
+        *scoped_var_ = original_value_;
     }
 
     AutoReset(const AutoReset&) = delete;
+
     AutoReset& operator=(const AutoReset&) = delete;
 
 private:
     T* scoped_var_;
-    T original_value;
+    T original_value_;
 };
 
 }   // namespace KBase

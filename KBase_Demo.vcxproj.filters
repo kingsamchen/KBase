@@ -10,9 +10,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="AtExitManager.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Pickle.cpp" />
     <ClCompile Include="strings\string_piece.cpp">
       <Filter>strings</Filter>
     </ClCompile>
@@ -22,11 +20,10 @@
     <ClCompile Include="strings\string_format.cpp">
       <Filter>strings</Filter>
     </ClCompile>
+    <ClCompile Include="at_exit_manager.cpp" />
+    <ClCompile Include="pickle.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="AtExitManager.h" />
-    <ClInclude Include="Pickle.h" />
-    <ClInclude Include="ToolHelper.h" />
     <ClInclude Include="strings\string_piece.h">
       <Filter>strings</Filter>
     </ClInclude>
@@ -37,6 +34,9 @@
     <ClInclude Include="strings\string_format.h">
       <Filter>strings</Filter>
     </ClInclude>
+    <ClInclude Include="scope_guard.h" />
+    <ClInclude Include="at_exit_manager.h" />
+    <ClInclude Include="pickle.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />

@@ -72,21 +72,21 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="AtExitManager.cpp" />
+    <ClCompile Include="at_exit_manager.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Pickle.cpp" />
+    <ClCompile Include="pickle.cpp" />
     <ClCompile Include="strings\string_format.cpp" />
     <ClCompile Include="strings\string_piece.cpp" />
     <ClCompile Include="strings\string_util.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="AtExitManager.h" />
+    <ClInclude Include="at_exit_manager.h" />
     <ClInclude Include="auto_reset.h" />
-    <ClInclude Include="Pickle.h" />
+    <ClInclude Include="pickle.h" />
     <ClInclude Include="strings\string_format.h" />
     <ClInclude Include="strings\string_piece.h" />
     <ClInclude Include="strings\string_util.h" />
-    <ClInclude Include="ToolHelper.h" />
+    <ClInclude Include="scope_guard.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />

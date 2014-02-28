@@ -13,8 +13,6 @@
 #include <mutex>
 #include <stack>
 
-#include "ToolHelper.h"
-
 namespace KBase {
 
 class AtExitManager {
@@ -29,8 +27,9 @@ public:
     
     static void ProcessCallbackNow();
 
-private:
-    DISABLE_COPYABLE(AtExitManager)
+    AtExitManager(const AtExitManager&) = delete;
+
+    AtExitManager& operator=(const AtExitManager&) = delete;
 
 private:
     std::mutex lock_;

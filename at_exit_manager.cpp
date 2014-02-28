@@ -2,7 +2,7 @@
  @ Kingsley Chen
 */
 
-#include "AtExitManager.h"
+#include "at_exit_manager.h"
 
 #include <cstdio>
 #include <cassert>

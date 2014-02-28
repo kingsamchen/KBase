@@ -6,14 +6,17 @@
 #pragma once
 #endif
 
-#ifndef STRINGS_STRING_FORMAT_H_
-#define STRINGS_STRING_FORMAT_H_
+#ifndef KBASE_STRINGS_STRING_FORMAT_H_
+#define KBASE_STRINGS_STRING_FORMAT_H_
 
 #include <stdarg.h>
 
 #include <string>
 
 namespace KBase {
+
+// all the following functions can throw an exception, if the size of the buffer
+// that stores the formatted data exceeds the threshold.
 
 std::string StringPrintf(const char* fmt, ...);
 std::wstring StringPrintf(const wchar_t* fmt, ...);
@@ -26,4 +29,4 @@ void StringAppendF(std::wstring* str, const wchar_t* fmt, ...);
 
 }   // namespace KBase
 
-#endif  // STRINGS_STRING_FORMAT_H_
+#endif  // KBASE_STRINGS_STRING_FORMAT_H_

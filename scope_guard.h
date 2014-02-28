@@ -1,12 +1,17 @@
+/*
+ @ Kingsley Chen
+*/
 
 #if _MSC_VER > 1000
 #pragma once
 #endif
 
-#ifndef KBASE_TOOL_HELPER_
-#define KBASE_TOOL_HELPER_
+#ifndef KBASE_SCOPE_GUARD_H_
+#define KBASE_SCOPE_GUARD_H_
 
 #include <functional>
+
+namespace KBase {
 
 #define SCOPE_GUARD_NAME_CAT(name, line) name##line
 #define SCOPE_GUARD_NAME(name, line) SCOPE_GUARD_NAME_CAT(name, line)
@@ -31,14 +36,15 @@ public:
         dismissed_ = true;
     }
 
+    ScopeGuard(const ScopeGuard&) = delete;
+
+    ScopeGuard& operator=(const ScopeGuard&) = delete;
+
 private:
     std::function<void()> on_scope_exit_;
     bool dismissed_;
 };
 
-#define DISABLE_COPYABLE(TypeName) \
-    TypeName(const TypeName&); \
-    TypeName& operator =(const TypeName&);
+}   // namespace KBase
 
-
-#endif // KBASE_TOOL_HELPER_
+#endif // KBASE_SCOPE_GUARD_H_
