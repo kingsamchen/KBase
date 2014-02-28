@@ -17,8 +17,7 @@ using std::endl;
 int main(int /*argc*/, char* /*argv[]*/)
 {
     std::string s = "hello";
-    KBase::StringAppendF(&s, ", %s!\n%d", "world", 2014);
-    std::cout << s;
+    std::wcout << KBase::StringPrintf(L"%s-%d-%f", L"KFC", 2014, 3.14);
     _getch();
     return 0;
 }

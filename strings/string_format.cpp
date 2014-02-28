@@ -6,6 +6,8 @@
 
 #include <vector>
 
+#include "../scope_guard.h"
+
 namespace KBase {
 
 inline int vsnprintfT(char* buf, size_t buf_size, size_t count_to_write, const char* fmt, va_list args)
@@ -65,7 +67,7 @@ void StringAppendF(std::string* str, const char* fmt, ...)
     va_list args;
     va_start(args, fmt);
     StringAppendFT(str, fmt, args);
-    va_end(args);
+    ON_SCOPE_EXIT([&] { va_end(args); });
 }
 
 void StringAppendF(std::wstring* str, const wchar_t* fmt, ...)
@@ -73,7 +75,55 @@ void StringAppendF(std::wstring* str, const wchar_t* fmt, ...)
     va_list args;
     va_start(args, fmt);
     StringAppendFT(str, fmt, args);
-    va_end(args);
+    ON_SCOPE_EXIT([&] { va_end(args); });
+}
+
+std::string StringPrintf(const char* fmt, ...)
+{
+    va_list args;
+    va_start(args, fmt);
+
+    std::string str;
+    StringAppendFT(&str, fmt, args);
+    ON_SCOPE_EXIT([&] { va_end(args); });
+
+    return str;
+}
+
+std::wstring StringPrintf(const wchar_t* fmt, ...)
+{
+    va_list args;
+    va_start(args, fmt);
+
+    std::wstring str;
+    StringAppendFT(&str, fmt, args);
+    ON_SCOPE_EXIT([&] { va_end(args); });
+
+    return str;
+}
+
+const std::string& SStringPrintf(std::string* str, const char* fmt, ...)
+{
+    va_list args;
+    va_start(args, fmt);
+
+    str->clear();
+    StringAppendFT(str, fmt, args);
+    ON_SCOPE_EXIT([&] { va_end(args); });
+
+    return *str;
+}
+
+const std::wstring& SStringPrintf(std::wstring* str, const wchar_t* fmt, ...)
+{
+    va_list args;
+    va_start(args, fmt);
+
+    str->clear();
+    StringAppendFT(str, fmt, args);
+    ON_SCOPE_EXIT([&] { va_end(args); });
+
+    return *str;
 }
 
 }   // namespace KBase

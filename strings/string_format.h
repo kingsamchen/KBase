@@ -15,6 +15,8 @@
 
 namespace KBase {
 
+// this file underlyingly relies on scope_guard.h
+
 // all the following functions can throw an exception, if the size of the buffer
 // that stores the formatted data exceeds the threshold.
 

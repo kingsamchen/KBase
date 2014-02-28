@@ -120,3 +120,18 @@ for a complete list of its functionalities, please see the file `string_piece.h`
 offers a lot of handy string utility functions.
 
 see the file `string_util.h` for great details.
+
+### String_Format
+
+printf-like string formatting functions.
+
+```c++
+std::string StringPrintf(const char* fmt, ...);
+std::wstring StringPrintf(const wchar_t* fmt, ...);
+
+const std::string& SStringPrintf(std::string* str, const char* fmt, ...);
+const std::wstring& SStringPrintf(std::string* str, const wchar_t* fmt, ...);
+
+void StringAppendF(std::string* str, const char* fmt, ...);
+void StringAppendF(std::wstring* str, const wchar_t* fmt, ...);
+```
