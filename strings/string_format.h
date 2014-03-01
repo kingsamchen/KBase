@@ -11,6 +11,7 @@
 
 #include <stdarg.h>
 
+#include <stdexcept>
 #include <string>
 
 namespace KBase {
@@ -19,6 +20,17 @@ namespace KBase {
 
 // all the following functions can throw an exception, if the size of the buffer
 // that stores the formatted data exceeds the threshold.
+
+class StringFormatDataLengthError : public std::length_error {
+public:
+    explicit StringFormatDataLengthError(const std::string& what)
+        : std::length_error(what)
+    {}
+
+    explicit StringFormatDataLengthError(const char* what)
+        : std::length_error(what)
+    {}
+};
 
 std::string StringPrintf(const char* fmt, ...);
 std::wstring StringPrintf(const wchar_t* fmt, ...);

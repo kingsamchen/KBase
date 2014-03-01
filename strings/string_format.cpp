@@ -43,7 +43,7 @@ void StringAppendFT(strT* str, const typename strT::value_type* fmt, va_list ap)
     while (true) {
         tentative_char_count <<= 1;
         if (tentative_char_count > kMaxAllowedCharCount) {
-            throw "memory needed exceeds the maximum value";
+            throw StringFormatDataLengthError("memory needed exceeds the maximum value");
         }
 
         std::vector<charT> dynamic_buf(tentative_char_count);
@@ -66,26 +66,26 @@ void StringAppendF(std::string* str, const char* fmt, ...)
 {
     va_list args;
     va_start(args, fmt);
-    StringAppendFT(str, fmt, args);
     ON_SCOPE_EXIT([&] { va_end(args); });
+    StringAppendFT(str, fmt, args);
 }
 
 void StringAppendF(std::wstring* str, const wchar_t* fmt, ...)
 {
     va_list args;
     va_start(args, fmt);
-    StringAppendFT(str, fmt, args);
     ON_SCOPE_EXIT([&] { va_end(args); });
+    StringAppendFT(str, fmt, args);
 }
 
 std::string StringPrintf(const char* fmt, ...)
 {
     va_list args;
     va_start(args, fmt);
+    ON_SCOPE_EXIT([&] { va_end(args); });
 
     std::string str;
     StringAppendFT(&str, fmt, args);
-    ON_SCOPE_EXIT([&] { va_end(args); });
 
     return str;
 }
@@ -94,10 +94,10 @@ std::wstring StringPrintf(const wchar_t* fmt, ...)
 {
     va_list args;
     va_start(args, fmt);
+    ON_SCOPE_EXIT([&] { va_end(args); });
 
     std::wstring str;
     StringAppendFT(&str, fmt, args);
-    ON_SCOPE_EXIT([&] { va_end(args); });
 
     return str;
 }
@@ -106,10 +106,10 @@ const std::string& SStringPrintf(std::string* str, const char* fmt, ...)
 {
     va_list args;
     va_start(args, fmt);
+    ON_SCOPE_EXIT([&] { va_end(args); });
 
     str->clear();
     StringAppendFT(str, fmt, args);
-    ON_SCOPE_EXIT([&] { va_end(args); });
 
     return *str;
 }
@@ -118,10 +118,10 @@ const std::wstring& SStringPrintf(std::wstring* str, const wchar_t* fmt, ...)
 {
     va_list args;
     va_start(args, fmt);
+    ON_SCOPE_EXIT([&] { va_end(args); });
 
     str->clear();
     StringAppendFT(str, fmt, args);
-    ON_SCOPE_EXIT([&] { va_end(args); });
 
     return *str;
 }

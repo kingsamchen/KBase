@@ -17,7 +17,13 @@ using std::endl;
 int main(int /*argc*/, char* /*argv[]*/)
 {
     std::string s = "hello";
-    std::wcout << KBase::StringPrintf(L"%s-%d-%f", L"KFC", 2014, 3.14);
+    try {
+        std::wcout << KBase::StringPrintf(L"%s-%d-%f", L"KFC", 2014, 3.14);
+    } catch (KBase::StringFormatDataLengthError& ex) {
+        std::cerr << "failed to format string" << std::endl;
+        std::cerr << ex.what();
+    }
+
     _getch();
     return 0;
 }
