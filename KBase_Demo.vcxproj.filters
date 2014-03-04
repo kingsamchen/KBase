@@ -22,6 +22,9 @@
     </ClCompile>
     <ClCompile Include="at_exit_manager.cpp" />
     <ClCompile Include="pickle.cpp" />
+    <ClCompile Include="strings\sys_string_encoding_conversions.cpp">
+      <Filter>strings</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="strings\string_piece.h">
@@ -37,6 +40,9 @@
     <ClInclude Include="scope_guard.h" />
     <ClInclude Include="at_exit_manager.h" />
     <ClInclude Include="pickle.h" />
+    <ClInclude Include="strings\sys_string_encoding_conversions.h">
+      <Filter>strings</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />

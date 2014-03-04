@@ -78,6 +78,7 @@
     <ClCompile Include="strings\string_format.cpp" />
     <ClCompile Include="strings\string_piece.cpp" />
     <ClCompile Include="strings\string_util.cpp" />
+    <ClCompile Include="strings\sys_string_encoding_conversions.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="at_exit_manager.h" />
@@ -87,6 +88,7 @@
     <ClInclude Include="strings\string_piece.h" />
     <ClInclude Include="strings\string_util.h" />
     <ClInclude Include="scope_guard.h" />
+    <ClInclude Include="strings\sys_string_encoding_conversions.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />
