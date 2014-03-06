@@ -4,13 +4,31 @@
 
 #include "sys_string_encoding_conversions.h"
 
-#include <vector>
-
 #include <windows.h>
 
 #include "string_util.h"
 
 namespace KBase {
+
+std::string SysWideToUTF8(const std::wstring& wide_str)
+{
+    return SysWideToMultiByte(wide_str, CodePage::UTF8);
+}
+
+std::wstring SysUTF8ToWide(const std::string& utf8_str)
+{
+    return SysMultiByteToWide(utf8_str, CodePage::UTF8);
+}
+
+std::string SysWideToNativeMB(const std::wstring& wide_str)
+{
+    return SysWideToMultiByte(wide_str, CodePage::Default_Code_Page);
+}
+
+std::wstring SysNativeMBToWide(const std::string& mb_str)
+{
+    return SysMultiByteToWide(mb_str, CodePage::Default_Code_Page);
+}
 
 std::wstring SysMultiByteToWide(const std::string& mb_str, CodePage code_page)
 {

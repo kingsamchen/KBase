@@ -135,3 +135,8 @@ const std::wstring& SStringPrintf(std::string* str, const wchar_t* fmt, ...);
 void StringAppendF(std::string* str, const char* fmt, ...);
 void StringAppendF(std::wstring* str, const wchar_t* fmt, ...);
 ```
+
+### Sys_String_Encoding_Conversion
+
+provides a collection of functions for systen-dependent string encoding conversions.
+

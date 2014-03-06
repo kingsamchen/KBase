@@ -18,8 +18,8 @@ int main(int /*argc*/, char* /*argv[]*/)
 {
     std::ofstream out("encoding_test.txt");
     std::string s = "helloÖÐÎÄ";
-    std::wstring ws = KBase::SysMultiByteToWide(s, KBase::CodePage::Default_Code_Page);
-    std::string utf8s = KBase::SysWideToMultiByte(ws, KBase::CodePage::UTF8);
+    std::wstring ws = KBase::SysNativeMBToWide(s);
+    std::string utf8s = KBase::SysWideToUTF8(ws);
     out << utf8s;
     _getch();
     return 0;

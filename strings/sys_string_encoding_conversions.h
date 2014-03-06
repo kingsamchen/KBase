@@ -13,17 +13,18 @@
 
 namespace KBase {
 
+// defined according to MSDN
 enum class CodePage {
     Default_Code_Page = 0,
     GB_Chinese_Encoding = 54936,
     UTF8 = 65001
 };
 
-std::string SysWideToUTF8(const std::wstring& str);
-std::wstring SysUTF8ToWide(const std::string& str);
+std::string SysWideToUTF8(const std::wstring& wide_str);
+std::wstring SysUTF8ToWide(const std::string& utf8_str);
 
-std::string SysWideToNativeMB(const std::wstring& str);
-std::wstring SysNativeMBToWide(const std::string& str);
+std::string SysWideToNativeMB(const std::wstring& wide_str);
+std::wstring SysNativeMBToWide(const std::string& mb_str);
 
 std::wstring SysMultiByteToWide(const std::string& mb_str, CodePage code_page);
 std::string SysWideToMultiByte(const std::wstring& wide_str, CodePage code_page);
