@@ -2,28 +2,25 @@
 #include <cassert>
 #include <cstdio>
 #include <conio.h>
+#include <fstream>
 #include <iostream>
 #include <iterator>
 #include <memory>
 #include <string>
 #include <vector>
 
-#include "strings/string_util.h"
-#include "strings/string_format.h"
+#include "strings/sys_string_encoding_conversions.h"
 
 using std::cout;
 using std::endl;
 
 int main(int /*argc*/, char* /*argv[]*/)
 {
-    std::string s = "hello";
-    try {
-        std::wcout << KBase::StringPrintf(L"%s-%d-%f", L"KFC", 2014, 3.14);
-    } catch (KBase::StringFormatDataLengthError& ex) {
-        std::cerr << "failed to format string" << std::endl;
-        std::cerr << ex.what();
-    }
-
+    std::ofstream out("encoding_test.txt");
+    std::string s = "helloÖÐÎÄ";
+    std::wstring ws = KBase::SysMultiByteToWide(s, KBase::CodePage::Default_Code_Page);
+    std::string utf8s = KBase::SysWideToMultiByte(ws, KBase::CodePage::UTF8);
+    out << utf8s;
     _getch();
     return 0;
 }

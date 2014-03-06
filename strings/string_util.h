@@ -9,6 +9,7 @@
 #ifndef KBASE_STRINGS_STRING_UTIL_H_
 #define KBASE_STRINGS_STRING_UTIL_H_ 
 
+#include <cassert>
 #include <string>
 #include <vector>
 
