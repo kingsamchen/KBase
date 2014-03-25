@@ -25,6 +25,7 @@
     <ClCompile Include="strings\sys_string_encoding_conversions.cpp">
       <Filter>strings</Filter>
     </ClCompile>
+    <ClCompile Include="logging.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="strings\string_piece.h">
@@ -43,6 +44,7 @@
     <ClInclude Include="strings\sys_string_encoding_conversions.h">
       <Filter>strings</Filter>
     </ClInclude>
+    <ClInclude Include="logging.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />

@@ -13,7 +13,7 @@
 #include <mutex>
 #include <stack>
 
-namespace KBase {
+namespace kbase {
 
 class AtExitManager {
 public:
@@ -37,6 +37,6 @@ private:
     AtExitManager* next_at_exit_manager_;
 };
 
-}   // namespace KBase
+}   // namespace kbase
 
 #endif  // KBASE_AT_EXIT_H_

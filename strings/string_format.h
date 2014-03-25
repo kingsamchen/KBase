@@ -14,7 +14,7 @@
 #include <stdexcept>
 #include <string>
 
-namespace KBase {
+namespace kbase {
 
 // this file underlyingly relies on scope_guard.h
 
@@ -41,6 +41,6 @@ const std::wstring& SStringPrintf(std::string* str, const wchar_t* fmt, ...);
 void StringAppendF(std::string* str, const char* fmt, ...);
 void StringAppendF(std::wstring* str, const wchar_t* fmt, ...);
 
-}   // namespace KBase
+}   // namespace kbase
 
 #endif  // KBASE_STRINGS_STRING_FORMAT_H_

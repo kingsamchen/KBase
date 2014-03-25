@@ -18,15 +18,15 @@ int main(int /*argc*/, char* /*argv[]*/)
 {
     std::ofstream out("encoding_test.txt");
     std::string s = "helloÖÐÎÄ";
-    std::wstring ws = KBase::SysNativeMBToWide(s);
-    std::string utf8s = KBase::SysWideToUTF8(ws);
+    std::wstring ws = kbase::SysNativeMBToWide(s);
+    std::string utf8s = kbase::SysWideToUTF8(ws);
     out << utf8s;
     _getch();
     return 0;
 }
 
 #ifdef _DEBUG
-namespace KBase {
+namespace kbase {
 //void _pickle_dump(const Pickle& pk)
 //{
 //    cout << "capacity:" << pk.capacity_ << endl

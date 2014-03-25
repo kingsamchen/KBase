@@ -17,7 +17,7 @@
 #include <functional>
 #include <string>
 
-namespace KBase {
+namespace kbase {
 
 template<typename STRING_TYPE> class BasicStringPiece;
 typedef BasicStringPiece<std::string> StringPiece;
@@ -600,23 +600,23 @@ std::wostream& operator<<(std::wostream& os, const WStringPiece& s);
     }                                                                         \
     return result;                                                            \
 
-}   // namespace KBase
+}   // namespace kbase
 
 // specialize std::hash for our string_piece types
 
 namespace std {
 
 template<>
-struct std::hash<KBase::StringPiece> {
-    size_t operator()(const KBase::StringPiece& sp)
+struct std::hash<kbase::StringPiece> {
+    size_t operator()(const kbase::StringPiece& sp)
     {
         HASH_STRING_PIECE(sp);
     }
 };
 
 template<>
-struct std::hash<KBase::WStringPiece> {
-    size_t operator()(const KBase::WStringPiece& sp)
+struct std::hash<kbase::WStringPiece> {
+    size_t operator()(const kbase::WStringPiece& sp)
     {
         HASH_STRING_PIECE(sp);
     }

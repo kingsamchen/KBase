@@ -11,7 +11,7 @@
 
 #include <string>
 
-namespace KBase {
+namespace kbase {
 
 // defined according to MSDN
 enum class CodePage {
@@ -29,6 +29,6 @@ std::wstring SysNativeMBToWide(const std::string& mb_str);
 std::wstring SysMultiByteToWide(const std::string& mb_str, CodePage code_page);
 std::string SysWideToMultiByte(const std::wstring& wide_str, CodePage code_page);
 
-}   // namespace KBase
+}   // namespace kbase
 
 #endif  // KBASE_STRINGS_SYS_STRING_ENCODING_CONVERSIONS_H_

@@ -73,6 +73,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="at_exit_manager.cpp" />
+    <ClCompile Include="logging.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="pickle.cpp" />
     <ClCompile Include="strings\string_format.cpp" />
@@ -83,6 +84,7 @@
   <ItemGroup>
     <ClInclude Include="at_exit_manager.h" />
     <ClInclude Include="auto_reset.h" />
+    <ClInclude Include="logging.h" />
     <ClInclude Include="pickle.h" />
     <ClInclude Include="strings\string_format.h" />
     <ClInclude Include="strings\string_piece.h" />

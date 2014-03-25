@@ -10,7 +10,7 @@
 using std::lock_guard;
 using std::mutex;
 
-namespace KBase {
+namespace kbase {
 
 static AtExitManager* g_top_exit_manager = nullptr;
 
@@ -64,4 +64,4 @@ void AtExitManager::ProcessCallbackNow()
     }
 }
 
-}   // namespace KBase
+}   // namespace kbase

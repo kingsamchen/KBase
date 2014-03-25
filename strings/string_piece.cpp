@@ -6,7 +6,7 @@
 
 #include <ostream>
 
-namespace KBase {
+namespace kbase {
 
 namespace internal {
 
@@ -151,6 +151,6 @@ std::wostream& operator<<(std::wostream& os, const WStringPiece& s)
     return os;
 }
 
-}   // namespace KBase
+}   // namespace kbase
 
 

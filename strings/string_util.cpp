@@ -10,10 +10,10 @@
 
 #include "string_piece.h"
 
-namespace KBase {
+namespace kbase {
 
 template<typename strT>
-static bool RemoveCharsT(const strT& in, const KBase::BasicStringPiece<strT>& remove_chars, strT* out)
+static bool RemoveCharsT(const strT& in, const kbase::BasicStringPiece<strT>& remove_chars, strT* out)
 {
     strT tmp(in.size(), 0);
 
@@ -344,4 +344,4 @@ bool MatchPattern(const std::wstring& str, const std::wstring& pat)
     return MatchPatternT(str.c_str(), pat.c_str());
 }
 
-}   // namespace KBase
+}   // namespace kbase

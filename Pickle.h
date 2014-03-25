@@ -12,7 +12,7 @@
 #include <cstdint>
 #include <string>
 
-namespace KBase {
+namespace kbase {
 
 class Pickle;
 
@@ -244,6 +244,6 @@ inline bool Pickle::WriteDouble(double value)
     return WriteByte(&value, sizeof(value));
 }
 
-}   // namespace KBase
+}   // namespace kbase
 
 #endif  // KBASE_PICKLE_H_

@@ -8,7 +8,7 @@
 
 #include "../scope_guard.h"
 
-namespace KBase {
+namespace kbase {
 
 inline int vsnprintfT(char* buf, size_t buf_size, size_t count_to_write, const char* fmt, va_list args)
 {
@@ -126,4 +126,4 @@ const std::wstring& SStringPrintf(std::wstring* str, const wchar_t* fmt, ...)
     return *str;
 }
 
-}   // namespace KBase
+}   // namespace kbase

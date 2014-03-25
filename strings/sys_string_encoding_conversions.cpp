@@ -8,7 +8,7 @@
 
 #include "string_util.h"
 
-namespace KBase {
+namespace kbase {
 
 std::string SysWideToUTF8(const std::wstring& wide_str)
 {
@@ -71,4 +71,4 @@ std::string SysWideToMultiByte(const std::wstring& wide_str, CodePage code_page)
     return mb_str;
 }
 
-}   // namespace KBase
+}   // namespace kbase

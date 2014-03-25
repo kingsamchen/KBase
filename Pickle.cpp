@@ -9,7 +9,7 @@
 #include <cstdlib>
 #include <cstring>
 
-namespace KBase{
+namespace kbase {
 
 // static
 const int Pickle::kPayloadUnit = 64;

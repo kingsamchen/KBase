@@ -13,7 +13,7 @@
 #include <string>
 #include <vector>
 
-namespace KBase {
+namespace kbase {
 
 /*
  @ brief
@@ -220,6 +220,6 @@ std::wstring JoinString(const std::vector<std::wstring>& tokens,
 bool MatchPattern(const std::string& str, const std::string& pat);
 bool MatchPattern(const std::wstring& str, const std::wstring& pat);
 
-}   // namespace KBase
+}   // namespace kbase
 
 #endif  // KBASE_STRINGS_STRING_UTIL_H_

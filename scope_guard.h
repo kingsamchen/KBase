@@ -11,7 +11,7 @@
 
 #include <functional>
 
-namespace KBase {
+namespace kbase {
 
 #define SCOPE_GUARD_NAME_CAT(name, line) name##line
 #define SCOPE_GUARD_NAME(name, line) SCOPE_GUARD_NAME_CAT(name, line)
@@ -45,6 +45,6 @@ private:
     bool dismissed_;
 };
 
-}   // namespace KBase
+}   // namespace kbase
 
 #endif // KBASE_SCOPE_GUARD_H_

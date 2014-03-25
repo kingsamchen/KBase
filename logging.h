@@ -11,7 +11,7 @@
 
 #include <string>
 
-namespace KBase {
+namespace kbase {
 
 typedef int LogSeverity;
 
@@ -38,6 +38,6 @@ private:
     LogSeverity severity_;
 };
 
-}   // namespace KBase
+}   // namespace kbase
 
 #endif  // KBASE_LOGGING_H_

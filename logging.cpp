@@ -4,7 +4,7 @@
 
 #include "logging.h"
 
-namespace KBase {
+namespace kbase {
 
 
-}   // namespace KBase
+}   // namespace kbase

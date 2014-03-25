@@ -9,7 +9,7 @@
 #ifndef KBASE_AUTO_RESET_H_
 #define KBASE_AUTO_RESET_H_
 
-namespace KBase {
+namespace kbase {
 
 // be cautious of that an AutoReset object must have shorter lifetime than
 // the scoped_var object. otherwise, it may cause invalid memory reference
@@ -37,6 +37,6 @@ private:
     T original_value_;
 };
 
-}   // namespace KBase
+}   // namespace kbase
 
 #endif  // KBASE_AUTO_RESET_H_
