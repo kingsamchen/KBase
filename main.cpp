@@ -9,18 +9,14 @@
 #include <string>
 #include <vector>
 
-#include "strings/sys_string_encoding_conversions.h"
+#include "kbase/strings/sys_string_encoding_conversions.h"
 
 using std::cout;
 using std::endl;
 
 int main(int /*argc*/, char* /*argv[]*/)
 {
-    std::ofstream out("encoding_test.txt");
-    std::string s = "helloÖÐÎÄ";
-    std::wstring ws = kbase::SysNativeMBToWide(s);
-    std::string utf8s = kbase::SysWideToUTF8(ws);
-    out << utf8s;
+    
     _getch();
     return 0;
 }

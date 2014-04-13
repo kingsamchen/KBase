@@ -2,13 +2,13 @@
  @ Kingsley Chen
 */
 
-#include "string_util.h"
+#include "kbase/strings/string_util.h"
 
 #include <algorithm>
 #include <cassert>
 #include <functional>
 
-#include "string_piece.h"
+#include "kbase/strings/string_piece.h"
 
 namespace kbase {
 

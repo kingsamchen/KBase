@@ -2,11 +2,11 @@
  @ Kingsley Chen
 */
 
-#include "sys_string_encoding_conversions.h"
+#include "kbase/strings/sys_string_encoding_conversions.h"
 
 #include <windows.h>
 
-#include "string_util.h"
+#include "kbase/strings/string_util.h"
 
 namespace kbase {
 

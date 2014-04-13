@@ -2,7 +2,7 @@
  @ Kingsley Chen
 */
 
-#include "string_piece.h"
+#include "kbase/strings/string_piece.h"
 
 #include <ostream>
 

@@ -2,11 +2,11 @@
  @ Kingsley Chen
 */
 
-#include "string_format.h"
+#include "kbase/strings/string_format.h"
 
 #include <vector>
 
-#include "../scope_guard.h"
+#include "kbase/scope_guard.h"
 
 namespace kbase {
 

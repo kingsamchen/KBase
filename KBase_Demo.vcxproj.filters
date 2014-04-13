@@ -11,40 +11,40 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="strings\string_piece.cpp">
+    <ClCompile Include="kbase\at_exit_manager.cpp" />
+    <ClCompile Include="kbase\logging.cpp" />
+    <ClCompile Include="kbase\strings\string_format.cpp">
       <Filter>strings</Filter>
     </ClCompile>
-    <ClCompile Include="strings\string_util.cpp">
+    <ClCompile Include="kbase\strings\string_piece.cpp">
       <Filter>strings</Filter>
     </ClCompile>
-    <ClCompile Include="strings\string_format.cpp">
+    <ClCompile Include="kbase\strings\string_util.cpp">
       <Filter>strings</Filter>
     </ClCompile>
-    <ClCompile Include="at_exit_manager.cpp" />
-    <ClCompile Include="pickle.cpp" />
-    <ClCompile Include="strings\sys_string_encoding_conversions.cpp">
+    <ClCompile Include="kbase\strings\sys_string_encoding_conversions.cpp">
       <Filter>strings</Filter>
     </ClCompile>
-    <ClCompile Include="logging.cpp" />
+    <ClCompile Include="kbase\pickle.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="strings\string_piece.h">
+    <ClInclude Include="kbase\at_exit_manager.h" />
+    <ClInclude Include="kbase\auto_reset.h" />
+    <ClInclude Include="kbase\logging.h" />
+    <ClInclude Include="kbase\scope_guard.h" />
+    <ClInclude Include="kbase\strings\string_format.h">
       <Filter>strings</Filter>
     </ClInclude>
-    <ClInclude Include="auto_reset.h" />
-    <ClInclude Include="strings\string_util.h">
+    <ClInclude Include="kbase\strings\string_piece.h">
       <Filter>strings</Filter>
     </ClInclude>
-    <ClInclude Include="strings\string_format.h">
+    <ClInclude Include="kbase\strings\string_util.h">
       <Filter>strings</Filter>
     </ClInclude>
-    <ClInclude Include="scope_guard.h" />
-    <ClInclude Include="at_exit_manager.h" />
-    <ClInclude Include="pickle.h" />
-    <ClInclude Include="strings\sys_string_encoding_conversions.h">
+    <ClInclude Include="kbase\strings\sys_string_encoding_conversions.h">
       <Filter>strings</Filter>
     </ClInclude>
-    <ClInclude Include="logging.h" />
+    <ClInclude Include="kbase\pickle.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />
