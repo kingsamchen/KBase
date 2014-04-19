@@ -14,7 +14,7 @@
 
 namespace kbase {
 
-// these log severities are used to index into the array |log_severity_names|
+// These log severities are used to index into the array |log_severity_names|.
 typedef int LogSeverity;
 
 const LogSeverity LOG_INFO = 0;
@@ -32,23 +32,49 @@ const LogSeverity LOG_ERROR = 2;
 #define COMPACT_LOG_WARNING COMPACT_LOG_EX_WARNING(LogMessage)
 #define COMPACT_LOG_ERROR COMPACT_LOG_EX_ERROR(LogMessage)
 
-#define LAZY_STREAM(stream, condition) !(condition) ? (void)0 : (stream)
-#define LOG_STREAM(severity) COMPACT_LOG_##severity.stream()
+#define LAZY_STREAM(stream, condition) \
+    !(condition) ? (void)0 : kbase::LogMessageVoidfy() & (stream)
+#define LOG_STREAM(severity) COMPACT_LOG_ ## severity.stream()
 
 #define LOG(severity) LAZY_STREAM(LOG_STREAM(severity), true)
 #define LOG_IF(severity, condition) LAZY_STREAM(LOG_STREAM(severity), condition)
 
+enum LogItemOptions {
+    ENABLE_NONE = 0,
+    ENABLE_PROCESS_ID = 0x1,
+    ENABLE_THREAD_ID = 0x2,
+    ENABLE_TIMESTAMP = 0x4,
+    ENABLE_ALL = ENABLE_PROCESS_ID | ENABLE_THREAD_ID | ENABLE_TIMESTAMP
+};
+
+enum LoggingDestination {
+    LOG_NONE = 0,
+    LOG_TO_FILE = 0x1,
+    LOG_TO_SYSTEM_DEBUG_LOG = 0x2,
+    LOG_TO_ALL = LOG_TO_FILE | LOG_TO_SYSTEM_DEBUG_LOG
+};
+
+struct LoggingSettings {
+    /*
+     @ initializes settings to default values
+    */
+    LoggingSettings();
+
+    LogItemOptions log_item_options;
+    LoggingDestination logging_dest;
+};
+
 class LogMessage {
 public:
-    LogMessage(const char* file, int line, LogSeverity severity, int ctr);
+    //LogMessage(const char* file, int line, LogSeverity severity, int ctr);
 
     LogMessage(const char* file, int line);
 
     LogMessage(const char* file, int line, LogSeverity severity);
 
-    LogMessage(const char* file, int line, std::string* result);
+    //LogMessage(const char* file, int line, std::string* result);
 
-    LogMessage(const char* file, int line, LogMessage severity, std::string* result);
+    //LogMessage(const char* file, int line, LogSeverity severity, std::string* result);
 
     ~LogMessage();
 
@@ -62,11 +88,30 @@ private:
 
     LogMessage& operator=(const LogMessage&) = delete;
 
+    /*
+     @ Writes the common info header into the stream.
+       the info header is in the following format:
+         [pid:tid:mmdd/hhmmss:severity:filename(line)]
+       in which, pid tid and logging time all are optional, and are controlled
+       by logging setting.
+    */
+    void Init(const char* file, int line);
+
 private:
     const char* file_;
     int line_;
     LogSeverity severity_;
+    size_t message_start_;
     std::ostringstream stream_;
+};
+
+// This class is used to ignore the compiler warning like "std::ostream object cannot
+// be copied" since conditional statement in macro |LAZY_STREAM| may return an
+// std::ostream object.
+class LogMessageVoidfy {
+public:
+    LogMessageVoidfy() {}
+    void operator&(std::ostream&) {}
 };
 
 }   // namespace kbase
