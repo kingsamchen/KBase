@@ -18,19 +18,19 @@ namespace kbase {
 typedef int LogSeverity;
 
 const LogSeverity LOG_INFO = 0;
-const LogSeverity LOG_WARNING = 1;
-const LogSeverity LOG_ERROR = 2;
+const LogSeverity LOG_ERROR = 1;
+const LogSeverity LOG_FATAL;
 
 #define COMPACT_LOG_EX_INFO(ClassName) \
     kbase::ClassName(__FILE__, __LINE__, kbase::LOG_INFO)
-#define COMPACT_LOG_EX_WARNING(ClassName) \
-    kbase::ClassName(__FILE__, __LINE__, kbase::LOG_WARNING)
 #define COMPACT_LOG_EX_ERROR(ClassName) \
     kbase::ClassName(__FILE__, __LINE__, kbase::LOG_ERROR)
+#define COMPACT_LOG_EX_FATAL(ClassName) \
+    kbase::ClassName(__FILE__, __LINE__, kbase::LOG_FATAL)
 
 #define COMPACT_LOG_INFO COMPACT_LOG_EX_INFO(LogMessage)
-#define COMPACT_LOG_WARNING COMPACT_LOG_EX_WARNING(LogMessage)
 #define COMPACT_LOG_ERROR COMPACT_LOG_EX_ERROR(LogMessage)
+#define COMPACT_LOG_ERROR COMPACT_LOG_EX_FATAL(LogMessage)
 
 #define LAZY_STREAM(stream, condition) \
     !(condition) ? (void)0 : kbase::LogMessageVoidfy() & (stream)
@@ -54,14 +54,27 @@ enum LoggingDestination {
     LOG_TO_ALL = LOG_TO_FILE | LOG_TO_SYSTEM_DEBUG_LOG
 };
 
+enum OldFileOption {
+    APPEND_TO_OLD_LOG_FILE,
+    DELETE_OLD_LOG_FILE
+};
+
+enum FileLockingState {
+    LOCK_LOG_FILE,
+    DONT_LOCK_LOG_FILE
+};
+
 struct LoggingSettings {
     /*
      @ initializes settings to default values
     */
     LoggingSettings();
 
+    std::string file_name;
     LogItemOptions log_item_options;
     LoggingDestination logging_dest;
+    OldFileOption old_file_option;
+    FileLockingState file_locking_state;
 };
 
 class LogMessage {
@@ -92,8 +105,8 @@ private:
      @ Writes the common info header into the stream.
        the info header is in the following format:
          [pid:tid:mmdd/hhmmss:severity:filename(line)]
-       in which, pid tid and logging time all are optional, and are controlled
-       by logging setting.
+       in which, pid tid and logging time all are optional, and are controlled by
+       logging setting.
     */
     void Init(const char* file, int line);
 
