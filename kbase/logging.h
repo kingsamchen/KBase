@@ -19,7 +19,7 @@ typedef int LogSeverity;
 
 const LogSeverity LOG_INFO = 0;
 const LogSeverity LOG_ERROR = 1;
-const LogSeverity LOG_FATAL;
+const LogSeverity LOG_FATAL = 2;
 
 #define COMPACT_LOG_EX_INFO(ClassName) \
     kbase::ClassName(__FILE__, __LINE__, kbase::LOG_INFO)
@@ -30,7 +30,7 @@ const LogSeverity LOG_FATAL;
 
 #define COMPACT_LOG_INFO COMPACT_LOG_EX_INFO(LogMessage)
 #define COMPACT_LOG_ERROR COMPACT_LOG_EX_ERROR(LogMessage)
-#define COMPACT_LOG_ERROR COMPACT_LOG_EX_FATAL(LogMessage)
+#define COMPACT_LOG_FATAL COMPACT_LOG_EX_FATAL(LogMessage)
 
 #define LAZY_STREAM(stream, condition) \
     !(condition) ? (void)0 : kbase::LogMessageVoidfy() & (stream)
@@ -59,35 +59,25 @@ enum OldFileOption {
     DELETE_OLD_LOG_FILE
 };
 
-enum FileLockingState {
-    LOCK_LOG_FILE,
-    DONT_LOCK_LOG_FILE
-};
-
 struct LoggingSettings {
     /*
      @ initializes settings to default values
     */
     LoggingSettings();
 
-    std::string file_name;
     LogItemOptions log_item_options;
     LoggingDestination logging_dest;
     OldFileOption old_file_option;
-    FileLockingState file_locking_state;
 };
+
+void InitLoggingSettings(const LoggingSettings& settings);
+void GetCurrentLoggingSettings(LoggingSettings* current_settings);
 
 class LogMessage {
 public:
-    //LogMessage(const char* file, int line, LogSeverity severity, int ctr);
-
     LogMessage(const char* file, int line);
 
     LogMessage(const char* file, int line, LogSeverity severity);
-
-    //LogMessage(const char* file, int line, std::string* result);
-
-    //LogMessage(const char* file, int line, LogSeverity severity, std::string* result);
 
     ~LogMessage();
 

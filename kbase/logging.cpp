@@ -23,17 +23,19 @@ LoggingDestination logging_dest = LoggingDestination::LOG_TO_FILE;
 
 OldFileOption old_file_option = OldFileOption::APPEND_TO_OLD_LOG_FILE;
 
-FileLockingState locking_state = FileLockingState::LOCK_LOG_FILE;
+typedef wchar_t PathChar;
+typedef std::wstring PathString;
 
-const char kFileNameSuffix[] = "debug_message.log";
+const PathChar kFileNameSuffix[] = L"debug_message.log";
 
 // Due to the performance consideration, I decide not to use std::string and
 // neither StringPiece, since I also want to keep this file more independent
 // as possible
-const char* ExtractFileName(const char* file_path)
+template<typename charT>
+const charT* ExtractFileName(const charT* file_path)
 {
-    const char* p = file_path;
-    const char* last_pos = nullptr;
+    const charT* p = file_path;
+    const charT* last_pos = nullptr;
     for (; *p != '\0'; ++p) {
         if (*p == '/' || *p == '\\') {
             last_pos = p;
@@ -43,17 +45,20 @@ const char* ExtractFileName(const char* file_path)
     return last_pos ? last_pos + 1 : file_path;
 }
 
-std::string GetDefaultLogName()
+PathString GetDefaultLogName()
 {
-    wchar_t exe_path[MAX_PATH];
+    PathChar exe_path[MAX_PATH];
     GetModuleFileName(nullptr, exe_path, MAX_PATH);
     
-    const wchar_t* last_slash = wcsrchr(exe_path, L'\\');
-    std::wstring tmp_name = last_slash ? last_slash : exe_path;
-    std::string default_name = kbase::SysWideToNativeMB(tmp_name);
-    default_name.append(kFileNameSuffix);
+    PathString default_name = ExtractFileName(exe_path);
+    default_name.append(L".").append(kFileNameSuffix);
 
     return default_name;
+}
+
+bool InitLogFile()
+{
+    return true;
 }
 
 }   // namespace
@@ -61,13 +66,31 @@ std::string GetDefaultLogName()
 LoggingSettings::LoggingSettings()
  : log_item_options(LogItemOptions::ENABLE_TIMESTAMP),
    logging_dest(LoggingDestination::LOG_TO_FILE),
-   old_file_option(OldFileOption::APPEND_TO_OLD_LOG_FILE),
-   file_locking_state(FileLockingState::LOCK_LOG_FILE),
-   file_name(GetDefaultLogName())
+   old_file_option(OldFileOption::APPEND_TO_OLD_LOG_FILE)
 {}
+
+void InitLoggingSettings(const LoggingSettings& settings)
+{
+    log_item_options = settings.log_item_options;
+    logging_dest = settings.logging_dest;
+    old_file_option = settings.old_file_option;
+}
+
+void GetCurrentLoggingSettings(LoggingSettings* settings)
+{
+    settings->log_item_options = log_item_options;
+    settings->logging_dest = logging_dest;
+    settings->old_file_option = old_file_option;
+}
 
 LogMessage::LogMessage(const char* file, int line, LogSeverity severity)
  : file_(file), line_(line), severity_(severity)
+{
+    Init(file, line);
+}
+
+LogMessage::LogMessage(const char* file, int line)
+ : LogMessage(file, line, LOG_INFO) 
 {
     Init(file, line);
 }
@@ -109,7 +132,7 @@ void LogMessage::Init(const char* file, int line)
     const char* file_name = ExtractFileName(file);
 
     stream_ << ':' << file_name << '(' << line << ")]";
-    message_start_ = stream_.tellp();
+    message_start_ = static_cast<size_t>(stream_.tellp());
 }
 
 }   // namespace kbase
