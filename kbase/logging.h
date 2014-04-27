@@ -21,6 +21,20 @@ const LogSeverity LOG_INFO = 0;
 const LogSeverity LOG_ERROR = 1;
 const LogSeverity LOG_FATAL = 2;
 
+namespace internal {
+
+#ifdef _DEBUG
+#define ENABLE_DLOG 1
+#else
+#define ENABLE_DLOG 0
+#endif
+
+enum { DLOG_ON = ENABLE_DLOG };
+
+#undef ENABLE_DLOG
+
+}   // namespace internal
+
 #define COMPACT_LOG_EX_INFO(ClassName) \
     kbase::ClassName(__FILE__, __LINE__, kbase::LOG_INFO)
 #define COMPACT_LOG_EX_ERROR(ClassName) \
@@ -38,6 +52,10 @@ const LogSeverity LOG_FATAL = 2;
 
 #define LOG(severity) LAZY_STREAM(LOG_STREAM(severity), true)
 #define LOG_IF(severity, condition) LAZY_STREAM(LOG_STREAM(severity), condition)
+
+#define DLOG(severity) LAZY_STREAM(LOG_STREAM(severity), ::kbase::internal::DLOG_ON)
+#define DLOG_IF(severity, condition) \
+    LAZY_STREAM(LOG_STREAM(severity), ::kbase::internal::DLOG_ON && condition)
 
 enum LogItemOptions {
     ENABLE_NONE = 0,
