@@ -104,7 +104,6 @@ private:
     const char* file_;
     int line_;
     LogSeverity severity_;
-    size_t message_start_;
     std::ostringstream stream_;
 };
 

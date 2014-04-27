@@ -5,6 +5,7 @@
 #include "kbase/logging.h"
 
 #include <algorithm>
+#include <cstdio>
 #include <ctime>
 #include <iomanip>
 #include <stdexcept>
@@ -18,6 +19,8 @@ namespace kbase {
 namespace {
 
 const char* log_severity_names[] = {"INFO", "ERROR", "FATAL"};
+
+const LogSeverity kAlwaysPrintErrorLevel = LOG_ERROR;
 
 LogItemOptions log_item_options = LogItemOptions::ENABLE_TIMESTAMP;
 
@@ -50,7 +53,7 @@ const charT* ExtractFileName(const charT* file_path)
 }
 
 /*
- @ Returns default log file path.
+ @ Returns the path of default log file.
    We use the same path as the EXE file.
 */
 PathString GetDefaultLogFile()
@@ -69,6 +72,8 @@ PathString GetDefaultLogFile()
  @ This function needs an global mutex-like protector that has this call enclosed.
    We can have multiple threads and/or processes, try to prevent messing up each
    other's writes.
+ @ returns true, if the file is ready to write
+           false, otherwise
 */
 bool InitLogFile()
 {
@@ -188,7 +193,34 @@ LogMessage::LogMessage(const char* file, int line)
 
 LogMessage::~LogMessage()
 {
-    __debugbreak();
+#if _DEBUG
+    if (severity_ == LOG_FATAL) {
+        // TODO: log stack trace information
+    }
+#endif
+
+    stream_ << std::endl;
+    std::string msg = stream_.str();
+
+    if ((logging_dest & LoggingDestination::LOG_TO_SYSTEM_DEBUG_LOG) ||
+        (severity_ >= kAlwaysPrintErrorLevel)) {
+        OutputDebugStringA(msg.c_str());
+        fprintf_s(stderr, "%s", msg.c_str());
+        fflush(stderr);
+    }
+
+    if (logging_dest & LoggingDestination::LOG_TO_FILE) {
+        LoggingLock lock;
+        if (InitLogFile()) {
+            fwrite(static_cast<const void*>(msg.c_str()), sizeof(char), msg.length(),
+                   log_file);
+            fflush(log_file);
+        }
+    }
+
+    if (severity_ == LOG_FATAL) {
+        throw std::runtime_error("encountered a fatal error!");
+    }
 }
 
 void LogMessage::Init(const char* file, int line)
@@ -223,7 +255,6 @@ void LogMessage::Init(const char* file, int line)
     const char* file_name = ExtractFileName(file);
 
     stream_ << ':' << file_name << '(' << line << ")]";
-    message_start_ = static_cast<size_t>(stream_.tellp());
 }
 
 }   // namespace kbase
