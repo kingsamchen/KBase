@@ -4,8 +4,10 @@
 
 #include "kbase/logging.h"
 
+#include <algorithm>
 #include <ctime>
 #include <iomanip>
+#include <stdexcept>
 
 #include <Windows.h>
 
@@ -26,7 +28,9 @@ OldFileOption old_file_option = OldFileOption::APPEND_TO_OLD_LOG_FILE;
 typedef wchar_t PathChar;
 typedef std::wstring PathString;
 
-const PathChar kFileNameSuffix[] = L"debug_message.log";
+FILE* log_file = nullptr;
+
+const PathChar kLogFileName[] = L"debug_message.log";
 
 // Due to the performance consideration, I decide not to use std::string and
 // neither StringPiece, since I also want to keep this file more independent
@@ -45,21 +49,108 @@ const charT* ExtractFileName(const charT* file_path)
     return last_pos ? last_pos + 1 : file_path;
 }
 
-PathString GetDefaultLogName()
+/*
+ @ Returns default log file path.
+   We use the same path as the EXE file.
+*/
+PathString GetDefaultLogFile()
 {
     PathChar exe_path[MAX_PATH];
     GetModuleFileName(nullptr, exe_path, MAX_PATH);
     
-    PathString default_name = ExtractFileName(exe_path);
-    default_name.append(L".").append(kFileNameSuffix);
+    const PathChar* end_past_slash = ExtractFileName(exe_path);
+    PathString default_path(exe_path, end_past_slash);
+    default_path.append(kLogFileName);
 
-    return default_name;
+    return default_path;
 }
 
+/*
+ @ This function needs an global mutex-like protector that has this call enclosed.
+   We can have multiple threads and/or processes, try to prevent messing up each
+   other's writes.
+*/
 bool InitLogFile()
 {
+    if (old_file_option == OldFileOption::DELETE_OLD_LOG_FILE) {
+        if (log_file) {
+            fclose(log_file);
+            log_file = nullptr;
+        }
+
+        PathString&& log_file_name = GetDefaultLogFile();
+        _wremove(log_file_name.c_str());
+    }
+    
+    if (log_file) {
+        return true;
+    }
+
+    PathString&& log_file_name = GetDefaultLogFile();
+    log_file = _wfsopen(log_file_name.c_str(), L"a", _SH_DENYNO);
+
+    if (!log_file) {
+        return false;
+    }
+
     return true;
 }
+
+// A global file-lock wrapper.
+// If it fails to create a mutex object, or open the existed one, it throws a
+// runtime error exception, and leaves the program crashed by default.
+class LoggingLock {
+public:
+    LoggingLock()
+    {
+        InitLock();
+        Lock();
+    }
+
+    ~LoggingLock()
+    {
+        Unlock();
+    }
+
+private:
+    LoggingLock(const LoggingLock&) = delete;
+    LoggingLock& operator=(const LoggingLock&) = delete;
+
+    void InitLock()
+    {
+        PathString log_name = GetDefaultLogFile();
+        // we want file name to be part of the mutex name, and \ is not a legal
+        // character, so we replace \ with /
+        std::replace(log_name.begin(), log_name.end(), L'\\', L'/');
+
+        std::wstring mutex_name = L"Global\\";
+        mutex_name.append(log_name);
+
+        // if the mutex has alread been created by another thread or process
+        // this call returns the handle to the existed mutex
+        log_mutex_ = CreateMutex(nullptr, false, mutex_name.c_str());
+        if (!log_mutex_) {
+            DWORD err = GetLastError();
+            throw std::runtime_error("failed to create a mutex object!\nerror code: "
+                                     + std::to_string(err));
+        }
+    }
+
+    void Lock()
+    {
+        WaitForSingleObject(log_mutex_, INFINITE);
+    }
+
+    void Unlock()
+    {
+        ReleaseMutex(log_mutex_);
+        CloseHandle(log_mutex_);
+    }
+
+private:
+    typedef HANDLE MutexHandle;
+    MutexHandle log_mutex_ = nullptr;
+};
 
 }   // namespace
 
