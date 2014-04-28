@@ -257,4 +257,59 @@ void LogMessage::Init(const char* file, int line)
     stream_ << ':' << file_name << '(' << line << ")]";
 }
 
+LastError::LastError()
+ : error_code_(GetLastError())
+{}
+
+unsigned long LastError::last_error_code() const
+{
+    return error_code_;
+}
+
+void LastError::GetVerboseMessage(std::wstring* message_text) const
+{
+    if (!message_text) {
+        return;
+    }
+
+    HLOCAL buffer = nullptr;
+    DWORD lang_id = MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US);
+    DWORD text_length = FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER |
+                                      FORMAT_MESSAGE_FROM_SYSTEM |
+                                      FORMAT_MESSAGE_IGNORE_INSERTS,
+                                      nullptr,
+                                      error_code_,
+                                      lang_id,
+                                      reinterpret_cast<LPTSTR>(&buffer),
+                                      0,
+                                      nullptr);
+
+    // checks if network-related error
+    if (text_length == 0) {
+        HMODULE dll = ::LoadLibraryEx(L"netmsg.dll", nullptr,
+                                      DONT_RESOLVE_DLL_REFERENCES);
+        if (!dll) {
+            text_length = ::FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER |
+                                          FORMAT_MESSAGE_IGNORE_INSERTS |
+                                          FORMAT_MESSAGE_FROM_HMODULE,
+                                          dll,
+                                          error_code_,
+                                          lang_id,
+                                          reinterpret_cast<LPTSTR>(&buffer),
+                                          0,
+                                          nullptr);
+            ::FreeLibrary(dll);
+        }
+    }
+
+    // best efforts only...
+    if (text_length == 0 || !buffer) {
+        message_text->clear();
+        return;
+    }
+
+    message_text->assign(static_cast<LPCTSTR>(LocalLock(buffer)));
+    ::LocalFree(buffer);
+}
+
 }   // namespace kbase

@@ -134,6 +134,21 @@ public:
     void operator&(std::ostream&) {}
 };
 
+class LastError {
+public:
+    LastError();
+
+    unsigned long last_error_code() const;
+    void GetVerboseMessage(std::wstring* message_text) const;
+
+private:
+    LastError(const LastError&) = delete;
+    LastError& operator=(const LastError&) = delete;
+    
+private:
+    unsigned long error_code_;
+};
+
 }   // namespace kbase
 
 #endif  // KBASE_LOGGING_H_
