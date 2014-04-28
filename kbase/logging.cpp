@@ -12,8 +12,6 @@
 
 #include <Windows.h>
 
-#include "strings/sys_string_encoding_conversions.h"
-
 namespace kbase {
 
 namespace {
