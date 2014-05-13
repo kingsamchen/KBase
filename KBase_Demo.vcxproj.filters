@@ -8,6 +8,9 @@
     <Filter Include="strings">
       <UniqueIdentifier>{f2d9cb75-3a3d-4794-8139-2c56f4366ae3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="files">
+      <UniqueIdentifier>{f813d0c1-6464-4439-9264-2cf930330d14}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -26,6 +29,9 @@
       <Filter>strings</Filter>
     </ClCompile>
     <ClCompile Include="kbase\pickle.cpp" />
+    <ClCompile Include="kbase\files\file_path.cpp">
+      <Filter>files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="kbase\at_exit_manager.h" />
@@ -45,6 +51,9 @@
       <Filter>strings</Filter>
     </ClInclude>
     <ClInclude Include="kbase\pickle.h" />
+    <ClInclude Include="kbase\files\file_path.h">
+      <Filter>files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />

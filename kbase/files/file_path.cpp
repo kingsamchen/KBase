@@ -24,10 +24,8 @@ const FilePath::PathChar FilePath::kExtensionSeparator = L'.';
 
 namespace {
 
-/*
- @ If the |path| contains a drive letter specification, returns the position of the
-   last character of the specification; otherwise, return npos.
-*/
+// If the |path| contains a drive letter specification, returns the position of the
+// last character of the specification; otherwise, return npos.
 PathString::size_type FindDriveLetter(const PathString& path)
 {
     if (path.length() >= 2 && path[1] == L':' &&
@@ -101,9 +99,37 @@ FilePath FilePath::StripTrailingSeparators() const
     return new_path;
 }
 
+FilePath FilePath::DirName() const
+{
+    FilePath new_path(path_);
+    new_path.StripTrailingSeparatorsInternal();
+
+    auto letter = FindDriveLetter(new_path.path_);
+    auto last_separator = new_path.path_.find_last_of(kSeparators, PathString::npos,
+                                                      kSeparatorsLength - 1);
+
+    if (last_separator == PathString::npos) {
+        new_path.path_.resize(letter + 1);
+    } else if (last_separator == letter + 1) {
+        new_path.path_.resize(letter + 2);
+    } else if (last_separator == letter + 2 &&
+               IsSeparator(new_path.path_[letter+1])) {
+        new_path.path_.resize(letter + 3);
+    } else {
+        new_path.path_.resize(last_separator);
+    }
+
+    new_path.StripTrailingSeparatorsInternal();
+    if (new_path.path_.empty()) {
+        new_path.path_ = kCurrentDir;
+    }
+
+    return new_path;
+}
+
 void FilePath::GetComponents(std::vector<PathString>* components) const
 {
-    assert(components != nullptr);
+    assert(components);
     if (!components) {
         throw std::invalid_argument("components cannot be NULL!");
     }
