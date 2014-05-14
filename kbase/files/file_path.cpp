@@ -117,7 +117,7 @@ FilePath FilePath::DirName() const
         new_path.path_.resize(letter + 2);
     } else if (last_separator == letter + 2 &&
                IsSeparator(new_path.path_[letter+1])) {
-        // preserves double-separator
+        // preserves the leading double-separator
         new_path.path_.resize(letter + 3);
     } else {
         new_path.path_.resize(last_separator);
@@ -126,6 +126,26 @@ FilePath FilePath::DirName() const
     new_path.StripTrailingSeparatorsInternal();
     if (new_path.path_.empty()) {
         new_path.path_ = kCurrentDir;
+    }
+
+    return new_path;
+}
+
+FilePath FilePath::BaseName() const
+{
+    FilePath new_path(path_);
+    new_path.StripTrailingSeparatorsInternal();
+
+    auto letter = FindDriveLetter(new_path.path_);
+    if (letter != PathString::npos) {
+        new_path.path_.erase(0, letter + 1);
+    }
+
+    auto last_separator = new_path.path_.find_last_of(kSeparators, PathString::npos,
+                                                      kSeparatorsLength - 1);
+    if (last_separator != PathString::npos &&
+        last_separator < new_path.path_.length() - 1) {
+        new_path.path_.erase(0, last_separator + 1);
     }
 
     return new_path;

@@ -9,14 +9,53 @@
 #include <string>
 #include <vector>
 
-#include "kbase/strings/sys_string_encoding_conversions.h"
+#include "kbase/files/file_path.h"
 
-using std::cout;
-using std::endl;
+template<typename T>
+void print_out(T beg, T end, const char* dem = " ")
+{
+    for (auto it = beg; it != end; ++it) {
+        std::wcout << *it << dem;
+    }
+
+    std::wcout << std::endl;
+}
 
 int main(int /*argc*/, char* /*argv[]*/)
 {
-    
+    std::wstring data[] = {
+        L"",
+        L"aa",
+        L"/aa/bb",
+        L"/aa/bb/",
+        L"/aa/bb//",
+        L"/aa/bb/ccc",
+        L"/aa",
+        L"/",
+        L"//",
+        L"///",
+        L"aa/",
+        L"aa/bb",
+        L"aa/bb/",
+        L"aa/bb//",
+        L"aa//bb//",
+        L"aa//bb/",
+        L"aa//bb",
+        L"//aa/bb",
+        L"//aa/",
+        L"//aa",
+        L"0:",
+        L"@:",
+        L"[:",
+        L"`:",
+        L"{:"
+    };
+
+    for (const auto& s : data) {
+        kbase::FilePath path(s);
+        std::wcout << s << L"\t-->\t" << path.BaseName().value() << std::endl;
+    }
+
     _getch();
     return 0;
 }

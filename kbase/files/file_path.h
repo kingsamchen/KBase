@@ -61,7 +61,16 @@ public:
     // the path that has been stripped.
     FilePath StripTrailingSeparators() const;
 
+    // Returns a FilePath corresponding to the dir that contains the path. If this
+    // object contains only one component, returns a FilePath identifying the current
+    // dir. If this object already refers to the root dir, returns a FilePath
+    // identifying the root dir.
     FilePath DirName() const;
+
+    // Returns a FilePath corresponding to the file component of the path. If this
+    // object already refers to the root, returns a FilePath identifying the root
+    // dir.
+    FilePath BaseName() const;
 
     //TODO: GetComponents
     void GetComponents(std::vector<PathString>* components) const;
