@@ -73,7 +73,7 @@ bool FilePath::IsSeparator(PathChar ch)
 
 void FilePath::StripTrailingSeparatorsInternal()
 {
-    // start always points to the position one-offset past the leading slash
+    // start always points to the position one-offset past the leading separator
     PathString::size_type start = FindDriveLetter(path_) + 2;
 
     PathString::size_type last_stripped = PathString::npos;
@@ -108,12 +108,16 @@ FilePath FilePath::DirName() const
     auto last_separator = new_path.path_.find_last_of(kSeparators, PathString::npos,
                                                       kSeparatorsLength - 1);
 
+    // there might be a drive letter in the path
     if (last_separator == PathString::npos) {
+        // in current dir
         new_path.path_.resize(letter + 1);
     } else if (last_separator == letter + 1) {
+        // in root dir
         new_path.path_.resize(letter + 2);
     } else if (last_separator == letter + 2 &&
                IsSeparator(new_path.path_[letter+1])) {
+        // preserves double-separator
         new_path.path_.resize(letter + 3);
     } else {
         new_path.path_.resize(last_separator);
