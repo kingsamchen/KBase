@@ -61,6 +61,12 @@ FilePath& FilePath::operator=(const FilePath& other)
 FilePath::~FilePath()
 {}
 
+bool operator==(const FilePath& lhs, const FilePath& rhs)
+{
+    //TODO:
+    return false;
+}
+
 // static
 bool FilePath::IsSeparator(PathChar ch)
 {
@@ -164,19 +170,36 @@ void FilePath::GetComponents(std::vector<PathString>* components) const
         return;
     }
 
-    //size_t slash_pos = path_.find_first_of(kSeparators);
-    //if (slash_pos == 0) {
-    //    components->emplace_back(1, path_[slash_pos]);
-    //} else if (path_[slash_pos-1] == L':') {
-    //    components->emplace_back(path_.substr(0, slash_pos));
-    //    components->emplace_back(1, path_[slash_pos]);
-    //}
+    std::vector<PathString> parts;
+    FilePath current(path_);
+    FilePath base;
 
-    //std::vector<std::wstring> parts;
-    //kbase::Tokenize(path_.substr(slash_pos + 1), kSeparators, &parts);
+    auto AreAllSeparators = [](const PathString& path) -> bool {
+        return std::all_of(path.cbegin(), path.cend(), FilePath::IsSeparator);
+    };
 
-    //std::remove_copy(parts.cbegin(), parts.cend(), std::back_inserter(*components),
-    //                 kCurrentDir);
+    // main body
+    while (current != current.DirName()) {
+        base = current.BaseName();
+        if (!AreAllSeparators(base.value())) {
+            parts.push_back(base.value());        
+        }
+        current = current.DirName();
+    }
+
+    // root
+    base = current.BaseName();
+    if (!base.empty() && base.value() != kCurrentDir) {
+        parts.push_back(base.value());
+    }
+
+    // drive letter
+    auto letter = FindDriveLetter(current.value());
+    if (letter != PathString::npos) {
+        parts.push_back(current.value().substr(0, letter + 1));
+    }
+
+    std::copy(parts.cbegin(), parts.cend(), components->rbegin());
 }
 
 }   // namespace kbase
