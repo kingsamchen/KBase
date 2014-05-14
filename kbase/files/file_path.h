@@ -37,7 +37,9 @@ public:
 
     ~FilePath();
 
-    //TODO: some comparison operators
+    friend bool operator==(const FilePath& lhs, const FilePath& rhs);
+
+    friend bool operator!=(const FilePath& lhs, const FilePath& rhs);
 
     const PathString& value() const
     {

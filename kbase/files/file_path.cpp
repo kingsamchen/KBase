@@ -11,6 +11,8 @@
 #include <functional>
 #include <stdexcept>
 
+#include "kbase/strings/string_util.h"
+
 namespace kbase {
 
 typedef FilePath::PathChar PathChar;
@@ -35,6 +37,30 @@ PathString::size_type FindDriveLetter(const PathString& path)
     }
 
     return PathString::npos;
+}
+
+// This function adheres the equality stipulation for two FilePath objects:
+// They can only differ in the case of drive letter.
+bool EqualDriveLetterCaseInsensitive(const PathString& x, const PathString& y)
+{
+    auto letter_pos_x = FindDriveLetter(x);
+    auto letter_pos_y = FindDriveLetter(y);
+
+    // if only one contains a drive letter, the comparison result is same as
+    // x == y
+    if (letter_pos_x == PathString::npos || letter_pos_y == PathString::npos) {
+        return x == y;
+    }
+
+    PathString&& letter_x = x.substr(0, letter_pos_x + 1);
+    PathString&& letter_y = y.substr(0, letter_pos_y + 1);
+    if (!kbase::StartsWith(letter_x, letter_y, false)) {
+        return false;
+    }
+
+    PathString&& rest_x = x.substr(letter_pos_x + 1);
+    PathString&& rest_y = y.substr(letter_pos_y + 1);
+    return rest_x == rest_y;
 }
 
 }   // namespace
@@ -63,8 +89,12 @@ FilePath::~FilePath()
 
 bool operator==(const FilePath& lhs, const FilePath& rhs)
 {
-    //TODO:
-    return false;
+    return EqualDriveLetterCaseInsensitive(lhs.value(), rhs.value());    
+}
+
+bool operator!=(const FilePath& lhs, const FilePath& rhs)
+{
+    return !EqualDriveLetterCaseInsensitive(lhs.value(), rhs.value());
 }
 
 // static
@@ -199,7 +229,7 @@ void FilePath::GetComponents(std::vector<PathString>* components) const
         parts.push_back(current.value().substr(0, letter + 1));
     }
 
-    std::copy(parts.cbegin(), parts.cend(), components->rbegin());
+    std::copy(parts.crbegin(), parts.crend(), std::back_inserter(*components));
 }
 
 }   // namespace kbase
