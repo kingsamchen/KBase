@@ -76,6 +76,7 @@ public:
 
     //TODO: GetComponents
     void GetComponents(std::vector<PathString>* components) const;
+    
     //TODO: IsParent
     bool IsParent(const FilePath& child) const;
 

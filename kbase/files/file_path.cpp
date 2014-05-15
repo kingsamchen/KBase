@@ -39,8 +39,13 @@ PathString::size_type FindDriveLetter(const PathString& path)
     return PathString::npos;
 }
 
+inline bool EqualPathString(const PathString& x, const PathString& y)
+{
+    return !kbase::SysStringCompareCaseInsensitive(x, y);
+}
+
 // This function adheres the equality stipulation for two FilePath objects:
-// They can only differ in the case of drive letter.
+// They can differ in the case, which is permitted by Windows.
 bool EqualDriveLetterCaseInsensitive(const PathString& x, const PathString& y)
 {
     auto letter_pos_x = FindDriveLetter(x);
@@ -49,18 +54,18 @@ bool EqualDriveLetterCaseInsensitive(const PathString& x, const PathString& y)
     // if only one contains a drive letter, the comparison result is same as
     // x == y
     if (letter_pos_x == PathString::npos || letter_pos_y == PathString::npos) {
-        return x == y;
+        return EqualPathString(x, y);
     }
 
     PathString&& letter_x = x.substr(0, letter_pos_x + 1);
     PathString&& letter_y = y.substr(0, letter_pos_y + 1);
-    if (!kbase::StartsWith(letter_x, letter_y, false)) {
+    if (!EqualPathString(letter_x, letter_y)) {
         return false;
     }
 
     PathString&& rest_x = x.substr(letter_pos_x + 1);
     PathString&& rest_y = y.substr(letter_pos_y + 1);
-    return rest_x == rest_y;
+    return EqualPathString(rest_x, rest_y);
 }
 
 }   // namespace
