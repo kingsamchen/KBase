@@ -8,6 +8,8 @@
 #include <cassert>
 #include <functional>
 
+#include <Windows.h>
+
 #include "kbase/strings/string_piece.h"
 
 namespace kbase {
@@ -171,6 +173,98 @@ bool ContainsOnlyChars(const std::wstring& in, const wchar_t chars[])
     return ContainsOnlyCharsT(in, chars);
 }
 
+void StringToLower(std::string* str)
+{
+    if (str->empty()) {
+        return;
+    }
+
+    auto buff = WriteInto(str, str->length() + 1);
+    CharLowerBuffA(buff, str->length()); 
+}
+
+std::string StringToLower(const std::string& str)
+{
+    std::string tmp(str);
+    StringToLower(&tmp);
+
+    return tmp;
+}
+
+void StringToLower(std::wstring* str)
+{
+    if (str->empty()) {
+        return;
+    }
+
+    auto buff = WriteInto(str, str->length() + 1);
+    CharLowerBuffW(buff, str->length());
+}
+
+std::wstring StringToLower(const std::wstring& str)
+{
+    std::wstring tmp(str);
+    StringToLower(&tmp);
+
+    return tmp;
+}
+
+void StringToUpper(std::string* str)
+{
+    if (str->empty()) {
+        return;
+    }
+
+    auto buff = WriteInto(str, str->length() + 1);
+    CharUpperBuffA(buff, str->length());
+}
+
+std::string StringToUpper(const std::string& str)
+{
+    std::string tmp(str);
+    StringToUpper(&tmp);
+
+    return tmp;
+}
+
+void StringToUpper(std::wstring* str)
+{
+    if (str->empty()) {
+        return;
+    }
+
+    auto buff = WriteInto(str, str->length() + 1);
+    CharUpperBuffW(buff, str->length());
+}
+
+std::wstring StringToUpper(const std::wstring& str)
+{
+    std::wstring tmp(str);
+    StringToUpper(&tmp);
+
+    return tmp;
+}
+
+int StringCompareCaseInsensitive(const std::string& x, const std::string& y)
+{
+    return _stricmp(x.c_str(), y.c_str());
+}
+
+int StringCompareCaseInsensitive(const std::wstring& x, const std::wstring& y)
+{
+    return _wcsicmp(x.c_str(), y.c_str());
+}
+
+int SysStringCompareCaseInsensitive(const std::wstring& x, const std::wstring& y)
+{
+    int ret = CompareStringOrdinal(x.data(), x.length(), y.data(), y.length(), TRUE);
+    if (ret == 0 || ret == ERROR_INVALID_PARAMETER) {
+        throw std::invalid_argument("invalid parameters!");
+    }
+
+    return ret - CSTR_EQUAL;
+}
+
 template<typename strT>
 static bool StartsWithT(const strT& str, const strT& token, bool case_sensitive)
 {
@@ -222,7 +316,6 @@ bool EndsWith(const std::string& str, const std::string& token, bool case_sensit
     return EndsWithT(str, token, case_sensitive);
 }
 
-
 bool EndsWith(const std::wstring& str, const std::wstring& token, bool case_sensitive)
 {
     return EndsWithT(str, token, case_sensitive);
@@ -256,7 +349,6 @@ size_t Tokenize(const std::wstring& str, const std::wstring& delimiters,
 {
     return TokenizeT(str, delimiters, tokens);
 }
-
 
 template<typename strT>
 static strT JoinStringT(const std::vector<strT>& tokens, const strT& sep)
