@@ -19,7 +19,7 @@ public:
     typedef std::wstring PathString;
     typedef PathString::value_type PathChar;
 
-    // separators in path hierarchy. supports both '/' and '\'
+    // Separators in path hierarchy. supports both '/' and '\'.
     static const PathChar kSeparators[];
     static const size_t kSeparatorsLength;
 
@@ -40,6 +40,9 @@ public:
     friend bool operator==(const FilePath& lhs, const FilePath& rhs);
 
     friend bool operator!=(const FilePath& lhs, const FilePath& rhs);
+
+    // Some STL contains require their elements have defined operator<.
+    friend bool operator<(const FilePath& lhs, const FilePath& rhs);
 
     const PathString& value() const
     {
@@ -74,7 +77,8 @@ public:
     // dir.
     FilePath BaseName() const;
 
-    //TODO: GetComponents
+    // Retrieves every components of the path, including the root slash.
+    // Example: C:\foo\bar  ->  ["C:", "\\", "foo", "bar"]
     void GetComponents(std::vector<PathString>* components) const;
     
     //TODO: IsParent

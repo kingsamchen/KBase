@@ -102,6 +102,11 @@ bool operator!=(const FilePath& lhs, const FilePath& rhs)
     return !EqualDriveLetterCaseInsensitive(lhs.value(), rhs.value());
 }
 
+bool operator<(const FilePath& lhs, const FilePath& rhs)
+{
+    return (kbase::SysStringCompareCaseInsensitive(lhs.value(), rhs.value()) < 0);
+}
+
 // static
 bool FilePath::IsSeparator(PathChar ch)
 {
