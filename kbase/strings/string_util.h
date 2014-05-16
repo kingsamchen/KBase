@@ -67,6 +67,8 @@ bool TrimTailingStr(const std::wstring& in, const wchar_t trim_chars[], std::wst
 bool ContainsOnlyChars(const std::string& in, const char chars[]);
 bool ContainsOnlyChars(const std::wstring& in, const wchar_t chars[]);
 
+// tolower and toupper are local sensitive, we might don't want to use them in some
+// situations.
 // it is legal to implicitly promotes a char to a wchar_t.
 // following functions toggle case only for ascii-characters.
 
@@ -124,12 +126,13 @@ void StringToLower(std::wstring* str);
 std::wstring StringToLower(const std::wstring& str);
 
 // Compares two strings in case-insensitive mode.
-// These functions support non-ASCII characters.
+// These functions support non-ASCII characters, and are local sensitive.
 
 int StringCompareCaseInsensitive(const std::string& x, const std::string& y);
 int StringCompareCaseInsensitive(const std::wstring& x, const std::wstring& y);
 
 // Compares two wide-string in case-insensitive mode.
+// Not local sensitive
 int SysStringCompareCaseInsensitive(const std::wstring& x, const std::wstring& y);
 
 // Returns true, if |str| starts with |token|.

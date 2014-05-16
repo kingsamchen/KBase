@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <cctype>
 #include <functional>
 
 #include <Windows.h>
@@ -13,6 +14,30 @@
 #include "kbase/strings/string_piece.h"
 
 namespace kbase {
+
+namespace {
+
+inline int ToLower(char ch)
+{
+    return tolower(ch);
+}
+
+inline int ToLower(wchar_t ch)
+{
+    return towlower(ch);
+}
+
+inline int ToUpper(char ch)
+{
+    return toupper(ch);
+}
+
+inline int ToUpper(wchar_t ch)
+{
+    return towupper(ch);
+}
+
+}   // namespace
 
 template<typename strT>
 static bool RemoveCharsT(const strT& in, const kbase::BasicStringPiece<strT>& remove_chars, strT* out)
@@ -275,7 +300,7 @@ static bool StartsWithT(const strT& str, const strT& token, bool case_sensitive)
         return str.compare(0, token.length(), token) == 0;
     } else {
         auto icmp = [](typename strT::value_type lhs, typename strT::value_type rhs) -> bool {
-            return ToLowerASCII(lhs) == ToLowerASCII(rhs);
+            return ToLower(lhs) == ToLower(rhs);
         };
 
         return std::equal(token.cbegin(), token.cend(), str.cbegin(), icmp); 
@@ -304,7 +329,7 @@ static bool EndsWithT(const strT& str, const strT& token, bool case_sensitive)
             == 0;
     } else {
         auto icmp = [](typename strT::value_type lhs, typename strT::value_type rhs) -> bool {
-            return ToLowerASCII(lhs) == ToLowerASCII(rhs);
+            return ToLower(lhs) == ToLower(rhs);
         };
 
         return std::equal(token.cbegin(), token.cend(), str.cbegin() + offset, icmp);
