@@ -81,7 +81,11 @@ FilePath::FilePath(const FilePath& other)
 FilePath::FilePath(const PathString& path)
  : path_(path)
 {
-    //TODO: what if path has someting after \0 ?
+    // The null-terminator '\0' indicates the end of a path.
+    PathString::size_type null_pos = path_.find(kStringTerminator);
+    if (null_pos != PathString::npos) {
+        path_ = path_.substr(0, null_pos);
+    }
 }
 
 FilePath& FilePath::operator=(const FilePath& other)
@@ -314,5 +318,9 @@ bool FilePath::AppendRelativePath(const FilePath& child, FilePath* path) const
     return true;
 }
 
+bool FilePath::IsParent(const FilePath& child) const
+{
+    return AppendRelativePath(child, nullptr);
+}
 
 }   // namespace kbase
