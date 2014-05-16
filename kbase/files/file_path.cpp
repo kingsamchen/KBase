@@ -23,6 +23,7 @@ const size_t FilePath::kSeparatorsLength = _countof(FilePath::kSeparators);
 const FilePath::PathChar FilePath::kCurrentDir[] = L".";
 const FilePath::PathChar FilePath::kParentDir[] = L"..";
 const FilePath::PathChar FilePath::kExtensionSeparator = L'.';
+const FilePath::PathChar FilePath::kStringTerminator = L'\0';
 
 namespace {
 
@@ -44,7 +45,7 @@ inline bool EqualPathString(const PathString& x, const PathString& y)
     return !kbase::SysStringCompareCaseInsensitive(x, y);
 }
 
-// This function adheres the equality stipulation for two FilePath objects:
+// This function adheres the equality stipulated for two FilePath objects:
 // They can differ in the case, which is permitted by Windows.
 bool EqualDriveLetterCaseInsensitive(const PathString& x, const PathString& y)
 {
@@ -241,5 +242,77 @@ void FilePath::GetComponents(std::vector<PathString>* components) const
 
     std::copy(parts.crbegin(), parts.crend(), std::back_inserter(*components));
 }
+
+void FilePath::Append(const PathString& components)
+{
+    const PathString* need_appended = &components;
+    PathString without_null;
+
+    PathString::size_type null_pos = need_appended->find(kStringTerminator);
+    if (null_pos != PathString::npos) {
+        without_null = components.substr(0, null_pos);
+        need_appended = &without_null;
+    }
+
+    //TODO: assert(!IsPathAbsolute(*need_appended));
+
+    // If appends to the current dir, just set the path as the components.
+    if (path_ == kCurrentDir) {
+        path_ = *need_appended;
+        return;
+    }
+
+    StripTrailingSeparatorsInternal();
+
+    // If the path is empty, that indicates current directory.
+    // If the path component is empty, that indicates nothing to append.
+    if (!need_appended->empty() && !path_.empty()) {
+        // Don't append separator, if there is already one.
+        if (!IsSeparator(path_[path_.length()-1])) {
+            // Don't append separator, if the path is a drive letter,
+            // which is a valid relative path.
+            if (FindDriveLetter(path_) + 1 != path_.length()) {
+                path_.append(1, kSeparators[0]);
+            }
+        }
+    }
+
+    path_.append(*need_appended);
+}
+
+void FilePath::Append(const FilePath& components)
+{
+    Append(components.value());
+}
+
+bool FilePath::AppendRelativePath(const FilePath& child, FilePath* path) const
+{
+    std::vector<PathString> current_components;
+    std::vector<PathString> child_components;
+    GetComponents(&current_components);
+    child.GetComponents(&child_components);
+
+    if (current_components.empty() || 
+        current_components.size() >= child_components.size()) {
+        return false;
+    }
+
+    auto current_iter = current_components.cbegin();
+    auto child_iter = child_components.cbegin();
+    for (; current_iter != current_components.cend(); ++current_iter, ++child_iter) {
+        if (!EqualPathString(*current_iter, *child_iter)) {
+            return false;
+        }
+    }
+
+    if (path) {
+        for (; child_iter != child_components.cend(); ++child_iter) {
+            path->Append(*child_iter);
+        }
+    }
+
+    return true;
+}
+
 
 }   // namespace kbase

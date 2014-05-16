@@ -26,6 +26,7 @@ public:
     static const PathChar kCurrentDir[];
     static const PathChar kParentDir[];
     static const PathChar kExtensionSeparator;
+    static const PathChar kStringTerminator;
 
     FilePath();
     
@@ -81,6 +82,21 @@ public:
     // Example: C:\foo\bar  ->  ["C:", "\\", "foo", "bar"]
     void GetComponents(std::vector<PathString>* components) const;
     
+    // |components| must be a relative path. Otherwise, functions will throw an
+    // invalid_argument exception.
+    void Append(const PathString& components);
+    void Append(const FilePath& components);
+
+    // If current path is parent of the |child|, appends to |path| the relative
+    // path to child, and returns true.
+    // otherwise, returns false.
+    // Example: current path: C:\user\kingsley chen\
+    //          child path:   C:\user\kingsley chen\app data\test
+    //          *path:        C:\user\kingsley chen\documents\
+    // After the calling of this function, *path becomes
+    // C:\user\kingsley chen\documents\app data\test
+    bool AppendRelativePath(const FilePath& child, FilePath* path) const;
+
     //TODO: IsParent
     bool IsParent(const FilePath& child) const;
 
