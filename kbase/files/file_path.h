@@ -38,6 +38,7 @@ public:
 
     ~FilePath();
 
+    // If two FilePath objects only differ in case, they are equal.
     friend bool operator==(const FilePath& lhs, const FilePath& rhs);
 
     friend bool operator!=(const FilePath& lhs, const FilePath& rhs);
@@ -82,6 +83,9 @@ public:
     // Example: C:\foo\bar  ->  ["C:", "\\", "foo", "bar"]
     void GetComponents(std::vector<PathString>* components) const;
     
+    // Returns true
+    bool IsAbsolute() const;
+
     // |components| must be a relative path. Otherwise, functions will throw an
     // invalid_argument exception.
     void Append(const PathString& components);
@@ -97,7 +101,8 @@ public:
     // C:\user\kingsley chen\documents\app data\test
     bool AppendRelativePath(const FilePath& child, FilePath* path) const;
 
-    //TODO: IsParent
+    // Returns true, if the path is the parent of the |child|.
+    // Returns false, otherwise.
     bool IsParent(const FilePath& child) const;
 
 private:

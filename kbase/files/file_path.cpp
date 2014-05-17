@@ -69,6 +69,20 @@ bool EqualDriveLetterCaseInsensitive(const PathString& x, const PathString& y)
     return EqualPathString(rest_x, rest_y);
 }
 
+bool IsPathAbsolute(const PathString& path)
+{
+    PathString::size_type drive_letter = FindDriveLetter(path);
+
+    // Such as c:\foo or \\foo .etc
+    if (drive_letter != PathString::npos) {
+        return (drive_letter + 1 < path.length()) &&
+            (FilePath::IsSeparator(path[drive_letter + 1]));
+    }
+
+    return (path.length() > 1) &&
+        (FilePath::IsSeparator(path[0]) && FilePath::IsSeparator(path[1]));
+}
+
 }   // namespace
 
 FilePath::FilePath()
@@ -247,6 +261,11 @@ void FilePath::GetComponents(std::vector<PathString>* components) const
     std::copy(parts.crbegin(), parts.crend(), std::back_inserter(*components));
 }
 
+bool FilePath::IsAbsolute() const
+{
+    return IsPathAbsolute(path_);
+}
+
 void FilePath::Append(const PathString& components)
 {
     const PathString* need_appended = &components;
@@ -258,7 +277,7 @@ void FilePath::Append(const PathString& components)
         need_appended = &without_null;
     }
 
-    //TODO: assert(!IsPathAbsolute(*need_appended));
+    assert(!IsPathAbsolute(*need_appended));
 
     // If appends to the current dir, just set the path as the components.
     if (path_ == kCurrentDir) {
