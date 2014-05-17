@@ -6,6 +6,9 @@
 
 #include <windows.h>
 
+#include <cassert>
+#include <stdexcept>
+
 #include "kbase/strings/string_util.h"
 
 namespace kbase {
@@ -69,6 +72,18 @@ std::string SysWideToMultiByte(const std::wstring& wide_str, CodePage code_page)
                         ptr, char_count, nullptr, nullptr);
 
     return mb_str;
+}
+
+std::wstring ASCIIToWide(const std::string& ascii_str)
+{
+    assert(IsStringASCII(ascii_str));
+#if defined(NDEBUG)
+    if (!IsStringASCII(ascii_str)) {
+        throw std::invalid_argument("string contains non-ASCII characters!");
+    }
+#endif
+
+    return std::wstring(ascii_str.cbegin(), ascii_str.cend());
 }
 
 }   // namespace kbase

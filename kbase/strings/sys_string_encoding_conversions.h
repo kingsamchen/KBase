@@ -29,6 +29,8 @@ std::wstring SysNativeMBToWide(const std::string& mb_str);
 std::wstring SysMultiByteToWide(const std::string& mb_str, CodePage code_page);
 std::string SysWideToMultiByte(const std::wstring& wide_str, CodePage code_page);
 
+std::wstring ASCIIToWide(const std::string& ascii_str);
+
 }   // namespace kbase
 
 #endif  // KBASE_STRINGS_SYS_STRING_ENCODING_CONVERSIONS_H_
