@@ -12,6 +12,7 @@
 #include <stdexcept>
 
 #include "kbase/strings/string_util.h"
+#include "kbase/strings/sys_string_encoding_conversions.h"
 
 namespace kbase {
 
@@ -219,9 +220,11 @@ FilePath FilePath::BaseName() const
 void FilePath::GetComponents(std::vector<PathString>* components) const
 {
     assert(components);
+#if defined(NDEBUG)
     if (!components) {
         throw std::invalid_argument("components cannot be NULL!");
     }
+#endif
 
     components->clear();
 
@@ -278,6 +281,11 @@ void FilePath::Append(const PathString& components)
     }
 
     assert(!IsPathAbsolute(*need_appended));
+#if defined(NDEBUG)
+    if (IsPathAbsolute(*need_appended)) {
+        throw std::invalid_argument("components cannot be absolute path!");
+    }
+#endif
 
     // If appends to the current dir, just set the path as the components.
     if (path_ == kCurrentDir) {
@@ -340,6 +348,18 @@ bool FilePath::AppendRelativePath(const FilePath& child, FilePath* path) const
 bool FilePath::IsParent(const FilePath& child) const
 {
     return AppendRelativePath(child, nullptr);
+}
+
+void FilePath::AppendASCII(const StringPiece& components)
+{
+    assert(IsStringASCII(components));
+#if defined(NDEBUG)
+    if (!IsStringASCII(components)) {
+        throw std::invalid_argument("components contain non-ASCII characters!");
+    }
+#endif
+    
+    Append(ASCIIToWide(components.as_string()));
 }
 
 }   // namespace kbase

@@ -12,6 +12,8 @@
 #include <string>
 #include <vector>
 
+#include "kbase/strings/string_piece.h"
+
 namespace kbase {
 
 class FilePath {
@@ -90,6 +92,8 @@ public:
     // invalid_argument exception.
     void Append(const PathString& components);
     void Append(const FilePath& components);
+
+    void AppendASCII(const StringPiece& components);
 
     // If current path is parent of the |child|, appends to |path| the relative
     // path to child, and returns true.
