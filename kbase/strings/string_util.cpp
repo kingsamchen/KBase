@@ -461,4 +461,27 @@ bool MatchPattern(const std::wstring& str, const std::wstring& pat)
     return MatchPatternT(str.c_str(), pat.c_str());
 }
 
+template<typename strT>
+static bool StringASCIICheck(const strT& str)
+{
+    for (size_t i = 0; i < str.length(); ++i) {
+        typename ToUnsigned<typename strT::value_type>::Unsigned c = str[i];
+        if (c > 0x7F) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool IsStringASCII(const StringPiece& str)
+{
+    return StringASCIICheck(str);
+}
+
+bool IsStringASCII(const WStringPiece& str)
+{
+    return StringASCIICheck(str);
+}
+
 }   // namespace kbase

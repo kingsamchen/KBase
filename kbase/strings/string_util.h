@@ -13,6 +13,8 @@
 #include <string>
 #include <vector>
 
+#include "kbase/strings/string_piece.h"
+
 namespace kbase {
 
 // Removes any characters specified by |remove_chars| in string |in|.
@@ -201,6 +203,30 @@ std::wstring JoinString(const std::vector<std::wstring>& tokens,
 // metacharacter |*| matches any sequence of zero or more characters.
 bool MatchPattern(const std::string& str, const std::string& pat);
 bool MatchPattern(const std::wstring& str, const std::wstring& pat);
+
+// Determines if all characters in string are defined in ASCII code page.
+bool IsStringASCII(const StringPiece& str);
+bool IsStringASCII(const WStringPiece& str);
+
+template<typename T>
+struct ToUnsigned {
+    typedef T Unsigned;
+};
+
+template<>
+struct ToUnsigned<char> {
+    typedef unsigned char Unsigned;
+};
+
+template<>
+struct ToUnsigned<signed char> {
+    typedef unsigned char Unsigned;
+};
+
+template<>
+struct ToUnsigned<wchar_t> {
+    typedef unsigned short Unsigned;
+};
 
 }   // namespace kbase
 
