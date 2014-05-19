@@ -86,4 +86,16 @@ std::wstring ASCIIToWide(const std::string& ascii_str)
     return std::wstring(ascii_str.cbegin(), ascii_str.cend());
 }
 
+std::string WideToASCII(const std::wstring& wide_str)
+{
+    assert(IsStringASCII(wide_str));
+#if defined(NDEBUG)
+    if (!IsStringASCII(wide_str)) {
+        throw std::invalid_argument("string contains non-ASCII characters!");
+    }
+#endif
+
+    return std::string(wide_str.cbegin(), wide_str.cend());
+}
+
 }   // namespace kbase
