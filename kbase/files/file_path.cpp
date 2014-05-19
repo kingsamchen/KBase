@@ -572,6 +572,22 @@ bool FilePath::ReadFromPickle(PickleIterator* iter)
     return true;
 }
 
+FilePath FilePath::NormalizePathSeparatorTo(PathChar separator) const
+{
+    PathString new_path_str = path_;
+    
+    for (PathChar sep : kSeparators) {
+        std::replace(new_path_str.begin(), new_path_str.end(), sep, separator);
+    }
+
+    return FilePath(new_path_str);
+}
+
+FilePath FilePath::NormalizePathSeparator() const
+{
+    return NormalizePathSeparatorTo(kSeparators[0]);
+}
+
 // static
 int FilePath::CompareIgnoreCase(const PathString& str1, const PathString& str2)
 {

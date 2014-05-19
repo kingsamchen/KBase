@@ -172,6 +172,10 @@ public:
 
     bool ReadFromPickle(PickleIterator* iter);
 
+    FilePath NormalizePathSeparator() const;
+
+    FilePath NormalizePathSeparatorTo(PathChar separator) const;
+
     // Case-insensitive comparison.
     // Returns -1, if str1 < str2;
     // Returns 0, if str1 == str2;
