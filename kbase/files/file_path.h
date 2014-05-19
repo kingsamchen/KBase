@@ -16,6 +16,9 @@
 
 namespace kbase {
 
+class Pickle;
+class PickleIterator;
+
 class FilePath {
 public:
     typedef std::wstring PathString;
@@ -164,6 +167,10 @@ public:
     static FilePath FromASCII(const std::string& path_in_ascii);
 
     static FilePath FromUTF8(const std::string& path_in_utf8);
+
+    void WriteToPickle(Pickle* pickle) const;
+
+    bool ReadFromPickle(PickleIterator* iter);
 
     // Case-insensitive comparison.
     // Returns -1, if str1 < str2;

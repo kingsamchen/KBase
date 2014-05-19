@@ -11,6 +11,7 @@
 #include <functional>
 #include <stdexcept>
 
+#include "kbase/pickle.h"
 #include "kbase/strings/string_util.h"
 #include "kbase/strings/sys_string_encoding_conversions.h"
 
@@ -551,6 +552,24 @@ FilePath FilePath::FromASCII(const std::string& path_in_ascii)
 FilePath FilePath::FromUTF8(const std::string& path_in_utf8)
 {
     return FilePath(kbase::SysUTF8ToWide(path_in_utf8));
+}
+
+void FilePath::WriteToPickle(Pickle* pickle) const
+{
+    pickle->WriteWString(path_);            
+}
+
+bool FilePath::ReadFromPickle(PickleIterator* iter)
+{
+    if (!iter->ReadWString(&path_)) {
+        return false;
+    }
+
+    if (path_.find(kStringTerminator) != PathString::npos) {
+        return false;
+    }
+
+    return true;
 }
 
 // static
