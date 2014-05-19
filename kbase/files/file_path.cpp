@@ -157,6 +157,30 @@ bool FilePath::IsSeparator(PathChar ch)
                        std::bind(equal_to<PathChar>(), ch, _1));
 }
 
+bool FilePath::EndsWithSeparator() const
+{
+    if (empty()) {
+        return false;
+    }
+
+    return IsSeparator(path_.back());
+}
+
+FilePath FilePath::AsEndingWithSeparator() const
+{
+    if (empty() || EndsWithSeparator()) {
+        return FilePath(*this);
+    }
+
+    PathString new_path_str;
+    new_path_str.reserve(path_.length() + 1);
+
+    new_path_str = path_;
+    new_path_str.append(1, kSeparators[0]);
+
+    return FilePath(new_path_str);
+}
+
 void FilePath::StripTrailingSeparatorsInternal()
 {
     // start always points to the position one-offset past the leading separator

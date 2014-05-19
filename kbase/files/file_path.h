@@ -66,6 +66,13 @@ public:
     // Checks whether |ch| is in kSeparators.
     static bool IsSeparator(PathChar ch);
 
+    // Returns true, if the path ends with a path separator.
+    bool EndsWithSeparator() const;
+
+    // Returns a copy of the file path that ends with a path separator.
+    // If the path is empty, returns an empty FilePath.
+    FilePath AsEndingWithSeparator() const;
+
     // This function internally calls StripTrailingSeparatorInternal, which returns
     // the path that has been stripped.
     FilePath StripTrailingSeparators() const;
@@ -143,9 +150,9 @@ public:
     bool MatchExtension(const PathString& extension) const;
 
     // Case-insensitive comparison.
-    // returns -1, if str1 < str2;
-    // returns 0, if str1 == str2;
-    // returns 1, if str1 > str2.
+    // Returns -1, if str1 < str2;
+    // Returns 0, if str1 == str2;
+    // Returns 1, if str1 > str2.
     static int CompareIgnoreCase(const PathString& str1,
                                  const PathString& str2);
 
