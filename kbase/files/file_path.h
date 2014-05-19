@@ -152,6 +152,19 @@ public:
     // Returns true if the path has a component that is '..'.
     bool ReferenceParent() const;
 
+    // Returns the string in native encoding of the path.
+    // If the path contains any non-ASCII character, the return value is an empty 
+    // object.
+    std::string AsASCII() const;
+
+    std::string AsUTF8() const;
+
+    // If the |path_in_ascii| contains any non-ASCII character, the function returns
+    // an empty FilePath.
+    static FilePath FromASCII(const std::string& path_in_ascii);
+
+    static FilePath FromUTF8(const std::string& path_in_utf8);
+
     // Case-insensitive comparison.
     // Returns -1, if str1 < str2;
     // Returns 0, if str1 == str2;

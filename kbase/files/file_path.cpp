@@ -523,6 +523,36 @@ bool FilePath::ReferenceParent() const
     return false;
 }
 
+std::string FilePath::AsASCII() const
+{
+    if (!kbase::IsStringASCII(path_)) {
+        return std::string();
+    }
+
+    return kbase::WideToASCII(path_);
+}
+
+std::string FilePath::AsUTF8() const
+{
+    return kbase::SysWideToUTF8(path_);
+}
+
+// static
+FilePath FilePath::FromASCII(const std::string& path_in_ascii)
+{
+    if (!kbase::IsStringASCII(path_in_ascii)) {
+        return FilePath();
+    }
+
+    return FilePath(kbase::ASCIIToWide(path_in_ascii));
+}
+
+// static
+FilePath FilePath::FromUTF8(const std::string& path_in_utf8)
+{
+    return FilePath(kbase::SysUTF8ToWide(path_in_utf8));
+}
+
 // static
 int FilePath::CompareIgnoreCase(const PathString& str1, const PathString& str2)
 {
