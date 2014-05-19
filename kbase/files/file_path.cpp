@@ -506,11 +506,27 @@ bool FilePath::MatchExtension(const PathString& extension) const
     return kbase::StringToLowerASCII(ext) == kbase::StringToLowerASCII(extension);
 }
 
+bool FilePath::ReferenceParent() const
+{
+    std::vector<PathString> components;
+    GetComponents(&components);
+
+    // It seems redundant spaces at the tail of '..' can be ignored by Windows.
+    PathString trimed_component;
+    for (const PathString& component : components) {
+        kbase::TrimTailingStr(component, L" ", &trimed_component);
+        if (trimed_component == kParentDir) {
+            return true;
+        }
+    }
+    
+    return false;
+}
+
 // static
 int FilePath::CompareIgnoreCase(const PathString& str1, const PathString& str2)
 {
     return kbase::SysStringCompareCaseInsensitive(str1, str2);
 }
-
 
 }   // namespace kbase

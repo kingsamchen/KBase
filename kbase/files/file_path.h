@@ -149,6 +149,9 @@ public:
     // Returns true, if |extension| matches the extension of the file name.
     bool MatchExtension(const PathString& extension) const;
 
+    // Returns true if the path has a component that is '..'.
+    bool ReferenceParent() const;
+
     // Case-insensitive comparison.
     // Returns -1, if str1 < str2;
     // Returns 0, if str1 == str2;
