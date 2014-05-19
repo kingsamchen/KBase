@@ -84,6 +84,26 @@ bool IsPathAbsolute(const PathString& path)
         (FilePath::IsSeparator(path[0]) && FilePath::IsSeparator(path[1]));
 }
 
+PathString::size_type ExtensionSeparatorPosition(const PathString& path)
+{
+    // Special cases for which path contains '.' but does not follow with an extension.
+    if (path == FilePath::kCurrentDir || path == FilePath::kParentDir) {
+        return PathString::npos;
+    }
+
+    return path.rfind(FilePath::kExtensionSeparator);
+}
+
+bool IsPathEmptyOrSpecialCase(const PathString& path)
+{
+    if (path.empty() || path == FilePath::kCurrentDir || 
+        path == FilePath::kParentDir) {
+        return true;
+    }
+
+    return false;
+}
+
 }   // namespace
 
 FilePath::FilePath()
@@ -360,6 +380,106 @@ void FilePath::AppendASCII(const StringPiece& components)
 #endif
     
     Append(ASCIIToWide(components.as_string()));
+}
+
+PathString FilePath::Extension() const
+{
+    FilePath base(BaseName());
+    PathString::size_type separator_pos = ExtensionSeparatorPosition(base.path_);
+
+    if (separator_pos == PathString::npos) {
+        return PathString();
+    }    
+
+    return base.path_.substr(separator_pos);
+}
+
+void FilePath::RemoveExtension()
+{
+    if (Extension().empty()) {
+        return;
+    }
+
+    PathString::size_type separator_pos = ExtensionSeparatorPosition(path_);
+    if (separator_pos != PathString::npos) {
+        path_ = path_.substr(0, separator_pos);
+    }
+}
+
+FilePath FilePath::StripExtention() const
+{
+    FilePath new_path(path_);
+    new_path.RemoveExtension();
+
+    return new_path;
+}
+
+FilePath FilePath::InsertBeforeExtension(const PathString& suffix) const
+{
+    if (suffix.empty()) {
+        return FilePath(*this);
+    }
+
+    if (IsPathEmptyOrSpecialCase(BaseName().value())) {
+        return FilePath();
+    }
+
+    PathString extension = Extension();
+    FilePath new_path = StripExtention();
+    new_path.path_.append(suffix).append(extension);
+
+    return new_path;
+}
+
+FilePath FilePath::AddExtension(const PathString& extension) const
+{
+    if (IsPathEmptyOrSpecialCase(BaseName().value())) {
+        return FilePath();
+    }
+
+    if (extension.empty() || extension == PathString(1, kExtensionSeparator)) {
+        return FilePath(*this);
+    }
+
+    FilePath new_path(path_);
+
+    // If neither the path nor the extension contains the separator, adds
+    // one manually.
+    if (new_path.path_.back() != kExtensionSeparator &&
+        extension.front() != kExtensionSeparator) {
+        new_path.path_.append(1, kExtensionSeparator);
+    }
+
+    new_path.path_.append(extension);
+
+    return new_path;
+}
+
+FilePath FilePath::ReplaceExtension(const PathString& extension) const
+{
+    if (IsPathEmptyOrSpecialCase(BaseName().value())) {
+        return FilePath();
+    }
+
+    FilePath new_path = StripExtention();
+    
+    if (extension.empty() || extension == PathString(1, kExtensionSeparator)) {
+        return new_path;
+    }
+    
+    if (extension[0] != kExtensionSeparator) {
+        new_path.path_.append(1, kExtensionSeparator);
+    }
+
+    new_path.path_.append(extension);
+
+    return new_path;
+}
+
+bool FilePath::MatchExtension(const PathString& extension) const
+{
+    PathString ext = Extension();
+    return kbase::StringToLowerASCII(ext) == kbase::StringToLowerASCII(extension);
 }
 
 }   // namespace kbase

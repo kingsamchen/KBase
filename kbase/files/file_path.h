@@ -109,6 +109,39 @@ public:
     // Returns false, otherwise.
     bool IsParent(const FilePath& child) const;
 
+    // Returns the extension of the path if there is any.
+    // The extension starts with extension separator.
+    // If there are multiple extensions, Windows only recognizes the last one.
+    PathString Extension() const;
+
+    // Removes the extension of the path if there is any.
+    void RemoveExtension();
+
+    // Same as above, but strips on a copy and leaves the original path intact.
+    FilePath StripExtention() const;
+
+    // Inserts |suffix| after the file name portion of the path, but before the
+    // extension.
+    // Returns an empty FilePath if the BaseName() is '.' or '..'.
+    // Example: path: c:\foo\bar\test.jpg suffix: (1) --> c:\foo\bar\test(1).jpg
+    FilePath InsertBeforeExtension(const PathString& suffix) const;
+
+    // Adds extension to the file name of the path.
+    // If the file name of the path already has an extension, the |extension| will
+    // be the sole extension recognized by Windows.
+    // Returns an empty FilePath if the BaseName() is '.' or '..'.
+    FilePath AddExtension(const PathString& extension) const;
+
+    // Replaces the extension of the file name with |extension|.
+    // If |extension| is empty or only contains separator, the extension of the file
+    // name is removed.
+    // If the file name does not have an extension, then |extension| is added.
+    // Returns an empty FilePath if the BaseName() is '.' or '..'.
+    FilePath ReplaceExtension(const PathString& extension) const;
+
+    // Returns true, if |extension| matches the extension of the file name.
+    bool MatchExtension(const PathString& extension) const;
+
 private:
     void StripTrailingSeparatorsInternal();
 
