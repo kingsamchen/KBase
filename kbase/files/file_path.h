@@ -142,6 +142,19 @@ public:
     // Returns true, if |extension| matches the extension of the file name.
     bool MatchExtension(const PathString& extension) const;
 
+    // Case-insensitive comparison.
+    // returns -1, if str1 < str2;
+    // returns 0, if str1 == str2;
+    // returns 1, if str1 > str2.
+    static int CompareIgnoreCase(const PathString& str1,
+                                 const PathString& str2);
+
+    static bool CompareEqualIgnoreCase(const PathString& str1,
+                                       const PathString& str2)
+    {
+        return CompareIgnoreCase(str1, str2) == 0;
+    }
+
 private:
     void StripTrailingSeparatorsInternal();
 

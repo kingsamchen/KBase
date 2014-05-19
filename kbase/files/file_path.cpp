@@ -482,4 +482,11 @@ bool FilePath::MatchExtension(const PathString& extension) const
     return kbase::StringToLowerASCII(ext) == kbase::StringToLowerASCII(extension);
 }
 
+// static
+int FilePath::CompareIgnoreCase(const PathString& str1, const PathString& str2)
+{
+    return kbase::SysStringCompareCaseInsensitive(str1, str2);
+}
+
+
 }   // namespace kbase
