@@ -172,6 +172,7 @@ public:
 
     bool ReadFromPickle(PickleIterator* iter);
 
+    // We choose kSeparators[0] as our default path separator.
     FilePath NormalizePathSeparator() const;
 
     FilePath NormalizePathSeparatorTo(PathChar separator) const;
@@ -197,5 +198,17 @@ private:
 };
 
 }   // namespace kbase
+
+namespace std {
+
+template<>
+struct std::hash<kbase::FilePath> {
+    size_t operator()(const kbase::FilePath& file_path)
+    {
+        return std::hash<kbase::FilePath::PathString>()(file_path.value());
+    }
+};
+
+}   // namespace std
 
 #endif  // KBASE_FILES_FILE_PATH_H_
