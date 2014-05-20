@@ -177,10 +177,6 @@ private:
     size_t buffer_offset_;
 
     friend class PickleIterator;
-/////////// exposed as dump function /////////
-#ifdef _DEBUG
-    friend void _pickle_dump(const Pickle& pk);
-#endif
 };
 
 inline size_t Pickle::size() const
