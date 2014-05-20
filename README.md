@@ -74,6 +74,10 @@ it.ReadString(&str);
 
 for complete functions and their usage, see the source code.
 
+### Scoped_Guard
+
+a scoped object that accepts an action which will be performed once the object goes out of its scope.
+
 ### AutoReset
 
 provides a facility that set a given object a new value within a scope, and
@@ -140,3 +144,15 @@ void StringAppendF(std::wstring* str, const wchar_t* fmt, ...);
 
 provides a collection of functions for systen-dependent string encoding conversions.
 
+### logging facility
+
+provides a convenient way for logging information.
+
+```
+DLOG(INFO) << "logging stage one";	// only available on Debug Mode
+LOG(ERROR) << "something goes wrong";
+```
+
+### FilePath
+
+a wrapper for path and along with some frequently asked operations.
