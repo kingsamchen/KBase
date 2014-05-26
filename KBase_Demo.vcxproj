@@ -77,6 +77,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="kbase\at_exit_manager.cpp" />
+    <ClCompile Include="kbase\files\file_enumerator.cpp" />
     <ClCompile Include="kbase\files\file_path.cpp" />
     <ClCompile Include="kbase\logging.cpp" />
     <ClCompile Include="kbase\pickle.cpp" />
@@ -89,6 +90,7 @@
   <ItemGroup>
     <ClInclude Include="kbase\at_exit_manager.h" />
     <ClInclude Include="kbase\auto_reset.h" />
+    <ClInclude Include="kbase\files\file_enumerator.h" />
     <ClInclude Include="kbase\files\file_path.h" />
     <ClInclude Include="kbase\logging.h" />
     <ClInclude Include="kbase\pickle.h" />

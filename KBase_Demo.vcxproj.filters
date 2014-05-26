@@ -32,6 +32,9 @@
     <ClCompile Include="kbase\files\file_path.cpp">
       <Filter>files</Filter>
     </ClCompile>
+    <ClCompile Include="kbase\files\file_enumerator.cpp">
+      <Filter>files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="kbase\at_exit_manager.h" />
@@ -52,6 +55,9 @@
     </ClInclude>
     <ClInclude Include="kbase\pickle.h" />
     <ClInclude Include="kbase\files\file_path.h">
+      <Filter>files</Filter>
+    </ClInclude>
+    <ClInclude Include="kbase\files\file_enumerator.h">
       <Filter>files</Filter>
     </ClInclude>
   </ItemGroup>
