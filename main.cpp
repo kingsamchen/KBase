@@ -9,7 +9,7 @@
 #include <string>
 #include <vector>
 
-#include "kbase/files/file_path.h"
+#include "kbase/files/file_enumerator.h"
 
 template<typename T>
 void print_out(T beg, T end, const char* dem = " ")
@@ -23,6 +23,12 @@ void print_out(T beg, T end, const char* dem = " ")
 
 int main(int /*argc*/, char* /*argv[]*/)
 {
+    kbase::FilePath root(L"c:\\");
+    kbase::FileEnumerator file_enumer(root, false, kbase::FileEnumerator::DIRS);
+    for (kbase::FilePath file = file_enumer.Next(); !file.empty();
+        file = file_enumer.Next()) {
+        std::wcout << file.value() << std::endl;
+    }
 
     _getch();
     return 0;

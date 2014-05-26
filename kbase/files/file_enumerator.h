@@ -9,6 +9,8 @@
 #ifndef KBASE_FILES_FILE_ENUMERATOR_H_
 #define KBASE_FILES_FILE_ENUMERATOR_H_
 
+#include <stack>
+
 #include <windows.h>
 
 #include "kbase/files/file_path.h"
@@ -21,10 +23,9 @@ public:
     
     };
 
-    enum class FileType {
+    enum FileType {
         FILES = 0x1,
         DIRS = 0x2,
-        BOTH_FILE_AND_DIR = FILES | DIRS
     };
 
     FileEnumerator(const FilePath& root_path, bool recursive, FileType file_type);
@@ -42,6 +43,10 @@ public:
     FileInfo GetInfo() const;
 
 private:
+    // Returns true, if the filename in path should be skipped according to the
+    // specified policies.
+    // Returns false, otherwise.
+    // This function skips '.' and '..'.
     bool ShouldSkip(const FilePath& path);
 
 private:
@@ -51,6 +56,8 @@ private:
     FilePath::PathString pattern_;
     WIN32_FIND_DATA find_data_;
     HANDLE find_handle_;
+    bool has_find_data_;
+    std::stack<FilePath> pending_paths_;
 };
 
 }   // namespace kbase
