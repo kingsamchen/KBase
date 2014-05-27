@@ -37,9 +37,13 @@ public:
     
     FilePath(const FilePath& other);
 
+    FilePath(FilePath&& other);
+
     explicit FilePath(const PathString& path);
 
     FilePath& operator=(const FilePath& other);
+
+    FilePath& operator=(FilePath&& other);
 
     ~FilePath();
 

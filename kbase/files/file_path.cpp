@@ -114,6 +114,10 @@ FilePath::FilePath(const FilePath& other)
  : path_(other.path_)
 {}
 
+FilePath::FilePath(FilePath&& other)
+ : path_(std::move(other.path_))
+{}
+
 FilePath::FilePath(const PathString& path)
  : path_(path)
 {
@@ -127,6 +131,12 @@ FilePath::FilePath(const PathString& path)
 FilePath& FilePath::operator=(const FilePath& other)
 {
     path_ = other.path_;
+    return *this;
+}
+
+FilePath& FilePath::operator=(FilePath&& other)
+{
+    path_ = std::move(other.path_);
     return *this;
 }
 
