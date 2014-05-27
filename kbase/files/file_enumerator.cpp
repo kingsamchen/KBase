@@ -4,6 +4,9 @@
 
 #include "kbase/files/file_enumerator.h"
 
+#include <cassert>
+#include <stdexcept>
+
 #include <VersionHelpers.h>
 
 namespace kbase {
@@ -101,6 +104,20 @@ FilePath FileEnumerator::Next()
     return FilePath();
 }
 
+FileEnumerator::FileInfo FileEnumerator::GetInfo() const
+{
+    assert(has_find_data_);
+    if (!has_find_data_) {
+        throw std::logic_error("try to get file info without data!");   
+    }
+
+    FileInfo file_info;
+    memcpy_s(&file_info.find_data_, sizeof(file_info.find_data_), 
+             &find_data_, sizeof(find_data_));
+
+    return file_info;
+}
+
 bool FileEnumerator::ShouldSkip(const FilePath& path)
 {
     FilePath::PathString base_name = path.BaseName().value();
@@ -109,6 +126,43 @@ bool FileEnumerator::ShouldSkip(const FilePath& path)
     }
 
     return false;
+}
+
+// --* FileInfo *--
+
+FileEnumerator::FileInfo::FileInfo()
+{
+    memset(&find_data_, 0, sizeof(find_data_));
+}
+
+FileEnumerator::FileInfo::~FileInfo()
+{}
+
+bool FileEnumerator::FileInfo::IsDirectory() const
+{
+    return !!(find_data_.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY);
+}
+
+FilePath FileEnumerator::FileInfo::GetName() const
+{
+    return FilePath(find_data_.cFileName);
+}
+
+kbase::Time FileEnumerator::FileInfo::GetLastModifiedTime() const
+{
+    SYSTEMTIME last_modified_time;
+    FileTimeToSystemTime(&find_data_.ftLastWriteTime, &last_modified_time);
+
+    return last_modified_time;
+}
+
+uint64_t FileEnumerator::FileInfo::GetSize() const
+{
+    ULARGE_INTEGER file_size;
+    file_size.LowPart = find_data_.nFileSizeLow;
+    file_size.HighPart = find_data_.nFileSizeHigh;
+
+    return file_size.QuadPart;
 }
 
 }   // namespace kbase

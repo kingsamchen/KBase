@@ -9,6 +9,7 @@
 #ifndef KBASE_FILES_FILE_ENUMERATOR_H_
 #define KBASE_FILES_FILE_ENUMERATOR_H_
 
+#include <cstdint>
 #include <stack>
 
 #include <windows.h>
@@ -17,10 +18,34 @@
 
 namespace kbase {
 
+// TODO: replace with kbase::Time
+typedef SYSTEMTIME Time;
+
 class FileEnumerator {
 public:
     class FileInfo {
-    
+    public:
+        FileInfo();
+
+        ~FileInfo();
+
+        bool IsDirectory() const;
+
+        // Only file name, does not contain any path inforamtion.
+        FilePath GetName() const;
+
+        Time GetLastModifiedTime() const;
+
+        uint64_t GetSize() const;
+
+        const WIN32_FIND_DATA& find_data() const
+        {
+            return find_data_;
+        }
+
+    private:
+        friend class FileEnumerator;
+        WIN32_FIND_DATA find_data_;
     };
 
     enum FileType {
@@ -40,6 +65,8 @@ public:
 
     FilePath Next();
 
+    // Gets the information of the current file.
+    // If there currently is no file, the function throws a logic_error exception.
     FileInfo GetInfo() const;
 
 private:
