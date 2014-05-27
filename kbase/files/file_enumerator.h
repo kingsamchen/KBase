@@ -53,8 +53,9 @@ public:
         DIRS = 0x2,
     };
 
+    // If |recursive| is true, it will enumerate all matches in every subdirectories.
+    // It employes BFS to enumerate matched entries.
     FileEnumerator(const FilePath& root_path, bool recursive, FileType file_type);
-
     FileEnumerator(const FilePath& root_path, bool recursive, FileType file_type,
                    const FilePath::PathString& pattern);
 

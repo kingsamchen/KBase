@@ -156,3 +156,18 @@ LOG(ERROR) << "something goes wrong";
 ### FilePath
 
 a wrapper for path and along with some frequently asked operations.
+
+### FileEnumerator
+
+enumerates files or directories in a specified path.
+
+Example:
+
+```
+kbase::FilePath root(L"d:\\MyDocuments");
+kbase::FileEnumerator file_enumer(root, false, kbase::FileEnumerator::FILES);
+for (auto file = file_enumer.Next(); !file.empty(); file = file_enumer.Next()) {
+    std::wcout << file.value() << L"\t";
+    std::wcout << file_enumer.GetInfo().GetSize() << std::endl;
+}
+```
