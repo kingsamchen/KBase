@@ -85,6 +85,7 @@
     <ClCompile Include="kbase\strings\string_piece.cpp" />
     <ClCompile Include="kbase\strings\string_util.cpp" />
     <ClCompile Include="kbase\strings\sys_string_encoding_conversions.cpp" />
+    <ClCompile Include="kbase\version_util.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -99,6 +100,7 @@
     <ClInclude Include="kbase\strings\string_piece.h" />
     <ClInclude Include="kbase\strings\string_util.h" />
     <ClInclude Include="kbase\strings\sys_string_encoding_conversions.h" />
+    <ClInclude Include="kbase\version_util.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />

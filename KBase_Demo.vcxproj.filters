@@ -35,6 +35,7 @@
     <ClCompile Include="kbase\files\file_enumerator.cpp">
       <Filter>files</Filter>
     </ClCompile>
+    <ClCompile Include="kbase\version_util.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="kbase\at_exit_manager.h" />
@@ -60,6 +61,7 @@
     <ClInclude Include="kbase\files\file_enumerator.h">
       <Filter>files</Filter>
     </ClInclude>
+    <ClInclude Include="kbase\version_util.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />
