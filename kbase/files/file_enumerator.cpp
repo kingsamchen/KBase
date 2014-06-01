@@ -7,7 +7,7 @@
 #include <cassert>
 #include <stdexcept>
 
-#include <VersionHelpers.h>
+#include "kbase/version_util.h"
 
 namespace kbase {
 
@@ -49,8 +49,7 @@ FilePath FileEnumerator::Next()
                 cur_root.Append(pattern_);
             }
 
-            // TODO: Replace with kbase::OSVersionInfo facilities.
-            if (IsWindows7OrGreater()) {
+            if (OSInfo::GetInstance()->IsVersionOrGreater(Version::WIN_7)) {
                 find_handle_ = FindFirstFileEx(cur_root.value().c_str(),
                                                FindExInfoBasic,
                                                &find_data_,
