@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "kbase/files/file_enumerator.h"
+#include "kbase/version_util.h"
 
 template<typename T>
 void print_out(T beg, T end, const char* dem = " ")
@@ -23,13 +24,7 @@ void print_out(T beg, T end, const char* dem = " ")
 
 int main(int /*argc*/, char* /*argv[]*/)
 {
-    kbase::FilePath root(L"d:\\MyDownload");
-    kbase::FileEnumerator file_enumer(root, false, kbase::FileEnumerator::FILES);
-    for (kbase::FilePath file = file_enumer.Next(); !file.empty();
-         file = file_enumer.Next()) {
-        std::wcout << file.value() << L"\t";
-        std::wcout << file_enumer.GetInfo().GetSize() << std::endl;
-    }
+    std::cout << kbase::OSInfo::GetInstance()->architecture();
 
     _getch();
     return 0;

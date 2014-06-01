@@ -9,42 +9,25 @@
 #ifndef KBASE_VERSION_UTIL_H_
 #define KBASE_VERSION_UTIL_H_
 
+#include <string>
+
 typedef void* HANDLE;
 
 namespace kbase {
 
 enum Version {
-    VERSION_PRE_XP = 0,     // Not supported.
-    VERSION_XP,
-    VERSION_SERVER_2003,    // Also includes Windows XP Pro X64 and Server 2003 R2.
-    VERSION_VISTA,          // Also includes Windows Server 2008.
-    VERSION_7,              // Also includes Windows Server 2008 R2.
-    VERSION_8,              // Also includes Windows Server 2012.
-    VERSION_8_1,
-    VERSION_UNKNOWN
-};
-
-enum VersionType {
-    SUITE_HOME,
-    SUITE_PROFESSIONAL,
-    SUITE_SERVER,
-    SUITE_UNKNOWN
+    WIN_XP,
+    WIN_XP_SP3,
+    WIN_SERVER_2003,
+    WIN_VISTA,      // Also includes Server 2008.
+    WIN_7,              
+    WIN_8,          // Also includes Server 2012.
+    WIN_8_1,        // Also includes Server 2012 R2.
 };
 
 // It is a singleton.
 class OSInfo {
 public:
-    struct VersionNumber {
-        int major;
-        int minor;
-        int build;
-    };
-
-    struct ServicePack {
-        int major;
-        int minor;
-    };
-
     enum SystemArchitecture {
         X86_ARCHITECTURE,
         X64_ARCHITECTURE,
@@ -63,22 +46,55 @@ public:
 
     static OSInfo* GetInstance();
 
+    // Returns WOW64_ENABLED, if the process is running under WOW64.
+    // Returns WOW64_DISABLED, if the process is 64-bit application, or the process
+    // is running on 32-bit system.
+    // Returns WOW64_UNKNOWN, if an error occurs.
+    // The handle to a process must have PROCESS_QUERY_INFORMATION access right.
     static WOW64Status GetWOW64StatusForProcess(HANDLE process);
 
-    // TODO: a lot of properties.
+    // TODO: process_model_name functions
+
+    // This function can be made static, but in order to be consistent with is_server
+    // in syntax, I choose to leave it as a member function.
+    bool IsVersionOrGreater(Version version);
+
+    bool is_server() const
+    {
+        return is_server_;
+    }
+
+    SystemArchitecture architecture() const
+    {
+        return architecture_;
+    }
+
+    WOW64Status wow64_status() const
+    {
+        return wow64_status_;
+    }
+
+    unsigned long processors() const
+    {
+        return processors_;
+    }
+
+    unsigned long allocation_granularity() const
+    {
+        return allocation_granularity_;
+    }
 
 private:
     OSInfo();
-
     ~OSInfo();
 
 private:
-    Version version_;
-    VersionNumber version_number_;
-    VersionType version_type;
-    ServicePack service_pack;
     SystemArchitecture architecture_;
     WOW64Status wow64_status_;
+    bool is_server_;
+    unsigned long processors_;
+    unsigned long allocation_granularity_;
+    std::string processor_model_name;
 };
 
 }   // namespace kbase
