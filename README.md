@@ -171,3 +171,20 @@ for (auto file = file_enumer.Next(); !file.empty(); file = file_enumer.Next()) {
     std::wcout << file_enumer.GetInfo().GetSize() << std::endl;
 }
 ```
+
+#### OSInfo
+
+Encapsulates some system-related operations.
+
+Example:
+
+```c++
+// is win7 or greater
+kbase::OSInfo::GetInstance()->IsVersionOrGreater(kbase::Version::WIN_7);
+
+// a server version?
+kbase::OSInfo::GetInstance()->is_server();
+
+// obtain the number of processors of the host
+unsigned long cnt_pro = kbase::OSInfo::GetInstance()->processors();
+```
