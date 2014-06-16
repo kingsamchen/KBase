@@ -13,7 +13,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp" />
     <ClCompile Include="kbase\at_exit_manager.cpp" />
     <ClCompile Include="kbase\logging.cpp" />
     <ClCompile Include="kbase\strings\string_format.cpp">
