@@ -57,7 +57,7 @@ public:
 
     // This function can be made static, but in order to be consistent with is_server
     // in syntax, I choose to leave it as a member function.
-    bool IsVersionOrGreater(Version version);
+    bool IsVersionOrGreater(Version version) const;
 
     bool is_server() const
     {

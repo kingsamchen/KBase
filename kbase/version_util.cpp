@@ -75,7 +75,7 @@ OSInfo::OSInfo()
 OSInfo::~OSInfo()
 {}
 
-bool OSInfo::IsVersionOrGreater(Version version)
+bool OSInfo::IsVersionOrGreater(Version version) const
 {
     const VersionNumber& version_number = version_name_to_number.at(version);
     bool ret = IsWindowsVersionOrGreater(version_number.major_version,
