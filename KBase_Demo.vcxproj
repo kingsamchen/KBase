@@ -80,10 +80,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="kbase\at_exit_manager.cpp" />
+    <ClCompile Include="kbase\error_exception_util.cpp" />
     <ClCompile Include="kbase\files\file_enumerator.cpp" />
     <ClCompile Include="kbase\files\file_path.cpp" />
     <ClCompile Include="kbase\logging.cpp" />
     <ClCompile Include="kbase\pickle.cpp" />
+    <ClCompile Include="kbase\registry.cpp" />
     <ClCompile Include="kbase\strings\string_format.cpp" />
     <ClCompile Include="kbase\strings\string_piece.cpp" />
     <ClCompile Include="kbase\strings\string_util.cpp" />
@@ -93,10 +95,12 @@
   <ItemGroup>
     <ClInclude Include="kbase\at_exit_manager.h" />
     <ClInclude Include="kbase\auto_reset.h" />
+    <ClInclude Include="kbase\error_exception_util.h" />
     <ClInclude Include="kbase\files\file_enumerator.h" />
     <ClInclude Include="kbase\files\file_path.h" />
     <ClInclude Include="kbase\logging.h" />
     <ClInclude Include="kbase\pickle.h" />
+    <ClInclude Include="kbase\registry.h" />
     <ClInclude Include="kbase\scope_guard.h" />
     <ClInclude Include="kbase\strings\string_format.h" />
     <ClInclude Include="kbase\strings\string_piece.h" />

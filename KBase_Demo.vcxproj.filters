@@ -35,6 +35,8 @@
       <Filter>files</Filter>
     </ClCompile>
     <ClCompile Include="kbase\version_util.cpp" />
+    <ClCompile Include="kbase\registry.cpp" />
+    <ClCompile Include="kbase\error_exception_util.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="kbase\at_exit_manager.h" />
@@ -61,6 +63,8 @@
       <Filter>files</Filter>
     </ClInclude>
     <ClInclude Include="kbase\version_util.h" />
+    <ClInclude Include="kbase\registry.h" />
+    <ClInclude Include="kbase\error_exception_util.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />
