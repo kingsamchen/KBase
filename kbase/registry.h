@@ -27,6 +27,11 @@ public:
 
     RegKey& operator=(const RegKey&) = delete;
 
+    long Create(HKEY root, const wchar_t* subkey, REGSAM access,
+                DWORD* disposition = nullptr);
+
+    void Close();
+
 private:
     HKEY key_;
 };
