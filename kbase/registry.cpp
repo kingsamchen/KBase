@@ -18,12 +18,11 @@ RegKey::RegKey(HKEY key)
     : key_(key)
 {}
 
-RegKey::RegKey(HKEY root, const wchar_t* subkey, REGSAM access)
+RegKey::RegKey(HKEY rootkey, const wchar_t* subkey, REGSAM access)
     : key_(nullptr)
 {
-    if (root) {
-        long result = Create(root, subkey, access);
-        ThrowLastErrorIf(result != ERROR_SUCCESS, "cannot create or open the key!");
+    if (rootkey) {
+        Create(rootkey, subkey, access);
     } else {
         assert(!subkey);
     }
@@ -34,16 +33,57 @@ RegKey::~RegKey()
     Close();
 }
 
-long RegKey::Create(HKEY root, const wchar_t* subkey, REGSAM access,
-                    DWORD* disposition /* = nullptr*/)
+void RegKey::Create(HKEY rootkey, const wchar_t* subkey, REGSAM access)
 {
-    assert(root && subkey && access);
+    Create(rootkey, subkey, access, nullptr);
+}
+
+void RegKey::Create(HKEY rootkey, const wchar_t* subkey, REGSAM access,
+                    DWORD* disposition)
+{
+    assert(rootkey && subkey && access);
     Close();
 
-    long result = RegCreateKeyEx(root, subkey, 0, nullptr, REG_OPTION_NON_VOLATILE,
+    long result = RegCreateKeyEx(rootkey, subkey, 0, nullptr, REG_OPTION_NON_VOLATILE,
                                  access, nullptr, &key_, disposition);
+    ThrowLastErrorIf(result != ERROR_SUCCESS, "cannot create or open the key!");
+}
 
-    return result;
+void RegKey::CreateKey(const wchar_t* key_name, REGSAM access)
+{
+    assert(key_name && access);
+
+    HKEY subkey = nullptr;
+    long result = RegCreateKeyEx(key_, key_name, 0, nullptr, REG_OPTION_NON_VOLATILE,
+                                 access, nullptr, &subkey, nullptr);
+    ThrowLastErrorIf(result != ERROR_SUCCESS, "cannot create or open the key!");
+
+    // We no longer need the old key handle.
+    Close();
+
+    key_ = subkey;
+}
+
+void RegKey::Open(HKEY rootkey, const wchar_t* subkey, REGSAM access)
+{
+    assert(rootkey && subkey && access);
+    Close();
+
+    long result = RegOpenKeyEx(rootkey, subkey, 0, access, &key_);
+    ThrowLastErrorIf(result != ERROR_SUCCESS, "cannot open the key!");
+}
+
+void RegKey::OpenKey(const wchar_t* key_name, REGSAM access)
+{
+    assert(key_name, access);
+
+    HKEY subkey = nullptr;
+    long result = RegOpenKeyEx(key_, key_name, 0, access, &subkey);
+    ThrowLastErrorIf(result != ERROR_SUCCESS, "cannot open the key!");
+
+    Close();
+
+    key_ = subkey;
 }
 
 void RegKey::Close()
