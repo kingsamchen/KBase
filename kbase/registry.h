@@ -45,9 +45,15 @@ public:
     // Throws an exception when it fails.
     void Open(HKEY rootkey, const wchar_t* subkey, REGSAM access);
 
+    // Opens an existing registry key with a given relative subkey name.
+    // Throws an exception when it fails.
     void OpenKey(const wchar_t* key_name, REGSAM access);
 
     void Close();
+
+    void Set(HKEY);
+
+    // add a Move operator
 
 private:
     HKEY key_;

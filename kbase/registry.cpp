@@ -75,7 +75,7 @@ void RegKey::Open(HKEY rootkey, const wchar_t* subkey, REGSAM access)
 
 void RegKey::OpenKey(const wchar_t* key_name, REGSAM access)
 {
-    assert(key_name, access);
+    assert(key_name && access);
 
     HKEY subkey = nullptr;
     long result = RegOpenKeyEx(key_, key_name, 0, access, &subkey);
@@ -88,6 +88,7 @@ void RegKey::OpenKey(const wchar_t* key_name, REGSAM access)
 
 void RegKey::Close()
 {
+    // TODO: stop watching
     if (key_) {
         RegCloseKey(key_);
         key_ = nullptr;
