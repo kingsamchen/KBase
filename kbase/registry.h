@@ -9,6 +9,8 @@
 #ifndef KBASE_REGISTRY_H_
 #define KBASE_REGISTRY_H_
 
+#include <string>
+
 #include <Windows.h>
 
 namespace kbase {
@@ -29,6 +31,10 @@ public:
     RegKey(const RegKey&) = delete;
 
     RegKey& operator=(const RegKey&) = delete;
+
+    RegKey(RegKey&& other);
+
+    RegKey& operator=(RegKey&& other);
 
     // Creates or opens the registry key.
     // The |disposition| indicates exact behavior.
@@ -51,9 +57,24 @@ public:
 
     void Close();
 
-    void Set(HKEY);
+    // Returns true, if this key has the specified value.
+    // Returns false if it doesn't.
+    // Throws an exception if an error occurs while attempting to access it.
+    bool HasValue(const wchar_t* value_name) const;
 
-    // add a Move operator
+    // Gets count of values in key.
+    // Throws an exception when it fails.
+    size_t GetValueCount() const;
+
+    // |index| is in the range [0, value_count).
+    // Throws an exception if an error occurs.
+    void GetValueNameAt(size_t index, std::wstring* value_name) const;
+
+    // Returns true, if the |key_| is valid.
+    bool Valid() const
+    {
+        return key_ != nullptr;
+    }
 
 private:
     HKEY key_;

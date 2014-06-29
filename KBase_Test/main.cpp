@@ -13,8 +13,8 @@
 #include <string>
 #include <vector>
 
-#include "kbase/files/file_enumerator.h"
-#include "kbase/version_util.h"
+#include "kbase\error_exception_util.h"
+#include "kbase\registry.h"
 
 template<typename T>
 void print_out(T beg, T end, const char* dem = " ")
@@ -28,8 +28,15 @@ void print_out(T beg, T end, const char* dem = " ")
 
 int main(int /*argc*/, char* /*argv[]*/)
 {
-    kbase::StringPiece sp("hello world");
-    std::cout << sp;
+    try {
+        kbase::RegKey regkey(HKEY_LOCAL_MACHINE, L"SOFTWARE\\RegisteredApplications", KEY_READ);
+        std::cout << regkey.GetValueCount();
+        std::wstring name;
+        regkey.GetValueNameAt(18, &name);
+        std::wcout << name;
+    } catch (const kbase::Win32Exception& ex) {
+        std::cout << ex.what();
+    }
 
     _getch();
     return 0;
