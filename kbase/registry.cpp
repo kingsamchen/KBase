@@ -158,4 +158,22 @@ void RegKey::GetValueNameAt(size_t index, std::wstring* value_name) const
     *value_name = buf;
 }
 
+void RegKey::DeleteKey(const wchar_t* key_name)
+{
+    assert(key_ && key_name);
+
+    long result = RegDeleteTree(key_, key_name);
+    SetLastError(result);
+    ThrowLastErrorIf(result != ERROR_SUCCESS, "failed to delete the key");
+}
+
+void RegKey::DeleteValue(const wchar_t* value_name)
+{
+    assert(key_ && value_name);
+
+    long result = RegDeleteValue(key_, value_name);
+    SetLastError(result);
+    ThrowLastErrorIf(result != ERROR_SUCCESS, "failed to delete the value");
+}
+
 }   // namespace kbase

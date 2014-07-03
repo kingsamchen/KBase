@@ -32,8 +32,8 @@ public:
 
     RegKey& operator=(const RegKey&) = delete;
 
+    // Support for move-semantics.
     RegKey(RegKey&& other);
-
     RegKey& operator=(RegKey&& other);
 
     // Creates or opens the registry key.
@@ -75,6 +75,17 @@ public:
     {
         return key_ != nullptr;
     }
+
+    // Removes a specific key along with all subkeys it contains. Use with care.
+    // The key must have been opened with DELETE, KEY_ENUMERATE_SUB_KEYS, and
+    // KEY_QUERY_VALUE access rights.
+    // Throws an exception if an error occurs.
+    void DeleteKey(const wchar_t* key_name);
+
+    // Removes a specific value under the key.
+    // Throws an exception if an error occurs.
+    void DeleteValue(const wchar_t* value_name);
+
 
 private:
     HKEY key_;
