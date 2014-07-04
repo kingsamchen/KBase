@@ -10,6 +10,7 @@
 #define KBASE_REGISTRY_H_
 
 #include <string>
+#include <vector>
 
 #include <Windows.h>
 
@@ -100,6 +101,10 @@ public:
 
     // Reads a REG_SZ or a REG_EXPAND_SZ registry field into the |value|.
     bool ReadStringValue(const wchar_t* value_name, std::wstring* value) const;
+
+    // Reads a REG_MULTI_SZ registry field into a vector of strings.
+    bool ReadStringValues(const wchar_t* value_name,
+                          std::vector<std::wstring>* values) const;
 
     // Reads raw data, and |data_type| indicates the what the type of the data is.
     bool ReadValue(const wchar_t* value_name, DWORD restricted_type, void* data,

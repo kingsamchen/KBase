@@ -204,12 +204,13 @@ bool RegKey::ReadStringValue(const wchar_t* value_name, std::wstring* value) con
     // Therefore, does expansions on our own.
     DWORD restricted_type = RRF_RT_REG_SZ | RRF_NOEXPAND | RRF_RT_REG_EXPAND_SZ;
     DWORD data_type = 0;
+    DWORD data_size = 0;
     std::wstring raw_data;
 
     long result = 0;
     do {
         wchar_t* data_ptr = WriteInto(&raw_data, str_length);
-        DWORD data_size = str_length * kCharSize;
+        data_size = str_length * kCharSize;
         result = RegGetValue(key_, nullptr, value_name, restricted_type, &data_type,
                              data_ptr, &data_size);
         if (result == ERROR_SUCCESS) {
@@ -225,6 +226,7 @@ bool RegKey::ReadStringValue(const wchar_t* value_name, std::wstring* value) con
                     // functions fails, and it internally sets the last error.
                     return false;
                 } else if (size > str_length) {
+                    data_size = size * kCharSize;
                     result = ERROR_MORE_DATA;
                 } else {
                     value->assign(ptr, size - 1);
@@ -232,11 +234,37 @@ bool RegKey::ReadStringValue(const wchar_t* value_name, std::wstring* value) con
                 }
             }
         }
-    } while (result == ERROR_MORE_DATA && (str_length *= 2, true));
+    } while (result == ERROR_MORE_DATA && (str_length = data_size / kCharSize, true));
 
     // An error caused by registry APIs occured.
     SetLastError(result);
     return false;
+}
+
+bool RegKey::ReadStringValues(const wchar_t* value_name,
+                              std::vector<std::wstring>* values) const
+{
+    assert(values);
+    const size_t kCharSize = sizeof(wchar_t);
+    DWORD restricted_type = RRF_RT_REG_MULTI_SZ;
+    DWORD data_size = 0;
+
+    // gets the data size, in bytes.
+    bool result = ReadValue(value_name, restricted_type, nullptr, &data_size);
+    if (!result) {
+        return false;
+    }
+
+    std::wstring raw_data;
+    wchar_t* data_ptr = WriteInto(&raw_data, data_size / kCharSize);
+    result = ReadValue(value_name, restricted_type, data_ptr, &data_size);
+    if (!result) {
+        return false;
+    }
+
+    Tokenize(raw_data, std::wstring(1, 0), values);
+    
+    return true;
 }
 
 bool RegKey::ReadDWORDValue(const wchar_t* value_name, DWORD* value) const

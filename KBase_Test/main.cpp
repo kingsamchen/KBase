@@ -29,9 +29,9 @@ void print_out(T beg, T end, const char* dem = " ")
 int main(int /*argc*/, char* /*argv[]*/)
 {
     try {
-        kbase::RegKey regkey(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Setup", KEY_READ);
-        DWORD value;
-        bool ret = regkey.ReadDWORDValue(L"bootdir", &value);
+        kbase::RegKey regkey(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion", KEY_READ);
+        std::wstring value;
+        bool ret = regkey.ReadStringValue(L"ProgramFilesPath", &value);
         kbase::LastError error;
         if (!ret) {
             std::wcout << error.GetVerboseMessage() << std::endl;
