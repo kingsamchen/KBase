@@ -8,6 +8,7 @@
 #include <cstdlib>
 
 #include "kbase\error_exception_util.h"
+#include "kbase\strings\string_util.h"
 
 namespace kbase {
 
@@ -174,6 +175,56 @@ void RegKey::DeleteValue(const wchar_t* value_name)
     long result = RegDeleteValue(key_, value_name);
     SetLastError(result);
     ThrowLastErrorIf(result != ERROR_SUCCESS, "failed to delete the value");
+}
+
+bool RegKey::ReadValue(const wchar_t* value_name, void* data, DWORD* data_size,
+                       DWORD* data_type) const
+{
+    long result = RegGetValue(key_, nullptr, value_name, 0, data_type, data,
+                              data_size);
+
+    return result == ERROR_SUCCESS ? true : SetLastError(result), false;
+}
+
+bool RegKey::ReadStringValue(const wchar_t* value_name, std::wstring* value) const
+{
+    const size_t kCharSize = sizeof(wchar_t);
+    size_t str_length = 1024;   // including null
+    DWORD assumed_data_type = RRF_RT_REG_SZ | RRF_RT_REG_EXPAND_SZ;
+    DWORD data_type = 0;
+    std::wstring raw_data;
+
+    long result = 0;
+    do {
+        wchar_t* data_ptr = WriteInto(&raw_data, str_length);
+        DWORD data_size = str_length * kCharSize;
+        result = RegGetValue(key_, nullptr, value_name, assumed_data_type, &data_type,
+                             data_ptr, &data_size);
+        if (result == ERROR_SUCCESS) {
+            if (data_type == REG_SZ) {
+                size_t written_length = data_size / kCharSize - 1;  
+                value->assign(data_ptr, written_length);
+                return true;
+            } else if (data_type == REG_EXPAND_SZ) {
+                std::wstring expanded;
+                wchar_t* ptr = WriteInto(&expanded, str_length);
+                size_t size = ExpandEnvironmentStrings(data_ptr, ptr, str_length);
+                if (size == 0) {
+                    // functions fails, and it internally sets the last error.
+                    return false;
+                } else if (size > str_length) {
+                    result = ERROR_MORE_DATA;
+                } else {
+                    value->assign(ptr, size - 1);
+                    return true;
+                }
+            }
+        }
+    } while (result == ERROR_MORE_DATA && (str_length *= 2, true));
+
+    // An error caused by registry APIs occured.
+    SetLastError(result);
+    return false;
 }
 
 }   // namespace kbase

@@ -86,6 +86,18 @@ public:
     // Throws an exception if an error occurs.
     void DeleteValue(const wchar_t* value_name);
 
+    // For each following read functions, it returns true if a function succeeds;
+    // and returns false, if an error occurs, and last error implies the reason for
+    // the failure.
+    // Moreover, the variable that stores the value being read remains unchanged if
+    // the function fails.
+
+    // Reads a REG_SZ or a REG_EXPAND_SZ registry field into the |value|.
+    bool ReadStringValue(const wchar_t* value_name, std::wstring* value) const;
+
+    // Reads raw data, and |data_type| indicates the what the type of the data is.
+    bool ReadValue(const wchar_t* value_name, void* data, DWORD* data_size,
+                   DWORD* data_type) const;
 
 private:
     HKEY key_;
