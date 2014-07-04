@@ -92,10 +92,18 @@ public:
     // Moreover, the variable that stores the value being read remains unchanged if
     // the function fails.
 
+    // Reads a REG_DWORD registry field.
+    bool ReadDWORDValue(const wchar_t* value_name, DWORD* value) const;
+
+    // Reads a REG_QWORD registry field.
+    bool ReadQWORDValue(const wchar_t* value_name, DWORD64* value) const;
+
     // Reads a REG_SZ or a REG_EXPAND_SZ registry field into the |value|.
     bool ReadStringValue(const wchar_t* value_name, std::wstring* value) const;
 
     // Reads raw data, and |data_type| indicates the what the type of the data is.
+    bool ReadValue(const wchar_t* value_name, DWORD restricted_type, void* data,
+                   DWORD* data_size) const;
     bool ReadValue(const wchar_t* value_name, void* data, DWORD* data_size,
                    DWORD* data_type) const;
 

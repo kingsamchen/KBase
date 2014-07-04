@@ -29,11 +29,16 @@ void print_out(T beg, T end, const char* dem = " ")
 int main(int /*argc*/, char* /*argv[]*/)
 {
     try {
-        kbase::RegKey regkey(HKEY_LOCAL_MACHINE, L"SOFTWARE\\RegisteredApplications", KEY_READ);
-        std::cout << regkey.GetValueCount();
-        std::wstring name;
-        regkey.GetValueNameAt(18, &name);
-        std::wcout << name;
+        kbase::RegKey regkey(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Setup", KEY_READ);
+        DWORD value;
+        bool ret = regkey.ReadDWORDValue(L"bootdir", &value);
+        kbase::LastError error;
+        if (!ret) {
+            std::wcout << error.GetVerboseMessage() << std::endl;
+        } else {
+            std::wcout << value;
+        }
+
     } catch (const kbase::Win32Exception& ex) {
         std::cout << ex.what();
     }

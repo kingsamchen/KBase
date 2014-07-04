@@ -183,14 +183,26 @@ bool RegKey::ReadValue(const wchar_t* value_name, void* data, DWORD* data_size,
     long result = RegGetValue(key_, nullptr, value_name, 0, data_type, data,
                               data_size);
 
-    return result == ERROR_SUCCESS ? true : SetLastError(result), false;
+    return result == ERROR_SUCCESS ? true : (SetLastError(result), false);
+}
+
+bool RegKey::ReadValue(const wchar_t* value_name, DWORD restricted_type, void* data,
+                       DWORD* data_size) const
+{
+    long result = RegGetValue(key_, nullptr, value_name, restricted_type, nullptr,
+                              data, data_size);
+
+    return result == ERROR_SUCCESS ? true : (SetLastError(result), false);
 }
 
 bool RegKey::ReadStringValue(const wchar_t* value_name, std::wstring* value) const
 {
     const size_t kCharSize = sizeof(wchar_t);
     size_t str_length = 1024;   // including null
-    DWORD assumed_data_type = RRF_RT_REG_SZ | RRF_RT_REG_EXPAND_SZ;
+    // It seems that automatic expansion for environment strings in RegGetValue 
+    // behaves incorrect when using std::basic_string as its buffer. 
+    // Therefore, does expansions on our own.
+    DWORD restricted_type = RRF_RT_REG_SZ | RRF_NOEXPAND | RRF_RT_REG_EXPAND_SZ;
     DWORD data_type = 0;
     std::wstring raw_data;
 
@@ -198,7 +210,7 @@ bool RegKey::ReadStringValue(const wchar_t* value_name, std::wstring* value) con
     do {
         wchar_t* data_ptr = WriteInto(&raw_data, str_length);
         DWORD data_size = str_length * kCharSize;
-        result = RegGetValue(key_, nullptr, value_name, assumed_data_type, &data_type,
+        result = RegGetValue(key_, nullptr, value_name, restricted_type, &data_type,
                              data_ptr, &data_size);
         if (result == ERROR_SUCCESS) {
             if (data_type == REG_SZ) {
@@ -225,6 +237,42 @@ bool RegKey::ReadStringValue(const wchar_t* value_name, std::wstring* value) con
     // An error caused by registry APIs occured.
     SetLastError(result);
     return false;
+}
+
+bool RegKey::ReadDWORDValue(const wchar_t* value_name, DWORD* value) const
+{
+    assert(value);
+    DWORD restricted_type = RRF_RT_DWORD;
+    DWORD tmp = 0;
+    DWORD data_size = sizeof(DWORD);
+
+    bool result = ReadValue(value_name, restricted_type, &tmp, &data_size);
+    if (!result) {
+        return false;
+    }
+
+    assert(data_size == sizeof(DWORD));
+    *value = tmp;
+
+    return true;
+}
+
+bool RegKey::ReadQWORDValue(const wchar_t* value_name, DWORD64* value) const
+{
+    assert(value);
+    DWORD restricted_type = RRF_RT_QWORD;
+    DWORD64 tmp = 0;
+    DWORD data_size = sizeof(DWORD64);
+
+    bool result = ReadValue(value_name, restricted_type, &tmp, &data_size);
+    if (!result) {
+        return false;
+    }
+
+    assert(data_size == sizeof(DWORD64));
+    *value = tmp;
+
+    return true;
 }
 
 }   // namespace kbase
