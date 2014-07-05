@@ -111,7 +111,6 @@ void RegKey::OpenKey(const wchar_t* key_name, REGSAM access)
 
 void RegKey::Close()
 {
-    // TODO: stop watching
     if (key_) {
         RegCloseKey(key_);
         key_ = nullptr;
@@ -195,7 +194,7 @@ bool RegKey::ReadValue(const wchar_t* value_name, DWORD restricted_type, void* d
     return result == ERROR_SUCCESS ? true : (SetLastError(result), false);
 }
 
-bool RegKey::ReadStringValue(const wchar_t* value_name, std::wstring* value) const
+bool RegKey::ReadValue(const wchar_t* value_name, std::wstring* value) const
 {
     const size_t kCharSize = sizeof(wchar_t);
     size_t str_length = 1024;   // including null
@@ -241,7 +240,7 @@ bool RegKey::ReadStringValue(const wchar_t* value_name, std::wstring* value) con
     return false;
 }
 
-bool RegKey::ReadStringValues(const wchar_t* value_name,
+bool RegKey::ReadValue(const wchar_t* value_name,
                               std::vector<std::wstring>* values) const
 {
     assert(values);
@@ -267,7 +266,7 @@ bool RegKey::ReadStringValues(const wchar_t* value_name,
     return true;
 }
 
-bool RegKey::ReadDWORDValue(const wchar_t* value_name, DWORD* value) const
+bool RegKey::ReadValue(const wchar_t* value_name, DWORD* value) const
 {
     assert(value);
     DWORD restricted_type = RRF_RT_DWORD;
@@ -285,7 +284,7 @@ bool RegKey::ReadDWORDValue(const wchar_t* value_name, DWORD* value) const
     return true;
 }
 
-bool RegKey::ReadQWORDValue(const wchar_t* value_name, DWORD64* value) const
+bool RegKey::ReadValue(const wchar_t* value_name, DWORD64* value) const
 {
     assert(value);
     DWORD restricted_type = RRF_RT_QWORD;
@@ -301,6 +300,31 @@ bool RegKey::ReadQWORDValue(const wchar_t* value_name, DWORD64* value) const
     *value = tmp;
 
     return true;
+}
+
+void RegKey::WriteValue(const wchar_t* value_name, DWORD value)
+{
+    WriteValue(value_name, &value, sizeof(DWORD), REG_DWORD);
+}
+
+void RegKey::WriteValue(const wchar_t* value_name, DWORD64 value)
+{
+    WriteValue(value_name, &value, sizeof(DWORD64), REG_QWORD);
+}
+
+void RegKey::WriteValue(const wchar_t* value_name, const wchar_t* value)
+{
+    WriteValue(value_name, value, sizeof(wchar_t) * (wcslen(value) + 1), REG_SZ);
+}
+
+void RegKey::WriteValue(const wchar_t* value_name, const void* data, DWORD data_size,
+                        DWORD data_type)
+{
+    assert(data && data_size > 0);
+    long result = RegSetValueEx(key_, value_name, 0, data_type,
+                                static_cast<const BYTE*>(data), data_size);
+    SetLastError(result);
+    ThrowLastErrorIf(result != ERROR_SUCCESS, "failed to write value");
 }
 
 }   // namespace kbase

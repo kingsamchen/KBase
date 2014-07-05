@@ -87,30 +87,46 @@ public:
     // Throws an exception if an error occurs.
     void DeleteValue(const wchar_t* value_name);
 
-    // For each following read functions, it returns true if a function succeeds;
-    // and returns false, if an error occurs, and last error implies the reason for
-    // the failure.
+    // For each of the following read functions, it returns true if a function 
+    // succeeds; and returns false, if an error occurs, and last error implies the 
+    // reason for the failure.
     // Moreover, the variable that stores the value being read remains unchanged if
     // the function fails.
 
     // Reads a REG_DWORD registry field.
-    bool ReadDWORDValue(const wchar_t* value_name, DWORD* value) const;
+    bool ReadValue(const wchar_t* value_name, DWORD* value) const;
 
     // Reads a REG_QWORD registry field.
-    bool ReadQWORDValue(const wchar_t* value_name, DWORD64* value) const;
+    bool ReadValue(const wchar_t* value_name, DWORD64* value) const;
 
     // Reads a REG_SZ or a REG_EXPAND_SZ registry field into the |value|.
-    bool ReadStringValue(const wchar_t* value_name, std::wstring* value) const;
+    bool ReadValue(const wchar_t* value_name, std::wstring* value) const;
 
     // Reads a REG_MULTI_SZ registry field into a vector of strings.
-    bool ReadStringValues(const wchar_t* value_name,
-                          std::vector<std::wstring>* values) const;
+    bool ReadValue(const wchar_t* value_name,
+                   std::vector<std::wstring>* values) const;
 
     // Reads raw data, and |data_type| indicates the what the type of the data is.
     bool ReadValue(const wchar_t* value_name, DWORD restricted_type, void* data,
                    DWORD* data_size) const;
     bool ReadValue(const wchar_t* value_name, void* data, DWORD* data_size,
                    DWORD* data_type) const;
+
+    // For each of the following write functions, it throws an exception when it
+    // fails.
+
+    // Sets a REG_DWORD registry field.
+    void WriteValue(const wchar_t* value_name, DWORD value);
+
+    // Sets a REG_QWORD registry field.
+    void WriteValue(const wchar_t* value_name, DWORD64 value);
+
+    // Sets a REG_SZ registry field.
+    void WriteValue(const wchar_t* value_name, const wchar_t* value);
+
+    // Sets a raw data into a specific registry field.
+    void WriteValue(const wchar_t* value_name, const void* data, DWORD data_size,
+                    DWORD data_type);
 
 private:
     HKEY key_;
