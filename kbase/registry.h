@@ -153,7 +153,7 @@ public:
 
     bool Valid() const
     {
-        return key_ != nullptr && index_ > 0;
+        return key_ != nullptr && index_ >= 0;
     }
 
     int index() const
@@ -161,12 +161,17 @@ public:
         return index_;
     }
 
+    size_t subkey_count() const
+    {
+        return subkey_count_;
+    }
+
     const wchar_t* key_name() const
     {
         return key_name_.data();
     }
 
-    const RegKeyIterator& operator++();
+    RegKeyIterator& operator++();
 
 private:
     bool Read();
@@ -175,6 +180,7 @@ private:
 private:
     HKEY key_;
     int index_; // when index_ becomes negative, enumeration is done.
+    size_t subkey_count_;
     std::array<wchar_t, MAX_PATH> key_name_;
 };
 

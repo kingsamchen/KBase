@@ -28,21 +28,27 @@ void print_out(T beg, T end, const char* dem = " ")
 
 int main(int /*argc*/, char* /*argv[]*/)
 {
-    try {
-        kbase::RegKey regkey(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion", KEY_READ);
-        std::wstring value;
-        bool ret = regkey.ReadStringValue(L"ProgramFilesPath", &value);
-        kbase::LastError error;
-        if (!ret) {
-            std::wcout << error.GetVerboseMessage() << std::endl;
-        } else {
-            std::wcout << value;
-        }
+    //try {
+    //    kbase::RegKey regkey(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Management", KEY_READ);
+    //    std::wstring value;
+    //    bool ret = regkey.ReadValue(L"ProgramFilesPath", &value);
+    //    kbase::LastError error;
+    //    if (!ret) {
+    //        std::wcout << error.GetVerboseMessage() << std::endl;
+    //    } else {
+    //        std::wcout << value;
+    //    }
+    //} catch (const kbase::Win32Exception& ex) {
+    //    std::cout << ex.what();
+    //}
 
-    } catch (const kbase::Win32Exception& ex) {
-        std::cout << ex.what();
-    }
+    auto fn = []() -> kbase::RegKeyIterator {
+        return kbase::RegKeyIterator(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Management");
+    };    
 
+    kbase::RegKeyIterator it = fn();
+  
+    __nop();
     _getch();
     return 0;
 }

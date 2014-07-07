@@ -338,23 +338,23 @@ void RegKey::WriteValue(const wchar_t* value_name, const void* data, DWORD data_
 // RegKeyIterator class implementations.
 
 RegKeyIterator::RegKeyIterator(HKEY rootkey, const wchar_t* folder_key)
-    : key_(nullptr), index_(-1)
+    : key_(nullptr), index_(-1), subkey_count_(0)
 {
     long result = RegOpenKeyEx(rootkey, folder_key, 0, KEY_READ, &key_);
-    if (result != ERROR_SUCCESS) {
-        return;
+    if (result == ERROR_SUCCESS) {
+        DWORD subkey_count = 0;
+        result = RegQueryInfoKey(key_, nullptr, nullptr, nullptr, &subkey_count,
+                                 nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+                                 nullptr);
+        if (result != ERROR_SUCCESS) {
+            Close();
+        } else {
+            subkey_count_ = subkey_count;
+            index_ = subkey_count - 1;
+        }       
     }
 
-    DWORD subkey_count = 0;
-    result = RegQueryInfoKey(key_, nullptr, nullptr, nullptr, &subkey_count, nullptr,
-                             nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
-    if (result != ERROR_SUCCESS) {
-        Close();
-        return;
-    }
-
-    index_ = subkey_count - 1;
-    key_name_[0] = L'\0';
+    Read();
 }
 
 RegKeyIterator::~RegKeyIterator()
@@ -392,7 +392,27 @@ void RegKeyIterator::Close()
 
 bool RegKeyIterator::Read()
 {
-    
+    if (Valid()) {
+        DWORD name_length = MAX_PATH;
+        long result = RegEnumKeyEx(key_, index_, key_name_.data(), &name_length,
+                                   nullptr, nullptr, nullptr, nullptr);
+        if (result == ERROR_SUCCESS) {
+            return true;
+        }
+    }
+
+    key_name_[0] = L'\0';
+    return false;
+}
+
+RegKeyIterator& RegKeyIterator::operator++()
+{
+    if (Valid()) {
+        --index_;
+        Read();
+    }
+
+    return *this;
 }
 
 }   // namespace kbase
