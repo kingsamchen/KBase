@@ -37,6 +37,9 @@ public:
     RegKey(RegKey&& other);
     RegKey& operator=(RegKey&& other);
 
+    // Release the ownership of the opened key.
+    HKEY Release();
+
     // Creates or opens the registry key.
     // The |disposition| indicates exact behavior.
     // These functions throw an exception when it fails.
@@ -133,7 +136,22 @@ private:
 };
 
 class RegKeyIterator {
+public:
+    RegKeyIterator(HKEY rootkey, const wchar_t* folder_key);
 
+    ~RegKeyIterator();
+
+    // Disallow copy.
+    RegKeyIterator(const RegKeyIterator&) = delete;
+    RegKeyIterator& operator=(const RegKeyIterator&) = delete;
+
+    // Support for move-semantics
+    RegKeyIterator(RegKeyIterator&& other);
+    RegKeyIterator& operator=(RegKeyIterator&& other);
+
+private:
+    HKEY key_;
+    size_t index_;
 };
 
 class RegValueIterator {

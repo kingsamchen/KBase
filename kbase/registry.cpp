@@ -51,6 +51,14 @@ RegKey::~RegKey()
     Close();
 }
 
+HKEY RegKey::Release()
+{
+    HKEY key = key_;
+    key_ = nullptr;
+
+    return key;
+}
+
 void RegKey::Create(HKEY rootkey, const wchar_t* subkey, REGSAM access)
 {
     Create(rootkey, subkey, access, nullptr);
@@ -325,6 +333,17 @@ void RegKey::WriteValue(const wchar_t* value_name, const void* data, DWORD data_
                                 static_cast<const BYTE*>(data), data_size);
     SetLastError(result);
     ThrowLastErrorIf(result != ERROR_SUCCESS, "failed to write value");
+}
+
+// RegKeyIterator class implementations.
+
+RegKeyIterator::RegKeyIterator(HKEY rootkey, const wchar_t* folder_key)
+{
+
+}
+
+RegKeyIterator::~RegKeyIterator()
+{
 }
 
 }   // namespace kbase
