@@ -354,19 +354,12 @@ RegKeyIterator::RegKeyIterator(HKEY rootkey, const wchar_t* folder_key)
     }
 
     index_ = subkey_count - 1;
+    key_name_[0] = L'\0';
 }
 
 RegKeyIterator::~RegKeyIterator()
 {
     Close();
-}
-
-void RegKeyIterator::Close()
-{
-    if (key_) {
-        RegCloseKey(key_);
-        key_ = nullptr;
-    }
 }
 
 RegKeyIterator::RegKeyIterator(RegKeyIterator&& other)
@@ -382,9 +375,24 @@ RegKeyIterator& RegKeyIterator::operator=(RegKeyIterator&& other)
 
         other.key_ = nullptr;
         other.index_ = -1;
+
+        key_name_ = std::move(other.key_name_);
     }
 
     return *this;
+}
+
+void RegKeyIterator::Close()
+{
+    if (key_) {
+        RegCloseKey(key_);
+        key_ = nullptr;
+    }
+}
+
+bool RegKeyIterator::Read()
+{
+    
 }
 
 }   // namespace kbase

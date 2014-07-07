@@ -9,6 +9,7 @@
 #ifndef KBASE_REGISTRY_H_
 #define KBASE_REGISTRY_H_
 
+#include <array>
 #include <string>
 #include <vector>
 
@@ -155,13 +156,26 @@ public:
         return key_ != nullptr && index_ > 0;
     }
 
+    int index() const
+    {
+        return index_;
+    }
+
+    const wchar_t* key_name() const
+    {
+        return key_name_.data();
+    }
+
+    const RegKeyIterator& operator++();
+
 private:
+    bool Read();
     void Close();
 
 private:
     HKEY key_;
     int index_; // when index_ becomes negative, enumeration is done.
-    wchar_t key_name_[MAX_PATH];
+    std::array<wchar_t, MAX_PATH> key_name_;
 };
 
 class RegValueIterator {
