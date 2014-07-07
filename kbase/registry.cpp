@@ -338,12 +338,53 @@ void RegKey::WriteValue(const wchar_t* value_name, const void* data, DWORD data_
 // RegKeyIterator class implementations.
 
 RegKeyIterator::RegKeyIterator(HKEY rootkey, const wchar_t* folder_key)
+    : key_(nullptr), index_(-1)
 {
+    long result = RegOpenKeyEx(rootkey, folder_key, 0, KEY_READ, &key_);
+    if (result != ERROR_SUCCESS) {
+        return;
+    }
 
+    DWORD subkey_count = 0;
+    result = RegQueryInfoKey(key_, nullptr, nullptr, nullptr, &subkey_count, nullptr,
+                             nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
+    if (result != ERROR_SUCCESS) {
+        Close();
+        return;
+    }
+
+    index_ = subkey_count - 1;
 }
 
 RegKeyIterator::~RegKeyIterator()
 {
+    Close();
+}
+
+void RegKeyIterator::Close()
+{
+    if (key_) {
+        RegCloseKey(key_);
+        key_ = nullptr;
+    }
+}
+
+RegKeyIterator::RegKeyIterator(RegKeyIterator&& other)
+{
+    *this = std::move(other);
+}
+
+RegKeyIterator& RegKeyIterator::operator=(RegKeyIterator&& other)
+{
+    if (this != &other) {
+        key_ = other.key_;
+        index_ = other.index_;
+
+        other.key_ = nullptr;
+        other.index_ = -1;
+    }
+
+    return *this;
 }
 
 }   // namespace kbase

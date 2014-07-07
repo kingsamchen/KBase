@@ -137,6 +137,7 @@ private:
 
 class RegKeyIterator {
 public:
+    // If construction fails, the internal state is invalid.
     RegKeyIterator(HKEY rootkey, const wchar_t* folder_key);
 
     ~RegKeyIterator();
@@ -149,9 +150,18 @@ public:
     RegKeyIterator(RegKeyIterator&& other);
     RegKeyIterator& operator=(RegKeyIterator&& other);
 
+    bool Valid() const
+    {
+        return key_ != nullptr && index_ > 0;
+    }
+
+private:
+    void Close();
+
 private:
     HKEY key_;
-    size_t index_;
+    int index_; // when index_ becomes negative, enumeration is done.
+    wchar_t key_name_[MAX_PATH];
 };
 
 class RegValueIterator {
