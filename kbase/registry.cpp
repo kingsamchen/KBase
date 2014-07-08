@@ -415,4 +415,46 @@ RegKeyIterator& RegKeyIterator::operator++()
     return *this;
 }
 
+// RegValueIterator class implementations
+
+RegValueIterator::RegValueIterator(HKEY rootkey, const wchar_t* folder_key)
+    : key_(nullptr),
+      index_(-1),
+      value_count_(0),
+      value_name_(INITIAL_NAME_SIZE, L'\0'),
+      value_(INITIAL_VALUE_SIZE, 0)
+{
+    long result = RegOpenKeyEx(rootkey, folder_key, 0, KEY_READ, &key_);
+    if (result == ERROR_SUCCESS) {
+        DWORD value_count = 0;
+        DWORD max_value_name_length = 0, max_value_length = 0;
+        result = RegQueryInfoKey(key_, nullptr, nullptr, nullptr, nullptr, nullptr,
+                                 nullptr, &value_count, &max_value_name_length,
+                                 &max_value_length, nullptr, nullptr);
+        if (result != ERROR_SUCCESS) {
+            Close();
+        } else {
+            value_count_ = value_count;
+            index_ = value_count - 1;
+            max_value_name_length_ = max_value_name_length;
+            max_value_length_ = max_value_length;
+        }
+    }
+
+    Read();
+}
+
+RegValueIterator::~RegValueIterator()
+{
+    Close();
+}
+
+void RegValueIterator::Close()
+{
+    if (key_) {
+        RegCloseKey(key_);
+        key_ = nullptr;
+    }
+}
+
 }   // namespace kbase

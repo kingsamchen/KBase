@@ -185,7 +185,40 @@ private:
 };
 
 class RegValueIterator {
+private:
+    enum {
+        INITIAL_NAME_SIZE = MAX_PATH,
+        INITIAL_VALUE_SIZE = 512
+    };
 
+public:
+    RegValueIterator(HKEY rootkey, const wchar_t* folder_key);
+
+    ~RegValueIterator();
+
+    RegValueIterator(const RegValueIterator&) = delete;
+    RegValueIterator& operator=(const RegValueIterator&) = delete;
+
+    bool Valid() const
+    {
+        return key_ != nullptr && index_ >= 0;
+    }
+
+    RegValueIterator& operator++();
+
+private:
+    bool Read();
+    void Close();
+
+private:
+    HKEY key_;
+    int index_;
+    size_t value_count_;
+    size_t max_value_name_length_;
+    size_t max_value_length_;
+    DWORD type_;
+    std::wstring value_name_;
+    std::vector<char> value_;
 };
 
 }   // namespace kbase
