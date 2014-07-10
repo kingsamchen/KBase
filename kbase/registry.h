@@ -199,9 +199,43 @@ public:
     RegValueIterator(const RegValueIterator&) = delete;
     RegValueIterator& operator=(const RegValueIterator&) = delete;
 
+    // Support for move-semantics.
+    RegValueIterator(RegValueIterator&& other);
+    RegValueIterator& operator=(RegValueIterator&& other);
+
     bool Valid() const
     {
         return key_ != nullptr && index_ >= 0;
+    }
+
+    int index() const
+    {
+        return index_;
+    }
+
+    size_t value_count() const
+    {
+        return value_count_;
+    }
+
+    DWORD type() const
+    {
+        return type_;
+    }
+
+    const wchar_t* value_name() const
+    {
+        return value_name_.c_str();
+    }
+
+    size_t value_size() const
+    {
+        return value_size_;
+    }
+
+    const char* value() const
+    {
+        return value_.data();
     }
 
     RegValueIterator& operator++();
@@ -214,11 +248,12 @@ private:
     HKEY key_;
     int index_;
     size_t value_count_;
-    size_t max_value_name_length_;
-    size_t max_value_length_;
+    size_t max_value_name_length_;  // always in characters.
+    size_t max_value_length_;       // in bytes.
     DWORD type_;
     std::wstring value_name_;
     std::vector<char> value_;
+    size_t value_size_;
 };
 
 }   // namespace kbase

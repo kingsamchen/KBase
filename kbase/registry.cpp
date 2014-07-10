@@ -421,8 +421,8 @@ RegValueIterator::RegValueIterator(HKEY rootkey, const wchar_t* folder_key)
     : key_(nullptr),
       index_(-1),
       value_count_(0),
-      value_name_(INITIAL_NAME_SIZE, L'\0'),
-      value_(INITIAL_VALUE_SIZE, 0)
+      value_(INITIAL_VALUE_SIZE, 0),
+      value_size_(0)
 {
     long result = RegOpenKeyEx(rootkey, folder_key, 0, KEY_READ, &key_);
     if (result == ERROR_SUCCESS) {
@@ -449,12 +449,83 @@ RegValueIterator::~RegValueIterator()
     Close();
 }
 
+RegValueIterator::RegValueIterator(RegValueIterator&& other)
+{
+    *this = std::move(other);
+}
+
+RegValueIterator& RegValueIterator::operator=(RegValueIterator&& other)
+{
+    if (this != &other) {
+        key_ = other.key_;
+        index_ = other.index_;
+        value_count_ = other.value_count_;
+        type_ = other.type_;
+        value_size_ = other.value_size_;
+        value_name_ = std::move(other.value_name_);
+        value_ = std::move(other.value_);
+
+        other.key_ = nullptr;
+        other.index_ = -1;
+        other.value_count_ = 0;
+        other.type_ = REG_NONE;
+        other.value_size_ = 0;
+    }
+
+    return *this;
+}
+
 void RegValueIterator::Close()
 {
     if (key_) {
         RegCloseKey(key_);
         key_ = nullptr;
     }
+}
+
+RegValueIterator& RegValueIterator::operator++()
+{
+    if (Valid()) {
+        --index_;
+        Read();
+    }
+
+    return *this;
+}
+
+bool RegValueIterator::Read()
+{
+    if (Valid()) {
+        DWORD value_size = INITIAL_VALUE_SIZE;
+        DWORD name_length = INITIAL_NAME_SIZE;
+        wchar_t* name = WriteInto(&value_name_, name_length);
+        long result = RegEnumValue(key_, index_, name, &name_length, nullptr, &type_,
+                                   reinterpret_cast<BYTE*>(&value_[0]), &value_size);
+        // Current size is too small.
+        if (result == ERROR_MORE_DATA) {
+            assert(value_size < max_value_length_);
+            assert(name_length < max_value_name_length_);
+            
+            value_size = max_value_length_;
+            name_length = max_value_name_length_;
+            name = WriteInto(&value_name_, name_length);
+            value_.resize(value_size, 0);
+
+            result = RegEnumValue(key_, index_, name, &name_length, nullptr, &type_,
+                                  reinterpret_cast<BYTE*>(&value_[0]), &value_size);
+        }
+
+        if (result == ERROR_SUCCESS) {
+            value_size_ = value_size;
+            return true;
+        }
+    }
+
+    type_ = REG_NONE;
+    value_name_[0] = L'\0';
+    value_[0] = 0;
+    value_size_ = 0;
+    return false;
 }
 
 }   // namespace kbase

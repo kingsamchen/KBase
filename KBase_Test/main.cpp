@@ -42,11 +42,10 @@ int main(int /*argc*/, char* /*argv[]*/)
     //    std::cout << ex.what();
     //}
 
-    auto fn = []() -> kbase::RegKeyIterator {
-        return kbase::RegKeyIterator(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Management");
-    };    
-
-    kbase::RegKeyIterator it = fn();
+    kbase::RegValueIterator it(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run");
+    for (; it.Valid(); ++it) {
+        std::wcout << it.value_name() << L" -> " << std::wstring((const wchar_t*)it.value(), it.value_size() / 2) << std::endl;
+    }
   
     __nop();
     _getch();
