@@ -53,11 +53,14 @@ public:
     // The handle to a process must have PROCESS_QUERY_INFORMATION access right.
     static WOW64Status GetWOW64StatusForProcess(HANDLE process);
 
-    // TODO: process_model_name functions
-
     // This function can be made static, but in order to be consistent with is_server
     // in syntax, I choose to leave it as a member function.
     bool IsVersionOrGreater(Version version) const;
+
+    std::wstring processor_model_name() const
+    {
+        return processor_model_name_;
+    }
 
     bool is_server() const
     {
@@ -84,9 +87,16 @@ public:
         return allocation_granularity_;
     }
 
+    void DestroyInstance()
+    {
+        delete this;
+    }
+
 private:
     OSInfo();
     ~OSInfo();
+
+    std::wstring GetProcessorModelName() const;
 
 private:
     SystemArchitecture architecture_;
@@ -94,7 +104,7 @@ private:
     bool is_server_;
     unsigned long processors_;
     unsigned long allocation_granularity_;
-    std::string processor_model_name;
+    std::wstring processor_model_name_;
 };
 
 }   // namespace kbase

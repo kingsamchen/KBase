@@ -2,12 +2,15 @@
  @ Kingsley Chen
 */
 
-#include "kbase/version_util.h"
+#include "kbase\version_util.h"
 
 #include <map>
+#include <memory>
 
 #include <Windows.h>
 #include <VersionHelpers.h>
+
+#include "kbase\registry.h"
 
 namespace kbase {
 
@@ -37,11 +40,18 @@ const std::map<Version, VersionNumber> version_name_to_number = {
 OSInfo* OSInfo::GetInstance()
 {
     static OSInfo* info = nullptr;
+    auto deleter = [](OSInfo* ptr) {
+        ptr->DestroyInstance();
+    };
+    static std::unique_ptr<OSInfo, decltype(deleter)> info_custody;
     if (!info) {
         OSInfo* new_info = new OSInfo();
-        if (InterlockedCompareExchangePointer(
-            reinterpret_cast<PVOID*>(&info), new_info, nullptr)) {
+        if (InterlockedCompareExchangePointer(reinterpret_cast<PVOID*>(&info),
+                                              new_info,
+                                              nullptr)) {
             delete new_info;
+        } else {
+            info_custody.reset(info);
         }
     }
 
@@ -51,7 +61,8 @@ OSInfo* OSInfo::GetInstance()
 OSInfo::OSInfo()
  : architecture_(UNKNOWN_ARCHITECTURE), 
    wow64_status_(GetWOW64StatusForProcess(GetCurrentProcess())),
-   is_server_(IsWindowsServer())
+   is_server_(IsWindowsServer()),
+   processor_model_name_(GetProcessorModelName())
 {
     SYSTEM_INFO system_info = {0};
     GetNativeSystemInfo(&system_info);
@@ -103,6 +114,18 @@ WOW64Status OSInfo::GetWOW64StatusForProcess(HANDLE process)
     }
 
     return is_wow64 ? WOW64Status::WOW64_ENABLED : WOW64Status::WOW64_DISABLED;
+}
+
+std::wstring OSInfo::GetProcessorModelName() const
+{
+    const wchar_t kKeyName[] = L"HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0";
+
+    RegKey key(HKEY_LOCAL_MACHINE);
+    key.OpenKey(kKeyName, KEY_READ);
+    std::wstring processor_model_name;
+    key.ReadValue(L"ProcessorNameString", &processor_model_name);
+    
+    return processor_model_name;
 }
 
 }   // namespace kbase
