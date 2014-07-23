@@ -15,14 +15,9 @@
 namespace kbase {
 
 typedef OSInfo::WOW64Status WOW64Status;
+typedef OSInfo::VersionNumber VersionNumber;
 
 namespace {
-
-struct VersionNumber {
-    WORD major_version;
-    WORD minor_version;
-    WORD service_pack_major;
-};
 
 const std::map<Version, VersionNumber> version_name_to_number = {
     {Version::WIN_XP, {5, 1, 0}},
@@ -59,11 +54,25 @@ OSInfo* OSInfo::GetInstance()
 }
 
 OSInfo::OSInfo()
- : architecture_(UNKNOWN_ARCHITECTURE), 
-   wow64_status_(GetWOW64StatusForProcess(GetCurrentProcess())),
-   is_server_(IsWindowsServer()),
-   processor_model_name_(GetProcessorModelName())
+    : architecture_(UNKNOWN_ARCHITECTURE), 
+      wow64_status_(GetWOW64StatusForProcess(GetCurrentProcess())),
+      is_server_(IsWindowsServer()),
+      processor_model_name_(GetProcessorModelName())
 {
+    // GetVersionEx was declared deprecated since Windows 8.1. You should use the
+    // VersionNumber struct only when you need to query what exact system version you
+    // are using. see
+    // http://msdn.microsoft.com/en-us/library/windows/desktop/ms724451(v=vs.85).aspx
+    // for more details.
+    OSVERSIONINFOEX os_version_info = { sizeof(os_version_info) };
+    GetVersionEx(reinterpret_cast<OSVERSIONINFO*>(&os_version_info));
+    version_number_.major_version = 
+        static_cast<WORD>(os_version_info.dwMajorVersion);
+    version_number_.minor_version = 
+        static_cast<WORD>(os_version_info.dwMinorVersion);
+    version_number_.service_pack_major =
+        static_cast<WORD>(os_version_info.wServicePackMajor);
+
     SYSTEM_INFO system_info = {0};
     GetNativeSystemInfo(&system_info);
 

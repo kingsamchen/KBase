@@ -12,9 +12,11 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <thread>
 
 #include "kbase\error_exception_util.h"
 #include "kbase\registry.h"
+#include "kbase\version_util.h"
 
 template<typename T>
 void print_out(T beg, T end, const char* dem = " ")
@@ -42,12 +44,8 @@ int main(int /*argc*/, char* /*argv[]*/)
     //    std::cout << ex.what();
     //}
 
-    kbase::RegValueIterator it(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run");
-    for (; it.Valid(); ++it) {
-        std::wcout << it.value_name() << L" -> " << std::wstring((const wchar_t*)it.value(), it.value_size() / 2) << std::endl;
-    }
-  
-    __nop();
+    auto ver = kbase::OSInfo::GetInstance()->version_number();
+    printf_s("%u.%u.%u", ver.major_version, ver.minor_version, ver.service_pack_major);
     _getch();
     return 0;
 }

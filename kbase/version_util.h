@@ -12,6 +12,7 @@
 #include <string>
 
 typedef void* HANDLE;
+typedef unsigned short WORD;
 
 namespace kbase {
 
@@ -39,6 +40,12 @@ public:
         WOW64_DISABLED,
         WOW64_ENABLED,
         WOW64_UNKNOWN
+    };
+
+    struct VersionNumber {
+        WORD major_version;
+        WORD minor_version;
+        WORD service_pack_major;
     };
 
     OSInfo(const OSInfo&) = delete;
@@ -77,6 +84,11 @@ public:
         return wow64_status_;
     }
 
+    VersionNumber version_number() const
+    {
+        return version_number_;
+    }
+
     unsigned long processors() const
     {
         return processors_;
@@ -101,6 +113,7 @@ private:
 private:
     SystemArchitecture architecture_;
     WOW64Status wow64_status_;
+    VersionNumber version_number_;
     bool is_server_;
     unsigned long processors_;
     unsigned long allocation_granularity_;
