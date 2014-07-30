@@ -10,8 +10,11 @@
 #define KBASE_SYS_INFO_H_
 
 #include <cstdint>
+#include <string>
 
 namespace kbase {
+
+class FilePath;
 
 class SysInfo {
 public:
@@ -20,6 +23,25 @@ public:
 
     // Returns the number of logical cores on the machine.
     static unsigned long NumberOfProcessors();
+
+    // Returns VM allocation granularity.
+    static unsigned long AllocationGranularity();
+
+    static std::string SystemArchitecture();
+
+    static std::string ProcessorModelName();
+
+    static std::string SystemVersion();
+
+    // Returns true, if the host system is server edition.
+    // Returns false, otherwise.
+    static bool ServerSystem();
+
+    // Returns true, if the host system is 64-bit system.
+    // Return false, if not or an error occured.
+    static bool RunningOn64BitSystem();
+
+    // The following AmountOf* functions would throw exception when they fail.
 
     // Returns the amount of actual physical memory, in bytes.
     static uint64_t AmountOfTotalPhysicalMemory();
@@ -35,6 +57,14 @@ public:
     // Returns the amount of unreserved and uncommitted memory currently in user mode
     // portion of the virtual address space of the calling process, in bytes.
     static uint64_t AmountOfAvailableVirtualMemory();
+    
+    // Returns the total number of bytes on a disk that are available to the user,
+    // i.e. quota related.
+    static uint64_t AmountOfTotalDiskSpace(const FilePath& path);
+
+    // Returns the total number of free bytes on a disk that are available to the
+    // user, i.e. quota related.
+    static uint64_t AmountOfFreeDiskSpace(const FilePath& path);
 };
 
 }   // namespace kbase
