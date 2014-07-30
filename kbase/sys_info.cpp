@@ -60,15 +60,12 @@ std::string SysInfo::SystemArchitecture()
         case OSInfo::X86_ARCHITECTURE:
             str = "X86";
             break;
-        
         case OSInfo::X64_ARCHITECTURE:
             str = "X86_64";
             break;
-
         case OSInfo::IA64_ARCHITECTURE:
             str = "IA64";
             break;
-
         default:
             str = "";
             break;
@@ -125,11 +122,9 @@ bool SysInfo::RunningOn64BitSystem()
         case OSInfo::WOW64_ENABLED:
             return true;
             break;
-
         case OSInfo::WOW64_DISABLED:
             return false;
             break;
-
         default:
             return false;
             break;
