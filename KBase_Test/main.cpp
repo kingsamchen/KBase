@@ -3,49 +3,10 @@
 
 #include "stdafx.h"
 
-#include <cassert>
-#include <cstdio>
-#include <conio.h>
-#include <fstream>
-#include <iostream>
-#include <iterator>
-#include <memory>
-#include <string>
-#include <vector>
-#include <thread>
+#include "gtest\gtest.h"
 
-#include "kbase\files\file_path.h"
-#include "kbase\error_exception_util.h"
-#include "kbase\registry.h"
-#include "kbase\sys_info.h"
-
-template<typename T>
-void print_out(T beg, T end, const char* dem = " ")
+int main(int argc, char* argv[])
 {
-    for (auto it = beg; it != end; ++it) {
-        std::wcout << *it << dem;
-    }
-
-    std::wcout << std::endl;
-}
-
-int main(int /*argc*/, char* /*argv[]*/)
-{
-    //try {
-    //    kbase::RegKey regkey(HKEY_LOCAL_MACHINE, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Management", KEY_READ);
-    //    std::wstring value;
-    //    bool ret = regkey.ReadValue(L"ProgramFilesPath", &value);
-    //    kbase::LastError error;
-    //    if (!ret) {
-    //        std::wcout << error.GetVerboseMessage() << std::endl;
-    //    } else {
-    //        std::wcout << value;
-    //    }
-    //} catch (const kbase::Win32Exception& ex) {
-    //    std::cout << ex.what();
-    //}
-    
-    std::cout << (kbase::SysInfo::AmountOfFreeDiskSpace(kbase::FilePath(L"D:\\")) >> 30);
-    _getch();
-    return 0;
+    testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
 }
