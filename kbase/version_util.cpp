@@ -16,6 +16,7 @@ namespace kbase {
 
 typedef OSInfo::WOW64Status WOW64Status;
 typedef OSInfo::VersionNumber VersionNumber;
+typedef OSInfo::Version Version;
 
 namespace {
 

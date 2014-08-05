@@ -16,16 +16,6 @@ typedef unsigned short WORD;
 
 namespace kbase {
 
-enum Version {
-    WIN_XP,
-    WIN_XP_SP3,
-    WIN_SERVER_2003,
-    WIN_VISTA,      // Also includes Server 2008.
-    WIN_7,              
-    WIN_8,          // Also includes Server 2012.
-    WIN_8_1,        // Also includes Server 2012 R2.
-};
-
 // It is a singleton.
 class OSInfo {
 public:
@@ -40,6 +30,16 @@ public:
         WOW64_DISABLED,
         WOW64_ENABLED,
         WOW64_UNKNOWN
+    };
+
+    enum Version {
+        WIN_XP,
+        WIN_XP_SP3,
+        WIN_SERVER_2003,
+        WIN_VISTA,      // Also includes Server 2008.
+        WIN_7,
+        WIN_8,          // Also includes Server 2012.
+        WIN_8_1,        // Also includes Server 2012 R2.
     };
 
     struct VersionNumber {

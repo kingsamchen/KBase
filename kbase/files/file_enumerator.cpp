@@ -49,7 +49,7 @@ FilePath FileEnumerator::Next()
                 cur_root.Append(pattern_);
             }
 
-            if (OSInfo::GetInstance()->IsVersionOrGreater(Version::WIN_7)) {
+            if (OSInfo::GetInstance()->IsVersionOrGreater(OSInfo::WIN_7)) {
                 find_handle_ = FindFirstFileEx(cur_root.value().c_str(),
                                                FindExInfoBasic,
                                                &find_data_,
