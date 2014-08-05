@@ -57,7 +57,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>..\$(Configuration);d:\src_lib\gtest-1.7.0\msvc\gtest\$(Configuration)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\$(Configuration);d:\src_lib\gtest-1.7.0\msvc\gtest-md\$(Configuration)</AdditionalLibraryDirectories>
       <AdditionalDependencies>kbase.lib;gtestd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -91,6 +91,7 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="samples\sys_info_unittest.cpp" />
+    <ClCompile Include="samples\version_util_unittest.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
