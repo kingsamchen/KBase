@@ -14,11 +14,16 @@
 
 namespace kbase {
 
+// This class automatically retrieves the last error code of the calling thread when
+// constructing an instance, and stores the value internally.
 class LastError {
 public:
     LastError();
 
     unsigned long last_error_code() const;
+
+    // Since the description of the error is intended for programmers only, the
+    // function insists on using English as its dispalying language.
     std::wstring GetVerboseMessage() const;
 
 private:
