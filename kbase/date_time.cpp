@@ -7,6 +7,8 @@
 #include <cassert>
 #include <stdexcept>
 
+#include "kbase\error_exception_util.h"
+
 namespace kbase {
 
 DateTime::DateTime(time_t time)
@@ -43,11 +45,27 @@ DateTime::DateTime(int year, int month, int day, int hour, int min, int sec)
 
 DateTime::DateTime(const SYSTEMTIME& systime)
 {
-    if (systime.wYear < 1900) {
-        throw std::invalid_argument("failed to convert to DateTime");
-    }
+    DateTime tmp(
+        static_cast<int>(systime.wYear), static_cast<int>(systime.wMonth),
+        static_cast<int>(systime.wDay), static_cast<int>(systime.wHour),
+        static_cast<int>(systime.wMinute), static_cast<int>(systime.wSecond));
+    
+    *this = tmp;
+}
 
-    // TODO: make DateTime from systime
+DateTime::DateTime(const FILETIME& filetime)
+{
+    FILETIME local_file_time;
+    BOOL ret = FileTimeToLocalFileTime(&filetime, &local_file_time);
+    ThrowLastErrorIf(!ret, "failed to convert FileTime to LocalFileTime");
+
+    SYSTEMTIME systime;
+    ret = FileTimeToSystemTime(&local_file_time, &systime);
+    ThrowLastErrorIf(!ret, "failed to convert FileTime to SystemTime");
+
+    DateTime tmp(systime);
+
+    *this = tmp;
 }
 
 }   // namespace kbase
