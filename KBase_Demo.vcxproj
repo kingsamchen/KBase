@@ -47,7 +47,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <WarningLevel>Level4</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
@@ -63,7 +63,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
@@ -80,6 +80,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="kbase\at_exit_manager.cpp" />
+    <ClCompile Include="kbase\date_time.cpp" />
     <ClCompile Include="kbase\error_exception_util.cpp" />
     <ClCompile Include="kbase\files\file_enumerator.cpp" />
     <ClCompile Include="kbase\files\file_path.cpp" />
@@ -96,6 +97,7 @@
   <ItemGroup>
     <ClInclude Include="kbase\at_exit_manager.h" />
     <ClInclude Include="kbase\auto_reset.h" />
+    <ClInclude Include="kbase\date_time.h" />
     <ClInclude Include="kbase\error_exception_util.h" />
     <ClInclude Include="kbase\files\file_enumerator.h" />
     <ClInclude Include="kbase\files\file_path.h" />
