@@ -40,6 +40,12 @@ public:
 
     static DateTime Now();
 
+    time_t AsTimeT() const;
+
+    SYSTEMTIME ToSystemTime() const;
+
+    FILETIME ToFileTime() const;
+
 private:
     internal::time_type time_;
 };
