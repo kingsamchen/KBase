@@ -249,7 +249,7 @@ bool RegKey::ReadValue(const wchar_t* value_name, std::wstring* value) const
 }
 
 bool RegKey::ReadValue(const wchar_t* value_name,
-                              std::vector<std::wstring>* values) const
+                       std::vector<std::wstring>* values) const
 {
     assert(values);
     const size_t kCharSize = sizeof(wchar_t);

@@ -53,11 +53,16 @@ DateTime::DateTime(const SYSTEMTIME& systime)
     *this = tmp;
 }
 
-DateTime::DateTime(const FILETIME& filetime)
+DateTime::DateTime(const FILETIME& filetime, bool in_utc /* = true */)
 {
+    BOOL ret;
     FILETIME local_file_time;
-    BOOL ret = FileTimeToLocalFileTime(&filetime, &local_file_time);
-    ThrowLastErrorIf(!ret, "failed to convert FileTime to LocalFileTime");
+    if (in_utc) {
+        ret = FileTimeToLocalFileTime(&filetime, &local_file_time);
+        ThrowLastErrorIf(!ret, "failed to convert FileTime to LocalFileTime");
+    } else {
+        local_file_time = filetime;
+    }
 
     SYSTEMTIME systime;
     ret = FileTimeToSystemTime(&local_file_time, &systime);
@@ -66,6 +71,68 @@ DateTime::DateTime(const FILETIME& filetime)
     DateTime tmp(systime);
 
     *this = tmp;
+}
+
+time_t DateTime::AsTimeT() const
+{
+    return static_cast<time_t>(time_);
+}
+
+struct tm DateTime::ToLocalTm() const
+{
+    struct tm local_time;
+    if (_localtime64_s(&local_time, &time_)) {
+        throw std::invalid_argument("failed to convert to local time");
+    }
+
+    return local_time;
+}
+
+struct tm DateTime::ToUTCTm() const
+{
+    struct tm utc_time;
+    if (_gmtime64_s(&utc_time, &time_)) {
+        throw std::invalid_argument("failed to convert to utc time");
+    }
+
+    return utc_time;
+}
+
+SYSTEMTIME DateTime::ToSystemTime() const
+{
+    struct tm local_time = ToLocalTm();
+    SYSTEMTIME sys_local_time;
+    sys_local_time.wYear = static_cast<WORD>(local_time.tm_year + 1900);
+    sys_local_time.wMonth = static_cast<WORD>(local_time.tm_mon + 1);
+    sys_local_time.wDay = static_cast<WORD>(local_time.tm_mday);
+    sys_local_time.wDayOfWeek = static_cast<WORD>(local_time.tm_wday);
+    sys_local_time.wHour = static_cast<WORD>(local_time.tm_hour);
+    sys_local_time.wMinute = static_cast<WORD>(local_time.tm_min);
+    sys_local_time.wSecond = static_cast<WORD>(local_time.tm_sec);
+    // not support for ms-precision.
+    sys_local_time.wMilliseconds = 0;
+
+    return sys_local_time;
+}
+
+FILETIME DateTime::ToFileTime() const
+{
+    FILETIME local_file_time = ToLocalFileTime();
+    FILETIME utc_file_time;
+    BOOL ret = LocalFileTimeToFileTime(&local_file_time, &utc_file_time);
+    ThrowLastErrorIf(!ret, "failed to convert local file time to file time");
+
+    return utc_file_time;
+}
+
+FILETIME DateTime::ToLocalFileTime() const
+{
+    FILETIME local_file_time;
+    SYSTEMTIME sys_local_time = ToSystemTime();
+    BOOL ret = SystemTimeToFileTime(&sys_local_time, &local_file_time);
+    ThrowLastErrorIf(!ret, "failed to convert system time to file time");
+
+    return local_file_time;
 }
 
 }   // namespace kbase
