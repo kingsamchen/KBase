@@ -46,6 +46,20 @@ public:
 
     static DateTime Now();
 
+    // comparisons
+
+    friend inline bool operator==(const DateTime& lhs, const DateTime& rhs);
+
+    friend inline bool operator!=(const DateTime& lhs, const DateTime& rhs);
+
+    friend inline bool operator<(const DateTime& lhs, const DateTime& rhs);
+
+    friend inline bool operator>(const DateTime& lhs, const DateTime& rhs);
+
+    friend inline bool operator<=(const DateTime& lhs, const DateTime& rhs);
+
+    friend inline bool operator>=(const DateTime& lhs, const DateTime& rhs);
+
     time_t AsTimeT() const;
 
     struct tm ToLocalTm() const;
@@ -59,10 +73,40 @@ public:
     FILETIME ToFileTime() const;
 
     FILETIME ToLocalFileTime() const;
-
+    
 private:
     internal::time_type time_;
 };
+
+inline bool operator==(const DateTime& lhs, const DateTime& rhs)
+{
+    return lhs.time_ == rhs.time_;
+}
+
+inline bool operator!=(const DateTime& lhs, const DateTime& rhs)
+{
+    return lhs.time_ != rhs.time_;
+}
+
+inline bool operator<(const DateTime& lhs, const DateTime& rhs)
+{
+    return lhs.time_ < rhs.time_;
+}
+
+inline bool operator>(const DateTime& lhs, const DateTime& rhs)
+{
+    return lhs.time_ > rhs.time_;
+}
+
+inline bool operator<=(const DateTime& lhs, const DateTime& rhs)
+{
+    return lhs.time_ <= rhs.time_;
+}
+
+inline bool operator>=(const DateTime& lhs, const DateTime& rhs)
+{
+    return lhs.time_ >= rhs.time_;
+}
 
 }   // namespace kbase
 

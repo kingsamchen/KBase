@@ -73,6 +73,12 @@ DateTime::DateTime(const FILETIME& filetime, bool in_utc /* = true */)
     *this = tmp;
 }
 
+// static
+DateTime DateTime::Now()
+{
+    return DateTime(time(nullptr));
+}
+
 time_t DateTime::AsTimeT() const
 {
     return static_cast<time_t>(time_);
