@@ -76,7 +76,7 @@ DateTime::DateTime(const FILETIME& filetime, bool in_utc /* = true */)
 // static
 DateTime DateTime::Now()
 {
-    return DateTime(time(nullptr));
+    return DateTime(_time64(nullptr));
 }
 
 time_t DateTime::AsTimeT() const

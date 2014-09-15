@@ -12,6 +12,7 @@
 #include <windows.h>
 
 #include <ctime>
+#include <string>
 
 namespace kbase {
 namespace internal {
@@ -45,6 +46,14 @@ public:
     explicit DateTime(const FILETIME& filetime, bool in_utc = true);
 
     static DateTime Now();
+
+    std::string ToString(const char* fmt);
+
+    std::wstring ToString(const wchar_t* fmt);
+
+    std::string ToUTCString(const char* fmt);
+
+    std::wstring ToUTCString(const wchar_t* fmt);
 
     // comparisons
 
