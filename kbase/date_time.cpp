@@ -12,21 +12,24 @@
 namespace kbase {
 
 DateTime::DateTime(time_t time)
-    : time_(time)
+    : time_(time, 0)
 {}
 
 DateTime::DateTime(int year, int month, int day)
-    : DateTime(year, month, day, 0, 0, 0)
+    : DateTime(year, month, day, 0, 0, 0, 0)
 {}
 
-DateTime::DateTime(int year, int month, int day, int hour, int min, int sec)
+DateTime::DateTime(int year, int month, int day, int hour, int min, int sec, int ms)
 {
-    assert(year >= 1900);
+    assert(year >= 1970);
     assert(month >= 1 && month <= 12);
     assert(day >= 1 && day <= 31);
     assert(hour >= 0 && hour <= 23);
     assert(min >= 0 && min <= 59);
     assert(sec >= 0 && sec <= 59);
+    assert(ms >= 0 && ms <= 999);
+
+    time_.milliseconds = ms;
 
     struct tm std_tm;
     std_tm.tm_year = year - 1900;
@@ -37,8 +40,8 @@ DateTime::DateTime(int year, int month, int day, int hour, int min, int sec)
     std_tm.tm_sec = sec;
     std_tm.tm_isdst = -1;
 
-    time_ = _mktime64(&std_tm);
-    if (time_ == -1) {
+    time_.major = _mktime64(&std_tm);
+    if (time_.major == -1) {
         throw std::invalid_argument("failed to convert to DateTime");
     }
 }
@@ -48,7 +51,8 @@ DateTime::DateTime(const SYSTEMTIME& systime)
     DateTime tmp(
         static_cast<int>(systime.wYear), static_cast<int>(systime.wMonth),
         static_cast<int>(systime.wDay), static_cast<int>(systime.wHour),
-        static_cast<int>(systime.wMinute), static_cast<int>(systime.wSecond));
+        static_cast<int>(systime.wMinute), static_cast<int>(systime.wSecond),
+        static_cast<int>(systime.wMilliseconds));
     
     *this = tmp;
 }
@@ -76,18 +80,21 @@ DateTime::DateTime(const FILETIME& filetime, bool in_utc /* = true */)
 // static
 DateTime DateTime::Now()
 {
-    return DateTime(_time64(nullptr));
+    SYSTEMTIME now;
+    GetLocalTime(&now);
+
+    return DateTime(now);
 }
 
 time_t DateTime::AsTimeT() const
 {
-    return static_cast<time_t>(time_);
+    return static_cast<time_t>(time_.major);
 }
 
 struct tm DateTime::ToLocalTm() const
 {
     struct tm local_time;
-    if (_localtime64_s(&local_time, &time_)) {
+    if (_localtime64_s(&local_time, &time_.major)) {
         throw std::invalid_argument("failed to convert to local time");
     }
 
@@ -97,7 +104,7 @@ struct tm DateTime::ToLocalTm() const
 struct tm DateTime::ToUTCTm() const
 {
     struct tm utc_time;
-    if (_gmtime64_s(&utc_time, &time_)) {
+    if (_gmtime64_s(&utc_time, &time_.major)) {
         throw std::invalid_argument("failed to convert to utc time");
     }
 
@@ -115,8 +122,7 @@ SYSTEMTIME DateTime::ToSystemTime() const
     sys_local_time.wHour = static_cast<WORD>(local_time.tm_hour);
     sys_local_time.wMinute = static_cast<WORD>(local_time.tm_min);
     sys_local_time.wSecond = static_cast<WORD>(local_time.tm_sec);
-    // not support for ms-precision.
-    sys_local_time.wMilliseconds = 0;
+    sys_local_time.wMilliseconds = static_cast<WORD>(time_.milliseconds);
 
     return sys_local_time;
 }

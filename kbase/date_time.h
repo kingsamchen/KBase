@@ -12,30 +12,49 @@
 #include <windows.h>
 
 #include <ctime>
+#include <cstdint>
 #include <string>
 
 namespace kbase {
 namespace internal {
 
-typedef __time64_t time_type;
+struct time_type {
+    time_type()
+    {}
+
+    time_type(__time64_t t, int ms)
+        : major(t), milliseconds(ms)
+    {}
+
+    int64_t compare(const time_type& other) const
+    {
+        int64_t this_value = major * 1000 + milliseconds;
+        int64_t other_value = other.major * 1000 + other.milliseconds;
+        return this_value - other_value;
+    }
+
+    __time64_t major;
+    int milliseconds;   // [0, 999]
+};
 
 }   // namespace internal
 
 // DateTime represents an absolute point in *local* time, internally represented as
-// the number of seconds since 1970/1/1 00:00 UTC, which is consistent with time_t.
+// a combination of the number of seconds since 1970/1/1 00:00 UTC, which is
+// consistent with time_t, and an integer that provides millisecond precision.
 // This class is intended to be designed as of value type.
 // Due to the constraints of struct tm, the |year| must be greater or equal
 // to 1900; otherwise, an exception would be thrown wihtin the contructor.
-// Beside, lack of support for microsecond-precision results in discrepancy with
-// SYSTEMTIME or FILETIME. Use with care when you have to convert to one of such
-// type, and also requires ms-precision.
+// Besides, because time_t is in second-unit whereas FILETIIME is in 100ns-unit,
+// none of them is interchangeable with DateTime. Use with care when you need
+// *widening* conversions to/from these types.
 class DateTime {
 public:
     explicit DateTime(time_t time);
 
     DateTime(int year, int month, int day);
 
-    DateTime(int year, int month, int day, int hour, int min, int sec);
+    DateTime(int year, int month, int day, int hour, int min, int sec, int ms);
 
     // Must be in local time.
     explicit DateTime(const SYSTEMTIME& systime);
@@ -75,8 +94,6 @@ public:
 
     struct tm ToUTCTm() const;
 
-    // In local time.
-    // Be wary of ms-precision problem.
     SYSTEMTIME ToSystemTime() const;
 
     FILETIME ToFileTime() const;
@@ -89,32 +106,32 @@ private:
 
 inline bool operator==(const DateTime& lhs, const DateTime& rhs)
 {
-    return lhs.time_ == rhs.time_;
+    return lhs.time_.compare(rhs.time_) == 0;
 }
 
 inline bool operator!=(const DateTime& lhs, const DateTime& rhs)
 {
-    return lhs.time_ != rhs.time_;
+    return !(lhs == rhs);
 }
 
 inline bool operator<(const DateTime& lhs, const DateTime& rhs)
 {
-    return lhs.time_ < rhs.time_;
+    return lhs.time_.compare(rhs.time_) < 0;
 }
 
 inline bool operator>(const DateTime& lhs, const DateTime& rhs)
 {
-    return lhs.time_ > rhs.time_;
+    return lhs.time_.compare(rhs.time_) > 0;
 }
 
 inline bool operator<=(const DateTime& lhs, const DateTime& rhs)
 {
-    return lhs.time_ <= rhs.time_;
+    return !(lhs > rhs);
 }
 
 inline bool operator>=(const DateTime& lhs, const DateTime& rhs)
 {
-    return lhs.time_ >= rhs.time_;
+    return !(lhs < rhs);
 }
 
 }   // namespace kbase

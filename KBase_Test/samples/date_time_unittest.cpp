@@ -22,13 +22,15 @@ struct TimeExplode {
     int hour;
     int min;
     int sec;
+    int ms;
     int weekday;
 };
 
 // Revealed from a demo.
 const time_t criterion_time_value = 1410548809;
-const TimeExplode criterion_local = {2014, 9, 13, 3, 6, 49, 6};    // +8
-const TimeExplode criterion_utc = {2014, 9, 12, 19, 6, 49, 5};     // UTC
+const TimeExplode criterion_local {2014, 9, 13, 3, 6, 49, 88, 6};    // +8
+const TimeExplode criterion_utc {2014, 9, 12, 19, 6, 49, 88, 5};     // UTC
+const FILETIME criterion_ft_utc{653561120, 30384405};
 
 bool EqualToTimeExplode(const struct tm& lhs, const TimeExplode& rhs)
 {
@@ -49,7 +51,14 @@ bool EqualToTimeExplode(const SYSTEMTIME& lhs, const TimeExplode& rhs)
            (lhs.wHour == rhs.hour) &&
            (lhs.wMinute == rhs.min) &&
            (lhs.wSecond == rhs.sec) &&
+           (lhs.wMilliseconds == rhs.ms) &&
            (lhs.wDayOfWeek == rhs.weekday);
+}
+
+bool EqualFileTime(const FILETIME& lhs, const FILETIME& rhs)
+{
+    return lhs.dwHighDateTime == rhs.dwHighDateTime &&
+           lhs.dwLowDateTime == rhs.dwLowDateTime;
 }
 
 }   // namespace
@@ -58,13 +67,15 @@ bool EqualToTimeExplode(const SYSTEMTIME& lhs, const TimeExplode& rhs)
 
 TEST_F(DateTimeTest, CtorForTimeMember)
 {
-    DateTime date_time(2014, 9, 13, 3, 6, 49);
+    DateTime date_time(2014, 9, 13, 3, 6, 49, 0);
+    DateTime date_time_with_ms(2014, 9, 13, 3, 6, 49, 999);
     EXPECT_TRUE(date_time.AsTimeT() == criterion_time_value);
+    EXPECT_TRUE(date_time_with_ms.AsTimeT() == criterion_time_value);
 }
 
 TEST_F(DateTimeTest, CtorForSystemTime)
 {
-    SYSTEMTIME time {2014, 9, 6, 13, 3, 6, 49};
+    SYSTEMTIME time {2014, 9, 6, 13, 3, 6, 49, 123};
     DateTime date_time(time);
 
     EXPECT_EQ(date_time.AsTimeT(), criterion_time_value);
@@ -72,7 +83,7 @@ TEST_F(DateTimeTest, CtorForSystemTime)
 
 TEST_F(DateTimeTest, CtorForFileTime)
 {
-    SYSTEMTIME time{2014, 9, 6, 13, 3, 6, 49};
+    SYSTEMTIME time{2014, 9, 6, 13, 3, 6, 49, 321};
     FILETIME file_time;
     SystemTimeToFileTime(&time, &file_time);
     DateTime date_time(file_time, false);
@@ -84,7 +95,7 @@ TEST_F(DateTimeTest, CtorForFileTime)
 
 TEST_F(DateTimeTest, ToLocalTime)
 {
-    DateTime date_time(2014, 9, 13, 3, 6, 49);
+    DateTime date_time(2014, 9, 13, 3, 6, 49, 0);
     auto local_tm = date_time.ToLocalTm();
 
     EXPECT_TRUE(EqualToTimeExplode(local_tm, criterion_local));
@@ -93,7 +104,7 @@ TEST_F(DateTimeTest, ToLocalTime)
 
 TEST_F(DateTimeTest, ToUTCTime)
 {
-    DateTime date_time(2014, 9, 13, 3, 6, 49);
+    DateTime date_time(2014, 9, 13, 3, 6, 49, 0);
     auto utc_tm = date_time.ToUTCTm();
 
     EXPECT_TRUE(EqualToTimeExplode(utc_tm, criterion_utc));
@@ -102,8 +113,16 @@ TEST_F(DateTimeTest, ToUTCTime)
 
 TEST_F(DateTimeTest, ToSystemTime)
 {
-    DateTime date_time(criterion_time_value);
+    DateTime date_time(2014, 9, 13, 3, 6, 49, 88);
     SYSTEMTIME sys_local_time = date_time.ToSystemTime();
 
     EXPECT_TRUE(EqualToTimeExplode(sys_local_time, criterion_local));
+}
+
+TEST_F(DateTimeTest, ToFileTime)
+{
+    DateTime date_time(2014, 7, 17, 0, 44, 3, 698);
+    FILETIME ft = date_time.ToFileTime();
+    DateTime tmp(ft, true);
+    EXPECT_TRUE(EqualFileTime(ft, criterion_ft_utc));
 }
