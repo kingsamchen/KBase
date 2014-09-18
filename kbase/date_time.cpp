@@ -11,7 +11,19 @@
 
 namespace kbase {
 
+const int internal::time_type::kScaleRatio = 1000;
+
 namespace {
+
+inline int64_t ExpandTimeT(__time64_t t)
+{
+    return t * internal::time_type::kScaleRatio;
+}
+
+inline __time64_t ShrinkToTimeT(int64_t t)
+{
+    return t / internal::time_type::kScaleRatio;
+}
 
 template<typename strT, typename FmtFunc>
 strT DateTimeToStringHelper(const struct tm& t,
@@ -31,7 +43,7 @@ strT DateTimeToStringHelper(const struct tm& t,
 }   // namespace
 
 DateTime::DateTime(time_t time)
-    : time_(time, 0)
+    : time_(ExpandTimeT(time))
 {}
 
 DateTime::DateTime(int year, int month, int day)
@@ -48,8 +60,6 @@ DateTime::DateTime(int year, int month, int day, int hour, int min, int sec, int
     assert(sec >= 0 && sec <= 59);
     assert(ms >= 0 && ms <= 999);
 
-    time_.milliseconds = ms;
-
     struct tm std_tm;
     std_tm.tm_year = year - 1900;
     std_tm.tm_mon = month - 1;
@@ -59,10 +69,12 @@ DateTime::DateTime(int year, int month, int day, int hour, int min, int sec, int
     std_tm.tm_sec = sec;
     std_tm.tm_isdst = -1;
 
-    time_.major = _mktime64(&std_tm);
-    if (time_.major == -1) {
+    time_t since_epoch = _mktime64(&std_tm);
+    if (since_epoch == -1) {
         throw std::invalid_argument("failed to convert to DateTime");
     }
+
+    time_.time_value = ExpandTimeT(since_epoch) + ms;
 }
 
 DateTime::DateTime(const SYSTEMTIME& systime)
@@ -131,13 +143,14 @@ std::wstring DateTime::ToUTCString(const wchar_t* fmt)
 
 time_t DateTime::AsTimeT() const
 {
-    return static_cast<time_t>(time_.major);
+    return static_cast<time_t>(ShrinkToTimeT(time_.time_value));
 }
 
 struct tm DateTime::ToLocalTm() const
 {
+    __time64_t t = ShrinkToTimeT(time_.time_value);
     struct tm local_time;
-    if (_localtime64_s(&local_time, &time_.major)) {
+    if (_localtime64_s(&local_time, &t)) {
         throw std::invalid_argument("failed to convert to local time");
     }
 
@@ -146,8 +159,9 @@ struct tm DateTime::ToLocalTm() const
 
 struct tm DateTime::ToUTCTm() const
 {
+    __time64_t t = ShrinkToTimeT(time_.time_value);
     struct tm utc_time;
-    if (_gmtime64_s(&utc_time, &time_.major)) {
+    if (_gmtime64_s(&utc_time, &t)) {
         throw std::invalid_argument("failed to convert to utc time");
     }
 
@@ -165,7 +179,8 @@ SYSTEMTIME DateTime::ToSystemTime() const
     sys_local_time.wHour = static_cast<WORD>(local_time.tm_hour);
     sys_local_time.wMinute = static_cast<WORD>(local_time.tm_min);
     sys_local_time.wSecond = static_cast<WORD>(local_time.tm_sec);
-    sys_local_time.wMilliseconds = static_cast<WORD>(time_.milliseconds);
+    sys_local_time.wMilliseconds = static_cast<WORD>(
+        time_.time_value % internal::time_type::kScaleRatio);
 
     return sys_local_time;
 }

@@ -126,3 +126,27 @@ TEST_F(DateTimeTest, ToFileTime)
     DateTime tmp(ft, true);
     EXPECT_TRUE(EqualFileTime(ft, criterion_ft_utc));
 }
+
+// comparisons
+
+TEST_F(DateTimeTest, ComparisonOperator)
+{
+    DateTime long_time_before(1989, 6, 4, 1, 2, 3, 4);
+    DateTime now = DateTime::Now();
+
+    // equal and not equal
+    DateTime now_copy = now;
+    EXPECT_TRUE(now == now_copy);
+    EXPECT_FALSE(now == long_time_before);
+    EXPECT_TRUE(now != long_time_before);
+    EXPECT_FALSE(now != now_copy);
+ 
+    // less and greater
+    EXPECT_TRUE(long_time_before < now);
+    EXPECT_TRUE(now > long_time_before);
+    EXPECT_TRUE(long_time_before <= now);
+    EXPECT_TRUE(now >= long_time_before);
+    EXPECT_TRUE(now >= now_copy);
+    EXPECT_TRUE(now <= now_copy);
+    EXPECT_FALSE(long_time_before > now);   
+}

@@ -20,28 +20,29 @@ namespace internal {
 
 struct time_type {
     time_type()
+        : time_value(0)
     {}
 
-    time_type(__time64_t t, int ms)
-        : major(t), milliseconds(ms)
+    time_type(int64_t val)
+        : time_value(val)
     {}
 
     int64_t compare(const time_type& other) const
     {
-        int64_t this_value = major * 1000 + milliseconds;
-        int64_t other_value = other.major * 1000 + other.milliseconds;
-        return this_value - other_value;
+        return time_value - other.time_value;
     }
 
-    __time64_t major;
-    int milliseconds;   // [0, 999]
+    static const int kScaleRatio;
+
+    // number of milliseconds since 1970/1/1 00:00 UTC.
+    int64_t time_value;
 };
 
 }   // namespace internal
 
 // DateTime represents an absolute point in *local* time, internally represented as
-// a combination of the number of seconds since 1970/1/1 00:00 UTC, which is
-// consistent with time_t, and an integer that provides millisecond precision.
+// the number of milliseconds since 1970/1/1 00:00 UTC, which is consistent with
+// time_t on second-precision.
 // This class is intended to be designed as of value type.
 // Due to the constraints of struct tm, the |year| must be greater or equal
 // to 1900; otherwise, an exception would be thrown wihtin the contructor.
@@ -88,6 +89,10 @@ public:
 
     friend inline bool operator>=(const DateTime& lhs, const DateTime& rhs);
 
+    // conversions
+
+    inline int64_t raw_time_since_epoch() const;
+
     time_t AsTimeT() const;
 
     struct tm ToLocalTm() const;
@@ -103,6 +108,11 @@ public:
 private:
     internal::time_type time_;
 };
+
+inline int64_t DateTime::raw_time_since_epoch() const
+{
+    return time_.time_value;
+}
 
 inline bool operator==(const DateTime& lhs, const DateTime& rhs)
 {
