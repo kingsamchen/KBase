@@ -11,6 +11,25 @@
 
 namespace kbase {
 
+namespace {
+
+template<typename strT, typename FmtFunc>
+strT DateTimeToStringHelper(const struct tm& t,
+                            const typename strT::value_type* fmt,
+                            FmtFunc fn)
+{
+    const size_t kBufferSize = 256U;
+    typename strT::value_type buffer[kBufferSize];
+
+    if (!fn(buffer, kBufferSize, fmt, &t)) {
+        return strT();
+    }
+
+    return strT(buffer);
+}
+
+}   // namespace
+
 DateTime::DateTime(time_t time)
     : time_(time, 0)
 {}
@@ -84,6 +103,30 @@ DateTime DateTime::Now()
     GetLocalTime(&now);
 
     return DateTime(now);
+}
+
+std::string DateTime::ToString(const char* fmt)
+{
+    auto t = ToLocalTm();
+    return DateTimeToStringHelper<std::string>(t, fmt, strftime);
+}
+
+std::wstring DateTime::ToString(const wchar_t* fmt)
+{
+    auto t = ToLocalTm();
+    return DateTimeToStringHelper<std::wstring>(t, fmt, wcsftime);
+}
+
+std::string DateTime::ToUTCString(const char* fmt)
+{
+    auto t = ToUTCTm();
+    return DateTimeToStringHelper<std::string>(t, fmt, strftime);
+}
+
+std::wstring DateTime::ToUTCString(const wchar_t* fmt)
+{
+    auto t = ToUTCTm();
+    return DateTimeToStringHelper<std::wstring>(t, fmt, wcsftime);
 }
 
 time_t DateTime::AsTimeT() const
