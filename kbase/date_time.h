@@ -53,6 +53,10 @@ class DateTime {
 public:
     explicit DateTime(time_t time);
 
+    DateTime(const DateTime&) = default;
+
+    DateTime& operator=(const DateTime&) = default;
+
     DateTime(int year, int month, int day);
 
     DateTime(int year, int month, int day, int hour, int min, int sec, int ms);
@@ -140,6 +144,126 @@ inline bool operator<=(const DateTime& lhs, const DateTime& rhs)
 }
 
 inline bool operator>=(const DateTime& lhs, const DateTime& rhs)
+{
+    return !(lhs < rhs);
+}
+
+// This class represents a time interval, in millisecond-unit.
+class DateTimeSpan {
+public:
+    DateTimeSpan();
+
+    DateTimeSpan(const DateTimeSpan&) = default;
+
+    DateTimeSpan(int64_t time_span);
+
+    DateTimeSpan& operator=(const DateTimeSpan&) = default;
+
+    inline int64_t time_span() const;
+
+    inline DateTimeSpan& operator++();
+
+    inline DateTimeSpan& operator--();
+
+    inline DateTimeSpan& operator+=(const DateTimeSpan& span);
+
+    inline DateTimeSpan& operator-=(const DateTimeSpan& span);
+
+    friend inline bool operator==(const DateTimeSpan& lhs, const DateTimeSpan& rhs);
+
+    friend inline bool operator!=(const DateTimeSpan& lhs, const DateTimeSpan& rhs);
+
+    friend inline bool operator<(const DateTimeSpan& lhs, const DateTimeSpan& rhs);
+
+    friend inline bool operator>(const DateTimeSpan& lhs, const DateTimeSpan& rhs);
+
+    friend inline bool operator<=(const DateTimeSpan& lhs, const DateTimeSpan& rhs);
+
+    friend inline bool operator>=(const DateTimeSpan& lhs, const DateTimeSpan& rhs);
+
+private:
+    int64_t time_span_;
+};
+
+inline int64_t DateTimeSpan::time_span() const
+{
+    return time_span_;
+}
+
+// arithmetics
+
+inline DateTimeSpan& DateTimeSpan::operator++()
+{
+    ++time_span_;
+
+    return *this;
+}
+
+inline DateTimeSpan& DateTimeSpan::operator--()
+{
+    --time_span_;
+
+    return *this;
+}
+
+inline DateTimeSpan& DateTimeSpan::operator+=(const DateTimeSpan& span)
+{
+    time_span_ += span.time_span_;
+
+    return *this;
+}
+
+inline DateTimeSpan& DateTimeSpan::operator-=(const DateTimeSpan& span)
+{
+    time_span_ -= span.time_span_;
+
+    return *this;
+}
+
+inline const DateTimeSpan operator+(const DateTimeSpan& lhs, const DateTimeSpan& rhs)
+{
+    DateTimeSpan ret(lhs);
+    ret += rhs;
+
+    return ret;
+}
+
+inline const DateTimeSpan operator-(const DateTimeSpan& lhs, const DateTimeSpan& rhs)
+{
+    DateTimeSpan ret(lhs);
+    ret -= rhs;
+
+    return ret;
+}
+
+// comparisons
+
+inline bool operator==(const DateTimeSpan& lhs, const DateTimeSpan& rhs)
+{
+    return lhs.time_span_ == rhs.time_span_;
+}
+
+inline bool operator!=(const DateTimeSpan& lhs, const DateTimeSpan& rhs)
+{
+    return !(lhs == rhs);
+}
+
+inline bool operator<(const DateTimeSpan& lhs, const DateTimeSpan& rhs)
+{
+    return lhs.time_span_ < rhs.time_span_;
+}
+
+inline bool operator>(const DateTimeSpan& lhs, const DateTimeSpan& rhs)
+{
+    return lhs.time_span_ > rhs.time_span_;
+}
+
+inline bool operator<=(const DateTimeSpan& lhs, const DateTimeSpan& rhs)
+{
+    return !(lhs > rhs);
+}
+
+inline bool operator>=(const DateTimeSpan& lhs, const DateTimeSpan& rhs)
 {
     return !(lhs < rhs);
 }

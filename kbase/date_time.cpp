@@ -205,4 +205,14 @@ FILETIME DateTime::ToLocalFileTime() const
     return local_file_time;
 }
 
+// --* DateTimeSpan *--
+
+DateTimeSpan::DateTimeSpan()
+    : time_span_(0)
+{}
+
+DateTimeSpan::DateTimeSpan(int64_t time_span)
+    : time_span_(time_span)
+{}
+
 }   // namespace kbase
