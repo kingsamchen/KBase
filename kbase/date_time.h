@@ -159,7 +159,25 @@ public:
 
     DateTimeSpan& operator=(const DateTimeSpan&) = default;
 
+    static DateTimeSpan FromDays(int64_t days);
+
+    static DateTimeSpan FromHours(int64_t hours);
+
+    static DateTimeSpan FromMinutes(int64_t mins);
+
+    static DateTimeSpan FromSeconds(int64_t secs);
+
     inline int64_t time_span() const;
+
+    inline int64_t AsDays() const;
+
+    inline int64_t AsHours() const;
+
+    inline int64_t AsMinutes() const;
+
+    inline int64_t AsSeconds() const;
+
+    // arithmetics
 
     inline DateTimeSpan& operator++();
 
@@ -168,6 +186,8 @@ public:
     inline DateTimeSpan& operator+=(const DateTimeSpan& span);
 
     inline DateTimeSpan& operator-=(const DateTimeSpan& span);
+
+    // comparisons
 
     friend inline bool operator==(const DateTimeSpan& lhs, const DateTimeSpan& rhs);
 
@@ -188,6 +208,26 @@ private:
 inline int64_t DateTimeSpan::time_span() const
 {
     return time_span_;
+}
+
+inline int64_t DateTimeSpan::AsDays() const
+{
+    return AsHours() / 24;
+}
+
+inline int64_t DateTimeSpan::AsHours() const
+{
+    return AsMinutes() / 60;
+}
+
+inline int64_t DateTimeSpan::AsMinutes() const
+{
+    return AsSeconds() / 60;
+}
+
+inline int64_t DateTimeSpan::AsSeconds() const
+{
+    return time_span_ / 1000;
 }
 
 // arithmetics

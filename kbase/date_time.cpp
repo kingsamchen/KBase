@@ -215,4 +215,28 @@ DateTimeSpan::DateTimeSpan(int64_t time_span)
     : time_span_(time_span)
 {}
 
+// static
+DateTimeSpan DateTimeSpan::FromDays(int64_t days)
+{
+    return DateTimeSpan(days * 86400 * 1000);
+}
+
+// static
+DateTimeSpan DateTimeSpan::FromHours(int64_t hours)
+{
+    return DateTimeSpan(hours * 3600 * 1000);
+}
+
+// static
+DateTimeSpan DateTimeSpan::FromMinutes(int64_t mins)
+{
+    return DateTimeSpan(mins * 60 * 1000);
+}
+
+// static
+DateTimeSpan DateTimeSpan::FromSeconds(int64_t secs)
+{
+    return DateTimeSpan(secs * 1000);
+}
+
 }   // namespace kbase
