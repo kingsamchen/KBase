@@ -14,12 +14,10 @@
 
 #include <windows.h>
 
+#include "kbase/date_time.h"
 #include "kbase/files/file_path.h"
 
 namespace kbase {
-
-// TODO: replace with kbase::Time
-typedef SYSTEMTIME Time;
 
 class FileEnumerator {
 public:
@@ -34,7 +32,7 @@ public:
         // Only file name, does not contain any path inforamtion.
         FilePath GetName() const;
 
-        Time GetLastModifiedTime() const;
+        DateTime GetLastModifiedTime() const;
 
         uint64_t GetSize() const;
 

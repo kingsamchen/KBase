@@ -44,7 +44,7 @@ struct time_type {
 
     static const int kScaleRatio;
 
-    // number of milliseconds since 1970/1/1 00:00 UTC.
+    // Number of milliseconds since 1970/1/1 00:00 UTC.
     int64_t time_value;
 };
 
@@ -57,7 +57,7 @@ public:
 
     DateTimeSpan(const DateTimeSpan&) = default;
 
-    DateTimeSpan(int64_t time_span);
+    explicit DateTimeSpan(int64_t time_span);
 
     DateTimeSpan& operator=(const DateTimeSpan&) = default;
 
@@ -79,7 +79,7 @@ public:
 
     inline int64_t AsSeconds() const;
 
-    // arithmetics
+    // Arithmetics
 
     inline DateTimeSpan& operator++();
 
@@ -89,7 +89,7 @@ public:
 
     inline DateTimeSpan& operator-=(const DateTimeSpan& span);
 
-    // comparisons
+    // Comparisons
 
     friend inline bool operator==(const DateTimeSpan& lhs, const DateTimeSpan& rhs);
 
@@ -132,7 +132,7 @@ inline int64_t DateTimeSpan::AsSeconds() const
     return time_span_ / 1000;
 }
 
-// arithmetics
+// Arithmetics
 
 inline DateTimeSpan& DateTimeSpan::operator++()
 {
@@ -178,7 +178,7 @@ inline const DateTimeSpan operator-(const DateTimeSpan& lhs, const DateTimeSpan&
     return ret;
 }
 
-// comparisons
+// Comparisons
 
 inline bool operator==(const DateTimeSpan& lhs, const DateTimeSpan& rhs)
 {
@@ -249,13 +249,13 @@ public:
 
     std::wstring ToUTCString(const wchar_t* fmt);
 
-    // arithmetics
+    // Arithmetics
 
     inline DateTime& operator+=(const DateTimeSpan& span);
 
     inline DateTime& operator-=(const DateTimeSpan& span);
 
-    // comparisons
+    // Comparisons
 
     friend inline bool operator==(const DateTime& lhs, const DateTime& rhs);
 
@@ -269,7 +269,7 @@ public:
 
     friend inline bool operator>=(const DateTime& lhs, const DateTime& rhs);
 
-    // conversions
+    // Conversions
 
     inline int64_t raw_time_since_epoch() const;
 

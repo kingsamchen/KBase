@@ -147,12 +147,9 @@ FilePath FileEnumerator::FileInfo::GetName() const
     return FilePath(find_data_.cFileName);
 }
 
-kbase::Time FileEnumerator::FileInfo::GetLastModifiedTime() const
+DateTime FileEnumerator::FileInfo::GetLastModifiedTime() const
 {
-    SYSTEMTIME last_modified_time;
-    FileTimeToSystemTime(&find_data_.ftLastWriteTime, &last_modified_time);
-
-    return last_modified_time;
+    return DateTime(find_data_.ftLastWriteTime);
 }
 
 uint64_t FileEnumerator::FileInfo::GetSize() const
