@@ -150,3 +150,16 @@ TEST_F(DateTimeTest, ComparisonOperator)
     EXPECT_TRUE(now <= now_copy);
     EXPECT_FALSE(long_time_before > now);   
 }
+
+// arithmetics
+
+TEST_F(DateTimeTest, Arithmetics)
+{
+    DateTime old_day(2014, 9, 19, 20, 15, 22, 0);
+    DateTime future(2014, 9, 19, 20, 16, 2, 0);
+    DateTimeSpan span = DateTimeSpan::FromSeconds(40);
+
+    old_day += span;
+
+    EXPECT_EQ(old_day, future);
+}
