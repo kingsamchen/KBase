@@ -4,9 +4,9 @@
 
 #include "sys_info.h"
 
-#include <tuple>
-
 #include <Windows.h>
+
+#include <tuple>
 
 #include "kbase\error_exception_util.h"
 #include "kbase\files\file_path.h"
@@ -103,6 +103,16 @@ std::string SysInfo::SystemVersion()
     }
 
     return version;
+}
+
+// static
+uint64_t SysInfo::Uptime()
+{
+    unsigned long long raw_time = 0;
+    BOOL ret = QueryUnbiasedInterruptTime(&raw_time);
+    ThrowLastErrorIf(!ret, "failed to query unbiased interrupt time");
+
+    return raw_time / (10 * 1000);
 }
 
 // static

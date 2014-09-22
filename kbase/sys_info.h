@@ -33,6 +33,11 @@ public:
 
     static std::string SystemVersion();
 
+    // Returns the uptime of the system.
+    // This duration is in millisecond-unit, and does not include time the system
+    // spends in sleep or hibernation.
+    static uint64_t Uptime();
+
     // Returns true, if the host system is server edition.
     // Returns false, otherwise.
     static bool ServerSystem();

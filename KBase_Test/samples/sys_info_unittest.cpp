@@ -41,6 +41,9 @@ TEST_F(SysInfoTest, SystemInfo)
 
     // Is the host system 64-bit?
     EXPECT_TRUE(kbase::SysInfo::RunningOn64BitSystem());
+
+    // Uptime is not zero.
+    EXPECT_GT(kbase::SysInfo::Uptime(), 0UL);
 }
 
 TEST_F(SysInfoTest, MemoryInfo)
