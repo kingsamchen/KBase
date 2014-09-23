@@ -14,6 +14,37 @@
 
 namespace kbase {
 
+#define GUARANTOR_A(x) GUARANTOR_OP(x, B)
+#define GUARANTOR_B(x) GUARANTOR_OP(x, A)
+#define GURANTOR_OP(x, next) \
+    GUARANTOR_A.current_value(#x, (x)).GUARANTOR_ ## next
+
+#define MAKE_GUARANTOR(exp) Guarantor(exp)
+
+#define ENSURE(exp)             \
+    if ((exp)) ;                \
+    else MAKE_GUARANTOR(#exp).context(__FILE__, __LINE__).GUARANTOR_A
+
+class Guarantor {
+public:
+    Guarantor(const char* msg);
+    ~Guarantor() = default;
+
+    Guarantor(const Guarantor&) = delete;
+    Guarantor& operator=(const Guarantor&) = delete;
+
+    Guarantor& context(const char* file_name, int line);
+
+    template<typename T>
+    Guarantor& current_value(const char* name, const T& value);
+
+    Guarantor& GUARANTOR_A;
+    Guarantor& GUARANTOR_B;
+
+private:
+    std::string exception_desc_;
+};
+
 // This class automatically retrieves the last error code of the calling thread when
 // constructing an instance, and stores the value internally.
 class LastError {
