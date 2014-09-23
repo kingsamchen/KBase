@@ -4,9 +4,10 @@
 
 #include "stdafx.h"
 
-#include <map>
-
 #include "windows.h"
+
+#include <map>
+#include <vector>
 
 #include "gtest\gtest.h"
 #include "kbase\error_exception_util.h"
@@ -32,6 +33,12 @@ void ErrorEmitter(DWORD error_code)
 void ClearLastError()
 {
     SetLastError(0);
+}
+
+void EnsureMacroTestIntermediate(const std::vector<int>& vec)
+{
+    // Must explicitly call the function to throw exception.
+    ENSURE(vec.size() >= 0 && vec.size() <= 5)(vec.size()).raise();
 }
 
 }   // namespace
@@ -73,4 +80,10 @@ TEST_F(ErrorExceptionUtilTest, ThrowLastError)
 
     ErrorEmitter(64);
     EXPECT_THROW(ThrowLastErrorIf(GetLastError() != ERROR_SUCCESS, ""), Win32Exception);
+}
+
+TEST_F(ErrorExceptionUtilTest, EnsureMacro)
+{
+    std::vector<int> v {1, 2, 3, 4, 5, 6, 7, 8, 9};
+    EXPECT_ANY_THROW(EnsureMacroTestIntermediate(v));
 }

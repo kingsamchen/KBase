@@ -17,6 +17,22 @@
 
 namespace kbase {
 
+namespace internal {
+
+// Defines the macro _ENSURE_DISABLED ahead of including this file to disable this
+// functionality.
+#if defined(_ENSURE_DISABLED)
+#define ENSURE_MODE 0
+#else
+#define ENSURE_MODE 1
+#endif
+
+enum { ENSURE_ON = ENSURE_MODE };
+
+#undef ENSURE_MODE
+
+}   // namespace internal
+
 #define GUARANTOR_A(x) GUARANTOR_OP(x, B)
 #define GUARANTOR_B(x) GUARANTOR_OP(x, A)
 #define GUARANTOR_OP(x, next) \
@@ -25,10 +41,9 @@ namespace kbase {
 #define MAKE_GUARANTOR(exp) kbase::Guarantor(exp, __FILE__, __LINE__)
 
 #define ENSURE(exp)                                                       \
-    if ((exp)) ;                                                          \
+    if ((exp || !kbase::internal::ENSURE_ON)) ;                           \
     else                                                                  \
         MAKE_GUARANTOR(#exp).GUARANTOR_A     
-        /*throw std::runtime_error("bla");*/ 
 
 class Guarantor {
 public:
@@ -36,7 +51,7 @@ public:
     {
         std::string context  
             = StringPrintf("Failed: %s\nFile: %s Line: %d\nCurrent Variables:\n",
-                         msg, file_name, line);
+                           msg, file_name, line);
         exception_desc_ << context;
     }
 
@@ -45,23 +60,22 @@ public:
     Guarantor(const Guarantor&) = delete;
     Guarantor& operator=(const Guarantor&) = delete;
 
-    //Guarantor& context(const char* file_name, int line);
-
+    // Incorporates variable value.
     template<typename T>
     Guarantor& current_value(const char* name, const T& value)
     {
-        exception_desc_ << name << " = " << value << "\n";
+        exception_desc_ << "    " << name << " = " << value << "\n";
         return *this;
     }
 
-    // stubs
+    void raise()
+    {
+        throw std::runtime_error(exception_desc_.str());
+    }
+
+    // access stubs
     Guarantor& GUARANTOR_A = *this;
     Guarantor& GUARANTOR_B = *this;
-
-    std::string exception_description() const
-    {
-        return exception_desc_.str();
-    }
 
 private:
     std::ostringstream exception_desc_;
