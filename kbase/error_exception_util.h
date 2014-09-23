@@ -9,40 +9,62 @@
 #ifndef KBASE_ERROR_EXCEPTION_UTIL_H_
 #define KBASE_ERROR_EXCEPTION_UTIL_H_
 
+#include <sstream>
 #include <string>
 #include <stdexcept>
+
+#include "kbase/strings/string_format.h"
 
 namespace kbase {
 
 #define GUARANTOR_A(x) GUARANTOR_OP(x, B)
 #define GUARANTOR_B(x) GUARANTOR_OP(x, A)
-#define GURANTOR_OP(x, next) \
+#define GUARANTOR_OP(x, next) \
     GUARANTOR_A.current_value(#x, (x)).GUARANTOR_ ## next
 
-#define MAKE_GUARANTOR(exp) Guarantor(exp)
+#define MAKE_GUARANTOR(exp) kbase::Guarantor(exp, __FILE__, __LINE__)
 
-#define ENSURE(exp)             \
-    if ((exp)) ;                \
-    else MAKE_GUARANTOR(#exp).context(__FILE__, __LINE__).GUARANTOR_A
+#define ENSURE(exp)                                                       \
+    if ((exp)) ;                                                          \
+    else                                                                  \
+        MAKE_GUARANTOR(#exp).GUARANTOR_A     
+        /*throw std::runtime_error("bla");*/ 
 
 class Guarantor {
 public:
-    Guarantor(const char* msg);
+    Guarantor(const char* msg, const char* file_name, int line)
+    {
+        std::string context  
+            = StringPrintf("Failed: %s\nFile: %s Line: %d\nCurrent Variables:\n",
+                         msg, file_name, line);
+        exception_desc_ << context;
+    }
+
     ~Guarantor() = default;
 
     Guarantor(const Guarantor&) = delete;
     Guarantor& operator=(const Guarantor&) = delete;
 
-    Guarantor& context(const char* file_name, int line);
+    //Guarantor& context(const char* file_name, int line);
 
     template<typename T>
-    Guarantor& current_value(const char* name, const T& value);
+    Guarantor& current_value(const char* name, const T& value)
+    {
+        exception_desc_ << name << " = " << value << "\n";
+        return *this;
+    }
 
-    Guarantor& GUARANTOR_A;
-    Guarantor& GUARANTOR_B;
+    // stubs
+    Guarantor& GUARANTOR_A = *this;
+    Guarantor& GUARANTOR_B = *this;
+
+    std::string exception_description() const
+    {
+        return exception_desc_.str();
+    }
 
 private:
-    std::string exception_desc_;
+    std::ostringstream exception_desc_;
 };
 
 // This class automatically retrieves the last error code of the calling thread when
