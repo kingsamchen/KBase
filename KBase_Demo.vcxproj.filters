@@ -71,6 +71,7 @@
     <ClInclude Include="kbase\sys_info.h" />
     <ClInclude Include="kbase\date_time.h" />
     <ClInclude Include="kbase\path_service.h" />
+    <ClInclude Include="kbase\base_path_provider.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />

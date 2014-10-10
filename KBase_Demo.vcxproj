@@ -98,6 +98,7 @@
   <ItemGroup>
     <ClInclude Include="kbase\at_exit_manager.h" />
     <ClInclude Include="kbase\auto_reset.h" />
+    <ClInclude Include="kbase\base_path_provider.h" />
     <ClInclude Include="kbase\date_time.h" />
     <ClInclude Include="kbase\error_exception_util.h" />
     <ClInclude Include="kbase\files\file_enumerator.h" />
