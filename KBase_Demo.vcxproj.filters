@@ -39,6 +39,7 @@
     <ClCompile Include="kbase\error_exception_util.cpp" />
     <ClCompile Include="kbase\sys_info.cpp" />
     <ClCompile Include="kbase\date_time.cpp" />
+    <ClCompile Include="kbase\path_service.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="kbase\at_exit_manager.h" />
@@ -69,6 +70,7 @@
     <ClInclude Include="kbase\error_exception_util.h" />
     <ClInclude Include="kbase\sys_info.h" />
     <ClInclude Include="kbase\date_time.h" />
+    <ClInclude Include="kbase\path_service.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />
