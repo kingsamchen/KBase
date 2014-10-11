@@ -12,6 +12,7 @@ namespace kbase {
 
 enum : PathService::PathKey {
     BASE_PATH_START = 0,
+    DIR_CURRENT,            // current directory
     // TODO: add more keys
     BASE_PATH_END
 };
