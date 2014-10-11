@@ -9,6 +9,7 @@
 #ifndef KBASE_ERROR_EXCEPTION_UTIL_H_
 #define KBASE_ERROR_EXCEPTION_UTIL_H_
 
+#include <cassert>
 #include <sstream>
 #include <string>
 #include <stdexcept>
@@ -19,8 +20,9 @@ namespace kbase {
 
 namespace internal {
 
-// Defines the macro _ENSURE_DISABLED ahead of including this file to disable this
-// functionality.
+// Defines the macro _ENSURE_DISABLED ahead of including this file to disable error
+// context catching functionality.
+// Be wary of that this marco does not disable assert in DEBUG mode.
 #if defined(_ENSURE_DISABLED)
 #define ENSURE_MODE 0
 #else
@@ -40,10 +42,18 @@ enum { ENSURE_ON = ENSURE_MODE };
 
 #define MAKE_GUARANTOR(exp) kbase::Guarantor(exp, __FILE__, __LINE__)
 
-#define ENSURE(exp)                                                       \
+#define DO_ENSURE(exp)                                                    \
     if ((exp || !kbase::internal::ENSURE_ON)) ;                           \
     else                                                                  \
         MAKE_GUARANTOR(#exp).GUARANTOR_A     
+
+#ifdef NDEBUG
+#define ENSURE(exp) DO_ENSURE(exp)
+#else
+#define ENSURE(exp)                                                       \
+  assert(exp);                                                            \
+  DO_ENSURE(exp)
+#endif
 
 class Guarantor {
 public:
@@ -58,6 +68,7 @@ public:
     ~Guarantor() = default;
 
     Guarantor(const Guarantor&) = delete;
+
     Guarantor& operator=(const Guarantor&) = delete;
 
     // Incorporates variable value.
