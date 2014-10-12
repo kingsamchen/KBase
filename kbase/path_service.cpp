@@ -57,7 +57,7 @@ PathData& GetPathData()
 }
 
 // Returns the path corresponding to the key, or an empty path if no cache was found.
-// The caller must be protected with a lock.
+// The caller takes responsibility for thread safety.
 FilePath GetPathFromCache(PathKey key, const PathData& path_data)
 {
     if (path_data.cache_disabled || key == kbase::DIR_CURRENT) {
@@ -70,6 +70,15 @@ FilePath GetPathFromCache(PathKey key, const PathData& path_data)
     }
 
     return FilePath();
+}
+
+// The caller takes responsibility for thread safety.
+void EnsureNoPathKeyOverlapped(PathKey start, PathKey end, const PathData& path_data)
+{
+    for (const PathProvider& provider : path_data.providers) {
+        ENSURE(start >= provider.end || end <= provider.start)
+            (start)(end)(provider.start)(provider.end).raise();
+    }
 }
 
 }   // namespace
@@ -121,6 +130,54 @@ FilePath PathService::Get(PathKey key)
     }
     
     return path;
+}
+
+// static
+void PathService::RegisterPathProvider(ProviderFunc provider,
+                                       PathKey start, PathKey end)
+{
+    PathData& path_data = GetPathData();
+    ENSURE(path_data.providers.empty() == false).raise();
+#ifdef _DEBUG
+    ENSURE(start < end)(start)(end).raise();
+#endif
+
+    std::lock_guard<std::mutex> scoped_lock(path_data.lock);
+
+#ifdef _DEBUG
+    EnsureNoPathKeyOverlapped(start, end, path_data);
+#endif
+
+    path_data.providers.emplace_front(PathProvider { provider, start, end });
+}
+
+// static
+void PathService::DisableCache()
+{
+    PathData& path_data = GetPathData();
+
+    std::lock_guard<std::mutex> scoped_lock(path_data.lock);
+
+    if (path_data.cache_disabled) {
+        return;
+    }
+
+    path_data.cached_path_table.clear();
+    path_data.cache_disabled = true;
+}
+
+// static
+void PathService::EnableCache()
+{
+    PathData& path_data = GetPathData();
+
+    std::lock_guard<std::mutex> scoped_lock(path_data.lock);
+
+    if (!path_data.cache_disabled) {
+        return;
+    }
+
+    path_data.cache_disabled = false;
 }
 
 }   // namespace kbase
