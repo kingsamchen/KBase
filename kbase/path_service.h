@@ -8,14 +8,15 @@
 
 #include <functional>
 
+#include "kbase\basic_types.h"
+#include "kbase\base_path_provider.h"
 #include "kbase\files\file_path.h"
 
 namespace kbase {
 
 class PathService {
 public:
-    typedef int PathKey;
-    typedef std::function<FilePath(PathService::PathKey)> ProviderFunc;
+    typedef std::function<FilePath(PathKey)> ProviderFunc;
 
     PathService() = delete;
 

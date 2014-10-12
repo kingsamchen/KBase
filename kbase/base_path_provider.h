@@ -6,11 +6,11 @@
 #ifndef KBASE_BASE_PATH_PROVIDER_H_
 #define KBASE_BASE_PATH_PROVIDER_H_
 
-#include "kbase\path_service.h"
+#include "kbase\basic_types.h"
 
 namespace kbase {
 
-enum : PathService::PathKey {
+enum BasePathKey : PathKey {
     BASE_PATH_START = 0,
     DIR_CURRENT,            // current directory
     // TODO: add more keys

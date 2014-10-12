@@ -40,6 +40,7 @@
     <ClCompile Include="kbase\sys_info.cpp" />
     <ClCompile Include="kbase\date_time.cpp" />
     <ClCompile Include="kbase\path_service.cpp" />
+    <ClCompile Include="kbase\base_path_provider.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="kbase\at_exit_manager.h" />
@@ -72,6 +73,7 @@
     <ClInclude Include="kbase\date_time.h" />
     <ClInclude Include="kbase\path_service.h" />
     <ClInclude Include="kbase\base_path_provider.h" />
+    <ClInclude Include="kbase\basic_types.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />
