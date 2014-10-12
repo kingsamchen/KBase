@@ -56,10 +56,11 @@ PathData& GetPathData()
     return g_path_data;
 }
 
+// Returns the path corresponding to the key, or an empty path if no cache was found.
 // The caller must be protected with a lock.
 FilePath GetPathFromCache(PathKey key, const PathData& path_data)
 {
-    if (path_data.cache_disabled) {
+    if (path_data.cache_disabled || key == kbase::DIR_CURRENT) {
         return FilePath();
     }
 
@@ -82,34 +83,22 @@ FilePath PathService::Get(PathKey key)
     ENSURE(key >= BASE_PATH_START)(key).raise();
     ENSURE(path_data.providers.empty() == false).raise();
 
-    // Special case. We always use our provider for retrieving current directory and
-    // never cache it.
-    // Since there are probably only few providers, the way we locate our base
-    // provider would not be a performance bottleneck.
-    if (key == DIR_CURRENT) {
-        auto get_base_provider = [&path_data]()->ProviderChain::iterator {
-            auto it = path_data.providers.begin();
-            while (std::next(it) != path_data.providers.end()) {
-                ++it;
-            }
-
-            return it;
-        };
-
-        return get_base_provider()->fn(key);
-    }
-
+    ProviderChain::const_iterator provider;
     {
         std::lock_guard<std::mutex> scoped_lock(path_data.lock);
         FilePath&& path = GetPathFromCache(key, path_data);
         if (!path.empty()) {
             return path;
         }
+
+        // To prevent head being modified by accidently registering a new provider 
+        // from other threads.
+        provider = path_data.providers.begin();
     }
 
     FilePath path;
-    for (const PathProvider& provider : path_data.providers) {
-        path = provider.fn(key);
+    for (; provider != path_data.providers.end(); ++provider) {
+        path = provider->fn(key);
         if (!path.empty()) {
             break;
         }
@@ -125,8 +114,9 @@ FilePath PathService::Get(PathKey key)
         // TODO: MakeAbsolutePath(path)
     }
 
+    // Special case for current direcotry: We never cache it.
     std::lock_guard<std::mutex> scoped_lock(path_data.lock);
-    if (!path_data.cache_disabled) {
+    if (!path_data.cache_disabled && key != DIR_CURRENT) {
         path_data.cached_path_table[key] = path;
     }
     
