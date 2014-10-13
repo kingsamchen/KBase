@@ -2,13 +2,28 @@
 #include "kbase\base_path_provider.h"
 
 #include <Windows.h>
+#include <ShlObj.h>
 
+#include "kbase\error_exception_util.h"
 #include "kbase\path_service.h"
+#include "kbase\scope_guard.h"
 
 // See @ http://blogs.msdn.com/b/oldnewthing/archive/2004/10/25/247180.aspx
 extern "C" IMAGE_DOS_HEADER __ImageBase;
 
 namespace {
+
+using kbase::FilePath;
+
+FilePath ShellGetFolderPath(const KNOWNFOLDERID& folder_id)
+{
+    wchar_t* folder_path = nullptr;
+    HRESULT ret = SHGetKnownFolderPath(folder_id, 0, nullptr, &folder_path);
+    ON_SCOPE_EXIT([&] { CoTaskMemFree(folder_path); });
+    ENSURE(ret == S_OK)(ret).raise();
+
+    return FilePath(folder_path);
+}
 
 }   // namespace
 
@@ -51,6 +66,40 @@ FilePath BasePathProvider(PathKey key)
         case DIR_TEMP:
             GetTempPath(kMaxPath, buffer);
             path = FilePath(buffer);
+            break;
+
+        case DIR_USER_DESKTOP:
+            path = ShellGetFolderPath(FOLDERID_Desktop);
+            break;
+
+        case DIR_PUBLIC_DESKTOP:
+            path = ShellGetFolderPath(FOLDERID_PublicDesktop);
+            break;
+
+        case DIR_WINDOWS:
+            GetWindowsDirectory(buffer, kMaxPath);
+            path = FilePath(buffer);
+            break;
+
+        case DIR_SYSTEM:
+            GetSystemDirectory(buffer, kMaxPath);
+            path = FilePath(buffer);
+            break;
+
+        case DIR_PROGRAM_FILES:
+            path = ShellGetFolderPath(FOLDERID_ProgramFiles);
+            break;
+
+        case DIR_PROGRAM_FILESX86:
+            path = ShellGetFolderPath(FOLDERID_ProgramFilesX86);
+            break;
+
+        case DIR_APP_DATA:
+            path = ShellGetFolderPath(FOLDERID_RoamingAppData);
+            break;
+
+        case DIR_COMMON_APP_DATA:
+            path = ShellGetFolderPath(FOLDERID_ProgramData);
             break;
 
         default:

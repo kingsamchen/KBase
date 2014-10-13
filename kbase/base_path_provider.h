@@ -18,8 +18,14 @@ enum BasePathKey : PathKey {
     DIR_EXE,                // directory containing FILE_EXE.
     DIR_MODULE,             // directory containing FILE_MODULE.
     DIR_TEMP,               // temporary directory.
-    DIR_USER_DESKTOP,       // current user's desktop
-    // TODO: add more keys
+    DIR_USER_DESKTOP,       // current user's desktop.
+    DIR_PUBLIC_DESKTOP,     // public user's desktop.
+    DIR_WINDOWS,            // windows directory, i.e. C:\Windows.
+    DIR_SYSTEM,             // system directory, i.e. C:\Windows\System32.
+    DIR_PROGRAM_FILES,      // C:\Program Files.
+    DIR_PROGRAM_FILESX86,   // C:\Program Files or C:\Program Files (x86).
+    DIR_APP_DATA,           // current user's application data directory.
+    DIR_COMMON_APP_DATA,    // C:\ProgramData on or after system Vista.
     BASE_PATH_END
 };
 
