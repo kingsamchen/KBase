@@ -15,6 +15,10 @@ enum BasePathKey : PathKey {
     FILE_EXE,               // path with filename of the current executable.
     FILE_MODULE,            // path with filename of the module running the code.
     DIR_CURRENT,            // current directory.
+    DIR_EXE,                // directory containing FILE_EXE.
+    DIR_MODULE,             // directory containing FILE_MODULE.
+    DIR_TEMP,               // temporary directory.
+    DIR_USER_DESKTOP,       // current user's desktop
     // TODO: add more keys
     BASE_PATH_END
 };

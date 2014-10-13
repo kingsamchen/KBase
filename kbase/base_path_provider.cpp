@@ -3,7 +3,10 @@
 
 #include <Windows.h>
 
-#include "kbase\files\file_path.h"
+#include "kbase\path_service.h"
+
+// See @ http://blogs.msdn.com/b/oldnewthing/archive/2004/10/25/247180.aspx
+extern "C" IMAGE_DOS_HEADER __ImageBase;
 
 namespace {
 
@@ -15,16 +18,39 @@ FilePath BasePathProvider(PathKey key)
 {
     // Though the system does have support for long file path, I decide to ignore 
     // it here.
-    wchar_t buffer[MAX_PATH] {0};
+    const size_t kMaxPath = MAX_PATH + 1;
+    wchar_t buffer[kMaxPath] {0};
     FilePath path;
 
     switch (key) {
         case FILE_EXE:
-            GetModuleFileName(nullptr, buffer, MAX_PATH);
+          GetModuleFileName(nullptr, buffer, kMaxPath);
             path = FilePath(buffer);
             break;
 
-        case FILE_MODULE:
+        case FILE_MODULE: {
+            HMODULE module = reinterpret_cast<HMODULE>(&__ImageBase);
+            GetModuleFileName(module, buffer, kMaxPath);
+            path = FilePath(buffer);
+            break;
+        }
+
+        case DIR_EXE:
+            path = PathService::Get(FILE_EXE).DirName();
+            break;
+
+        case DIR_MODULE:
+            path = PathService::Get(FILE_MODULE).DirName();
+            break;
+
+        case DIR_CURRENT:
+            GetCurrentDirectory(kMaxPath, buffer);
+            path = FilePath(buffer);
+            break;
+
+        case DIR_TEMP:
+            GetTempPath(kMaxPath, buffer);
+            path = FilePath(buffer);
             break;
 
         default:
