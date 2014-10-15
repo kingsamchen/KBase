@@ -1,3 +1,6 @@
+/*
+ @ Kingsley Chen
+*/
 
 #include "kbase\base_path_provider.h"
 

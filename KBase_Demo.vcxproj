@@ -85,6 +85,7 @@
     <ClCompile Include="kbase\error_exception_util.cpp" />
     <ClCompile Include="kbase\files\file_enumerator.cpp" />
     <ClCompile Include="kbase\files\file_path.cpp" />
+    <ClCompile Include="kbase\files\file_util.cpp" />
     <ClCompile Include="kbase\logging.cpp" />
     <ClCompile Include="kbase\path_service.cpp" />
     <ClCompile Include="kbase\pickle.cpp" />
@@ -105,6 +106,7 @@
     <ClInclude Include="kbase\error_exception_util.h" />
     <ClInclude Include="kbase\files\file_enumerator.h" />
     <ClInclude Include="kbase\files\file_path.h" />
+    <ClInclude Include="kbase\files\file_util.h" />
     <ClInclude Include="kbase\logging.h" />
     <ClInclude Include="kbase\path_service.h" />
     <ClInclude Include="kbase\pickle.h" />

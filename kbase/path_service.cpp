@@ -1,12 +1,18 @@
+/*
+ @ Kingsley Chen
+*/
 
 #include "kbase\path_service.h"
 
+#include <algorithm>
 #include <forward_list>
 #include <mutex>
 #include <unordered_map>
 
 #include "kbase\base_path_provider.h"
 #include "kbase\error_exception_util.h"
+#include "kbase\files\file_util.h"
+#include "kbase\strings\sys_string_encoding_conversions.h"
 
 using kbase::FilePath;
 using kbase::PathKey;
@@ -120,7 +126,9 @@ FilePath PathService::Get(PathKey key)
 
     // Ensure that the returned path never contains '..'.
     if (path.ReferenceParent()) {
-        // TODO: MakeAbsolutePath(path)
+        FilePath&& full_path = MakeAbsoluteFilePath(path);
+        ENSURE(!full_path.empty())(SysWideToNativeMB(path.value())).raise();
+        path = std::move(full_path);
     }
 
     // Special case for current direcotry: We never cache it.

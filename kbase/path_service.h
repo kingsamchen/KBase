@@ -1,3 +1,6 @@
+/*
+ @ Kingsley Chen
+*/
 
 #if defined(_MSC_VER)
 #pragma once
@@ -22,8 +25,8 @@ public:
 
     ~PathService() = delete;
 
-    // Returns the path corresponding to the key if the function succeeds.
-    // Returns an empty file path otherwise.
+    // Returns the absolute path corresponding to the key if the function succeeds.
+    // Returns an empty file path if no matching was found.
     static FilePath Get(PathKey key);
 
     // Users can register their own path provider along with a bunch of new path keys.
