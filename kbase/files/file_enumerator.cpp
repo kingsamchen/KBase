@@ -49,17 +49,12 @@ FilePath FileEnumerator::Next()
                 cur_root.Append(pattern_);
             }
 
-            if (OSInfo::GetInstance()->IsVersionOrGreater(OSInfo::WIN_7)) {
-                find_handle_ = FindFirstFileEx(cur_root.value().c_str(),
-                                               FindExInfoBasic,
-                                               &find_data_,
-                                               FindExSearchNameMatch,
-                                               nullptr,
-                                               FIND_FIRST_EX_LARGE_FETCH);
-            } else {
-                find_handle_ = FindFirstFile(cur_root.value().c_str(), &find_data_);
-            }
-
+            find_handle_ = FindFirstFileEx(cur_root.value().c_str(),
+                                           FindExInfoBasic,
+                                           &find_data_,
+                                           FindExSearchNameMatch,
+                                           nullptr,
+                                           FIND_FIRST_EX_LARGE_FETCH);
             has_find_data_ = true;
         } else {
             // Enumeration in this directory is accomplished.

@@ -1,0 +1,403 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="kbase::StringFormatDataLengthError" Collapsed="true">
+    <Position X="13" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQ=</HashCode>
+      <FileName>kbase\strings\string_format.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="kbase::BasicStringPiece&lt;STRING_TYPE&gt;" Collapsed="true">
+    <Position X="3.5" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AACwABAAQAAAAAACgUAAAAAAAAAAAAIACAAAEAAIAAA=</HashCode>
+      <FileName>kbase\strings\string_piece.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="kbase::FileEnumerator" Collapsed="true">
+    <Position X="13" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AgAAACDAIAAAAABBAAAAgAAAAAAAAEAABEAiABAAAAA=</HashCode>
+      <FileName>kbase\files\file_enumerator.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="kbase::Pickle" Collapsed="true">
+    <Position X="11.25" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>QgAAABAAABBQABAARoI4AACAAABgAAIgAAAyAAGAABA=</HashCode>
+      <FileName>kbase\pickle.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="kbase::PickleIterator" Collapsed="true">
+    <Position X="13" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAgAQAAAABAAAgAAEQwAAgAAAAAUgAAEAQgAAAAAA=</HashCode>
+      <FileName>kbase\pickle.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="kbase::FilePath" Collapsed="true">
+    <Position X="6" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>QlgIBAAAABABgUggBMkAAAQiAIIBAWRAEAJgIAAEA0g=</HashCode>
+      <FileName>kbase\files\file_path.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="kbase::AtExitManager" Collapsed="true">
+    <Position X="6" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAIAAAAAAgAAIEAAAAAAAAAAAAAAAAgAGAAIAA=</HashCode>
+      <FileName>kbase\at_exit_manager.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="kbase::AutoReset&lt;T&gt;" Collapsed="true">
+    <Position X="7.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>IAAAAAgAAAAAAAAAAAAAAAAEAAAAAAAAAAAgAAgAAAA=</HashCode>
+      <FileName>kbase\auto_reset.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="kbase::DateTimeSpan" Collapsed="true">
+    <Position X="11.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAABAIwoAAAAEAWAEAQQAAAACAAAAAAAAgAAAAAAA=</HashCode>
+      <FileName>kbase\date_time.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="kbase::DateTime" Collapsed="true">
+    <Position X="9.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ARAAAAAAAAAAAAAFAAAABQgAACACCAQAAAAgAAAoAAA=</HashCode>
+      <FileName>kbase\date_time.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="kbase::Guarantor" Collapsed="true">
+    <Position X="7.75" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>gAAABAAAwAQAAAAAAAAAAAAAAACAAAAAAAAgAAQAAAA=</HashCode>
+      <FileName>kbase\error_exception_util.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="kbase::LastError" Collapsed="true">
+    <Position X="9.5" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAIAAAAAQAAAAAAAAAAAAAAAAQAAAAAAAQAAA=</HashCode>
+      <FileName>kbase\error_exception_util.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="kbase::Win32Exception" Collapsed="true">
+    <Position X="7.75" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAgAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAg=</HashCode>
+      <FileName>kbase\error_exception_util.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="kbase::LogMessage" Collapsed="true">
+    <Position X="13" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>BAAAAQAAAAgAAAAABAAAAAAAAAAAAAAACAAiEAAAIAA=</HashCode>
+      <FileName>kbase\logging.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="kbase::LogMessageVoidfy" Collapsed="true">
+    <Position X="6" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAgAAAAAAA=</HashCode>
+      <FileName>kbase\logging.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="kbase::PathService" Collapsed="true">
+    <Position X="9.5" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AQAAAAAAAAACAADAAAAAAAAAAAAAAAAAAAAAASAAAAA=</HashCode>
+      <FileName>kbase\path_service.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="kbase::RegKey" Collapsed="true">
+    <Position X="6" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAAAAIIAQAIBAAAAABAAAAGQAAKAgBRCABAA=</HashCode>
+      <FileName>kbase\registry.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="kbase::RegKeyIterator" Collapsed="true">
+    <Position X="7.75" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AQAEAAAAAAAAAAAAQIAAEAAgAAAAAAAAAAAgBACBCAA=</HashCode>
+      <FileName>kbase\registry.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="kbase::RegValueIterator" Collapsed="true">
+    <Position X="9.5" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAEAAIgACEAAAAASIAAAAAgAAARICAAAAAgJQCBAAA=</HashCode>
+      <FileName>kbase\registry.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="kbase::ScopeGuard" Collapsed="true">
+    <Position X="11.25" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAEAAAEAAACAAAAAAAAEAAAAAAAAABAgAAAAAAA=</HashCode>
+      <FileName>kbase\scope_guard.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="kbase::SysInfo" Collapsed="true">
+    <Position X="6" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>QIAAABAAAIAAAAAABAwEQCAAQAAIAAAAAAAAACCABQA=</HashCode>
+      <FileName>kbase\sys_info.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="kbase::OSInfo" Collapsed="true">
+    <Position X="7.75" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAhAAAAAAABAAASAgAgBABAAAAIIEhQCgIAQAAAA=</HashCode>
+      <FileName>kbase\version_util.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="kbase::internal::StringPieceDetail&lt;STRING_TYPE&gt;" Collapsed="true">
+    <Position X="3.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEAAgIAAACAAAABAAsYABAACAAEAAAAAAAAQAgAIwoA=</HashCode>
+      <FileName>kbase\strings\string_piece.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="kbase::`anonymous-namespace'::LoggingLock" Collapsed="true">
+    <Position X="11.25" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>gAAQAAACAAAAAAAABAAAAgCAAAAAAAAAAAAgAAAAAAA=</HashCode>
+      <FileName>kbase\logging.cpp</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Struct Name="kbase::ToUnsigned&lt;T&gt;" Collapsed="true">
+    <Position X="13" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>kbase\strings\string_util.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="kbase::ToUnsigned&lt;char&gt;" Collapsed="true">
+    <Position X="6" Y="6.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>kbase\strings\string_util.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="kbase::ToUnsigned&lt;signed char&gt;" Collapsed="true">
+    <Position X="7.75" Y="6.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>kbase\strings\string_util.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="kbase::ToUnsigned&lt;wchar_t&gt;" Collapsed="true">
+    <Position X="9.5" Y="6.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>kbase\strings\string_util.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="kbase::LoggingSettings" Collapsed="true">
+    <Position X="6" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAJAAAAAAAAAEA=</HashCode>
+      <FileName>kbase\logging.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="kbase::internal::time_type" Collapsed="true">
+    <Position X="11.25" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAACAAAAAAAAAAAhAAAQAAAAAAAAACQAA=</HashCode>
+      <FileName>kbase\date_time.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="`anonymous-namespace'::PathProvider" Collapsed="true">
+    <Position X="9.5" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAEACAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>kbase\path_service.cpp</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="`anonymous-namespace'::PathData" Collapsed="true">
+    <Position X="7.75" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAARAEAAAAAQAAAAAAAAAEAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>kbase\path_service.cpp</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Typedef Name="kbase::StringPiece" Collapsed="true">
+    <Position X="3.5" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>kbase\strings\string_piece.h</FileName>
+    </TypeIdentifier>
+  </Typedef>
+  <Typedef Name="kbase::WStringPiece" Collapsed="true">
+    <Position X="0.5" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>kbase\strings\string_piece.h</FileName>
+    </TypeIdentifier>
+  </Typedef>
+  <Typedef Name="kbase::PathChar" Collapsed="true">
+    <Position X="9.5" Y="9.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>kbase\files\file_path.cpp</FileName>
+    </TypeIdentifier>
+  </Typedef>
+  <Typedef Name="kbase::PathString" Collapsed="true">
+    <Position X="7.75" Y="10.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>kbase\files\file_path.cpp</FileName>
+    </TypeIdentifier>
+  </Typedef>
+  <Typedef Name="kbase::`anonymous-namespace'::PathChar" Collapsed="true">
+    <Position X="11.25" Y="9.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>kbase\logging.cpp</FileName>
+    </TypeIdentifier>
+  </Typedef>
+  <Typedef Name="kbase::`anonymous-namespace'::PathString" Collapsed="true">
+    <Position X="9.5" Y="10.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>kbase\logging.cpp</FileName>
+    </TypeIdentifier>
+  </Typedef>
+  <Typedef Name="`anonymous-namespace'::ProviderFunc" Collapsed="true">
+    <Position X="13" Y="10.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>kbase\path_service.cpp</FileName>
+    </TypeIdentifier>
+  </Typedef>
+  <Typedef Name="`anonymous-namespace'::PathMap" Collapsed="true">
+    <Position X="6" Y="10.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>kbase\path_service.cpp</FileName>
+    </TypeIdentifier>
+  </Typedef>
+  <Typedef Name="`anonymous-namespace'::ProviderChain" Collapsed="true">
+    <Position X="11.25" Y="10.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>kbase\path_service.cpp</FileName>
+    </TypeIdentifier>
+  </Typedef>
+  <Typedef Name="kbase::`anonymous-namespace'::SpaceType" Collapsed="true">
+    <Position X="6" Y="11.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>kbase\sys_info.cpp</FileName>
+    </TypeIdentifier>
+  </Typedef>
+  <Typedef Name="kbase::WOW64Status" Collapsed="true">
+    <Position X="13" Y="11.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>kbase\version_util.cpp</FileName>
+    </TypeIdentifier>
+  </Typedef>
+  <Typedef Name="kbase::VersionNumber" Collapsed="true">
+    <Position X="9.5" Y="11.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>kbase\version_util.cpp</FileName>
+    </TypeIdentifier>
+  </Typedef>
+  <Typedef Name="kbase::Version" Collapsed="true">
+    <Position X="7.75" Y="11.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>kbase\version_util.cpp</FileName>
+    </TypeIdentifier>
+  </Typedef>
+  <Typedef Name="kbase::PathKey" Collapsed="true">
+    <Position X="13" Y="9.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>kbase\basic_types.h</FileName>
+    </TypeIdentifier>
+  </Typedef>
+  <Typedef Name="kbase::LogSeverity" Collapsed="true">
+    <Position X="7.75" Y="9.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>kbase\logging.h</FileName>
+    </TypeIdentifier>
+  </Typedef>
+  <Typedef Name="HANDLE" Collapsed="true">
+    <Position X="6" Y="9.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>c:\program files (x86)\windows kits\8.1\include\um\winnt.h</FileName>
+    </TypeIdentifier>
+  </Typedef>
+  <Typedef Name="WORD" Collapsed="true">
+    <Position X="11.25" Y="11.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>c:\program files (x86)\windows kits\8.1\include\shared\minwindef.h</FileName>
+    </TypeIdentifier>
+  </Typedef>
+  <Enum Name="kbase::TrimPosition" Collapsed="true">
+    <Position X="9.5" Y="8.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAEAAAAAAAAAAAAAAAAAIAAAAAAAIAAAAIAAAAAAA=</HashCode>
+      <FileName>kbase\strings\string_util.cpp</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="kbase::CodePage" Collapsed="true">
+    <Position X="11.25" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAgAAAAAAAAAAABAAAQAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>kbase\strings\sys_string_encoding_conversions.h</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="kbase::BasePathKey" Collapsed="true">
+    <Position X="9.5" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAgAwiAQAAgsAAAAAAABAAACIAAAAAAKAAAAEAA=</HashCode>
+      <FileName>kbase\base_path_provider.h</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="kbase::LogItemOptions" Collapsed="true">
+    <Position X="6" Y="8.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAgAAAAAACAAAAAAAAAIAAAAAAAJAAAAA=</HashCode>
+      <FileName>kbase\logging.h</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="kbase::LoggingDestination" Collapsed="true">
+    <Position X="13" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAgAAAABAAAAAAAAAAAAAAAAAAAAQAQAAAAAAAA=</HashCode>
+      <FileName>kbase\logging.h</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="kbase::OldFileOption" Collapsed="true">
+    <Position X="7.75" Y="8.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAQAAAAAA=</HashCode>
+      <FileName>kbase\logging.h</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="kbase::internal::__unnamed_enum_0115_1" Collapsed="true">
+    <Position X="7.75" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>kbase\error_exception_util.h</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="kbase::internal::__unnamed_enum_0005_1" Collapsed="true">
+    <Position X="6" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAA=</HashCode>
+      <FileName>kbase\logging.h</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Font Name="Microsoft YaHei" Size="9" />
+</ClassDiagram>

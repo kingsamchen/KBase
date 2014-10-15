@@ -13,7 +13,7 @@
 #include <Windows.h>
 
 namespace kbase {
-
+// TODO: move this anonymous namespace out of namespace kbase
 namespace {
 
 const char* log_severity_names[] = {"INFO", "ERROR", "FATAL"};
@@ -99,6 +99,7 @@ bool InitLogFile()
     return true;
 }
 
+// TODO: add a light-weight lock for resovling race between threads.
 // A global file-lock wrapper.
 // If it fails to create a mutex object, or open the existed one, it throws a
 // runtime error exception, and leaves the program crashed by default.

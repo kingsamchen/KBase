@@ -125,7 +125,7 @@ private:
     std::ostringstream stream_;
 };
 
-// This class is used to ignore the compiler warning like "std::ostream object cannot
+// This class is used to suppress the compiler warning like "std::ostream object cannot
 // be copied" since conditional statement in macro |LAZY_STREAM| may return an
 // std::ostream object.
 class LogMessageVoidfy {
