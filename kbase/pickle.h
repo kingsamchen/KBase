@@ -22,23 +22,23 @@ public:
 
     explicit PickleIterator(const Pickle& pickle);
 
-    bool ReadBool(bool* result);
+    bool Read(bool* result);
 
-    bool ReadInt(int* result);
+    bool Read(int* result);
 
-    bool ReadUInt32(uint32_t* result);
+    bool Read(uint32_t* result);
 
-    bool ReadInt64(int64_t* result);
+    bool Read(int64_t* result);
 
-    bool ReadUInt64(uint64_t* result);
+    bool Read(uint64_t* result);
     
-    bool ReadFloat(float* result);
+    bool Read(float* result);
     
-    bool ReadDouble(double* result);
+    bool Read(double* result);
     
-    bool ReadString(std::string* result);
+    bool Read(std::string* result);
     
-    bool ReadWString(std::wstring* result);
+    bool Read(std::wstring* result);
     
     bool ReadBytes(const char** data, int length);
     
@@ -55,11 +55,9 @@ private:
     
     const char* GetReadPointerAndAdvance(int num_bytes);
 
-    /*
-     @ brief
-        when the size of element doesn't equal to sizeof(char), use this function
-        for safety consieration. this function runs overflow check on int32 num_bytes.
-    */
+    
+    // when the size of element doesn't equal to sizeof(char), use this function
+    // for safety consieration. this function runs overflow check on int32 num_bytes.
     const char* GetReadPointerAndAdvance(int num_elements, size_t element_size);
 
 private:
@@ -82,10 +80,7 @@ public:
 
     Pickle(const char* data, int data_len);
 
-    /*
-     @ brief
-        a deep copy of an Pickle object
-    */
+    // a deep copy of an Pickle object
     Pickle(const Pickle& other);
     
     ~Pickle();
@@ -96,30 +91,27 @@ public:
     
     inline const void* data() const;
     
-    inline bool WriteBool(bool value);
+    inline bool Write(bool value);
     
-    inline bool WriteInt(int value);
+    inline bool Write(int value);
     
-    inline bool WriteUInt32(uint32_t value);
+    inline bool Write(uint32_t value);
     
-    inline bool WriteInt64(int64_t value);
+    inline bool Write(int64_t value);
     
-    inline bool WriteUInt64(uint64_t value);
+    inline bool Write(uint64_t value);
     
-    inline bool WriteFloat(float value);
+    inline bool Write(float value);
     
-    inline bool WriteDouble(double value);
+    inline bool Write(double value);
     
-    bool WriteString(const std::string& value);
+    bool Write(const std::string& value);
     
-    bool WriteWString(const std::wstring& value);
+    bool Write(const std::wstring& value);
 
-    /*
-     @ brief
-        serialize data in byte with specified length. PoD types only
-        the function guarantees the internal data remains unchanged if this
-        funtion fails.
-    */
+    // Serialize data in byte with specified length. PoD types only.
+    // These functions guarantee that the internal data remains unchanged if the
+    // funtion fails.
     bool WriteByte(const void* data, int data_len);
 
     bool WriteData(const char* data, int length);
@@ -137,34 +129,22 @@ public:
     inline size_t payload_size() const;
 
 private:
-    /*
-     @ brief
-        resize the capacity of internal buffer. this function internally rounds the
-        [new_capacity] up to the next multiple of predefined alignment
-     @ params
-        new_capacity[in] new capacity of internal buffer and will be aligned internally.
-        be wary of that, the new_capacity actually includes internal header size.
-        e.g. new_capacity = header_size + your_desired_payload_size
-    */
+    // Resize the capacity of internal buffer. This function internally rounds the
+    // |new_capacity| up to the next multiple of predefined alignment.
+    // Be wary of that, the |new_capacity| actually includes internal header size.
+    // e.g. new_capacity = header_size + your_desired_payload_size
     bool Resize(size_t new_capacity);
     
     static size_t AlignInt(size_t i, int alignment);
     
-    /*
-     @ brief
-        locate to the next uint32-aligned offset. and resize internal buffer if
-        necessary.
-     @ return
-        the location that the data should be written at, or
-        nullptr if an error occured.
-    */
+    // Locate to the next uint32-aligned offset, and resize internal buffer if
+    // necessary.
+    // Returns the location that the data should be written at, or nullptr if
+    // an error occured.
     char* BeginWrite(size_t length);
     
-    /*
-     @ brief
-        zero pading memory; otherwise some memory detectors may complain about
-        uninitialized memory.
-    */
+    // Zero pading memory; otherwise some memory detectors may complain about
+    // uninitialized memory.
     void EndWrite(char* dest, size_t length);
 
 private:
@@ -209,33 +189,33 @@ inline const char* Pickle::end_of_payload() const
     return payload() + payload_size();
 }
 
-inline bool Pickle::WriteBool(bool value)
+inline bool Pickle::Write(bool value)
 {
-    return WriteInt(value ? 1 : 0);
+    return Write(value ? 1 : 0);
 }
 
-inline bool Pickle::WriteInt(int value)
+inline bool Pickle::Write(int value)
 {
     return WriteByte(&value, sizeof(value));
 }
 
-inline bool Pickle::WriteUInt32(uint32_t value)
+inline bool Pickle::Write(uint32_t value)
 {
     return WriteByte(&value, sizeof(value));
 }
-inline bool Pickle::WriteInt64(int64_t value)
+inline bool Pickle::Write(int64_t value)
 {
     return WriteByte(&value, sizeof(value));
 }
-inline bool Pickle::WriteUInt64(uint64_t value)
+inline bool Pickle::Write(uint64_t value)
 {
     return WriteByte(&value, sizeof(value));
 }
-inline bool Pickle::WriteFloat(float value)
+inline bool Pickle::Write(float value)
 {
     return WriteByte(&value, sizeof(value));
 }
-inline bool Pickle::WriteDouble(double value)
+inline bool Pickle::Write(double value)
 {
     return WriteByte(&value, sizeof(value));
 }

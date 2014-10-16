@@ -566,12 +566,12 @@ FilePath FilePath::FromUTF8(const std::string& path_in_utf8)
 
 void FilePath::WriteToPickle(Pickle* pickle) const
 {
-    pickle->WriteWString(path_);            
+    pickle->Write(path_);            
 }
 
 bool FilePath::ReadFromPickle(PickleIterator* iter)
 {
-    if (!iter->ReadWString(&path_)) {
+    if (!iter->Read(&path_)) {
         return false;
     }
 
