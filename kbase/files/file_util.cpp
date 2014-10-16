@@ -1,6 +1,8 @@
 
 #include "kbase\files\file_util.h"
 
+#include <Windows.h>
+
 #include <cstdlib>
 
 namespace kbase {
@@ -13,6 +15,11 @@ FilePath MakeAbsoluteFilePath(const FilePath& path)
     }
 
     return FilePath(buffer);
+}
+
+bool PathExists(const FilePath& path)
+{
+    return GetFileAttributes(path.value().c_str()) != INVALID_FILE_ATTRIBUTES;
 }
 
 }   // namespace kbase

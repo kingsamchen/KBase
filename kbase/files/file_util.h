@@ -14,6 +14,16 @@ namespace kbase {
 // Returns an empty path on error.
 FilePath MakeAbsoluteFilePath(const FilePath& path);
 
+// Returns true if the path exists.
+// Returns false if doesn't exist.
+bool PathExists(const FilePath& path);
+
+void Delete(const FilePath& path, bool recursive);
+
+void DeleteFileAfterReboot(const FilePath& path);
+
+void Move(const FilePath& src, const FilePath& dest);
+
 }   // namespace kbase
 
 #endif  // KBASE_FILES_FILE_UTIL_H_
