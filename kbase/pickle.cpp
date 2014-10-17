@@ -186,9 +186,9 @@ const char* PickleIterator::GetReadPointerAndAdvance(int num_elements, size_t el
 
 // --* Pickle *--
 
-// payload is uint32 aligned
+// Payload is uint32 aligned.
 
-Pickle::Pickle() : header_(nullptr), capacity_(0), buffer_offset_(0)
+Pickle::Pickle() : header_(nullptr), capacity_(0)
 {
     Resize(kPayloadUnit);
     header_->payload_size = 0;
@@ -196,12 +196,11 @@ Pickle::Pickle() : header_(nullptr), capacity_(0), buffer_offset_(0)
 
 Pickle::Pickle(const char* data, int) 
     : header_(reinterpret_cast<Header*>(const_cast<char*>(data))),
-      capacity_(kCapacityReadOnly),
-      buffer_offset_(0)
+      capacity_(kCapacityReadOnly)
 {}
 
-Pickle::Pickle(const Pickle& other) : header_(nullptr), capacity_(0),
-                                      buffer_offset_(other.buffer_offset_)
+Pickle::Pickle(const Pickle& other) 
+    : header_(nullptr), capacity_(0)
 {
     // If |other| is constructed from a const buffer, its capacity value is
     // kCapacityReadOnly. therefore, calculate its capacity on hand.
@@ -212,19 +211,14 @@ Pickle::Pickle(const Pickle& other) : header_(nullptr), capacity_(0),
     memcpy_s(header_, capacity_, other.header_, capacity);
 }
 
-Pickle::~Pickle()
+Pickle::Pickle(Pickle&& other)
 {
-    if (capacity_ != kCapacityReadOnly) {
-        free(header_);
-    }
+    *this = std::move(other);
 }
 
 Pickle& Pickle::operator=(const Pickle& rhs)
 {
     if (this == &rhs) {
-#ifdef _DEBUG
-        ENSURE(false).raise();
-#endif
         return *this;
     }
 
@@ -238,9 +232,28 @@ Pickle& Pickle::operator=(const Pickle& rhs)
     ENSURE(resized)(capacity_)(capacity).raise();
 
     memcpy_s(header_, capacity_, rhs.header_, capacity);
-    buffer_offset_ = rhs.buffer_offset_;
 
     return *this;
+}
+
+Pickle& Pickle::operator=(Pickle&& rhs)
+{
+    if (this != &rhs) {
+        header_ = rhs.header_;
+        capacity_ = rhs.capacity_;
+        // Let it die peacefully.
+        rhs.capacity_ = kCapacityReadOnly;
+        rhs.header_ = nullptr;
+    }
+
+    return *this;
+}
+
+Pickle::~Pickle()
+{
+    if (capacity_ != kCapacityReadOnly) {
+        free(header_);
+    }
 }
 
 bool Pickle::Resize(size_t new_capacity)

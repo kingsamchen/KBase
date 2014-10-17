@@ -162,7 +162,6 @@ private:
     static const int kPayloadUnit;
     Header* header_;
     size_t capacity_;
-    size_t buffer_offset_;
 
     friend class PickleIterator;
 };

@@ -1,3 +1,6 @@
+/*
+ @ Kingsley Chen
+*/
 
 #include "stdafx.h"
 
@@ -125,5 +128,15 @@ TEST(PickleTest, Construction)
 
 TEST(PickleTest, Move)
 {
+    auto fn = []()->Pickle {
+        Pickle tmp;
+        MarshalDataToPickle(&tmp);
+        EXPECT_FALSE(tmp.empty());
 
+        return tmp;
+    };
+
+    Pickle pk = fn();
+    auto ret_from_move = UnMarshalDataFromPickle(pk);
+    ASSERT_EQ(data_list, ret_from_move);
 }
