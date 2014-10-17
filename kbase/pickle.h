@@ -18,8 +18,6 @@ class Pickle;
 
 class PickleIterator {
 public:
-    PickleIterator() : read_ptr_(nullptr), read_end_ptr_(nullptr) {}
-
     explicit PickleIterator(const Pickle& pickle);
 
     bool Read(bool* result);
@@ -56,7 +54,7 @@ private:
     const char* GetReadPointerAndAdvance(int num_bytes);
 
     
-    // when the size of element doesn't equal to sizeof(char), use this function
+    // When the size of element doesn't equal to sizeof(char), use this function
     // for safety consieration. this function runs overflow check on int32 num_bytes.
     const char* GetReadPointerAndAdvance(int num_elements, size_t element_size);
 
@@ -83,13 +81,17 @@ private:
 public:
     Pickle();
 
+    // Results in a Pickle object that has weak-reference to a serialized buffer.
+    // The Pickle object cannot call any modifiable methods, and caller must ensure
+    // the referee is in a valid state, when PickleIterator is applied.
     Pickle(const char* data, int data_len);
 
-    // a deep copy of an Pickle object
+    // Makes a deep copy of the Pickle object.
     Pickle(const Pickle& other);
     
     ~Pickle();
 
+    // Makes a deep copyof the Pickle object.
     Pickle& operator=(const Pickle& rhs);
 
     // Returns the size of internal data, including header.
@@ -119,7 +121,7 @@ public:
     
     bool Write(const std::wstring& value);
 
-    // Serialize data in byte with specified length. PoD types only.
+    // Serializes data in byte with specified length. PoD types only.
     // These functions guarantee that the internal data remains unchanged if the
     // funtion fails.
     bool WriteByte(const void* data, int data_len);
@@ -131,7 +133,7 @@ public:
     inline size_t payload_size() const;
 
 private:
-    // Resize the capacity of internal buffer. This function internally rounds the
+    // Resizes the capacity of internal buffer. This function internally rounds the
     // |new_capacity| up to the next multiple of predefined alignment.
     // Be wary of that, the |new_capacity| actually includes internal header size.
     // e.g. new_capacity = header_size + your_desired_payload_size
@@ -139,13 +141,13 @@ private:
     
     static size_t AlignInt(size_t i, int alignment);
     
-    // Locate to the next uint32-aligned offset, and resize internal buffer if
+    // Locates to the next uint32-aligned offset, and resize internal buffer if
     // necessary.
     // Returns the location that the data should be written at, or nullptr if
     // an error occured.
     char* BeginWrite(size_t length);
     
-    // Zero pading memory; otherwise some memory detectors may complain about
+    // Zeros pading memory; otherwise some memory detectors may complain about
     // uninitialized memory.
     void EndWrite(char* dest, size_t length);
 
@@ -155,11 +157,8 @@ private:
 
 private:
     static const int kPayloadUnit;
-    
     Header* header_;
-    
     size_t capacity_;
-    
     size_t buffer_offset_;
 
     friend class PickleIterator;

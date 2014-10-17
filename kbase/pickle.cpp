@@ -184,6 +184,8 @@ const char* PickleIterator::GetReadPointerAndAdvance(int num_elements, size_t el
     return GetReadPointerAndAdvance(num_bytes32);
 }
 
+// --* Pickle *--
+
 // payload is uint32 aligned
 
 Pickle::Pickle() : header_(nullptr), capacity_(0), buffer_offset_(0)
