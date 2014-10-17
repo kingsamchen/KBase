@@ -75,6 +75,11 @@ private:
 //        <-----payload------>
 
 class Pickle {
+private:
+    struct Header {
+        uint32_t payload_size;
+    };
+
 public:
     Pickle();
 
@@ -87,7 +92,12 @@ public:
 
     Pickle& operator=(const Pickle& rhs);
 
+    // Returns the size of internal data, including header.
     inline size_t size() const;
+
+    // Returns true, if no payload there, i.e. payload_size == 0.
+    // Returns false, otherwise.
+    inline bool empty() const;
     
     inline const void* data() const;
     
@@ -115,16 +125,8 @@ public:
     bool WriteByte(const void* data, int data_len);
 
     bool WriteData(const char* data, int length);
-
-    struct Header {
-        uint32_t payload_size;
-    };
-
-    inline char* mutable_payload() const;
     
     inline const char* payload() const;
-    
-    inline const char* end_of_payload() const;
     
     inline size_t payload_size() const;
 
@@ -147,6 +149,10 @@ private:
     // uninitialized memory.
     void EndWrite(char* dest, size_t length);
 
+    inline char* mutable_payload() const;
+
+    inline const char* end_of_payload() const;
+
 private:
     static const int kPayloadUnit;
     
@@ -162,6 +168,11 @@ private:
 inline size_t Pickle::size() const
 {
     return sizeof(Header) + header_->payload_size;
+}
+
+inline bool Pickle::empty() const
+{
+  return payload_size() == 0;
 }
 
 inline const void* Pickle::data() const
