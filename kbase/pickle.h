@@ -52,7 +52,6 @@ private:
     inline const char* GetReadPointerAndAdvance();
     
     const char* GetReadPointerAndAdvance(int num_bytes);
-
     
     // When the size of element doesn't equal to sizeof(char), use this function
     // for safety consieration. this function runs overflow check on int32 num_bytes.
@@ -89,10 +88,14 @@ public:
     // Makes a deep copy of the Pickle object.
     Pickle(const Pickle& other);
     
-    ~Pickle();
+    Pickle(Pickle&& other);
 
     // Makes a deep copyof the Pickle object.
     Pickle& operator=(const Pickle& rhs);
+
+    Pickle& operator=(Pickle&& rhs);
+
+    ~Pickle();
 
     // Returns the size of internal data, including header.
     inline size_t size() const;
@@ -171,7 +174,7 @@ inline size_t Pickle::size() const
 
 inline bool Pickle::empty() const
 {
-  return payload_size() == 0;
+    return payload_size() == 0;
 }
 
 inline const void* Pickle::data() const
