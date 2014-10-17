@@ -92,6 +92,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="samples\date_time_unittest.cpp" />
     <ClCompile Include="samples\error_exception_util_unittest.cpp" />
+    <ClCompile Include="samples\pickle_unittest.cpp" />
     <ClCompile Include="samples\sys_info_unittest.cpp" />
     <ClCompile Include="samples\version_util_unittest.cpp" />
     <ClCompile Include="stdafx.cpp">
