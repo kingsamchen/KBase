@@ -90,7 +90,7 @@ public:
     
     Pickle(Pickle&& other);
 
-    // Makes a deep copyof the Pickle object.
+    // Makes a deep copy of the Pickle object.
     Pickle& operator=(const Pickle& rhs);
 
     Pickle& operator=(Pickle&& rhs);

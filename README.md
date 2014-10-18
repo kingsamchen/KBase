@@ -13,7 +13,7 @@ Since I made these files by using Visual Studio 2013 on Windows 7, some faciliti
 
 - part of C++11 features
 - brand new APIs provided only since Windows Vista/7
-- unportable CRT implementations, such as secured-string-manipulation functions 
+- un-portable CRT implementations, such as secured-string-manipulation functions 
 
 Therefore, the **minimum** requirements are
 
@@ -31,11 +31,11 @@ If you use GNU C++, you may need to write makefile to build the entire project o
 
 Once again, KBase is a toy project I do in spare time. There is no any guarantee for its long-term maintenance.
 
-KBase is inpired by base of Chromium. However, I don't approve of the way they use C++, thus I wrote KBase in my own coding flavor, and also with adapting to my personal needs.
+KBase is inspired by base of Chromium. However, I don't approve of the way they use C++, thus I wrote KBase in my own coding flavor, and also with adapting to my personal needs.
 
 ### Usage and Samples
 
-Direcotry `Doc` contains documentations for explaining how to use each part of KBase.
+Directory `Docs` contains documentations for explaining how to use each part of KBase.
 
 The sub-directory `KBase_Test` contains a series of unit test files, which can be regarded as code samples in a certain of extend.
 

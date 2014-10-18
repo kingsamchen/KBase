@@ -173,7 +173,8 @@ const char* PickleIterator::GetReadPointerAndAdvance(int num_bytes)
     return curr_read_ptr;
 }
 
-const char* PickleIterator::GetReadPointerAndAdvance(int num_elements, size_t element_size)
+const char* PickleIterator::GetReadPointerAndAdvance(int num_elements,
+                                                     size_t element_size)
 {
     int64_t num_bytes = static_cast<int64_t>(num_elements) * element_size;
     int num_bytes32 = static_cast<int>(num_bytes);
