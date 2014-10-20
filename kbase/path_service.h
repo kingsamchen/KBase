@@ -32,6 +32,7 @@ public:
     // Users can register their own path provider along with a bunch of new path keys.
     // By default, only in debug mode does this function internally do key overlapping
     // checking.
+    // WARNING: The provider itself must not call |PathService::Get|.
     static void RegisterPathProvider(ProviderFunc provider,
                                      PathKey start, PathKey end);
 
