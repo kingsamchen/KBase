@@ -33,7 +33,7 @@ public:
     static const PathChar kExtensionSeparator;
     static const PathChar kStringTerminator;
 
-    FilePath();
+    FilePath() = default;
     
     FilePath(const FilePath& other);
 
@@ -45,7 +45,7 @@ public:
 
     FilePath& operator=(FilePath&& other);
 
-    ~FilePath();
+    ~FilePath() = default;
 
     // If two FilePath objects only differ in case, they are equal.
     friend bool operator==(const FilePath& lhs, const FilePath& rhs);

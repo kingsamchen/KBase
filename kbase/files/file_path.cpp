@@ -17,9 +17,6 @@
 
 namespace kbase {
 
-typedef FilePath::PathChar PathChar;
-typedef FilePath::PathString PathString;
-
 const FilePath::PathChar FilePath::kSeparators[] = L"\\/";
 const size_t FilePath::kSeparatorsLength = _countof(FilePath::kSeparators);
 const FilePath::PathChar FilePath::kCurrentDir[] = L".";
@@ -27,7 +24,14 @@ const FilePath::PathChar FilePath::kParentDir[] = L"..";
 const FilePath::PathChar FilePath::kExtensionSeparator = L'.';
 const FilePath::PathChar FilePath::kStringTerminator = L'\0';
 
+}   // namespace kbase
+
 namespace {
+
+using kbase::FilePath;
+
+typedef FilePath::PathChar PathChar;
+typedef FilePath::PathString PathString;
 
 // If the |path| contains a drive letter specification, returns the position of the
 // last character of the specification; otherwise, return npos.
@@ -107,19 +111,18 @@ bool IsPathEmptyOrSpecialCase(const PathString& path)
 
 }   // namespace
 
-FilePath::FilePath()
-{}
+namespace kbase {
 
 FilePath::FilePath(const FilePath& other)
- : path_(other.path_)
+    : path_(other.path_)
 {}
 
 FilePath::FilePath(FilePath&& other)
- : path_(std::move(other.path_))
+    : path_(std::move(other.path_))
 {}
 
 FilePath::FilePath(const PathString& path)
- : path_(path)
+    : path_(path)
 {
     // The null-terminator '\0' indicates the end of a path.
     PathString::size_type null_pos = path_.find(kStringTerminator);
@@ -139,9 +142,6 @@ FilePath& FilePath::operator=(FilePath&& other)
     path_ = std::move(other.path_);
     return *this;
 }
-
-FilePath::~FilePath()
-{}
 
 bool operator==(const FilePath& lhs, const FilePath& rhs)
 {
