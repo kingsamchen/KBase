@@ -12,8 +12,6 @@
 #include <string>
 #include <vector>
 
-#include "kbase/strings/string_piece.h"
-
 namespace kbase {
 
 class Pickle;
@@ -99,15 +97,23 @@ public:
     // Example: C:\foo\bar  ->  ["C:", "\\", "foo", "bar"]
     void GetComponents(std::vector<PathString>* components) const;
     
-    // Returns true
+    // Returns true if it is a absolute path.
     bool IsAbsolute() const;
 
     // |components| must be a relative path. Otherwise, functions will throw an
     // invalid_argument exception.
+
     void Append(const PathString& components);
+
     void Append(const FilePath& components);
 
-    void AppendASCII(const StringPiece& components);
+    FilePath AppendTo(const PathString& components);
+
+    FilePath AppendTo(const FilePath& components);
+
+    void AppendASCII(const std::string& components);
+
+    FilePath AppendASCIITo(const std::string& components);
 
     // If current path is parent of the |child|, appends to |path| the relative
     // path to child, and returns true.
@@ -121,6 +127,8 @@ public:
 
     // Returns true, if the path is the parent of the |child|.
     // Returns false, otherwise.
+    // NOTE: This function may make a wrong judgement if paths that contain both '.'
+    // '..' are involved.
     bool IsParent(const FilePath& child) const;
 
     // Returns the extension of the path if there is any.

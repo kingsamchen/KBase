@@ -6,11 +6,15 @@
 
 #include <algorithm>
 #include <functional>
+#include <tuple>
+#include <xutility>
 
 using std::placeholders::_1;
 using kbase::FilePath;
 
 namespace {
+
+typedef std::pair<FilePath, FilePath> PathTestPair;
 
 bool ContainsNullterminator(const FilePath::PathString& path_str)
 {
@@ -87,4 +91,83 @@ TEST(FilePathTest, PathComponents)
 
     FilePath path(L"C:\\test\\path\\data.txt");
     EXPECT_EQ(path.DirName(), FilePath(L"C:\\test\\path"));
+    EXPECT_EQ(FilePath(L"C:\\"), FilePath(L"C:\\").DirName());
+
+    PathTestPair base_dir_test[] {
+        { FilePath(), FilePath() },
+        { FilePath(L"."), FilePath(L".") },
+        { FilePath(L"abc"), FilePath(L"abc") },
+        { FilePath(L"abc"), FilePath(L"./abc") },
+        { FilePath(L"abc"), FilePath(L"C:\\abc") },
+        { FilePath(L"\\"), FilePath(L"C:\\") }
+    };
+
+    for (const auto& p : base_dir_test) {
+        EXPECT_EQ(p.first, p.second.BaseName());
+    }
+
+    typedef std::pair<FilePath, std::vector<std::wstring>> PathComponentPair;
+    PathComponentPair componnet_test[] {
+        { FilePath(L"C:"), { L"C:" } },
+        { FilePath(L"C:\\"), { L"C:", L"\\" } },
+        { FilePath(L"C:\\foo\\bar"), { L"C:", L"\\", L"foo", L"bar"} }
+    };
+
+    std::vector<std::wstring> comp;
+    for (const auto& p : componnet_test) {
+        p.first.GetComponents(&comp);
+        EXPECT_EQ(comp, p.second);
+    }
+}
+
+TEST(FilePathTest, PathProperty)
+{
+    typedef std::pair<FilePath, bool> PathPropertyPair;
+    
+    // IsAbsolte
+    PathPropertyPair abs_path[] {
+        { FilePath(L"."), false },
+        { FilePath(L"abc"), false },
+        { FilePath(L"./abc"), false },
+        { FilePath(L".."), false },
+        { FilePath(L"../abc"), false },
+        { FilePath(L"C:abc"), false },
+        { FilePath(L"C://abc"), true }
+    };
+
+    for (const auto& p : abs_path) {
+        EXPECT_EQ(p.first.IsAbsolute(), p.second);
+    }
+
+    // ReferenceParent
+    PathPropertyPair refer_parent_path[] {
+        { FilePath(L"./abc"), false },
+        { FilePath(L".."), true },
+        { FilePath(L"../abc"), true }
+    };
+
+    for (const auto& p : refer_parent_path) {
+      EXPECT_EQ(p.first.ReferenceParent(), p.second);
+    }
+
+    typedef std::tuple<FilePath, FilePath, bool> PathPropertyTuple;
+    PathPropertyTuple paths[] {
+        std::make_tuple(FilePath(L"./abc"), FilePath(L"./abc/def"), true),
+        std::make_tuple(FilePath(L"C:\\"), FilePath(L"C:\\abc"), true),
+        std::make_tuple(FilePath(L"C:\\test\\"), FilePath(L"C:\\abc\\"), false)
+    };
+
+    for (const auto& t : paths) {
+        EXPECT_EQ(std::get<0>(t).IsParent(std::get<1>(t)), std::get<2>(t));
+    }
+}
+
+TEST(FilePathTest, PathAppend)
+{
+    
+}
+
+TEST(FilePathTest, PathExtension)
+{
+    
 }

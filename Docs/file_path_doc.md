@@ -158,3 +158,43 @@ for (const auto& path : root_paths) {
 FilePath path(L"C:\\test\\path\\data.txt");
 EXPECT_EQ(path.DirName(), FilePath(L"C:\\test\\path"));
 ```
+
+#### FilePath DirName() [*const*]
+
+Returns a FilePath corresponding to the dir that contains the path.
+
+If this object contains only one component, returns a FilePath identifying the current dir.
+
+If this object already refers to the root dir, returns a FilePath identifying the root dir.
+
+#### FilePath BaseName() [*const*]
+
+Returns a FilePath corresponding to the file component of the path.
+
+If this object already refers to the root, returns a FilePath identifying the root dir.
+
+#### void GetComponents(std::vector<PathString>\* components) [*const*]
+
+Retrieves every components of the path, including the root slash.
+
+```c++
+FilePath path(L"C:\\foo\\bar");
+std::vector<FilePath::PathString> components;
+path.GetComponents(&components);	// ["C:", "\\", "foo", "bar"]
+```
+
+#### bool IsAbsolute() [*const*]
+
+Returns true if it is a absolute path.
+
+#### bool ReferenceParent() [*const*]
+
+Returns `true` if the path has a component that is '..'.
+
+#### bool IsParent(const FilePath& child) [*const*]
+
+Returns `true`, if the path is the parent of the `child`.
+
+Returns `false` otherwise.
+
+**NOTE:** This function may make a wrong judgement if paths that contain both `.` and `..` are involved.

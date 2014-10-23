@@ -2,7 +2,7 @@
  @ Kingsley Chen
 */
 
-#include "kbase/files/file_path.h"
+#include "kbase\files\file_path.h"
 
 #include <cassert>
 #include <cstdlib>
@@ -11,9 +11,10 @@
 #include <functional>
 #include <stdexcept>
 
-#include "kbase/pickle.h"
-#include "kbase/strings/string_util.h"
-#include "kbase/strings/sys_string_encoding_conversions.h"
+#include "kbase\error_exception_util.h"
+#include "kbase\pickle.h"
+#include "kbase\strings\string_util.h"
+#include "kbase\strings\sys_string_encoding_conversions.h"
 
 namespace kbase {
 
@@ -335,12 +336,7 @@ void FilePath::Append(const PathString& components)
         need_appended = &without_null;
     }
 
-    assert(!IsPathAbsolute(*need_appended));
-#if defined(NDEBUG)
-    if (IsPathAbsolute(*need_appended)) {
-        throw std::invalid_argument("components cannot be absolute path!");
-    }
-#endif
+    ENSURE(!IsPathAbsolute(*need_appended)).raise();
 
     // If appends to the current dir, just set the path as the components.
     if (path_ == kCurrentDir) {
@@ -369,6 +365,19 @@ void FilePath::Append(const PathString& components)
 void FilePath::Append(const FilePath& components)
 {
     Append(components.value());
+}
+
+FilePath FilePath::AppendTo(const PathString& components)
+{
+    FilePath new_path(*this);
+    new_path.Append(components);
+
+    return new_path;
+}
+
+FilePath FilePath::AppendTo(const FilePath& components)
+{
+    return AppendTo(components.value());
 }
 
 bool FilePath::AppendRelativePath(const FilePath& child, FilePath* path) const
@@ -405,16 +414,19 @@ bool FilePath::IsParent(const FilePath& child) const
     return AppendRelativePath(child, nullptr);
 }
 
-void FilePath::AppendASCII(const StringPiece& components)
+void FilePath::AppendASCII(const std::string& components)
 {
-    assert(IsStringASCII(components));
-#if defined(NDEBUG)
-    if (!IsStringASCII(components)) {
-        throw std::invalid_argument("components contain non-ASCII characters!");
-    }
-#endif
-    
-    Append(ASCIIToWide(components.as_string()));
+    ENSURE(IsStringASCII(components)).raise();
+
+    Append(ASCIIToWide(components));
+}
+
+kbase::FilePath FilePath::AppendASCIITo(const std::string& components)
+{
+    FilePath new_path(*this);
+    new_path.AppendASCII(components);
+
+    return new_path;
 }
 
 PathString FilePath::Extension() const
