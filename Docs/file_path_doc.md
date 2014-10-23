@@ -198,3 +198,101 @@ Returns `true`, if the path is the parent of the `child`.
 Returns `false` otherwise.
 
 **NOTE:** This function may make a wrong judgement if paths that contain both `.` and `..` are involved.
+
+#### void Append(const PathString& components)
+
+#### void Append(const FilePath& components)
+
+#### FilePath AppendTo(const PathString& components) [*const*]
+
+#### FilePath AppendTo(const FilePath& components) [*const*]
+
+#### void AppendASCII(const std::string& components)
+
+#### FilePath AppendASCIITo(const std::string& components) [*const*]
+
+**NOTE:** `components` must be a relative path. Otherwise, functions will throw an exception.
+
+#### bool AppendRelativePath(const FilePath& child, FilePath* path) [*const*]
+
+If current path is parent of the `child`, appends to `path` the relative path to child, and returns true.
+
+otherwise, returns false.
+
+```
+Example: current path: C:\user\kingsley chen\
+         child path:   C:\user\kingsley chen\app data\test
+         *path:        C:\user\kingsley chen\documents\
+After the calling of this function, *path becomes
+C:\user\kingsley chen\documents\app data\test
+```
+
+#### PathString Extension() [*const*]
+
+Returns the extension of the path if there is any.
+
+The extension starts with extension separator.
+
+If there are multiple extensions, Windows only recognizes the last one.
+
+#### void RemoveExtension()
+
+Removes the extension of the path if there is any.
+
+#### FilePath StripExtention() [*const*]
+
+Same as above, but strips on a copy and leaves the original path intact.
+
+#### FilePath InsertBeforeExtension(const PathString& suffix) [*const*]
+
+Inserts |suffix| after the file name portion of the path, but before the extension.
+
+Returns an empty FilePath if the BaseName() is `.` or `..`.
+
+```
+Example: path: c:\foo\bar\test.jpg suffix: (1) --> c:\foo\bar\test(1).jpg
+```
+
+#### FilePath AddExtension(const PathString& extension) [*const*]
+
+Adds extension to the file name of the path.
+
+If the file name of the path already has an extension, the `extension` will be the sole extension recognized by Windows.
+
+Returns an empty FilePath if the BaseName() is `.` or `..`.
+
+#### FilePath ReplaceExtension(const PathString& extension) [*const*]
+
+Replaces the extension of the file name with `extension`.
+
+If `extension` is empty or only contains separator, the extension of the file name is removed.
+
+If the file name does not have an extension, then `extension` is added.
+
+Returns an empty FilePath if the BaseName() is `.` or `..`.
+
+#### bool MatchExtension(const PathString& extension) [*const*]
+
+Returns `true`, if `extension` matches the extension of the file name.
+
+#### std::string AsASCII() [*const*]
+
+#### std::string AsUTF8() [*const*]
+
+Returns the string in native encoding of the path.
+
+If the path contains any non-ASCII character, the return value is an empty object.
+
+#### static FilePath FromASCII(const std::string& path_in_ascii)
+
+#### static FilePath FromUTF8(const std::string& path_in_utf8)
+
+If the `path_in_ascii` contains any non-ASCII character, the function returns an empty FilePath.
+
+### Serialization
+
+---
+
+#### void WriteToPickle(Pickle* pickle) [*const*]
+
+#### bool ReadFromPickle(PickleIterator* iter)

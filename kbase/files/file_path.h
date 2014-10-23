@@ -101,19 +101,19 @@ public:
     bool IsAbsolute() const;
 
     // |components| must be a relative path. Otherwise, functions will throw an
-    // invalid_argument exception.
+    // exception.
 
     void Append(const PathString& components);
 
     void Append(const FilePath& components);
 
-    FilePath AppendTo(const PathString& components);
+    FilePath AppendTo(const PathString& components) const;
 
-    FilePath AppendTo(const FilePath& components);
+    FilePath AppendTo(const FilePath& components) const;
 
     void AppendASCII(const std::string& components);
 
-    FilePath AppendASCIITo(const std::string& components);
+    FilePath AppendASCIITo(const std::string& components) const;
 
     // If current path is parent of the |child|, appends to |path| the relative
     // path to child, and returns true.

@@ -367,7 +367,7 @@ void FilePath::Append(const FilePath& components)
     Append(components.value());
 }
 
-FilePath FilePath::AppendTo(const PathString& components)
+FilePath FilePath::AppendTo(const PathString& components) const
 {
     FilePath new_path(*this);
     new_path.Append(components);
@@ -375,7 +375,7 @@ FilePath FilePath::AppendTo(const PathString& components)
     return new_path;
 }
 
-FilePath FilePath::AppendTo(const FilePath& components)
+FilePath FilePath::AppendTo(const FilePath& components) const
 {
     return AppendTo(components.value());
 }
@@ -421,7 +421,7 @@ void FilePath::AppendASCII(const std::string& components)
     Append(ASCIIToWide(components));
 }
 
-kbase::FilePath FilePath::AppendASCIITo(const std::string& components)
+kbase::FilePath FilePath::AppendASCIITo(const std::string& components) const
 {
     FilePath new_path(*this);
     new_path.AppendASCII(components);

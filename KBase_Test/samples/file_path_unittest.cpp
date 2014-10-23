@@ -1,3 +1,6 @@
+/*
+ @ Kingsley Chen
+*/
 
 #include "stdafx.h"
 
@@ -164,10 +167,34 @@ TEST(FilePathTest, PathProperty)
 
 TEST(FilePathTest, PathAppend)
 {
-    
+    typedef std::tuple<FilePath, FilePath, std::wstring> PathAppendTuple;
+    PathAppendTuple paths[] {
+        std::make_tuple(FilePath(L"C:abc"), FilePath(L"C:"), L"abc"),
+        std::make_tuple(FilePath(L"C:\\abc"), FilePath(L"C:\\"), L"abc"),
+        std::make_tuple(FilePath(L"C:\\abc\\def"), FilePath(L"C:\\abc"), L"def")
+    };
+
+    for (const auto& t : paths) {
+        EXPECT_EQ(std::get<0>(t), std::get<1>(t).AppendTo(std::get<2>(t)));
+    }
+
+    FilePath current(LR"(C:\user\kingsley chen\)");
+    FilePath child(LR"(C:\user\kingsley chen\app data\test)");
+    FilePath path(LR"(C:\user\kingsley chen\documents\)");
+    EXPECT_TRUE(current.AppendRelativePath(child, &path));
+    EXPECT_EQ(path, FilePath(L"C:\\user\\kingsley chen\\documents\\app data\\test"));
 }
 
 TEST(FilePathTest, PathExtension)
 {
-    
+    FilePath path(L"C:\\abc\\def\\xxx.dat");
+    EXPECT_EQ(path.Extension(), std::wstring(L".dat"));
+    path.RemoveExtension();
+    EXPECT_EQ(path.Extension(), std::wstring());
+    EXPECT_EQ(path, FilePath(L"C:\\abc\\def\\xxx"));
+    path = path.AddExtension(L".txt");
+    EXPECT_EQ(path.Extension(), std::wstring(L".txt"));
+    path = path.ReplaceExtension(L".avi");
+    EXPECT_EQ(path.Extension(), std::wstring(L".avi"));
+    EXPECT_TRUE(path.MatchExtension(L".avi"));
 }
