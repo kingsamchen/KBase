@@ -42,7 +42,7 @@ public:
     FilePath Next();
 
     // Gets the information of the current file.
-    // If there currently is no file, the function throws a logic_error exception.
+    // If there currently is no file, the function throws an exception.
     FileInfo GetInfo() const;
 
 private:
