@@ -105,6 +105,7 @@
     <ClInclude Include="kbase\date_time.h" />
     <ClInclude Include="kbase\error_exception_util.h" />
     <ClInclude Include="kbase\files\file_enumerator.h" />
+    <ClInclude Include="kbase\files\file_info.h" />
     <ClInclude Include="kbase\files\file_path.h" />
     <ClInclude Include="kbase\files\file_util.h" />
     <ClInclude Include="kbase\logging.h" />

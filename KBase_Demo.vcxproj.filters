@@ -80,5 +80,8 @@
     <ClInclude Include="kbase\files\file_util.h">
       <Filter>files</Filter>
     </ClInclude>
+    <ClInclude Include="kbase\files\file_info.h">
+      <Filter>files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

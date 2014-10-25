@@ -16,40 +16,16 @@
 
 #include "kbase\basic_types.h"
 #include "kbase\date_time.h"
+#include "kbase\files\file_info.h"
 #include "kbase\files\file_path.h"
 
 namespace kbase {
 
 class FileEnumerator {
 public:
-    class FileInfo {
-    public:
-        FileInfo();
-
-        ~FileInfo();
-
-        bool IsDirectory() const;
-
-        // Only file name, does not contain any path inforamtion.
-        FilePath GetName() const;
-
-        DateTime GetLastModifiedTime() const;
-
-        uint64_t GetSize() const;
-
-        const WIN32_FIND_DATA& find_data() const
-        {
-            return find_data_;
-        }
-
-    private:
-        friend class FileEnumerator;
-        WIN32_FIND_DATA find_data_;
-    };
-
     enum FileType {
-        FILES = 0x1,
-        DIRS = 0x2,
+        FILES = 1,
+        DIRS  = 1 << 1
     };
 
     // If |recursive| is true, it will enumerate all matches in every subdirectories.

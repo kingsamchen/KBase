@@ -2,12 +2,9 @@
  @ Kingsley Chen
 */
 
-#include "kbase/files/file_enumerator.h"
+#include "kbase\files\file_enumerator.h"
 
-#include <cassert>
-#include <stdexcept>
-
-#include "kbase/version_util.h"
+#include "kbase\error_exception_util.h"
 
 namespace kbase {
 
@@ -98,18 +95,20 @@ FilePath FileEnumerator::Next()
     return FilePath();
 }
 
-FileEnumerator::FileInfo FileEnumerator::GetInfo() const
+FileInfo FileEnumerator::GetInfo() const
 {
-    assert(has_find_data_);
-    if (!has_find_data_) {
-        throw std::logic_error("try to get file info without data!");   
-    }
+    ENSURE(has_find_data_).raise();
 
-    FileInfo file_info;
-    memcpy_s(&file_info.find_data_, sizeof(file_info.find_data_), 
-             &find_data_, sizeof(find_data_));
+    ULARGE_INTEGER file_size;
+    file_size.LowPart = find_data_.nFileSizeLow;
+    file_size.HighPart = find_data_.nFileSizeHigh;
 
-    return file_info;
+    return FileInfo(find_data_.cFileName,
+                    static_cast<int64_t>(file_size.QuadPart),
+                    !!(find_data_.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY),
+                    DateTime(find_data_.ftCreationTime),
+                    DateTime(find_data_.ftLastWriteTime),
+                    DateTime(find_data_.ftLastAccessTime));
 }
 
 bool FileEnumerator::ShouldSkip(const FilePath& path)
@@ -120,40 +119,6 @@ bool FileEnumerator::ShouldSkip(const FilePath& path)
     }
 
     return false;
-}
-
-// --* FileInfo *--
-
-FileEnumerator::FileInfo::FileInfo()
-{
-    memset(&find_data_, 0, sizeof(find_data_));
-}
-
-FileEnumerator::FileInfo::~FileInfo()
-{}
-
-bool FileEnumerator::FileInfo::IsDirectory() const
-{
-    return !!(find_data_.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY);
-}
-
-FilePath FileEnumerator::FileInfo::GetName() const
-{
-    return FilePath(find_data_.cFileName);
-}
-
-DateTime FileEnumerator::FileInfo::GetLastModifiedTime() const
-{
-    return DateTime(find_data_.ftLastWriteTime);
-}
-
-uint64_t FileEnumerator::FileInfo::GetSize() const
-{
-    ULARGE_INTEGER file_size;
-    file_size.LowPart = find_data_.nFileSizeLow;
-    file_size.HighPart = find_data_.nFileSizeHigh;
-
-    return file_size.QuadPart;
 }
 
 }   // namespace kbase
