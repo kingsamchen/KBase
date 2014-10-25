@@ -12,6 +12,8 @@
 #include <string>
 #include <vector>
 
+#include "kbase\basic_types.h"
+
 namespace kbase {
 
 class Pickle;
@@ -19,9 +21,6 @@ class PickleIterator;
 
 class FilePath {
 public:
-    typedef std::wstring PathString;
-    typedef PathString::value_type PathChar;
-
     // Separators in path hierarchy. supports both '/' and '\'.
     static const PathChar kSeparators[];
     static const size_t kSeparatorsLength;
@@ -217,7 +216,7 @@ template<>
 struct std::hash<kbase::FilePath> {
     size_t operator()(const kbase::FilePath& file_path)
     {
-        return std::hash<kbase::FilePath::PathString>()(file_path.value());
+        return std::hash<kbase::PathString>()(file_path.value());
     }
 };
 

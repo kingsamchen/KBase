@@ -13,13 +13,13 @@ namespace kbase {
 
 FileEnumerator::FileEnumerator(const FilePath& root_path, bool recursive,
                                FileType file_type)
- : FileEnumerator(root_path, recursive, file_type, FilePath::PathString())
+ : FileEnumerator(root_path, recursive, file_type, PathString())
 {}
 
 FileEnumerator::FileEnumerator(const FilePath& root_path,
                                bool recursive,
                                FileType file_type,
-                               const FilePath::PathString& pattern)
+                               const PathString& pattern)
  : root_path_(root_path), recursive_(recursive), file_type_(file_type),
    pattern_(pattern), find_handle_(INVALID_HANDLE_VALUE), has_find_data_(false)
 {
@@ -114,7 +114,7 @@ FileEnumerator::FileInfo FileEnumerator::GetInfo() const
 
 bool FileEnumerator::ShouldSkip(const FilePath& path)
 {
-    FilePath::PathString base_name = path.BaseName().value();
+    PathString base_name = path.BaseName().value();
     if (base_name == FilePath::kCurrentDir || base_name == FilePath::kParentDir) {
         return true;
     }

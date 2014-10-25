@@ -14,8 +14,9 @@
 
 #include <windows.h>
 
-#include "kbase/date_time.h"
-#include "kbase/files/file_path.h"
+#include "kbase\basic_types.h"
+#include "kbase\date_time.h"
+#include "kbase\files\file_path.h"
 
 namespace kbase {
 
@@ -55,7 +56,7 @@ public:
     // It employes BFS to enumerate matched entries.
     FileEnumerator(const FilePath& root_path, bool recursive, FileType file_type);
     FileEnumerator(const FilePath& root_path, bool recursive, FileType file_type,
-                   const FilePath::PathString& pattern);
+                   const PathString& pattern);
 
     ~FileEnumerator();
     
@@ -79,7 +80,7 @@ private:
     FilePath root_path_;
     bool recursive_;
     FileType file_type_;
-    FilePath::PathString pattern_;
+    PathString pattern_;
     WIN32_FIND_DATA find_data_;
     HANDLE find_handle_;
     bool has_find_data_;

@@ -18,12 +18,12 @@
 
 namespace kbase {
 
-const FilePath::PathChar FilePath::kSeparators[] = L"\\/";
+const PathChar FilePath::kSeparators[] = L"\\/";
 const size_t FilePath::kSeparatorsLength = _countof(FilePath::kSeparators);
-const FilePath::PathChar FilePath::kCurrentDir[] = L".";
-const FilePath::PathChar FilePath::kParentDir[] = L"..";
-const FilePath::PathChar FilePath::kExtensionSeparator = L'.';
-const FilePath::PathChar FilePath::kStringTerminator = L'\0';
+const PathChar FilePath::kCurrentDir[] = L".";
+const PathChar FilePath::kParentDir[] = L"..";
+const PathChar FilePath::kExtensionSeparator = L'.';
+const PathChar FilePath::kStringTerminator = L'\0';
 
 }   // namespace kbase
 
@@ -31,8 +31,8 @@ namespace {
 
 using kbase::FilePath;
 
-typedef FilePath::PathChar PathChar;
-typedef FilePath::PathString PathString;
+typedef kbase::PathChar PathChar;
+typedef kbase::PathString PathString;
 
 // If the |path| contains a drive letter specification, returns the position of the
 // last character of the specification; otherwise, return npos.
