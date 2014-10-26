@@ -12,14 +12,17 @@
 #include <tuple>
 #include <xutility>
 
+#include "kbase\basic_types.h"
+
 using std::placeholders::_1;
+using kbase::PathString;
 using kbase::FilePath;
 
 namespace {
 
 typedef std::pair<FilePath, FilePath> PathTestPair;
 
-bool ContainsNullterminator(const FilePath::PathString& path_str)
+bool ContainsNullterminator(const PathString& path_str)
 {
     return std::any_of(path_str.begin(), path_str.end(),
                        std::bind(std::equal_to<wchar_t>(), L'\0', _1));
@@ -31,8 +34,8 @@ bool ContainsNullterminator(const FilePath::PathString& path_str)
 // |FilePath| internally cuts them off.
 TEST(FilePathTest, Ctor)
 {
-    FilePath::PathString test_path = L"C:\\abc\\def";
-    FilePath::PathString test_path2 = test_path + FilePath::PathString(2, L'\0');
+    PathString test_path = L"C:\\abc\\def";
+    PathString test_path2 = test_path + PathString(2, L'\0');
     ASSERT_FALSE(ContainsNullterminator(test_path));
     ASSERT_TRUE(ContainsNullterminator(test_path2));
 

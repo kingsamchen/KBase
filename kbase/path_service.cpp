@@ -125,7 +125,7 @@ FilePath PathService::Get(PathKey key)
     }
 
     // Ensure that the returned path never contains '..'.
-    if (path.ReferenceParent()) {
+    if (!path.IsAbsolute()) {
         FilePath&& full_path = MakeAbsoluteFilePath(path);
         ENSURE(!full_path.empty())(SysWideToNativeMB(path.value())).raise();
         path = std::move(full_path);
