@@ -6,6 +6,7 @@
 #ifndef KBASE_FILES_FILE_UTIL_H_
 #define KBASE_FILES_FILE_UTIL_H_
 
+#include "kbase\files\file_info.h"
 #include "kbase\files\file_path.h"
 
 namespace kbase {
@@ -17,6 +18,12 @@ FilePath MakeAbsoluteFilePath(const FilePath& path);
 // Returns true if the path exists.
 // Returns false if doesn't exist.
 bool PathExists(const FilePath& path);
+
+// Retrieves the information of a given file or directory.
+// Throws an exception when error occurs.
+// Be wary of that the size-field of the |FileInfo| is valid if and only if the
+// |path| indicates a file.
+FileInfo GetFileInfo(const FilePath& path);
 
 void Delete(const FilePath& path, bool recursive);
 

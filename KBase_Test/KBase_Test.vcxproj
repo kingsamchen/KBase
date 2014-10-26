@@ -93,6 +93,7 @@
     <ClCompile Include="samples\date_time_unittest.cpp" />
     <ClCompile Include="samples\error_exception_util_unittest.cpp" />
     <ClCompile Include="samples\file_path_unittest.cpp" />
+    <ClCompile Include="samples\file_util_unittest.cpp" />
     <ClCompile Include="samples\path_service_unittest.cpp" />
     <ClCompile Include="samples\pickle_unittest.cpp" />
     <ClCompile Include="samples\sys_info_unittest.cpp" />
