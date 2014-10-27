@@ -7,7 +7,27 @@
 #include <iostream>
 #include <utility>
 
+#include "kbase\path_service.h"
+
 using namespace kbase;
+
+namespace {
+
+const FilePath dir = PathService::Get(DIR_CURRENT).AppendTo(L"abc_test");
+const FilePath file_path = dir.AppendTo(L"abc.txt");
+
+void CreateDirectoryWithFile()
+{
+    CreateDirectoryW(dir.value().c_str(), nullptr);
+    auto handle =
+        CreateFileW(file_path.value().c_str(), GENERIC_READ | GENERIC_WRITE, 0, nullptr,
+                    CREATE_NEW, FILE_ATTRIBUTE_NORMAL, nullptr);
+    if (handle != INVALID_HANDLE_VALUE) {
+        CloseHandle(handle);   
+    }
+}
+
+}   // namespace
 
 TEST(FileUtilTest, MakeAbsoluteFilePath)
 {
@@ -32,3 +52,15 @@ TEST(FileUtilTest, PathExists)
     }
 }
 
+TEST(FileUtilTest, RemoveFile)
+{
+    CreateDirectoryWithFile();
+    ASSERT_TRUE(PathExists(dir));
+    ASSERT_TRUE(PathExists(file_path));
+    RemoveFile(file_path, false);
+    RemoveFile(dir, false);
+    EXPECT_FALSE(PathExists(dir));
+    CreateDirectoryWithFile();
+    RemoveFile(dir, true);
+    EXPECT_FALSE(PathExists(dir));
+}

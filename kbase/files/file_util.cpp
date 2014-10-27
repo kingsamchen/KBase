@@ -3,6 +3,7 @@
 
 #include <Windows.h>
 
+#include <algorithm>
 #include <cstdlib>
 
 #include "kbase\date_time.h"
@@ -42,6 +43,36 @@ FileInfo GetFileInfo(const FilePath& path)
                     DateTime(attr_data.ftCreationTime),
                     DateTime(attr_data.ftLastWriteTime),
                     DateTime(attr_data.ftLastAccessTime));
+}
+
+void RemoveFile(const FilePath& path, bool recursive)
+{
+    if (!recursive) {
+        if (GetFileInfo(path).is_directory()) {
+            BOOL rv = RemoveDirectoryW(path.value().c_str());
+            ThrowLastErrorIf(!rv, "Failed to remove the directory");
+            return;
+        }
+
+        BOOL rv = DeleteFileW(path.value().c_str());
+        ThrowLastErrorIf(!rv, "Failed to delete the file");
+        return;
+    }
+    
+    // SHFileOperationW requires that path must end with double null-terminators.
+    // NOTE: both wcscpy_s and wcsncpy_s fill buffer after the first null-terminator
+    // with dirty charater.
+    wchar_t path_ends_double_null[MAX_PATH + 1] {0};
+    std::copy_n(path.value().begin(), path.value().size(), path_ends_double_null);
+
+    SHFILEOPSTRUCT file_op {0};
+    file_op.fFlags = FOF_NO_UI;
+    file_op.wFunc = FO_DELETE;
+    file_op.pFrom = path_ends_double_null;
+
+    int rv = SHFileOperationW(&file_op);
+    bool err = rv || file_op.fAnyOperationsAborted;
+    ThrowLastErrorIf(err, "Failed to remove files recursively");
 }
 
 }   // namespace kbase

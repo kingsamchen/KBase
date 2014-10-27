@@ -25,9 +25,12 @@ bool PathExists(const FilePath& path);
 // |path| indicates a file.
 FileInfo GetFileInfo(const FilePath& path);
 
-void Delete(const FilePath& path, bool recursive);
+// Removes a file or a directory indicated by the given |path|.
+// If want to remove a directory non-recursively, the directory must be empty.
+// Throws an exception when failed.
+void RemoveFile(const FilePath& path, bool recursive);
 
-void DeleteFileAfterReboot(const FilePath& path);
+void RemoveFileAfterReboot(const FilePath& path);
 
 void Move(const FilePath& src, const FilePath& dest);
 
