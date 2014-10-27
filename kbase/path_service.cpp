@@ -54,12 +54,11 @@ struct PathData {
     {}
 };
 
-// TODO: replace with LazyInstance object
-PathData g_path_data;
-
 PathData& GetPathData()
 {
-    return g_path_data;
+    // TODO: replace with (thread-safe) LazyInstance object.
+    static PathData path_data;
+    return path_data;
 }
 
 // Returns the path corresponding to the key, or an empty path if no cache was found.
