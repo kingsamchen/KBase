@@ -19,6 +19,10 @@ FilePath MakeAbsoluteFilePath(const FilePath& path);
 // Returns false if doesn't exist.
 bool PathExists(const FilePath& path);
 
+// Returns true if the directory exists.
+// Returns false, otherwise.
+bool DirectoryExists(const FilePath& path);
+
 // Retrieves the information of a given file or directory.
 // Throws an exception when error occurs.
 // Be wary of that the size-field of the |FileInfo| is valid if and only if the
@@ -36,6 +40,16 @@ void RemoveFile(const FilePath& path, bool recursive);
 // guarantee the deletion will be enforced.
 // Throws an exception when failed to mark.
 void RemoveFileAfterReboot(const FilePath& path);
+
+// Copies a single file from |src| to |dest|.
+// If |dest| already exists, has it overwritten.
+// The file copied retains file attribute from the source.
+void DuplicateFile(const FilePath& src, const FilePath& dest);
+
+// Copy all files in |src| to |dest| if recursive is false.
+// Copy all content, including subfolders in |src| to |dest| if recursive is true.
+// Overwrites files that already exist.
+void DuplicateDirectory(const FilePath& src, const FilePath& dest, bool recursive);
 
 void MoveFile(const FilePath& src, const FilePath& dest);
 

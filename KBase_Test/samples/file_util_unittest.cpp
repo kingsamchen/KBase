@@ -52,6 +52,20 @@ TEST(FileUtilTest, PathExists)
     }
 }
 
+TEST(FileUtilTest, DirExists)
+{
+    typedef std::pair<FilePath, bool> TestPathExistsPair;
+    TestPathExistsPair test_exists[] {
+            {FilePath(L"C:\\path_exists_test.fuck"), false},
+            {FilePath(L"C:\\Windows"), true},
+            {FilePath(L"C:\\Windows\\WindowsUpdate.log"), false}
+    };
+
+    for (const auto& p : test_exists) {
+        EXPECT_EQ(DirectoryExists(p.first), p.second);
+    }
+}
+
 TEST(FileUtilTest, RemoveFile)
 {
     CreateDirectoryWithFile();
@@ -63,4 +77,9 @@ TEST(FileUtilTest, RemoveFile)
     CreateDirectoryWithFile();
     RemoveFile(dir, true);
     EXPECT_FALSE(PathExists(dir));
+}
+
+TEST(FileUtilTest, DuplicateDirectory)
+{
+    
 }

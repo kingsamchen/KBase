@@ -8,6 +8,8 @@
 
 #include "kbase\date_time.h"
 #include "kbase\error_exception_util.h"
+#include "kbase\files\file_enumerator.h"
+#include "kbase\strings\string_util.h"
 
 namespace kbase {
 
@@ -24,6 +26,12 @@ FilePath MakeAbsoluteFilePath(const FilePath& path)
 bool PathExists(const FilePath& path)
 {
     return GetFileAttributesW(path.value().c_str()) != INVALID_FILE_ATTRIBUTES;
+}
+
+bool DirectoryExists(const FilePath& path)
+{
+    DWORD attr = GetFileAttributesW(path.value().c_str());
+    return attr != INVALID_FILE_ATTRIBUTES && (attr & FILE_ATTRIBUTE_DIRECTORY);
 }
 
 FileInfo GetFileInfo(const FilePath& path)
@@ -60,10 +68,14 @@ void RemoveFile(const FilePath& path, bool recursive)
     }
     
     // SHFileOperationW requires that path must end with double null-terminators.
+    // Moreover, if the path passed to SHFileOperationW is not a full path, the
+    // invocation of SHFileOperationW is not thread safe.
     // NOTE: both wcscpy_s and wcsncpy_s fill buffer after the first null-terminator
     // with dirty charater.
     wchar_t path_ends_double_null[MAX_PATH + 1] {0};
-    std::copy_n(path.value().begin(), path.value().size(), path_ends_double_null);
+    FilePath full_path = MakeAbsoluteFilePath(path);
+    std::copy_n(full_path.value().begin(), full_path.value().size(),
+                path_ends_double_null);
 
     SHFILEOPSTRUCT file_op {0};
     file_op.fFlags = FOF_NO_UI;
@@ -81,8 +93,64 @@ void RemoveFileAfterReboot(const FilePath& path)
     ThrowLastErrorIf(!rv, "Failed to mark delay delete");
 }
 
+void DuplicateFile(const FilePath& src, const FilePath& dest)
+{
+    BOOL rv = CopyFileW(src.value().c_str(), dest.value().c_str(), false);
+    ThrowLastErrorIf(!rv, "Failed to duplicate file");
+}
+
+void DuplicateDirectory(const FilePath& src, const FilePath& dest, bool recursive)
+{
+    FilePath full_src = MakeAbsoluteFilePath(src);
+    ENSURE(!full_src.empty())(src.value()).raise();
+    FilePath full_dest = dest;
+    if (PathExists(full_dest)) {
+        full_dest = MakeAbsoluteFilePath(full_dest);
+        ENSURE(!full_dest.empty())(dest.value()).raise();
+    } else {
+        // Parent directory of the |dest| must exist.
+        auto&& dest_parent = MakeAbsoluteFilePath(full_dest.DirName());
+        ENSURE(!dest_parent.empty())(dest.value()).raise();
+    }
+
+    // Treats this condition as succeeded.
+    if (full_src == full_dest) {
+        return;
+    }
+
+    // The destination cannot be a subfolder of the source in recursive mode.
+    bool permitted = !(recursive && 
+                       StartsWith(full_dest.value(), full_src.value(), false));
+    ENSURE(permitted)(full_src.value())(full_dest.value()).raise();
+
+    if (!DirectoryExists(full_dest)) {
+        BOOL rv = CreateDirectoryW(full_dest.value().c_str(), nullptr);
+        ThrowLastErrorIf(!rv, "Failed to create top-level dest dir");
+    }
+
+    int file_type = FileEnumerator::FILES;
+    if (recursive) {
+        file_type |= FileEnumerator::DIRS;
+    }
+
+    FileEnumerator file_it(full_src, recursive, file_type);
+    for (auto&& current = file_it.Next(); !current.empty(); current = file_it.Next()) {
+        FilePath dest_for_cur = full_dest;
+        bool rv = full_src.AppendRelativePath(current, &dest_for_cur);
+        ENSURE(rv)(full_src.value())(current.value())(dest_for_cur.value()).raise();
+        if (file_it.GetInfo().is_directory() && !DirectoryExists(dest_for_cur)) {
+            BOOL rv = CreateDirectoryW(dest_for_cur.value().c_str(), nullptr);
+            ThrowLastErrorIf(!rv, "Failed to create top-level dest dir");
+        } else {
+            DuplicateFile(current, dest_for_cur);
+        }
+    }
+}
+
 void MoveFile(const FilePath& src, const FilePath& dest)
 {
+    (src);
+    (dest);
     
 }
 
