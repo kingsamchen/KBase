@@ -6,9 +6,6 @@
 
 #include <Windows.h>
 
-#include "kbase\strings\string_format.h"
-#include "kbase\strings\sys_string_encoding_conversions.h"
-
 namespace kbase {
 
 LastError::LastError()

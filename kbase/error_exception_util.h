@@ -14,7 +14,8 @@
 #include <string>
 #include <stdexcept>
 
-#include "kbase/strings/string_format.h"
+#include "kbase\strings\string_format.h"
+#include "kbase\strings\sys_string_encoding_conversions.h"
 
 namespace kbase {
 
@@ -76,6 +77,14 @@ public:
     Guarantor& current_value(const char* name, const T& value)
     {
         exception_desc_ << "    " << name << " = " << value << "\n";
+        return *this;
+    }
+
+    template<>
+    Guarantor& current_value(const char* name, const std::wstring& value)
+    {
+        std::string converted = SysWideToNativeMB(value);
+        exception_desc_ << "    " << name << " = " << converted << "\n";
         return *this;
     }
 
