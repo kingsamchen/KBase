@@ -75,4 +75,15 @@ void RemoveFile(const FilePath& path, bool recursive)
     ThrowLastErrorIf(err, "Failed to remove files recursively");
 }
 
+void RemoveFileAfterReboot(const FilePath& path)
+{
+    BOOL rv = MoveFileExW(path.value().c_str(), nullptr, MOVEFILE_DELAY_UNTIL_REBOOT);
+    ThrowLastErrorIf(!rv, "Failed to mark delay delete");
+}
+
+void MoveFile(const FilePath& src, const FilePath& dest)
+{
+    
+}
+
 }   // namespace kbase

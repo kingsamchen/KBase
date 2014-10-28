@@ -30,9 +30,14 @@ FileInfo GetFileInfo(const FilePath& path);
 // Throws an exception when failed.
 void RemoveFile(const FilePath& path, bool recursive);
 
+// If the |path| refers to a directory, the system removes the directory only if the
+// directory is empty.
+// This function only marks the file or directory as should-be-deleted, it doesn't
+// guarantee the deletion will be enforced.
+// Throws an exception when failed to mark.
 void RemoveFileAfterReboot(const FilePath& path);
 
-void Move(const FilePath& src, const FilePath& dest);
+void MoveFile(const FilePath& src, const FilePath& dest);
 
 }   // namespace kbase
 
