@@ -2,11 +2,12 @@
  @ Kingsley Chen
 */
 
-#include "kbase/error_exception_util.h"
+#include "kbase\error_exception_util.h"
 
 #include <Windows.h>
 
-#include "kbase/strings/sys_string_encoding_conversions.h"
+#include "kbase\strings\string_format.h"
+#include "kbase\strings\sys_string_encoding_conversions.h"
 
 namespace kbase {
 
@@ -74,7 +75,8 @@ unsigned long Win32Exception::error_code() const
     return error_code_;
 }
 
-void ThrowLastErrorIf(bool expression, const std::string& user_message)
+void ThrowLastErrorIfInternal(const char* file, int line, const char* fn_name,
+                              bool expression, const std::string& user_message)
 {
     if (expression) {
         LastError last_error;
@@ -82,7 +84,9 @@ void ThrowLastErrorIf(bool expression, const std::string& user_message)
         // Since GetVerboseMessage internally uses English as its displaying language,
         // it is safe here to call WideToASCII.
         std::string last_error_message = WideToASCII(last_error.GetVerboseMessage());
-        std::string error_message = user_message + " (" + last_error_message + ")";
+        std::string error_message = 
+            StringPrintf("File: %s Line: %d Function: %s\n", file, line, fn_name);
+        error_message += user_message + " (" + last_error_message + ")";
         
         throw Win32Exception(last_error.last_error_code(), error_message);
     }

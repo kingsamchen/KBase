@@ -118,10 +118,14 @@ private:
     unsigned long error_code_;
 };
 
+#define ThrowLastErrorIf(exp, msg)                                                \
+    kbase::ThrowLastErrorIfInternal(__FILE__, __LINE__, __FUNCTION__, exp, msg)
+
 // Throws a Win32Exception if |expression| is true.
 // This function internally displays description of the last error, which means that
 // ex.what() does return text like "user_message (descption_of_last_error)"
-void ThrowLastErrorIf(bool expression, const std::string& user_message);
+void ThrowLastErrorIfInternal(const char* file, int line, const char* fn_name, 
+                              bool expression, const std::string& user_message);
 
 }   // namespace kbase
 
