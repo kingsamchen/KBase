@@ -6,6 +6,8 @@
 #ifndef KBASE_FILES_FILE_UTIL_H_
 #define KBASE_FILES_FILE_UTIL_H_
 
+#include <string>
+
 #include "kbase\files\file_info.h"
 #include "kbase\files\file_path.h"
 
@@ -59,9 +61,23 @@ void DuplicateDirectory(const FilePath& src, const FilePath& dest, bool recursiv
 // Overwrites any that already exists.
 void MakeFileMove(const FilePath& src, const FilePath& dest);
 
+// Reads contents of whole file at |path| into a string.
+// Data is read in binary mode, therefore no CRLF conversion involved.
+// If failed to read from file, the string is empty.
+
+std::string ReadFileToString(const FilePath& path);
+
 void ReadFileToString(const FilePath& path, std::string* data);
 
-void ReadFileToString(const FilePath& path, std::string* data, size_t size_to_read);
+// Writes |data| to a file at |path|.
+// Be wary of that in this function, the data is written in text-mode.
+// If failed to create/open the file to write, the function does nothing.
+void WriteStringToFile(const FilePath& path, const std::string& data);
+
+// Similar to WriteStringToFile, but instead of overwritting the existing contents,
+// this function has data appended.
+// If failed to create/open the file to write, the function does nothing.
+void AppendStringToFile(const FilePath& path, const std::string& data);
 
 }   // namespace kbase
 

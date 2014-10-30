@@ -5,10 +5,12 @@
 
 #include <algorithm>
 #include <cstdlib>
+#include <fstream>
 
 #include "kbase\date_time.h"
 #include "kbase\error_exception_util.h"
 #include "kbase\files\file_enumerator.h"
+#include "kbase\logging.h"
 #include "kbase\strings\string_util.h"
 
 namespace kbase {
@@ -172,6 +174,56 @@ void MakeFileMove(const FilePath& src, const FilePath& dest)
 
     SetLastError(last_error.last_error_code());
     ThrowLastErrorIf(true, "Failed to move file");
+}
+
+void ReadFileToString(const FilePath& path, std::string* data)
+{
+    if (!data->empty()) {
+        data->clear();
+    }
+
+    // It seems the constructor of ifstream in MSVC has an overload function for
+    // wide-character.
+    std::ifstream in(path.value(), std::ios::in | std::ios::binary);
+    if (!in) {
+        DLOG(WARNING) << "Create/open file failed for path " << path.AsUTF8();
+        return;
+    }
+
+    in.seekg(0, std::ios::end);
+    data->resize(static_cast<size_t>(in.tellg()));
+    in.seekg(0);
+    in.read(&(*data)[0], data->size());
+}
+
+std::string ReadFileToString(const FilePath& path)
+{
+    std::string data;
+    ReadFileToString(path, &data);
+
+    return data;
+}
+
+void WriteStringToFile(const FilePath& path, const std::string& data)
+{
+    std::ofstream out(path.value());
+    if (!out) {
+        DLOG(WARNING) << "Create/open file faield for path " << path.AsUTF8();
+        return;
+    }
+    
+    out.write(data.data(), data.size());
+}
+
+void AppendStringToFile(const FilePath& path, const std::string& data)
+{
+    std::ofstream out(path.value(), std::ios::app);
+    if (!out) {
+        DLOG(WARNING) << "Create/open file faield for path " << path.AsUTF8();
+        return;
+    }
+
+    out.write(data.data(), data.size());
 }
 
 }   // namespace kbase
