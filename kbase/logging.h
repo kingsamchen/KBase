@@ -18,7 +18,7 @@ namespace kbase {
 typedef int LogSeverity;
 
 const LogSeverity LOG_INFO = 0;
-const LogSeverity LOG_ERROR = 1;
+const LogSeverity LOG_WARNING = 1;
 const LogSeverity LOG_FATAL = 2;
 
 namespace internal {
@@ -37,13 +37,13 @@ enum { DLOG_ON = ENABLE_DLOG };
 
 #define COMPACT_LOG_EX_INFO(ClassName) \
     kbase::ClassName(__FILE__, __LINE__, kbase::LOG_INFO)
-#define COMPACT_LOG_EX_ERROR(ClassName) \
-    kbase::ClassName(__FILE__, __LINE__, kbase::LOG_ERROR)
+#define COMPACT_LOG_EX_WARNING(ClassName) \
+    kbase::ClassName(__FILE__, __LINE__, kbase::LOG_WARNING)
 #define COMPACT_LOG_EX_FATAL(ClassName) \
     kbase::ClassName(__FILE__, __LINE__, kbase::LOG_FATAL)
 
 #define COMPACT_LOG_INFO COMPACT_LOG_EX_INFO(LogMessage)
-#define COMPACT_LOG_ERROR COMPACT_LOG_EX_ERROR(LogMessage)
+#define COMPACT_LOG_WARNING COMPACT_LOG_EX_WARNING(LogMessage)
 #define COMPACT_LOG_FATAL COMPACT_LOG_EX_FATAL(LogMessage)
 
 #define LAZY_STREAM(stream, condition) \

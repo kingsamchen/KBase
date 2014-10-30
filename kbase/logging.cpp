@@ -16,9 +16,9 @@ namespace kbase {
 // TODO: move this anonymous namespace out of namespace kbase
 namespace {
 
-const char* log_severity_names[] = {"INFO", "ERROR", "FATAL"};
+const char* log_severity_names[] = {"INFO", "WARNING", "FATAL"};
 
-const LogSeverity kAlwaysPrintErrorLevel = LOG_ERROR;
+const LogSeverity kAlwaysPrintErrorLevel = LOG_WARNING;
 
 LogItemOptions log_item_options = LogItemOptions::ENABLE_TIMESTAMP;
 
