@@ -34,6 +34,12 @@ bool DirectoryExists(const FilePath& path)
     return attr != INVALID_FILE_ATTRIBUTES && (attr & FILE_ATTRIBUTE_DIRECTORY);
 }
 
+bool IsDirectoryEmpty(const FilePath& path)
+{
+    FileEnumerator file_it(path, false, FileEnumerator::DIRS | FileEnumerator::FILES);
+    return file_it.Next().empty();
+}
+
 FileInfo GetFileInfo(const FilePath& path)
 {
     WIN32_FILE_ATTRIBUTE_DATA attr_data;
@@ -134,24 +140,38 @@ void DuplicateDirectory(const FilePath& src, const FilePath& dest, bool recursiv
     }
 
     FileEnumerator file_it(full_src, recursive, file_type);
-    for (auto&& current = file_it.Next(); !current.empty(); current = file_it.Next()) {
+    for (auto&& cur = file_it.Next(); !cur.empty(); cur = file_it.Next()) {
         FilePath dest_for_cur = full_dest;
-        bool rv = full_src.AppendRelativePath(current, &dest_for_cur);
-        ENSURE(rv)(full_src.value())(current.value())(dest_for_cur.value()).raise();
+        bool rv = full_src.AppendRelativePath(cur, &dest_for_cur);
+        ENSURE(rv)(full_src.value())(cur.value())(dest_for_cur.value()).raise();
         if (file_it.GetInfo().is_directory() && !DirectoryExists(dest_for_cur)) {
             BOOL rv = CreateDirectoryW(dest_for_cur.value().c_str(), nullptr);
             ThrowLastErrorIf(!rv, "Failed to create top-level dest dir");
         } else {
-            DuplicateFile(current, dest_for_cur);
+            DuplicateFile(cur, dest_for_cur);
         }
     }
 }
 
-void MoveFile(const FilePath& src, const FilePath& dest)
+void MakeFileMove(const FilePath& src, const FilePath& dest)
 {
-    (src);
-    (dest);
+    if (MoveFileExW(src.value().c_str(), dest.value().c_str(),
+                    MOVEFILE_COPY_ALLOWED | MOVEFILE_REPLACE_EXISTING)) {
+        return;
+    }
     
+    LastError last_error;
+
+    if (DirectoryExists(src)) {
+        // Only empty directory can be moved across volume.
+        // We here use an explicit copy-and-remove strategy.
+        DuplicateDirectory(src, dest, true);
+        RemoveFile(src, true);
+        return;
+    }
+
+    SetLastError(last_error.last_error_code());
+    ThrowLastErrorIf(true, "Failed to move file");
 }
 
 }   // namespace kbase

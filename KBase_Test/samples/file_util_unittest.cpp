@@ -79,7 +79,59 @@ TEST(FileUtilTest, RemoveFile)
     EXPECT_FALSE(PathExists(dir));
 }
 
+TEST(FileUtilTest, IsDirectoryEmpty)
+{
+    CreateDirectoryW(L"C:\\DirTest", nullptr);
+    typedef std::pair<FilePath, bool> DirProperty;
+    DirProperty dir_pair[] {
+        {FilePath(L"C:\\Windows"), false},
+        {FilePath(L"C:\\test"), true},
+        {FilePath(L"C:\\DirTest"), true}
+    };
+
+    for (const auto& p : dir_pair) {
+        EXPECT_EQ(IsDirectoryEmpty(p.first), p.second);
+    }
+
+    RemoveFile(FilePath(L"C:\\DirTest"), false);
+}
+
+TEST(FileUtilTest, DuplicateFile)
+{
+    CreateDirectoryWithFile();
+    ASSERT_TRUE(PathExists(dir));
+    ASSERT_TRUE(PathExists(file_path));
+    FilePath new_file = dir.BaseName().AppendTo(L"new_file.lala");
+    DuplicateFile(file_path, new_file);
+    EXPECT_TRUE(PathExists(new_file));
+    RemoveFile(new_file, false);
+    RemoveFile(dir, true);
+}
+
 TEST(FileUtilTest, DuplicateDirectory)
 {
-    
+    CreateDirectoryWithFile();
+    ASSERT_TRUE(PathExists(dir));
+    ASSERT_TRUE(PathExists(file_path));
+    FilePath new_dir(L"C:\\moved_dir");
+    FilePath new_file = new_dir.AppendTo(file_path.BaseName());
+    DuplicateDirectory(dir, new_dir, true);
+    EXPECT_TRUE(PathExists(new_dir));
+    EXPECT_TRUE(PathExists(new_file));
+    RemoveFile(new_dir, true);
+}
+
+TEST(FileUtilTest, MakeFileMove)
+{
+    CreateDirectoryWithFile();
+    ASSERT_TRUE(PathExists(dir));
+    ASSERT_TRUE(PathExists(file_path));
+    FilePath new_dir(L"C:\\moved_dir");
+    FilePath new_file = new_dir.AppendTo(file_path.BaseName());
+    MakeFileMove(dir, new_dir);
+    EXPECT_FALSE(PathExists(dir));
+    EXPECT_FALSE(PathExists(file_path));
+    EXPECT_TRUE(PathExists(new_dir));
+    EXPECT_TRUE(PathExists(new_file));
+    RemoveFile(new_dir, true);
 }

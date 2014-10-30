@@ -23,6 +23,10 @@ bool PathExists(const FilePath& path);
 // Returns false, otherwise.
 bool DirectoryExists(const FilePath& path);
 
+// Returns true if the directory is empty.
+// Returns false otherwise.
+bool IsDirectoryEmpty(const FilePath& path);
+
 // Retrieves the information of a given file or directory.
 // Throws an exception when error occurs.
 // Be wary of that the size-field of the |FileInfo| is valid if and only if the
@@ -46,12 +50,18 @@ void RemoveFileAfterReboot(const FilePath& path);
 // The file copied retains file attribute from the source.
 void DuplicateFile(const FilePath& src, const FilePath& dest);
 
-// Copy all files in |src| to |dest| if recursive is false.
-// Copy all content, including subfolders in |src| to |dest| if recursive is true.
+// Copies all files in |src| to |dest| if recursive is false.
+// Copies all content, including subfolders in |src| to |dest| if recursive is true.
 // Overwrites files that already exist.
 void DuplicateDirectory(const FilePath& src, const FilePath& dest, bool recursive);
 
-void MoveFile(const FilePath& src, const FilePath& dest);
+// Moves a file or a directory along with its subfolders from |src| to |dest|.
+// Overwrites any that already exists.
+void MakeFileMove(const FilePath& src, const FilePath& dest);
+
+void ReadFileToString(const FilePath& path, std::string* data);
+
+void ReadFileToString(const FilePath& path, std::string* data, size_t size_to_read);
 
 }   // namespace kbase
 
