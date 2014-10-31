@@ -2,8 +2,8 @@
  @ Kingsley Chen
 */
 
-#if _MSC_VER > 1000
-#pragma once
+#if defined(_MSC_VER)
+#pragma once  
 #endif
 
 #ifndef KBASE_AUTO_RESET_H_
@@ -11,21 +11,19 @@
 
 namespace kbase {
 
-// be cautious of that an AutoReset object must have shorter lifetime than
-// the scoped_var object. otherwise, it may cause invalid memory reference
+// Be cautious of that an AutoReset object must have shorter lifetime than
+// the scoped_var object. Otherwise, it may cause invalid memory reference
 // during destruction.
 template<typename T>
 class AutoReset {
 public:
-    AutoReset(T* scoped_var, T new_value)
+    AutoReset(T* scoped_var)
         : scoped_var_(scoped_var), original_value_(*scoped_var)
-    {
-        *scoped_var_ = new_value;
-    }
+    {}
 
     ~AutoReset()
     {
-        *scoped_var_ = original_value_;
+        *scoped_var_ = std::move(original_value_);
     }
 
     AutoReset(const AutoReset&) = delete;
