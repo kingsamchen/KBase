@@ -1,3 +1,6 @@
+/*
+ @ Kingsley Chen
+*/
 
 #include "kbase\files\file_util.h"
 

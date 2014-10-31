@@ -1,3 +1,6 @@
+/*
+ @ Kingsley Chen
+*/
 
 #include "stdafx.h"
 
@@ -8,6 +11,7 @@
 #include <utility>
 
 #include "kbase\path_service.h"
+#include "kbase\strings\string_util.h"
 
 using namespace kbase;
 
@@ -134,4 +138,17 @@ TEST(FileUtilTest, MakeFileMove)
     EXPECT_TRUE(PathExists(new_dir));
     EXPECT_TRUE(PathExists(new_file));
     RemoveFile(new_dir, true);
+}
+
+TEST(FileUtilTest, ReadOrWriteFile)
+{
+    std::string original_contents = "abc\nblabla\nhelloworld";
+    FilePath file_path(L"file_io_test");
+    WriteStringToFile(file_path, original_contents);
+    ASSERT_TRUE(PathExists(file_path));
+    std::string contents = ReadFileToString(file_path);
+    EXPECT_NE(original_contents, contents);
+    kbase::RemoveChars(contents, "\r", &contents);
+    EXPECT_EQ(original_contents, contents);
+    RemoveFile(file_path, false);
 }

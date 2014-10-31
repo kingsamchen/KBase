@@ -49,6 +49,7 @@ static bool RemoveCharsT(const strT& in, const kbase::BasicStringPiece<strT>& re
             != remove_chars.cend();
     };
 
+    // TODO: fix the bug when |in| and |out| refer to the same object.
     auto new_end = std::remove_copy_if(in.cbegin(), in.cend(), tmp.begin(), char_in);
     tmp.erase(new_end, tmp.end());
     using std::swap;

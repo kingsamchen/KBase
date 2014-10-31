@@ -1,3 +1,6 @@
+/*
+ @ Kingsley Chen
+*/
 
 #if defined(_MSC_VER)
 #pragma once
