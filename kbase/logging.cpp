@@ -2,7 +2,9 @@
  @ Kingsley Chen
 */
 
-#include "kbase/logging.h"
+#include "kbase\logging.h"
+
+#include <Windows.h>
 
 #include <algorithm>
 #include <cstdio>
@@ -10,24 +12,27 @@
 #include <iomanip>
 #include <stdexcept>
 
-#include <Windows.h>
+#include "kbase\basic_types.h"
+#include "kbase\error_exception_util.h"
 
-namespace kbase {
-// TODO: move this anonymous namespace out of namespace kbase
 namespace {
 
-const char* log_severity_names[] = {"INFO", "WARNING", "FATAL"};
+using kbase::LogSeverity;
+using kbase::LogItemOptions;
+using kbase::LoggingDestination;
+using kbase::OldFileOption;
+using kbase::PathChar;
+using kbase::PathString;
 
-const LogSeverity kAlwaysPrintErrorLevel = LOG_WARNING;
+const char* kLogSeverityNames[] {"INFO", "WARNING", "FATAL"};
+
+const LogSeverity kAlwaysPrintErrorLevel = kbase::LOG_WARNING;
 
 LogItemOptions log_item_options = LogItemOptions::ENABLE_TIMESTAMP;
 
 LoggingDestination logging_dest = LoggingDestination::LOG_TO_FILE;
 
 OldFileOption old_file_option = OldFileOption::APPEND_TO_OLD_LOG_FILE;
-
-typedef wchar_t PathChar;
-typedef std::wstring PathString;
 
 FILE* log_file = nullptr;
 
@@ -50,15 +55,13 @@ const charT* ExtractFileName(const charT* file_path)
     return last_pos ? last_pos + 1 : file_path;
 }
 
-/*
- @ Returns the path of default log file.
-   We use the same path as the EXE file.
-*/
+// Returns the path of default log file. 
+// We use the same path as the EXE file.
 PathString GetDefaultLogFile()
 {
     PathChar exe_path[MAX_PATH];
     GetModuleFileName(nullptr, exe_path, MAX_PATH);
-    
+
     const PathChar* end_past_slash = ExtractFileName(exe_path);
     PathString default_path(exe_path, end_past_slash);
     default_path.append(kLogFileName);
@@ -66,13 +69,10 @@ PathString GetDefaultLogFile()
     return default_path;
 }
 
-/*
- @ This function needs an global mutex-like protector that has this call enclosed.
-   We can have multiple threads and/or processes, try to prevent messing up each
-   other's writes.
- @ returns true, if the file is ready to write
-           false, otherwise
-*/
+// This function needs an global mutex-like protector that has this call enclosed.
+// We can have multiple threads and/or processes, try to prevent messing up each
+// other's writes.
+// Returns true, if the file is ready to write; return false, otherwise.
 bool InitLogFile()
 {
     if (old_file_option == OldFileOption::DELETE_OLD_LOG_FILE) {
@@ -84,7 +84,7 @@ bool InitLogFile()
         PathString&& log_file_name = GetDefaultLogFile();
         _wremove(log_file_name.c_str());
     }
-    
+
     if (log_file) {
         return true;
     }
@@ -123,8 +123,8 @@ private:
     void InitLock()
     {
         PathString log_name = GetDefaultLogFile();
-        // we want file name to be part of the mutex name, and \ is not a legal
-        // character, so we replace \ with /
+        // We want the file name to be part of the mutex name, and \ is not a legal
+        // character, so we replace \ with /.
         std::replace(log_name.begin(), log_name.end(), L'\\', L'/');
 
         std::wstring mutex_name = L"Global\\";
@@ -133,11 +133,7 @@ private:
         // if the mutex has alread been created by another thread or process
         // this call returns the handle to the existed mutex
         log_mutex_ = CreateMutex(nullptr, false, mutex_name.c_str());
-        if (!log_mutex_) {
-            DWORD err = GetLastError();
-            throw std::runtime_error("failed to create a mutex object!\nerror code: "
-                                     + std::to_string(err));
-        }
+        ThrowLastErrorIf(!log_mutex_, "failed to create a mutex object!");
     }
 
     void Lock()
@@ -157,6 +153,8 @@ private:
 };
 
 }   // namespace
+
+namespace kbase {
 
 LoggingSettings::LoggingSettings()
  : log_item_options(LogItemOptions::ENABLE_TIMESTAMP),
@@ -249,7 +247,7 @@ void LogMessage::Init(const char* file, int line)
                 << ':';
     }
 
-    stream_ << log_severity_names[severity_];
+    stream_ << kLogSeverityNames[severity_];
     
     const char* file_name = ExtractFileName(file);
 

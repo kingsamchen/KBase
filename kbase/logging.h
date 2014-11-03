@@ -2,8 +2,8 @@
  @ Kingsley Chen
 */
 
-#if _MSC_VER > 1000
-#pragma once
+#if defined(_MSC_VER)
+#pragma once  
 #endif
 
 #ifndef KBASE_LOGGING_H_
@@ -59,16 +59,16 @@ enum { DLOG_ON = ENABLE_DLOG };
 
 enum LogItemOptions {
     ENABLE_NONE = 0,
-    ENABLE_PROCESS_ID = 0x1,
-    ENABLE_THREAD_ID = 0x2,
-    ENABLE_TIMESTAMP = 0x4,
+    ENABLE_PROCESS_ID = 1 << 0,
+    ENABLE_THREAD_ID = 1 << 1,
+    ENABLE_TIMESTAMP = 1 << 2,
     ENABLE_ALL = ENABLE_PROCESS_ID | ENABLE_THREAD_ID | ENABLE_TIMESTAMP
 };
 
 enum LoggingDestination {
     LOG_NONE = 0,
-    LOG_TO_FILE = 0x1,
-    LOG_TO_SYSTEM_DEBUG_LOG = 0x2,
+    LOG_TO_FILE = 1 << 0,
+    LOG_TO_SYSTEM_DEBUG_LOG = 1 << 1,
     LOG_TO_ALL = LOG_TO_FILE | LOG_TO_SYSTEM_DEBUG_LOG
 };
 
@@ -78,9 +78,7 @@ enum OldFileOption {
 };
 
 struct LoggingSettings {
-    /*
-     @ initializes settings to default values
-    */
+    // Initializes settings to default values.
     LoggingSettings();
 
     LogItemOptions log_item_options;
@@ -109,13 +107,11 @@ private:
 
     LogMessage& operator=(const LogMessage&) = delete;
 
-    /*
-     @ Writes the common info header into the stream.
-       the info header is in the following format:
-         [pid:tid:mmdd/hhmmss:severity:filename(line)]
-       in which, pid tid and logging time all are optional, and are controlled by
-       logging setting.
-    */
+    // Writes the common info header into the stream.
+    // The info header is in the following format:
+    //  [pid:tid:mmdd/hhmmss:severity:filename(line)]
+    // in which, pid tid and logging time all are optional, and are controlled by
+    // logging setting.
     void Init(const char* file, int line);
 
 private:
