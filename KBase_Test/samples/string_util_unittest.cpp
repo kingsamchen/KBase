@@ -1,3 +1,6 @@
+/*
+ @ Kingsley Chen
+*/
 
 #include "stdafx.h"
 

@@ -10,19 +10,26 @@
 #include <cstdio>
 #include <ctime>
 #include <iomanip>
+#include <memory>
+#include <mutex>
 #include <stdexcept>
 
 #include "kbase\basic_types.h"
 #include "kbase\error_exception_util.h"
 
+// TODO: replace raw HANDLE and FILE* with corresponding ScopedObject.
 namespace {
 
 using kbase::LogSeverity;
 using kbase::LogItemOptions;
 using kbase::LoggingDestination;
 using kbase::OldFileOption;
+using kbase::LoggingLockOption;
 using kbase::PathChar;
 using kbase::PathString;
+
+typedef HANDLE GlobalLockHandle;
+typedef std::unique_ptr<std::unique_lock<std::mutex>> ThreadLockHandle;
 
 const char* kLogSeverityNames[] {"INFO", "WARNING", "FATAL"};
 
@@ -33,6 +40,8 @@ LogItemOptions log_item_options = LogItemOptions::ENABLE_TIMESTAMP;
 LoggingDestination logging_dest = LoggingDestination::LOG_TO_FILE;
 
 OldFileOption old_file_option = OldFileOption::APPEND_TO_OLD_LOG_FILE;
+
+LoggingLockOption logging_lock_option = LoggingLockOption::USE_GLOBAL_LOCK;
 
 FILE* log_file = nullptr;
 
@@ -99,15 +108,12 @@ bool InitLogFile()
     return true;
 }
 
-// TODO: add a light-weight lock for resovling race between threads.
-// A global file-lock wrapper.
-// If it fails to create a mutex object, or open the existed one, it throws a
-// runtime error exception, and leaves the program crashed by default.
+// A well-tailored lock for resolving race-condition when multiple threads or even
+// multiple processes are logging to the file simultanesouly.
 class LoggingLock {
 public:
     LoggingLock()
     {
-        InitLock();
         Lock();
     }
 
@@ -116,41 +122,66 @@ public:
         Unlock();
     }
 
+    static void InitLock()
+    {
+        if (initialized_) {
+            return;
+        }
+
+        if (logging_lock_option == LoggingLockOption::USE_GLOBAL_LOCK) {
+            PathString log_name = GetDefaultLogFile();
+            // We want the file name to be part of the mutex name, and \ is not a 
+            // legal character, so we replace \ with /.
+            std::replace(log_name.begin(), log_name.end(), L'\\', L'/');
+
+            std::wstring mutex_name = L"Global\\";
+            mutex_name.append(log_name);
+
+            // if the mutex has alread been created by another thread or process
+            // this call returns the handle to the existed mutex
+            global_lock_ = CreateMutexW(nullptr, false, mutex_name.c_str());
+            ThrowLastErrorIf(!global_lock_, "failed to create a mutex object!");
+        } else {
+            local_lock_.reset(
+                new std::unique_lock<std::mutex>(local_mutex_, std::defer_lock));
+        }
+
+        initialized_ = true;
+    }
+
 private:
     LoggingLock(const LoggingLock&) = delete;
     LoggingLock& operator=(const LoggingLock&) = delete;
 
-    void InitLock()
-    {
-        PathString log_name = GetDefaultLogFile();
-        // We want the file name to be part of the mutex name, and \ is not a legal
-        // character, so we replace \ with /.
-        std::replace(log_name.begin(), log_name.end(), L'\\', L'/');
-
-        std::wstring mutex_name = L"Global\\";
-        mutex_name.append(log_name);
-
-        // if the mutex has alread been created by another thread or process
-        // this call returns the handle to the existed mutex
-        log_mutex_ = CreateMutex(nullptr, false, mutex_name.c_str());
-        ThrowLastErrorIf(!log_mutex_, "failed to create a mutex object!");
-    }
-
     void Lock()
     {
-        WaitForSingleObject(log_mutex_, INFINITE);
+        if (logging_lock_option == LoggingLockOption::USE_GLOBAL_LOCK) {
+            WaitForSingleObject(global_lock_, INFINITE);
+        } else {
+            local_lock_->lock();
+        }
     }
 
     void Unlock()
     {
-        ReleaseMutex(log_mutex_);
-        CloseHandle(log_mutex_);
+        if (logging_lock_option == LoggingLockOption::USE_GLOBAL_LOCK) {
+            ReleaseMutex(global_lock_);
+        } else {
+            local_lock_->unlock();
+        }
     }
 
 private:
-    typedef HANDLE MutexHandle;
-    MutexHandle log_mutex_ = nullptr;
+    static bool initialized_;
+    static GlobalLockHandle global_lock_;
+    static ThreadLockHandle local_lock_;
+    static std::mutex local_mutex_;
 };
+
+bool LoggingLock::initialized_ = false;
+GlobalLockHandle LoggingLock::global_lock_;
+ThreadLockHandle LoggingLock::local_lock_;
+std::mutex LoggingLock::local_mutex_;
 
 }   // namespace
 
@@ -159,7 +190,8 @@ namespace kbase {
 LoggingSettings::LoggingSettings()
  : log_item_options(LogItemOptions::ENABLE_TIMESTAMP),
    logging_dest(LoggingDestination::LOG_TO_FILE),
-   old_file_option(OldFileOption::APPEND_TO_OLD_LOG_FILE)
+   old_file_option(OldFileOption::APPEND_TO_OLD_LOG_FILE),
+   logging_lock_option(LoggingLockOption::USE_GLOBAL_LOCK)
 {}
 
 void InitLoggingSettings(const LoggingSettings& settings)
@@ -167,13 +199,7 @@ void InitLoggingSettings(const LoggingSettings& settings)
     log_item_options = settings.log_item_options;
     logging_dest = settings.logging_dest;
     old_file_option = settings.old_file_option;
-}
-
-void GetCurrentLoggingSettings(LoggingSettings* settings)
-{
-    settings->log_item_options = log_item_options;
-    settings->logging_dest = logging_dest;
-    settings->old_file_option = old_file_option;
+    logging_lock_option = settings.logging_lock_option;
 }
 
 LogMessage::LogMessage(const char* file, int line, LogSeverity severity)
@@ -207,16 +233,13 @@ LogMessage::~LogMessage()
     }
 
     if (logging_dest & LoggingDestination::LOG_TO_FILE) {
+        LoggingLock::InitLock();
         LoggingLock lock;
         if (InitLogFile()) {
             fwrite(static_cast<const void*>(msg.c_str()), sizeof(char), msg.length(),
                    log_file);
             fflush(log_file);
         }
-    }
-
-    if (severity_ == LOG_FATAL) {
-        throw std::runtime_error("encountered a fatal error!");
     }
 }
 

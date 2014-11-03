@@ -77,6 +77,11 @@ enum OldFileOption {
     DELETE_OLD_LOG_FILE
 };
 
+enum LoggingLockOption {
+    USE_GLOBAL_LOCK,
+    USE_LOCAL_LOCK
+};
+
 struct LoggingSettings {
     // Initializes settings to default values.
     LoggingSettings();
@@ -84,10 +89,14 @@ struct LoggingSettings {
     LogItemOptions log_item_options;
     LoggingDestination logging_dest;
     OldFileOption old_file_option;
+    LoggingLockOption logging_lock_option;
 };
 
+// You should better initialize these settings before logging facility being used.
+// If you don't call this function to initialize logging settings, default settings
+// are applied.
+// Note that, this function must not be called more than once.
 void InitLoggingSettings(const LoggingSettings& settings);
-void GetCurrentLoggingSettings(LoggingSettings* current_settings);
 
 class LogMessage {
 public:
