@@ -97,6 +97,7 @@
     <ClCompile Include="samples\file_util_unittest.cpp" />
     <ClCompile Include="samples\path_service_unittest.cpp" />
     <ClCompile Include="samples\pickle_unittest.cpp" />
+    <ClCompile Include="samples\string_util_unittest.cpp" />
     <ClCompile Include="samples\sys_info_unittest.cpp" />
     <ClCompile Include="samples\version_util_unittest.cpp" />
     <ClCompile Include="stdafx.cpp">

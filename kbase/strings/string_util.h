@@ -13,61 +13,73 @@
 #include <string>
 #include <vector>
 
-#include "kbase/strings/string_piece.h"
+#include "kbase\strings\string_piece.h"
 
 namespace kbase {
 
 // Removes any characters specified by |remove_chars| in string |in|.
 // Returns true, if any characters are removed; return false, otherwise. 
+// It is safe to make |in| and |out| both refer to a same object.
 
 bool RemoveChars(const std::string& in,
-                 const char remove_chars[],
+                 const StringPiece& remove_chars,
                  std::string* out);
 bool RemoveChars(const std::wstring& in,
-                 const wchar_t remove_chars[],
+                 const WStringPiece& remove_chars,
                  std::wstring* out);
 
 // Replace |find_with| with |replace_with| in |str|.
 // |pos| indicates the search beginning. if |pos| equals to |npos| or is greater
 // than the length of |str|, these functions do nothing.
 
-void ReplaceSubstr(std::string* str,
-                   const std::string& find_with,
-                   const std::string& replace_with,
-                   std::string::size_type pos = 0);
-void ReplaceSubstr(std::wstring* str,
-                   const std::wstring& find_with,
-                   const std::wstring& replace_with,
-                   std::wstring::size_type pos = 0);
+void ReplaceSubstring(std::string* str,
+                      const StringPiece& find_with,
+                      const StringPiece& replace_with,
+                      std::string::size_type pos = 0);
+void ReplaceSubstring(std::wstring* str,
+                      const WStringPiece& find_with,
+                      const WStringPiece& replace_with,
+                      std::wstring::size_type pos = 0);
 
-void ReplaceFirstSubstr(std::string* str,
-                        const std::string& find_with,
-                        const std::string& replace_with,
-                        std::string::size_type pos = 0);
-void ReplaceFirstSubstr(std::wstring* str,
-                        const std::wstring& find_with,
-                        const std::wstring& replace_with,
-                        std::wstring::size_type pos = 0);
+void ReplaceFirstSubstring(std::string* str,
+                           const StringPiece& find_with,
+                           const StringPiece& replace_with,
+                           std::string::size_type pos = 0);
+void ReplaceFirstSubstring(std::wstring* str,
+                           const WStringPiece& find_with,
+                           const WStringPiece& replace_with,
+                           std::wstring::size_type pos = 0);
 
 // Removes characters in |trim_chars| in a certain range of |in|. 
-// |trim_chars| indicates characters that need to be removed from |in|. must be
-// null-terminated.
+// |trim_chars| indicates characters that need to be removed from |in|. 
 // Returns true if having trimed; otherwise returns false.
 
-bool TrimString(const std::string& in, const char trim_chars[], std::string* out);
-bool TrimString(const std::wstring& in, const wchar_t trim_chars[], std::wstring* out);
+bool TrimString(const std::string& in,
+                const StringPiece& trim_chars,
+                std::string* out);
+bool TrimString(const std::wstring& in,
+                const WStringPiece& trim_chars,
+                std::wstring* out);
 
-bool TrimLeadingStr(const std::string& in, const char trim_chars[], std::string* out);
-bool TrimLeadingStr(const std::wstring& in, const wchar_t trim_chars[], std::wstring* out);
+bool TrimLeadingStr(const std::string& in,
+                    const StringPiece& trim_chars,
+                    std::string* out);
+bool TrimLeadingStr(const std::wstring& in,
+                    const WStringPiece& trim_chars,
+                    std::wstring* out);
 
-bool TrimTailingStr(const std::string& in, const char trim_chars[], std::string* out);
-bool TrimTailingStr(const std::wstring& in, const wchar_t trim_chars[], std::wstring* out);
+bool TrimTailingStr(const std::string& in,
+                    const StringPiece& trim_chars,
+                    std::string* out);
+bool TrimTailingStr(const std::wstring& in,
+                    const WStringPiece& trim_chars,
+                    std::wstring* out);
 
 // Returns true, if the |in| is empty or contains only characters in |chars|;
 // returns false, otherwise.
 
-bool ContainsOnlyChars(const std::string& in, const char chars[]);
-bool ContainsOnlyChars(const std::wstring& in, const wchar_t chars[]);
+bool ContainsOnlyChars(const std::string& in, const StringPiece& chars);
+bool ContainsOnlyChars(const std::wstring& in, const WStringPiece& chars);
 
 // tolower and toupper are local sensitive, we might don't want to use them in some
 // situations.
