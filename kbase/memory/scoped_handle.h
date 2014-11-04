@@ -86,8 +86,52 @@ public:
     typedef HandleType Handle;
     typedef TraitsType Traits;
 
-    //ScopedHandle() {}
-    //ScopedHandle(Handle);
+    ScopedHandle()
+        : handle_(Traits::NullHandle())
+    {}
+
+    explicit ScopedHandle(Handle handle)
+        : handle_(handle)
+    {}
+
+    ScopedHandle(ScopedHandle&& other)
+    {
+        *this = std::move(other);
+    }
+
+    ~ScopedHandle()
+    {
+        *this = nullptr;
+    }
+
+    ScopedHandle& operator=(ScopedHandle&& rhs)
+    {
+        if (this != &rhs) {
+            handle_ = rhs.handle_;
+            rhs = nullptr;
+        }
+
+        return *this;
+    }
+
+    ScopedHandle& operator=(nullptr_t)
+    {
+        Close();
+        return *this;
+    }
+
+    void Close()
+    {
+        if (Traits::IsValid(handle_)) {
+            Traits::Close(handle_);
+            handle_ = Traits::NullHandle();
+        }
+    }
+
+    Handle Get() const
+    {
+        return handle_;
+    }
 
 private:
     Handle handle_;
