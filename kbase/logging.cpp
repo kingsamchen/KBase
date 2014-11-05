@@ -16,19 +16,21 @@
 
 #include "kbase\basic_types.h"
 #include "kbase\error_exception_util.h"
+#include "kbase\memory\scoped_handle.h"
 
-// TODO: replace raw HANDLE and FILE* with corresponding ScopedObject.
 namespace {
 
 using kbase::LogSeverity;
 using kbase::LogItemOptions;
 using kbase::LoggingDestination;
-using kbase::OldFileOption;
 using kbase::LoggingLockOption;
+using kbase::OldFileOption;
+
 using kbase::PathChar;
 using kbase::PathString;
+using kbase::ScopedStdioHandle;
 
-typedef HANDLE GlobalLockHandle;
+typedef kbase::ScopedSysHandle GlobalLockHandle;
 typedef std::unique_ptr<std::unique_lock<std::mutex>> ThreadLockHandle;
 
 const char* kLogSeverityNames[] {"INFO", "WARNING", "FATAL"};
@@ -43,7 +45,7 @@ OldFileOption old_file_option = OldFileOption::APPEND_TO_OLD_LOG_FILE;
 
 LoggingLockOption logging_lock_option = LoggingLockOption::USE_GLOBAL_LOCK;
 
-FILE* log_file = nullptr;
+ScopedStdioHandle log_file;
 
 const PathChar kLogFileName[] = L"debug_message.log";
 
@@ -86,7 +88,6 @@ bool InitLogFile()
 {
     if (old_file_option == OldFileOption::DELETE_OLD_LOG_FILE) {
         if (log_file) {
-            fclose(log_file);
             log_file = nullptr;
         }
 
@@ -99,7 +100,7 @@ bool InitLogFile()
     }
 
     PathString&& log_file_name = GetDefaultLogFile();
-    log_file = _wfsopen(log_file_name.c_str(), L"a", _SH_DENYNO);
+    log_file.Reset(_wfsopen(log_file_name.c_str(), L"a", _SH_DENYNO));
 
     if (!log_file) {
         return false;
@@ -139,7 +140,7 @@ public:
 
             // if the mutex has alread been created by another thread or process
             // this call returns the handle to the existed mutex
-            global_lock_ = CreateMutexW(nullptr, false, mutex_name.c_str());
+            global_lock_.Reset(CreateMutexW(nullptr, false, mutex_name.c_str()));
             ThrowLastErrorIf(!global_lock_, "failed to create a mutex object!");
         } else {
             local_lock_.reset(
@@ -156,7 +157,7 @@ private:
     void Lock()
     {
         if (logging_lock_option == LoggingLockOption::USE_GLOBAL_LOCK) {
-            WaitForSingleObject(global_lock_, INFINITE);
+            WaitForSingleObject(global_lock_.Get(), INFINITE);
         } else {
             local_lock_->lock();
         }
@@ -165,7 +166,7 @@ private:
     void Unlock()
     {
         if (logging_lock_option == LoggingLockOption::USE_GLOBAL_LOCK) {
-            ReleaseMutex(global_lock_);
+            ReleaseMutex(global_lock_.Get());
         } else {
             local_lock_->unlock();
         }
@@ -237,8 +238,8 @@ LogMessage::~LogMessage()
         LoggingLock lock;
         if (InitLogFile()) {
             fwrite(static_cast<const void*>(msg.c_str()), sizeof(char), msg.length(),
-                   log_file);
-            fflush(log_file);
+                   log_file.Get());
+            fflush(log_file.Get());
         }
     }
 }
