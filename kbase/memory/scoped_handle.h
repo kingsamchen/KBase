@@ -88,7 +88,7 @@ public:
     {
         if (this != &rhs) {
             handle_ = rhs.handle_;
-            rhs = nullptr;
+            rhs.handle_ = Traits::NullHandle();
         }
 
         return *this;
@@ -106,9 +106,10 @@ public:
         return Traits::IsValid(handle_);
     }
 
-    operator Handle() const
+    // Explicit cast is required.
+    explicit operator Handle() const
     {
-        reutrn handle_;
+        return handle_;
     }
 
     void Close()
