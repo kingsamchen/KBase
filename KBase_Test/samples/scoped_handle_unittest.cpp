@@ -59,13 +59,37 @@ TEST(ScopedHandleTest, TestAndNullize)
 
 TEST(ScopedHandleTest, MoveSemantics)
 {
-    FILE* fp = nullptr;
-    fopen_s(&fp, "C:\\test.t", "w");
-    ScopedStdioHandle fh(fp);
-    ASSERT_TRUE(static_cast<bool>(fh));
-    fwrite("abcd", sizeof(char), 4, static_cast<FILE*>(fh));
-    ScopedStdioHandle new_fh(std::move(fh));
-    EXPECT_FALSE(static_cast<bool>(fh));
-    EXPECT_TRUE(static_cast<bool>(new_fh));
-    fwrite("1234", sizeof(char), 4, static_cast<FILE*>(new_fh));
+    {
+        FILE* fp = nullptr;
+        fopen_s(&fp, "C:\\test.t", "w");
+        ScopedStdioHandle fh(fp);
+        ASSERT_TRUE(static_cast<bool>(fh));
+        fwrite("abcd", sizeof(char), 4, static_cast<FILE*>(fh));
+        ScopedStdioHandle new_fh(std::move(fh));
+        EXPECT_FALSE(static_cast<bool>(fh));
+        EXPECT_TRUE(static_cast<bool>(new_fh));
+        fwrite("1234", sizeof(char), 4, static_cast<FILE*>(new_fh));
+        new_fh = nullptr;
+        remove("C:\\test.t");
+    }    
+
+    {
+        ScopedSysHandle event_h(CreateEventW(nullptr, TRUE, TRUE, nullptr));
+        ASSERT_TRUE(static_cast<bool>(event_h));
+        ScopedSysHandle another_h(CreateEventW(nullptr, TRUE, TRUE, nullptr));
+        ASSERT_TRUE(static_cast<bool>(event_h));
+        ASSERT_NE(event_h.Get(), another_h.Get());
+        
+        auto reserved_h = static_cast<HANDLE>(event_h);
+        auto reserved_another_h = static_cast<HANDLE>(another_h);
+        event_h = std::move(another_h);
+        
+        EXPECT_FALSE(static_cast<bool>(another_h));
+        EXPECT_TRUE(static_cast<bool>(event_h));
+        EXPECT_EQ(reserved_another_h, event_h.Get());
+        BOOL rv = CloseHandle(reserved_h);
+        DWORD err = GetLastError();
+        EXPECT_FALSE(rv);
+        EXPECT_EQ(err, ERROR_INVALID_HANDLE);
+    }
 }

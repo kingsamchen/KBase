@@ -18,11 +18,18 @@ namespace kbase {
 template<typename HandleType>
 struct HandleTraits {
     typedef HandleType Handle;
+
+    HandleTraits() = delete;
+    ~HandleTraits() = delete;
 };
 
 template<>
 struct HandleTraits<HANDLE> {
     typedef HANDLE Handle;
+
+    HandleTraits() = delete;
+
+    ~HandleTraits() = delete;
 
     static Handle NullHandle()
     {
@@ -43,6 +50,10 @@ struct HandleTraits<HANDLE> {
 template<>
 struct HandleTraits<FILE*> {
     typedef FILE* Handle;
+
+    HandleTraits() = delete;
+
+    ~HandleTraits() = delete;
 
     static Handle NullHandle()
     {
@@ -74,6 +85,8 @@ public:
         : handle_(handle)
     {}
 
+    ScopedHandle(const ScopedHandle&) = delete;
+
     ScopedHandle(ScopedHandle&& other)
     {
         *this = std::move(other);
@@ -84,9 +97,12 @@ public:
         *this = nullptr;
     }
 
+    ScopedHandle& operator=(const ScopedHandle&) = delete;
+
     ScopedHandle& operator=(ScopedHandle&& rhs)
     {
         if (this != &rhs) {
+            Close();
             handle_ = rhs.handle_;
             rhs.handle_ = Traits::NullHandle();
         }
