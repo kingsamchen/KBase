@@ -85,5 +85,8 @@
     <ClInclude Include="kbase\memory\scoped_handle.h">
       <Filter>memory</Filter>
     </ClInclude>
+    <ClInclude Include="kbase\memory\singleton.h">
+      <Filter>memory</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

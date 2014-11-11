@@ -71,5 +71,8 @@
     <ClCompile Include="samples\scoped_handle_unittest.cpp">
       <Filter>samples</Filter>
     </ClCompile>
+    <ClCompile Include="samples\singleton_unittest.cpp">
+      <Filter>samples</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
