@@ -17,19 +17,23 @@ namespace kbase {
 
 class AtExitManager {
 public:
-    typedef std::function<void(void*)> AtExitCallbackType;    
+    typedef std::function<void()> AtExitCallbackType;    
 
     AtExitManager();
 
     ~AtExitManager();
 
-    static void RegisterCallback(const AtExitCallbackType& callback, void* param);
+    static void RegisterCallback(const AtExitCallbackType& callback);
     
     static void ProcessCallbackNow();
 
     AtExitManager(const AtExitManager&) = delete;
 
+    AtExitManager(AtExitManager&&) = delete;
+
     AtExitManager& operator=(const AtExitManager&) = delete;
+
+    AtExitManager& operator=(AtExitManager&&) = delete;
 
 private:
     std::mutex lock_;

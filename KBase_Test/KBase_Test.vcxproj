@@ -52,12 +52,12 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>..\;d:\src_lib\gtest-1.7.0\include\;.;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\;d:\SourceLib\gtest-1.7.0\include\;.;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>..\$(Configuration);d:\src_lib\gtest-1.7.0\msvc\gtest-md\$(Configuration)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\$(Configuration);d:\SourceLib\gtest-1.7.0\msvc\gtest-md\$(Configuration)</AdditionalLibraryDirectories>
       <AdditionalDependencies>kbase.lib;gtestd.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>

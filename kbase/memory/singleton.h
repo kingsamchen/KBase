@@ -11,6 +11,8 @@
 
 #include <mutex>
 
+#include "kbase\at_exit_manager.h"
+
 namespace kbase {
 
 template<typename T>
@@ -54,7 +56,11 @@ private:
     static void Initialize()
     {
         instance_ = Traits::Create();
-        // TODO: Register Traits::Destroy if should cleanup at exit.
+        if (Traits::kDestroyAtExit) {
+            AtExitManager::RegisterCallback([]() {
+                Traits::Destroy(instance_);
+            });
+        }
     }
 
 private:
