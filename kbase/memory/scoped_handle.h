@@ -122,8 +122,8 @@ public:
         return Traits::IsValid(handle_);
     }
 
-    // Explicit cast is required.
-    explicit operator Handle() const
+    // Be careful.
+    operator Handle() const
     {
         return handle_;
     }

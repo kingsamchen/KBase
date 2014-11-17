@@ -18,6 +18,23 @@
 #include "kbase\date_time.h"
 #include "kbase\files\file_info.h"
 #include "kbase\files\file_path.h"
+#include "kbase\memory\scoped_handle.h"
+
+namespace {
+
+struct FindHandleTraits : public kbase::HandleTraits<HANDLE> {
+    FindHandleTraits() = delete;    
+    ~FindHandleTraits() = delete;
+
+    static void Close(Handle handle)
+    {
+        FindClose(handle);
+    }
+};
+
+typedef kbase::ScopedHandle<HANDLE, FindHandleTraits> FileFindHandle;
+
+}   // namespace
 
 namespace kbase {
 
@@ -34,7 +51,7 @@ public:
     FileEnumerator(const FilePath& root_path, bool recursive, int file_type,
                    const PathString& pattern);
 
-    ~FileEnumerator();
+    ~FileEnumerator() = default;
     
     FileEnumerator(const FileEnumerator&) = delete;
     FileEnumerator& operator=(const FileEnumerator&) = delete;
@@ -58,7 +75,7 @@ private:
     int file_type_;
     PathString pattern_;
     WIN32_FIND_DATA find_data_;
-    HANDLE find_handle_;
+    FileFindHandle find_handle_;
     bool has_find_data_;
     std::stack<FilePath> pending_paths_;
 };

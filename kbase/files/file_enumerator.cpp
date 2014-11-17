@@ -24,13 +24,6 @@ FileEnumerator::FileEnumerator(const FilePath& root_path,
     pending_paths_.push(root_path);
 }
 
-FileEnumerator::~FileEnumerator()
-{
-    if (find_handle_ != INVALID_HANDLE_VALUE) {
-        FindClose(find_handle_);
-    }
-}
-
 FilePath FileEnumerator::Next()
 {
     while (!pending_paths_.empty() || has_find_data_) {
@@ -46,22 +39,22 @@ FilePath FileEnumerator::Next()
                 cur_root.Append(pattern_);
             }
 
-            find_handle_ = FindFirstFileEx(cur_root.value().c_str(),
-                                           FindExInfoBasic,
-                                           &find_data_,
-                                           FindExSearchNameMatch,
-                                           nullptr,
-                                           FIND_FIRST_EX_LARGE_FETCH);
+            find_handle_.Reset(FindFirstFileExW(cur_root.value().c_str(),
+                                                FindExInfoBasic,
+                                                &find_data_,
+                                                FindExSearchNameMatch,
+                                                nullptr,
+                                                FIND_FIRST_EX_LARGE_FETCH));
             has_find_data_ = true;
         } else {
             // Enumeration in this directory is accomplished.
-            if (!FindNextFile(find_handle_, &find_data_)) {
+            if (!FindNextFileW(find_handle_, &find_data_)) {
                 FindClose(find_handle_);
-                find_handle_ = INVALID_HANDLE_VALUE;
+                find_handle_ = nullptr;
             }
         }
 
-        if (find_handle_ == INVALID_HANDLE_VALUE) {
+        if (!find_handle_) {
             has_find_data_ = false;
             continue;
         }

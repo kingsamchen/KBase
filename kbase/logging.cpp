@@ -157,7 +157,7 @@ private:
     void Lock()
     {
         if (logging_lock_option == LoggingLockOption::USE_GLOBAL_LOCK) {
-            WaitForSingleObject(global_lock_.Get(), INFINITE);
+            WaitForSingleObject(global_lock_, INFINITE);
         } else {
             local_lock_->lock();
         }
@@ -166,7 +166,7 @@ private:
     void Unlock()
     {
         if (logging_lock_option == LoggingLockOption::USE_GLOBAL_LOCK) {
-            ReleaseMutex(global_lock_.Get());
+            ReleaseMutex(global_lock_);
         } else {
             local_lock_->unlock();
         }
@@ -238,8 +238,8 @@ LogMessage::~LogMessage()
         LoggingLock lock;
         if (InitLogFile()) {
             fwrite(static_cast<const void*>(msg.c_str()), sizeof(char), msg.length(),
-                   log_file.Get());
-            fflush(log_file.Get());
+                   log_file);
+            fflush(log_file);
         }
     }
 }
