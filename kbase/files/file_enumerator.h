@@ -20,10 +20,12 @@
 #include "kbase\files\file_path.h"
 #include "kbase\memory\scoped_handle.h"
 
-namespace {
+namespace kbase {
+
+namespace internal {
 
 struct FindHandleTraits : public kbase::HandleTraits<HANDLE> {
-    FindHandleTraits() = delete;    
+    FindHandleTraits() = delete;
     ~FindHandleTraits() = delete;
 
     static void Close(Handle handle)
@@ -34,9 +36,7 @@ struct FindHandleTraits : public kbase::HandleTraits<HANDLE> {
 
 typedef kbase::ScopedHandle<HANDLE, FindHandleTraits> FileFindHandle;
 
-}   // namespace
-
-namespace kbase {
+}   // namespace internal
 
 class FileEnumerator {
 public:
@@ -75,7 +75,7 @@ private:
     int file_type_;
     PathString pattern_;
     WIN32_FIND_DATA find_data_;
-    FileFindHandle find_handle_;
+    internal::FileFindHandle find_handle_;
     bool has_find_data_;
     std::stack<FilePath> pending_paths_;
 };
