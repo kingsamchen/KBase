@@ -88,5 +88,8 @@
     <ClInclude Include="kbase\memory\singleton.h">
       <Filter>memory</Filter>
     </ClInclude>
+    <ClInclude Include="kbase\memory\lazy.h">
+      <Filter>memory</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
