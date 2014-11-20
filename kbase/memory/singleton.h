@@ -48,7 +48,7 @@ public:
 
     static T* instance()
     {
-        std::call_once(flag_, Singleton::Initialize);
+        std::call_once(flag_, &Singleton::Initialize);
         return instance_;
     }
 

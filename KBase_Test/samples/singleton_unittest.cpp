@@ -20,6 +20,22 @@ struct DataPack {
 
 std::atomic<DataPack*> g_data_pack_ptr {nullptr};
 
+class SingletonUser {
+public:
+    static SingletonUser* Instance()
+    {
+        return kbase::Singleton<SingletonUser>::instance();
+    }
+
+private:
+    friend kbase::DefaultSingletonTraits<SingletonUser>;
+    SingletonUser() {}
+    ~SingletonUser() {}
+
+public:
+    int n;
+};
+
 }   // namespace
 
 TEST(SingletonTest, Valid)

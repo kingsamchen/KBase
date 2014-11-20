@@ -18,11 +18,22 @@ namespace kbase {
 template<typename T>
 class Lazy {
 public:
-    typedef std::function<T*()> Constructor;
+    // Creator is used when you have demand on controlling the construction of the
+    // value. Each valid Creator should return a raw pointer to a T object.
+    // Lazy stashes an instance of Creator during construction, and invokes it when
+    // the lazy value is accessed in the first time, and then takes over the
+    // ownership of the raw pointer which is returned from the Creator.
+    typedef std::function<T*()> Creator;
 
-    Lazy();
+    // Initializes the value with its default constructor.
+    Lazy()
+        : ctor_([]() { return new T(); })
+    {}
 
-    explicit Lazy(Constructor ctor);
+    // Initializes the value by calling crator.
+    explicit Lazy(Creator creator)
+        : ctor_(creator)
+    {}
 
     Lazy(const Lazy&) = delete;
 
@@ -34,11 +45,21 @@ public:
 
     ~Lazy() = default;
 
-    T& value();
+    T& value()
+    {
+        std::call_once(flag_, &Lazy::Initialize, this);
+        return *value_.get();
+    }
+
+private:
+    void Initialize()
+    {
+        value_.reset(ctor_());
+    }
 
 private:
     std::unique_ptr<T> value_;
-    Constructor ctor_;
+    Creator ctor_;
     std::once_flag flag_;
 };
 
