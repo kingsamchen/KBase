@@ -12,10 +12,12 @@
 #include "kbase\base_path_provider.h"
 #include "kbase\error_exception_util.h"
 #include "kbase\files\file_util.h"
+#include "kbase\memory\lazy.h"
 #include "kbase\strings\sys_string_encoding_conversions.h"
 
 using kbase::FilePath;
 using kbase::PathKey;
+using kbase::Lazy;
 
 namespace kbase {
 
@@ -56,9 +58,8 @@ struct PathData {
 
 PathData& GetPathData()
 {
-    // TODO: replace with (thread-safe) LazyInstance object.
-    static PathData path_data;
-    return path_data;
+    static Lazy<PathData> path_data;
+    return path_data.value();
 }
 
 // Returns the path corresponding to the key, or an empty path if no cache was found.

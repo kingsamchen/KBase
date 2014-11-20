@@ -15,6 +15,12 @@
 
 namespace kbase {
 
+// Lazy<T> manages a single instance of type T, which will be lazily created on the
+// first time it is accessed.
+// The instance of type T is created either by using its default constructor,
+// or a specified Creator. The constructor will only ever be called once, even in a
+// multiple-thread environment. However, access of the internal instance is not
+// self-thread, you need to have guaranteed thread-safey on your own.
 template<typename T>
 class Lazy {
 public:
@@ -49,6 +55,11 @@ public:
     {
         std::call_once(flag_, &Lazy::Initialize, this);
         return *value_.get();
+    }
+
+    bool value_created() const
+    {
+        return static_cast<bool>(value_);
     }
 
 private:
