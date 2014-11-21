@@ -77,5 +77,8 @@
     <ClCompile Include="samples\lazy_unittest.cpp">
       <Filter>samples</Filter>
     </ClCompile>
+    <ClCompile Include="samples\command_line_unittest.cpp">
+      <Filter>samples</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
