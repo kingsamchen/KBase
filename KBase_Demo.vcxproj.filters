@@ -43,6 +43,7 @@
     <ClCompile Include="kbase\files\file_util.cpp">
       <Filter>files</Filter>
     </ClCompile>
+    <ClCompile Include="kbase\command_line.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="kbase\at_exit_manager.h" />
@@ -91,5 +92,6 @@
     <ClInclude Include="kbase\memory\lazy.h">
       <Filter>memory</Filter>
     </ClInclude>
+    <ClInclude Include="kbase\command_line.h" />
   </ItemGroup>
 </Project>
