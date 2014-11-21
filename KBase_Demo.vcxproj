@@ -81,6 +81,7 @@
   <ItemGroup>
     <ClCompile Include="kbase\at_exit_manager.cpp" />
     <ClCompile Include="kbase\base_path_provider.cpp" />
+    <ClCompile Include="kbase\command_line.cpp" />
     <ClCompile Include="kbase\date_time.cpp" />
     <ClCompile Include="kbase\error_exception_util.cpp" />
     <ClCompile Include="kbase\files\file_enumerator.cpp" />
@@ -102,6 +103,7 @@
     <ClInclude Include="kbase\auto_reset.h" />
     <ClInclude Include="kbase\base_path_provider.h" />
     <ClInclude Include="kbase\basic_types.h" />
+    <ClInclude Include="kbase\command_line.h" />
     <ClInclude Include="kbase\date_time.h" />
     <ClInclude Include="kbase\error_exception_util.h" />
     <ClInclude Include="kbase\files\file_enumerator.h" />
