@@ -23,6 +23,13 @@ namespace kbase {
 // separated by spaces or tabs.
 // Arguments with preceded '--', '-', and '/' are switches. A switch can optionally
 // have a value that is delimited by '='.
+// Arguments that are not switches are called parameters. They are just specific
+// values.
+// Besides, the first argument is called program, since it always referes to the full
+// path of the program.
+// The general order of arguments in command line is as follows:
+// { program, [(-|--|/)switchs[=value]], [parameters] } 
+// that is, switches always precede with arguments.
 class CommandLine {
 public:
     using StringType = std::wstring;
@@ -59,6 +66,10 @@ public:
 
     void SetProgram(const FilePath& program);
 
+    void AppendSwitch(const StringType& name, const StringType& value = StringType());
+
+    void AppendParameter(const StringType& arg);
+
 private:
     using Argv = std::list<StringType>;
     using SwitchTable = std::map<StringType, StringType>;
@@ -66,7 +77,7 @@ private:
     static Lazy<CommandLine> current_process_cmdline_;
     Argv argv_;
     Argv::iterator last_not_args_;
-    SwitchTable switches_;    
+    SwitchTable switches_;
 };
 
 }   // namespace kbase

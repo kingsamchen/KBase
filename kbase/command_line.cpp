@@ -6,17 +6,54 @@
 
 #include <Windows.h>
 
+#include <algorithm>
+#include <utility>
+
 #include "kbase\error_exception_util.h"
 #include "kbase\strings\string_util.h"
 
 namespace {
 
 using kbase::CommandLine;
+using CharType = CommandLine::CharType;
+using StringType = CommandLine::StringType;
 using ArgList = CommandLine::ArgList;
+using SwitchPair = std::pair<StringType, StringType>;
 
-void AppendSwitchesAndArguments(CommandLine* cmdline, const ArgList& argv)
+const CharType* kSwitchPrefixes[] {L"-", L"--", L"/"};
+const CharType kSwitchValueDelimiter[] = L"=";
+
+bool IsArgumentSwitch(const StringType& arg)
 {
+    return std::any_of(std::begin(kSwitchPrefixes), std::end(kSwitchPrefixes),
+                       [&arg](const CharType* prefix)->bool {
+        return kbase::StartsWith(arg, prefix);
+    });
+}
 
+SwitchPair UnstickSwitch(StringType* switch_token)
+{
+    kbase::TrimLeadingStr(*switch_token, L"-/", switch_token);
+    std::vector<StringType> members;
+    kbase::Tokenize(*switch_token, kSwitchValueDelimiter, &members);
+    // Note that the switch may not carry a value.
+    members.resize(2);
+
+    return {members[0], members[1]};
+}
+
+void AddArguments(CommandLine* cmdline, const ArgList& argv)
+{
+    for (auto arg = argv.cbegin() + 1; arg != argv.cend(); ++arg) {
+        StringType sanitized_arg;
+        kbase::TrimString(*arg, L" \t", &sanitized_arg);
+        if (IsArgumentSwitch(sanitized_arg)) {
+            auto switch_member = UnstickSwitch(&sanitized_arg);
+            cmdline->AppendSwitch(switch_member.first, switch_member.second);
+        } else {
+            cmdline->AppendParameter(sanitized_arg);
+        }
+    }
 }
 
 }   // namespace
@@ -102,7 +139,17 @@ void CommandLine::ParseFromArgv(const ArgList& argv)
     switches_.clear();
 
     SetProgram(FilePath(argv[0]));
-    AppendSwitchesAndArguments(this, argv);
+    AddArguments(this, argv);
+}
+
+void CommandLine::AppendSwitch(const StringType& name, const StringType& value)
+{
+
+}
+
+void CommandLine::AppendParameter(const StringType& parameter)
+{
+
 }
 
 }   // namespace kbase
