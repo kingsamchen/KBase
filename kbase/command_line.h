@@ -21,19 +21,21 @@ namespace kbase {
 
 // A command line on Windows consists of one or more arguments, which are tokens
 // separated by spaces or tabs.
-// Arguments with preceded '--', '-', and '/' are switches. Switches can optionally
-// have values, delimited by '='.
+// Arguments with preceded '--', '-', and '/' are switches. A switch can optionally
+// have a value that is delimited by '='.
 class CommandLine {
 public:
-    typedef std::wstring StringType;
-    typedef StringType::value_type CharType;
+    using StringType = std::wstring;
+    using CharType = StringType::value_type;
+    using ArgList = std::vector<StringType>;
 
     explicit CommandLine(const FilePath& program);
 
     CommandLine(int argc, const CharType* const* argv);
 
-    explicit CommandLine(const std::vector<StringType>& argv);
+    explicit CommandLine(const ArgList& argv);
 
+    // |cmdline| has same requirement as in ParseFromString.
     explicit CommandLine(const StringType& cmdline);
 
     ~CommandLine() = default;
@@ -46,8 +48,11 @@ public:
 
     void ParseFromArgv(int argc, const CharType* const* argv);
 
-    void ParseFromArgv(const std::vector<StringType>& argv);
+    void ParseFromArgv(const ArgList& argv);
 
+    // Since Windows uses spaces or tabs to separate command line arguments, please
+    // make sure that file path of the program, i.e. argv[0], is enclosed with
+    // quotation marks, if the path may contain spaces.
     void ParseFromString(const StringType& cmdline);
 
     FilePath GetProgram() const;
@@ -55,8 +60,8 @@ public:
     void SetProgram(const FilePath& program);
 
 private:
-    typedef std::list<StringType> Argv;
-    typedef std::map<StringType, StringType> SwitchTable;
+    using Argv = std::list<StringType>;
+    using SwitchTable = std::map<StringType, StringType>;
 
     static Lazy<CommandLine> current_process_cmdline_;
     Argv argv_;
