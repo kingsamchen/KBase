@@ -182,4 +182,55 @@ void CommandLine::AppendParameter(const StringType& parameter)
     argv_.emplace_back(parameter);
 }
 
+bool CommandLine::HasSwitch(const StringType& name) const
+{
+    return switches_.find(name) != switches_.end();
+}
+
+bool CommandLine::GetSwitchValue(const StringType& name, StringType* value) const
+{
+    auto it = switches_.find(name);
+    if (it == switches_.end()) {
+        return false;
+    }
+
+    *value = it->second;
+    return true;
+}
+
+CommandLine::ArgList CommandLine::GetParameters() const
+{
+    Argv::const_iterator params_begin = std::next(last_not_param_);
+    ArgList params;
+    std::copy(params_begin, argv_.end(), std::back_inserter(params));
+
+    return params;
+}
+
+CommandLine::ArgList CommandLine::GetArgv() const
+{
+    ArgList str_argv;
+    str_argv.reserve(argv_.size());
+
+    // Program part.
+    str_argv.emplace_back(GetProgram().value());
+
+    // Switches with prepending default prefix.
+    Argv::const_iterator switch_end = std::next(last_not_param_);
+    std::transform(std::next(argv_.begin()), switch_end, std::back_inserter(str_argv),
+                   [&](const StringType& arg)->StringType {
+        size_t index = static_cast<size_t>(GetDefaultSwitchPrefix());
+        StringType prepended(kSwitchPrefixes[index]);
+        prepended.append(arg);
+
+        return prepended;
+    });
+
+    // parameters.
+    ArgList&& params = GetParameters();
+    std::move(params.begin(), params.end(), std::back_inserter(str_argv));
+
+    return str_argv;
+}
+
 }   // namespace kbase

@@ -36,6 +36,7 @@ public:
     using StringType = std::wstring;
     using CharType = StringType::value_type;
     using ArgList = std::vector<StringType>;
+    using SwitchTable = std::map<StringType, StringType>;
 
     enum DefaultSwitchPrefix : size_t {
         PREFIX_DASH = 0,
@@ -85,10 +86,22 @@ public:
 
     void AppendParameter(const StringType& arg);
 
+    bool HasSwitch(const StringType& name) const;
+
+    bool GetSwitchValue(const StringType& name, StringType* value) const;
+
+    const SwitchTable& GetSwitches() const
+    {
+        return switches_;
+    }
+
+    ArgList GetParameters() const;
+
+    ArgList GetArgv() const;
+
 private:
     using Argv = std::list<StringType>;
-    using SwitchTable = std::map<StringType, StringType>;
-
+    
     static Lazy<CommandLine> current_process_cmdline_;
     Argv argv_;
     Argv::iterator last_not_param_;

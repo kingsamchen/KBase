@@ -45,3 +45,14 @@ TEST(CommandLineTest, DefaultSwithPrefix)
     EXPECT_NE(cmdline.GetDefaultSwitchPrefix(), kbase::CommandLine::PREFIX_DASH);
     EXPECT_EQ(cmdline.GetDefaultSwitchPrefix(), kbase::CommandLine::PREFIX_SLASH);
 }
+
+TEST(CommandLineTest, HasSwitch)
+{
+    std::wstring cmdline_str = L"C:\\windows\\system32\\notepad.exe -r --maxmize D:\\test.txt";
+    kbase::CommandLine cmdline(cmdline_str);
+    ASSERT_EQ(cmdline.GetProgram(), kbase::FilePath(L"C:\\windows\\system32\\notepad.exe"));
+
+    EXPECT_TRUE(cmdline.HasSwitch(L"r"));
+    EXPECT_TRUE(cmdline.HasSwitch(L"maxmize"));
+    EXPECT_FALSE(cmdline.HasSwitch(L"path"));
+}
