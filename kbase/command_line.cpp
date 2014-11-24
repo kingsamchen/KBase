@@ -65,25 +65,25 @@ Lazy<CommandLine> CommandLine::current_process_cmdline_([]() {
 });
 
 CommandLine::CommandLine(const FilePath& program)
-    : argv_(1), last_not_args_(argv_.begin())
+    : argv_(1), last_not_param_(argv_.begin())
 {
     SetProgram(program);
 }
 
 CommandLine::CommandLine(int argc, const CharType* const* argv)
-    : argv_(1), last_not_args_(argv_.begin())
+    : argv_(1), last_not_param_(argv_.begin())
 {
     ParseFromArgv(argc, argv);
 }
 
 CommandLine::CommandLine(const std::vector<StringType>& argv)
-    : argv_(1), last_not_args_(argv_.begin())
+    : argv_(1), last_not_param_(argv_.begin())
 {
     ParseFromArgv(argv);
 }
 
 CommandLine::CommandLine(const StringType& cmdline)
-    : argv_(1), last_not_args_(argv_.begin())
+    : argv_(1), last_not_param_(argv_.begin())
 {
     ParseFromString(cmdline);
 }
@@ -135,7 +135,7 @@ void CommandLine::ParseFromArgv(const ArgList& argv)
 
     // Anyway, we start from scratch.
     argv_ = Argv(1);
-    last_not_args_ = argv_.begin();
+    last_not_param_ = argv_.begin();
     switches_.clear();
 
     SetProgram(FilePath(argv[0]));
@@ -144,12 +144,20 @@ void CommandLine::ParseFromArgv(const ArgList& argv)
 
 void CommandLine::AppendSwitch(const StringType& name, const StringType& value)
 {
-
+    switches_[name] = value;
+    
+    auto original = last_not_param_++;
+    // Since we have |last_not_param_| to demarcate switches and parameters, we here
+    // leave switch prefix unprepended.
+    StringType switch_arg(name);
+    switch_arg.append(L"=").append(value);
+    argv_.emplace(last_not_param_, switch_arg);
+    last_not_param_ = ++original;    
 }
 
 void CommandLine::AppendParameter(const StringType& parameter)
 {
-
+    argv_.emplace_back(parameter);
 }
 
 }   // namespace kbase
