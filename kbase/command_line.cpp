@@ -7,6 +7,7 @@
 #include <Windows.h>
 
 #include <algorithm>
+#include <cstdlib>
 #include <utility>
 
 #include "kbase\error_exception_util.h"
@@ -94,7 +95,28 @@ const CommandLine& CommandLine::ForCurrentProcess()
     return current_process_cmdline_.value();
 }
 
-FilePath CommandLine::GetProgram()  const
+CommandLine::DefaultSwitchPrefix CommandLine::GetDefaultSwitchPrefix() const
+{
+    for (int i = 0; i < _countof(kSwitchPrefixes); ++i) {
+        if (wcscmp(default_switch_prefix_.data(), kSwitchPrefixes[i]) == 0) {
+            return static_cast<DefaultSwitchPrefix>(i);
+        }
+    }
+
+    // Shall never get here.
+    ENSURE(false)(default_switch_prefix_.data()).raise();
+    return DefaultSwitchPrefix::PREFIX_DASH;
+}
+
+void CommandLine::SetDefaultSwitchPrefix(DefaultSwitchPrefix prefix_type)
+{
+    size_t index = static_cast<size_t>(prefix_type);
+    ENSURE(index < _countof(kSwitchPrefixes))(prefix_type).raise();
+    wcscpy_s(default_switch_prefix_.data(), default_switch_prefix_.size(),
+             kSwitchPrefixes[index]);
+}
+
+FilePath CommandLine::GetProgram() const
 {
     return FilePath(argv_.front());
 }

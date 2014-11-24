@@ -9,6 +9,7 @@
 #ifndef KBASE_COMMAND_LINE_H_
 #define KBASE_COMMAND_LINE_H_
 
+#include <array>
 #include <list>
 #include <map>
 #include <string>
@@ -36,6 +37,12 @@ public:
     using CharType = StringType::value_type;
     using ArgList = std::vector<StringType>;
 
+    enum DefaultSwitchPrefix : size_t {
+        PREFIX_DASH = 0,
+        PREFIX_DOUBLE_DASH,
+        PREFIX_SLASH
+    };
+
     explicit CommandLine(const FilePath& program);
 
     CommandLine(int argc, const CharType* const* argv);
@@ -62,6 +69,14 @@ public:
     // quotation marks, if the path may contain spaces.
     void ParseFromString(const StringType& cmdline);
 
+    // Default switch prefix is used when stringizing switches.
+    // No matter which prefix a switch uses, it eventually will be eliminated when
+    // the switch is stashed inside, and thus being prepended with default switch
+    // prefix if you want to stringify switches.
+    DefaultSwitchPrefix GetDefaultSwitchPrefix() const;
+
+    void SetDefaultSwitchPrefix(DefaultSwitchPrefix prefix_type);
+
     FilePath GetProgram() const;
 
     void SetProgram(const FilePath& program);
@@ -78,6 +93,10 @@ private:
     Argv argv_;
     Argv::iterator last_not_param_;
     SwitchTable switches_;
+    static const size_t kSwitchPrefixSizeLimit = 3;
+    // Use '-' as out initial default switch prefix.
+    // HACK: VS2013 doesn't support explicit initializer for class member array yet.
+    std::array<wchar_t, kSwitchPrefixSizeLimit> default_switch_prefix_ {{L"-"}};
 };
 
 }   // namespace kbase

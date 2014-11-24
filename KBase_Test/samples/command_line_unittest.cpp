@@ -34,3 +34,14 @@ TEST(CommandLineTest, GetOrSetProgram)
     cmdline.SetProgram(path_with_hybrid);
     EXPECT_EQ(cmdline.GetProgram(), path);
 }
+
+TEST(CommandLineTest, DefaultSwithPrefix)
+{
+    kbase::FilePath path(L"C:\\windows\\system32\\calc.exe");
+    kbase::CommandLine cmdline(path);
+    EXPECT_EQ(cmdline.GetDefaultSwitchPrefix(), kbase::CommandLine::PREFIX_DASH);
+
+    cmdline.SetDefaultSwitchPrefix(kbase::CommandLine::PREFIX_SLASH);
+    EXPECT_NE(cmdline.GetDefaultSwitchPrefix(), kbase::CommandLine::PREFIX_DASH);
+    EXPECT_EQ(cmdline.GetDefaultSwitchPrefix(), kbase::CommandLine::PREFIX_SLASH);
+}
