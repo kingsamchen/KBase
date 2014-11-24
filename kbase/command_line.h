@@ -59,6 +59,7 @@ public:
 
     static CommandLine FromString(const StringType& cmdline);
 
+    // Returns the singleton command line object for the current process.
     static const CommandLine& ForCurrentProcess();
 
     void ParseFromArgv(int argc, const CharType* const* argv);
@@ -82,12 +83,16 @@ public:
 
     void SetProgram(const FilePath& program);
 
+    // |name| should not be preceded with a prefix.
     void AppendSwitch(const StringType& name, const StringType& value = StringType());
 
     void AppendParameter(const StringType& arg);
 
+    // |name| should not be preceded with a prefix.
     bool HasSwitch(const StringType& name) const;
 
+    // Returns true if succeeded in querying the value associated with the switch.
+    // Returns false if no such switch was found, and |value| remains unchanged.
     bool GetSwitchValue(const StringType& name, StringType* value) const;
 
     const SwitchTable& GetSwitches() const
@@ -97,6 +102,7 @@ public:
 
     ArgList GetParameters() const;
 
+    // Note that, switches will be preceded with default prefix.
     ArgList GetArgv() const;
 
 private:
@@ -109,7 +115,7 @@ private:
     static const size_t kSwitchPrefixSizeLimit = 3;
     // Use '-' as out initial default switch prefix.
     // HACK: VS2013 doesn't support explicit initializer for class member array yet.
-    std::array<wchar_t, kSwitchPrefixSizeLimit> default_switch_prefix_ {{L"-"}};
+    std::array<wchar_t, kSwitchPrefixSizeLimit> default_switch_prefix_;
 };
 
 }   // namespace kbase

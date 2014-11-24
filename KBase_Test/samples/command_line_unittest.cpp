@@ -16,6 +16,16 @@ TEST(CommandLineTest, Ctors)
     EXPECT_EQ(program, path);
 }
 
+TEST(CommandLineTest, CurrentProcessCommandLine)
+{
+    const kbase::CommandLine& cmdline = kbase::CommandLine::ForCurrentProcess();
+    auto argv = cmdline.GetArgv();
+    for (const auto& arg : argv) {
+        std::wcout << arg << std::endl;    
+    }
+    EXPECT_FALSE(argv.empty());
+}
+
 TEST(CommandLineTest, GetOrSetProgram)
 {
     kbase::FilePath path(L"C:\\windows\\system32\\calc.exe");
@@ -55,4 +65,54 @@ TEST(CommandLineTest, HasSwitch)
     EXPECT_TRUE(cmdline.HasSwitch(L"r"));
     EXPECT_TRUE(cmdline.HasSwitch(L"maxmize"));
     EXPECT_FALSE(cmdline.HasSwitch(L"path"));
+}
+
+TEST(CommandLineTest, QuerySwitchValue)
+{
+    kbase::CommandLine cmdline(L"C:\\windows\\system32\\notepad.exe -a=1 --maxmize --t=1024 D:\\test.txt");
+    
+    std::wstring value;
+    bool rv = cmdline.GetSwitchValue(L"a", &value);
+    EXPECT_TRUE(rv);
+    EXPECT_EQ(value, L"1");
+
+    rv = cmdline.GetSwitchValue(L"maxmize", &value);
+    EXPECT_TRUE(rv);
+    EXPECT_TRUE(value.empty());
+
+    rv = cmdline.GetSwitchValue(L"ta", &value);
+    EXPECT_FALSE(rv);
+}
+
+TEST(CommandLineTest, GetParameters)
+{
+    {
+        kbase::CommandLine cmdline(L"C:\\abc.exe -a=1 -t=123 D:\\test.txt 3600 2014/11/25");
+        auto params = cmdline.GetParameters();
+        std::vector<std::wstring> p {L"D:\\test.txt", L"3600", L"2014/11/25"};
+        EXPECT_EQ(params, p);
+    }
+
+    {
+        kbase::CommandLine cmdline(L"C:\\abc.exe -a=1 -t=123");
+        auto params = cmdline.GetParameters();
+        std::vector<std::wstring> empty;
+        EXPECT_EQ(params, empty);
+    }
+}
+
+TEST(CommandLineTest, GetArgv)
+{
+    kbase::CommandLine::ArgList argv {L"D:\\test.exe", L"-a=1", L"-t=1024", L"-warmup", L"D:\\test.txt", L"2014-11-25"};
+    {
+    kbase::CommandLine cmdline(argv);
+    auto parsed_argv = cmdline.GetArgv();
+    EXPECT_EQ(parsed_argv, argv);
+    }
+
+    {
+    kbase::CommandLine cmdline(L"D:\\test.exe --a=1 /t=1024 --warmup D:\\test.txt 2014-11-25");
+    auto parsed_argv = cmdline.GetArgv();
+    EXPECT_EQ(parsed_argv, argv);
+    }
 }

@@ -66,27 +66,33 @@ Lazy<CommandLine> CommandLine::current_process_cmdline_([]() {
 });
 
 CommandLine::CommandLine(const FilePath& program)
-    : argv_(1), last_not_param_(argv_.begin())
+    : argv_(1), last_not_param_(argv_.begin()), default_switch_prefix_({L"-"})
 {
     SetProgram(program);
 }
 
 CommandLine::CommandLine(int argc, const CharType* const* argv)
-    : argv_(1), last_not_param_(argv_.begin())
+    : argv_(1), last_not_param_(argv_.begin()), default_switch_prefix_({L"-"})
 {
     ParseFromArgv(argc, argv);
 }
 
 CommandLine::CommandLine(const std::vector<StringType>& argv)
-    : argv_(1), last_not_param_(argv_.begin())
+    : argv_(1), last_not_param_(argv_.begin()), default_switch_prefix_({L"-"})
 {
     ParseFromArgv(argv);
 }
 
 CommandLine::CommandLine(const StringType& cmdline)
-    : argv_(1), last_not_param_(argv_.begin())
+    : argv_(1), last_not_param_(argv_.begin()), default_switch_prefix_({L"-"})
 {
     ParseFromString(cmdline);
+}
+
+// static
+CommandLine CommandLine::FromString(const StringType& cmdline)
+{
+    return CommandLine(cmdline);
 }
 
 // static
@@ -172,7 +178,9 @@ void CommandLine::AppendSwitch(const StringType& name, const StringType& value)
     // Since we have |last_not_param_| to demarcate switches and parameters, we here
     // leave switch prefix unprepended.
     StringType switch_arg(name);
-    switch_arg.append(L"=").append(value);
+    if (!value.empty()) {
+        switch_arg.append(L"=").append(value);
+    }
     argv_.emplace(last_not_param_, switch_arg);
     last_not_param_ = ++original;    
 }
