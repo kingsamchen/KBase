@@ -105,6 +105,10 @@ public:
     // Note that, switches will be preceded with default prefix.
     ArgList GetArgv() const;
 
+    StringType GetCommandLineString() const;
+
+    StringType GetArgvStringWithoutProgram() const;
+
 private:
     using Argv = std::list<StringType>;
     

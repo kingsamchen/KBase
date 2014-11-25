@@ -116,3 +116,19 @@ TEST(CommandLineTest, GetArgv)
     EXPECT_EQ(parsed_argv, argv);
     }
 }
+
+TEST(CommandLineTest, GerArgvWithoutProgramStr)
+{
+    kbase::CommandLine cmdline(L"D:\\test.exe --a=1 /t=1024 --warmup D:\\test.txt 2014-11-25");
+    auto argv_str = cmdline.GetArgvStringWithoutProgram();
+    EXPECT_EQ(argv_str, L"-a=1 -t=1024 -warmup D:\\test.txt 2014-11-25");
+}
+
+TEST(CommandLineTest, GetCommandLineString)
+{
+    kbase::CommandLine::ArgList argv{L"D:\\program files\\test.exe", L"-a=1", L"-t=1024", L"-warmup", L"D:\\test.txt", L"2014-11-25"};
+    kbase::CommandLine cmdline(argv);
+    auto cmdline_str = cmdline.GetCommandLineString();
+    std::wcout << cmdline_str << std::endl;
+    EXPECT_EQ(cmdline_str, L"\"D:\\program files\\test.exe\" -a=1 -t=1024 -warmup D:\\test.txt 2014-11-25");
+}

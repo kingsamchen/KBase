@@ -57,6 +57,41 @@ void AddArguments(CommandLine* cmdline, const ArgList& argv)
     }
 }
 
+// Quotes the |arg| if necessary.
+// Algorithm comes from http://goo.gl/mxKhoj
+StringType QuoteArg(const StringType& arg)
+{
+    if (arg.find_first_of(L" \t\"") == arg.npos) {
+        return arg;
+    }
+
+    StringType quoted_arg(1, L'"');
+    for (auto it = arg.cbegin(); ; ++it) {
+        size_t number_of_backslash = 0U;
+        
+        // Count number adjacent backslashes.
+        while (it != arg.cend() && *it == L'\\') {
+            ++it;
+            ++number_of_backslash;
+        }
+
+        if (it == arg.cend()) {
+            quoted_arg.append(2 * number_of_backslash, L'\\');
+            break;
+        } else if (*it == L'"') {
+            quoted_arg.append(2 * number_of_backslash + 1, L'\\');
+            quoted_arg.push_back(*it);
+        } else {
+            quoted_arg.append(number_of_backslash, L'\\');
+            quoted_arg.push_back(*it);
+        }
+    }
+
+    quoted_arg.push_back(L'"');
+
+    return quoted_arg;
+}
+
 }   // namespace
 
 namespace kbase {
@@ -206,7 +241,7 @@ bool CommandLine::GetSwitchValue(const StringType& name, StringType* value) cons
     return true;
 }
 
-CommandLine::ArgList CommandLine::GetParameters() const
+ArgList CommandLine::GetParameters() const
 {
     Argv::const_iterator params_begin = std::next(last_not_param_);
     ArgList params;
@@ -215,7 +250,7 @@ CommandLine::ArgList CommandLine::GetParameters() const
     return params;
 }
 
-CommandLine::ArgList CommandLine::GetArgv() const
+ArgList CommandLine::GetArgv() const
 {
     ArgList str_argv;
     str_argv.reserve(argv_.size());
@@ -239,6 +274,29 @@ CommandLine::ArgList CommandLine::GetArgv() const
     std::move(params.begin(), params.end(), std::back_inserter(str_argv));
 
     return str_argv;
+}
+
+StringType CommandLine::GetArgvStringWithoutProgram() const
+{
+    ArgList argv = GetArgv();
+
+    // Skipt program part.
+    ArgList quoted_args;
+    std::move(std::next(argv.begin()), argv.end(), std::back_inserter(quoted_args));
+
+    // Quotes each part only if necessary.
+    std::transform(quoted_args.begin(), quoted_args.end(), quoted_args.begin(),
+                   QuoteArg);
+
+    return JoinString(quoted_args, L" ");
+}
+
+StringType CommandLine::GetCommandLineString() const
+{
+    StringType raw_cmdline_str(QuoteArg(argv_.front()));
+    raw_cmdline_str.append(L" ").append(GetArgvStringWithoutProgram());
+
+    return raw_cmdline_str;
 }
 
 }   // namespace kbase
