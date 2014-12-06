@@ -20,6 +20,13 @@ namespace kbase {
 // Some operations when failed would throw Win32Expcetion.
 class RegKey {
 public:
+    // Used by KeyExists only.
+    enum WOW6432Node {
+        DEFAULT_WOW64_KEY,
+        FORCE_WOW64_64KEY,
+        FORCE_WOW64_32KEY
+    };
+
     RegKey();
     
     explicit RegKey(HKEY key);
@@ -61,6 +68,11 @@ public:
     void OpenKey(const wchar_t* key_name, REGSAM access);
 
     void Close();
+
+    // Returns true if the registry key exists; Returns false if it doesn't.
+    // Throws an exception when any error occurs.
+    // For details about WOW6432Node redirection, see @ http://is.gd/6Z23qk
+    static bool KeyExists(HKEY rootkey, const wchar_t* subkey, WOW6432Node node_key);
 
     // Returns true, if this key has the specified value.
     // Returns false if it doesn't.

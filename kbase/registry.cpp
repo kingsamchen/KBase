@@ -125,6 +125,32 @@ void RegKey::Close()
     }
 }
 
+// static
+bool RegKey::KeyExists(HKEY rootkey, const wchar_t* subkey, WOW6432Node node_key)
+{
+    REGSAM access = KEY_READ;
+    if (node_key == FORCE_WOW64_32KEY) {
+        access |= KEY_WOW64_32KEY;
+    } else if (node_key == FORCE_WOW64_64KEY) {
+        access |= KEY_WOW64_64KEY;
+    }
+
+    HKEY key = nullptr;
+    long rv = RegOpenKeyExW(rootkey, subkey, 0, access, &key);
+    RegCloseKey(key);
+
+    if (rv == ERROR_SUCCESS) {
+        return true;
+    }
+
+    SetLastError(rv);
+    LastError err;
+    ThrowLastErrorIf(err.last_error_code() != ERROR_FILE_NOT_FOUND,
+                     "Error in RegOpenKeyEx");
+
+    return false;
+}
+
 bool RegKey::HasValue(const wchar_t* value_name) const
 {
     BOOL result = RegQueryValueEx(key_, value_name, 0, nullptr, nullptr, nullptr);
