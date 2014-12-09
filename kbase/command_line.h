@@ -53,9 +53,15 @@ public:
     // |cmdline| has same requirement as in ParseFromString.
     explicit CommandLine(const StringType& cmdline);
 
+    CommandLine(const CommandLine& other);
+
+    CommandLine(CommandLine&& other);
+
     ~CommandLine() = default;
 
-    // TODO: add copy-semantics and move-semantics process
+    CommandLine& operator=(const CommandLine& rhs);
+
+    CommandLine& operator=(CommandLine&& rhs);
 
     static CommandLine FromString(const StringType& cmdline);
 

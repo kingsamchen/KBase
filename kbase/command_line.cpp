@@ -106,6 +106,21 @@ CommandLine::CommandLine(const FilePath& program)
     SetProgram(program);
 }
 
+CommandLine::CommandLine(const CommandLine& other)
+    : argv_(other.argv_), switches_(other.switches_),
+      default_switch_prefix_(other.default_switch_prefix_)
+{
+    // Need to fix the iterator to argv.
+    size_t dist = std::distance<Argv::const_iterator>(other.argv_.begin(),
+                                                      other.last_not_param_);
+    last_not_param_ = std::next(argv_.begin(), dist);
+}
+
+CommandLine::CommandLine(CommandLine&& other)
+{
+    *this = std::move(other);
+}
+
 CommandLine::CommandLine(int argc, const CharType* const* argv)
     : argv_(1), last_not_param_(argv_.begin()), default_switch_prefix_({L"-"})
 {
@@ -122,6 +137,35 @@ CommandLine::CommandLine(const StringType& cmdline)
     : argv_(1), last_not_param_(argv_.begin()), default_switch_prefix_({L"-"})
 {
     ParseFromString(cmdline);
+}
+
+CommandLine& CommandLine::operator=(const CommandLine& rhs)
+{
+    if (this != &rhs) {
+        argv_ = rhs.argv_;
+        size_t dist = std::distance<Argv::const_iterator>(rhs.argv_.begin(),
+                                                          rhs.last_not_param_);
+        last_not_param_ = std::next(argv_.begin(), dist);
+        switches_ = rhs.switches_;
+        default_switch_prefix_ = rhs.default_switch_prefix_;
+    }
+
+    return *this;
+}
+
+CommandLine& CommandLine::operator=(CommandLine&& rhs)
+{
+    if (this != &rhs) {
+        // Once having moved argv from rhs, we shall never access it again.
+        size_t dist = std::distance<Argv::const_iterator>(rhs.argv_.begin(),
+                                                          rhs.last_not_param_);
+        argv_ = std::move(rhs.argv_);
+        last_not_param_ = std::next(argv_.begin(), dist);
+        switches_ = std::move(rhs.switches_);
+        default_switch_prefix_ = std::move(rhs.default_switch_prefix_);
+    }
+
+    return *this;
 }
 
 // static

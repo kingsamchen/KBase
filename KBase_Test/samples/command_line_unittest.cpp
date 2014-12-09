@@ -9,11 +9,30 @@
 
 TEST(CommandLineTest, Ctors)
 {
-    kbase::FilePath path(L"C:\\windows\\system32\\calc.exe");
-    kbase::CommandLine cmdline(path);
-    auto program = cmdline.GetProgram();
-    std::cout << program.AsASCII() << std::endl;
-    EXPECT_EQ(program, path);
+    {
+        kbase::FilePath path(L"C:\\windows\\system32\\calc.exe");
+        kbase::CommandLine cmdline(path);
+        auto program = cmdline.GetProgram();
+        std::cout << program.AsASCII() << std::endl;
+        EXPECT_EQ(program, path);
+    }
+
+    // copy-semantics
+    {
+        const kbase::CommandLine& cmdline = kbase::CommandLine::ForCurrentProcess();
+        kbase::CommandLine new_copied_cmdline(cmdline);
+        kbase::CommandLine copy_op_cmdline(L"C:\\windows\\system32\\notepad.exe");
+        copy_op_cmdline = new_copied_cmdline;
+        EXPECT_EQ(new_copied_cmdline.GetArgv(), copy_op_cmdline.GetArgv());
+    }
+
+    // move-semantics
+    {
+        const kbase::CommandLine& cmdline = kbase::CommandLine::ForCurrentProcess();
+        kbase::CommandLine new_copied_cmdline(cmdline);
+        kbase::CommandLine new_moved_cmdline(std::move(new_copied_cmdline));
+        EXPECT_EQ(new_moved_cmdline.GetArgv(), cmdline.GetArgv());
+    }
 }
 
 TEST(CommandLineTest, CurrentProcessCommandLine)
