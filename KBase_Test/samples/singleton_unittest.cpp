@@ -45,6 +45,13 @@ TEST(SingletonTest, Valid)
     *i = 0x12345678;
 }
 
+TEST(SingletonTest, Leaky)
+{
+    int* i = kbase::Singleton<int, kbase::LeakySingletonTraits<int>>::instance();
+    *i = 0x12345678;
+    delete i;
+}
+
 TEST(SingletonTest, Uniqueness)
 {
     kbase::AtExitManager exit_manager;
