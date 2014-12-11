@@ -112,6 +112,7 @@
     <ClInclude Include="kbase\files\file_util.h" />
     <ClInclude Include="kbase\memory\lazy.h" />
     <ClInclude Include="kbase\logging.h" />
+    <ClInclude Include="kbase\memory\lru_cache.h" />
     <ClInclude Include="kbase\memory\scoped_handle.h" />
     <ClInclude Include="kbase\memory\singleton.h" />
     <ClInclude Include="kbase\path_service.h" />

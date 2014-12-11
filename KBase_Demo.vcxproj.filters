@@ -93,5 +93,8 @@
       <Filter>memory</Filter>
     </ClInclude>
     <ClInclude Include="kbase\command_line.h" />
+    <ClInclude Include="kbase\memory\lru_cache.h">
+      <Filter>memory</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
