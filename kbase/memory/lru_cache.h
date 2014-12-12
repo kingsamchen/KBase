@@ -1,3 +1,6 @@
+/*
+ @ Kingsley Chen
+*/
 
 #if defined(_MSC_VER)
 #pragma once
@@ -60,17 +63,13 @@ public:
 
     iterator Put(const Key& key, const Entry& entry)
     {
-        if ((auto key_it = key_table_.find(key)) != key_table_.end()) {
-            erase(key_it->second);
-        } else if (auto_evict() && (max_size() == size())) {
-            Evict();
-        }
-
-        entry_ordering_list_.push_back(value_type(key, entry));
-        key_table_.insert(std::make_pair(key, --entry_ordering_list_.end()));
+        PutInternal(key, entry);    
     }
 
-    // TODO: iterator Put(const Key& key, Entry&& entry)
+    iterator Put(const Key& key, Entry&& entry)
+    {
+        PutInternal(key, std::move(entry));
+    }
 
     iterator erase(const_iterator pos)
     {
@@ -113,7 +112,23 @@ public:
 
     const_iterator end() const { return entry_ordering_list_.end(); }
 
-    const_iterator end() const { return entry_ordering_list_.cend(); }
+    const_iterator cend() const { return entry_ordering_list_.cend(); }
+
+private:
+    iterator PutInternal(const Key& key, Entry&& entry)
+    {
+        if ((auto key_it = key_table_.find(key)) != key_table_.end()) {
+            erase(key_it->second);
+        } else if (auto_evict() && (max_size() == size())) {
+            Evict();
+        }
+
+        entry_ordering_list_.push_back(value_type(key, std::forward<Entry>(entry)));
+        auto rv = key_table_.insert(
+            std::make_pair(key, --entry_ordering_list_.end()));
+        
+        return rv.first;
+    }
 
 private:
     const size_type max_size_;
