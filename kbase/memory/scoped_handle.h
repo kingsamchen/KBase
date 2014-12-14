@@ -12,6 +12,7 @@
 #include <Windows.h>
 
 #include <cstdio>
+#include <cstddef>
 
 namespace kbase {
 
