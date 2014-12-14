@@ -61,14 +61,20 @@ public:
 
     ~LRUCache() = default;
 
+    // Add a pair of <key, entry> into the cache. If the key already exists, update
+    // the entry.
+    // If auto-eviction is enabled for the cache, and also cache runs out its free
+    // storage, then LRU replacement algorithm is employed when caching into new
+    // entry.
+
     iterator Put(const Key& key, const Entry& entry)
     {
-        PutInternal(key, entry);    
+        return PutInternal(key, entry);    
     }
 
     iterator Put(const Key& key, Entry&& entry)
     {
-        PutInternal(key, std::move(entry));
+        return PutInternal(key, std::move(entry));
     }
 
     iterator erase(const_iterator pos)
@@ -115,9 +121,11 @@ public:
     const_iterator cend() const { return entry_ordering_list_.cend(); }
 
 private:
+    template<typename Key, typename Entry>
     iterator PutInternal(const Key& key, Entry&& entry)
     {
-        if ((auto key_it = key_table_.find(key)) != key_table_.end()) {
+        auto key_it = key_table_.find(key);
+        if (key_it != key_table_.end()) {
             erase(key_it->second);
         } else if (auto_evict() && (max_size() == size())) {
             Evict();
@@ -127,7 +135,7 @@ private:
         auto rv = key_table_.insert(
             std::make_pair(key, --entry_ordering_list_.end()));
         
-        return rv.first;
+        return rv.first->second;
     }
 
 private:

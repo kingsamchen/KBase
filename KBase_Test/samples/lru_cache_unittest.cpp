@@ -19,3 +19,27 @@ TEST(LRUCacheTest, Construction)
     EXPECT_TRUE(ltd.auto_evict());
     EXPECT_EQ(ltd.max_size(), 1024);
 }
+
+TEST(LRUCacheTest, Put)
+{
+    std::pair<int, std::string> candicates[] {
+        {65, "A"}, {66, "B"}, {67, "C"}, {68, "D"}, {69, "E"}, {70, "F"}, {71, "G"}
+    };
+
+    kbase::LRUTreeCache<int, std::string> alphabet(5);
+    EXPECT_TRUE(alphabet.empty());
+
+    // normal insertion
+
+    for (int i = 0; i < 3; ++i) {
+        alphabet.Put(candicates[i].first, candicates[i].second);
+    }
+
+    EXPECT_EQ(alphabet.size(), 3);
+    int idx = 0;
+    for (auto it = alphabet.begin(); it != alphabet.end(); ++it, ++idx) {
+        EXPECT_EQ(it->first, candicates[idx].first);
+        EXPECT_EQ(it->second, candicates[idx].second);
+    }
+    idx = 0;
+}
