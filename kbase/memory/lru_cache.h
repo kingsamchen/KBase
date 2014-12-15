@@ -95,6 +95,26 @@ public:
         return entry_it;
     }
 
+    const_iterator find(const Key& key) const
+    {
+        auto key_it = key_table_.find(key);
+        if (key_it == key_table_.end()) {
+            return end();
+        }
+
+        return key_it->second;
+    }
+
+    iterator find(const Key& key)
+    {
+        auto key_it = key_table_.find(key);
+        if (key_it == key_table_.end()) {
+            return end();
+        }
+
+        return key_it->second;
+    }
+
     iterator erase(const_iterator pos)
     {
         key_table_.erase(pos->first);
