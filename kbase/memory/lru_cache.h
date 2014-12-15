@@ -12,6 +12,8 @@
 #include <map>
 #include <unordered_map>
 
+#include "kbase\error_exception_util.h"
+
 namespace kbase {
 
 // Standardize type argument signatures of std::map and std::unordered_map.
@@ -26,6 +28,14 @@ struct HashMap {
     using MapType = std::unordered_map<Key, Value>;
 };
 
+// A cache faicility that allows O(logn)-time, i.e. TreeMap-based implementation,
+// and O(1)-time, i.e. HashMap-based implementation, access to entries using a key.
+// If auto eviction is enabled, LRU-replacement algorithm would be employed when
+// the cache runs out its free storage.
+// The reason why a TreeMap-based implementation is also provided may be counter-
+// intuitive: tree based caches usually outperform their hash based rivals in
+// string-key circumstances.
+// For a much detailed benchmark, see @ http://timday.bitbucket.org/lru.html
 template<typename Key, typename Entry, template<typename, typename> class Map>
 class LRUCache {
 public:
@@ -53,11 +63,26 @@ public:
 
     LRUCache(const LRUCache&) = delete;
 
-    // TODO: LRUCache(LRUCache&&);
+    LRUCache(LRUCache&& other)
+        : max_size_(std::move(other.max_size_)),
+          entry_ordering_list_(std::move(other.entry_ordering_list_)),
+          key_table_(std::move(other.key_table_))
+    {}
 
     LRUCache& operator=(const LRUCache&) = delete;
 
-    // TODO: LRUCache& operator=(LRUCache&&);
+    LRUCache& operator=(LRUCache&& rhs)
+    {
+        if (this != &rhs) {
+            entry_ordering_list_ = std::move(rhs.entry_ordering_list_);
+            key_table_ = std::move(rhs.key_table_);
+            // Work-around for assigning to a const variable.
+            size_type* new_max_size = const_cast<size_type*>(&max_size_);
+            *new_max_size = rhs.max_size_;
+        }
+
+        return *this;
+    }
 
     ~LRUCache() = default;
 
@@ -95,6 +120,10 @@ public:
         return entry_it;
     }
 
+    // Returns the iterator to the value associated with the |key|.
+    // Returns end() if no such value was found.
+    // These two functions does not affect the ordering.
+
     const_iterator find(const Key& key) const
     {
         auto key_it = key_table_.find(key);
@@ -115,18 +144,28 @@ public:
         return key_it->second;
     }
 
+    // Erases the value with specific iterator, and returns the iterator to
+    // the next value.
     iterator erase(const_iterator pos)
     {
         key_table_.erase(pos->first);
         return entry_ordering_list_.erase(pos);
     }
 
+    // Evict a single entry, or |count_to_evict| entries from cache.
+
     void Evict()
     {
         erase(entry_ordering_list_.begin());
     }
 
-    // TODO: Evict(size_type)
+    void Evict(size_type count_to_evict)
+    {
+        ENSURE(count_to_evict <= size())(count_to_evict)(size()).raise();
+        for (size_type i = 0; i < count_to_evict; ++i) {
+            Evict();
+        }
+    }
 
     size_type size() const
     {

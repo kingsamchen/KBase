@@ -111,3 +111,42 @@ TEST(LRUCacheTest, Get)
         EXPECT_TRUE(CacheOrderingMatch(dt, {65, 67, 66, 68}));
     }
 }
+
+TEST(LRUCacheTest, Evict)
+{
+    using Dict = kbase::LRUTreeCache<int, std::string>;
+    Dict dt(Dict::NO_AUTO_EVICT);
+    dt.Put(65, "A");
+    dt.Put(66, "B");
+    dt.Put(67, "C");
+    dt.Put(68, "D");
+
+    dt.Evict(2);
+    EXPECT_TRUE(CacheOrderingMatch(dt, {67, 68}));
+
+    dt.Evict(2);
+    EXPECT_TRUE(dt.empty());
+}
+
+TEST(LRUCacheTest, move_semantics)
+{
+    using Dict = kbase::LRUTreeCache<int, std::string>;
+
+    auto gen = []()->Dict {
+        Dict dt(Dict::NO_AUTO_EVICT);
+        dt.Put(65, "A");
+        dt.Put(66, "B");
+        dt.Put(67, "C");
+        dt.Put(68, "D");
+        return dt;
+    };
+
+    Dict new_dt(gen());
+    EXPECT_TRUE(CacheOrderingMatch(new_dt, {65, 66, 67, 68}));
+
+    Dict messy_dt(123);
+    messy_dt.Put(1, "Its done");
+    messy_dt = std::move(new_dt);
+    EXPECT_FALSE(messy_dt.auto_evict());
+    EXPECT_TRUE(CacheOrderingMatch(messy_dt, {65, 66, 67, 68}));
+}
