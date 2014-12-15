@@ -77,6 +77,24 @@ public:
         return PutInternal(key, std::move(entry));
     }
 
+    // Returns the iterator to the value associated with |key|.
+    // Returns end() if no matched value was found.
+    // Accessing a cached entry marks this entry as recently used by moving it to
+    // the tail of cached entry list.
+    iterator Get(const Key& key)
+    {
+        auto key_it = key_table_.find(key);
+        if (key_it == key_table_.end()) {
+            return end();
+        }
+
+        auto entry_it = key_it->second;
+        entry_ordering_list_.splice(entry_ordering_list_.end(), entry_ordering_list_,
+                                    entry_it);
+
+        return entry_it;
+    }
+
     iterator erase(const_iterator pos)
     {
         key_table_.erase(pos->first);
@@ -87,6 +105,8 @@ public:
     {
         erase(entry_ordering_list_.begin());
     }
+
+    // TODO: Evict(size_type)
 
     size_type size() const
     {
