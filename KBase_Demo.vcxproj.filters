@@ -44,6 +44,9 @@
       <Filter>files</Filter>
     </ClCompile>
     <ClCompile Include="kbase\command_line.cpp" />
+    <ClCompile Include="kbase\files\file_version_info.cpp">
+      <Filter>files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="kbase\at_exit_manager.h" />
@@ -95,6 +98,9 @@
     <ClInclude Include="kbase\command_line.h" />
     <ClInclude Include="kbase\memory\lru_cache.h">
       <Filter>memory</Filter>
+    </ClInclude>
+    <ClInclude Include="kbase\files\file_version_info.h">
+      <Filter>files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
