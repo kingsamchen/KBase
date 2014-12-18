@@ -9,16 +9,19 @@
 #ifndef KBASE_BASIC_TYPES_H_
 #define KBASE_BASIC_TYPES_H_
 
+#include <cstdint>
 #include <string>
 
 // Defines types that would be shared by among several files.
 namespace kbase {
 
 // |PathKey| is used by |PathService| and |BasePathProvider|.
-typedef int PathKey;
+using PathKey = int;
 
-typedef wchar_t PathChar;
-typedef std::basic_string<PathChar> PathString;
+using PathChar = wchar_t;
+using PathString = std::basic_string<PathChar>;
+
+using byte = uint8_t;
 
 }   // namespace kbase
 
