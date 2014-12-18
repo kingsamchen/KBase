@@ -1,3 +1,6 @@
+/*
+ @ Kingsley Chen
+*/
 
 #if defined(_MSC_VER)
 #pragma once
@@ -9,6 +12,7 @@
 #include <Windows.h>
 
 #include <memory>
+#include <string>
 #include <vector>
 
 #include "kbase\basic_types.h"
@@ -35,20 +39,22 @@ public:
 
     FileVersionInfo& operator=(FileVersionInfo&&) = delete;
 
-    static std::unique_ptr<FileVersionInfo> CreateForFile(const FilePath& file_path);
+    static std::unique_ptr<FileVersionInfo> CreateForFile(const FilePath& file);
 
-    static std::unique_ptr<FileVersionInfo> CreateForModule(const HMODULE module);
+    static std::unique_ptr<FileVersionInfo> CreateForModule(HMODULE module);
 
     // TODO: property fields.
 
 private:
     FileVersionInfo(internal::VersionData&& data);
     
+    std::wstring GetValue(const wchar_t* name);
+
 private:
     internal::VersionData data_;
-    VS_FIXEDFILEINFO* info_block_;
-    unsigned short lang_;
-    unsigned short code_page_;
+    VS_FIXEDFILEINFO* info_block_ = nullptr;
+    unsigned short lang_ = 0U;
+    unsigned short code_page_ = 0U;
 };
 
 }   // namespace kbase
