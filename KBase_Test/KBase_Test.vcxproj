@@ -96,6 +96,7 @@
     <ClCompile Include="samples\error_exception_util_unittest.cpp" />
     <ClCompile Include="samples\file_path_unittest.cpp" />
     <ClCompile Include="samples\file_util_unittest.cpp" />
+    <ClCompile Include="samples\file_version_info_unittest.cpp" />
     <ClCompile Include="samples\lazy_unittest.cpp" />
     <ClCompile Include="samples\logging_unittest.cpp" />
     <ClCompile Include="samples\lru_cache_unittest.cpp" />

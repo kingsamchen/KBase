@@ -9,6 +9,8 @@
 #include "kbase\error_exception_util.h"
 #include "kbase\files\file_path.h"
 
+#pragma comment(lib, "version.lib")
+
 namespace {
 
 using VersionData = kbase::internal::VersionData;
@@ -63,7 +65,7 @@ FileVersionInfo::FileVersionInfo(VersionData&& data)
     code_page_ = translation->code_page;
 }
 
-std::wstring FileVersionInfo::GetValue(const wchar_t* name)
+std::wstring FileVersionInfo::GetValue(const wchar_t* name) const
 {
     LangCodePage lang_codepage[2] {
         {lang_, code_page_}, {GetUserDefaultLangID(), code_page_}

@@ -43,12 +43,77 @@ public:
 
     static std::unique_ptr<FileVersionInfo> CreateForModule(HMODULE module);
 
-    // TODO: property fields.
+    VS_FIXEDFILEINFO* fixed_file_info() const
+    {
+        return info_block_;
+    }
+
+    std::wstring comments() const
+    {
+        return GetValue(L"Comments");
+    }
+
+    std::wstring internal_name() const
+    {
+        return GetValue(L"InternalName");
+    }
+
+    std::wstring product_name() const
+    {
+        return GetValue(L"ProductName");
+    }
+
+    std::wstring company_name() const
+    {
+        return GetValue(L"CompanyName");
+    }
+
+    std::wstring legal_copyright() const
+    {
+        return GetValue(L"LegalCopyright");
+    }
+
+    std::wstring product_version() const
+    {
+        return GetValue(L"ProductVersion");
+    }
+
+    std::wstring file_description() const
+    {
+        return GetValue(L"FileDescription");
+    }
+
+    std::wstring legal_trademarks() const
+    {
+        return GetValue(L"LegalTrademarks");
+    }
+
+    std::wstring private_build() const
+    {
+        return GetValue(L"PrivateBuild");
+    }
+
+    std::wstring file_version() const
+    {
+        return GetValue(L"FileVersion");
+    }
+
+    std::wstring original_filename() const
+    {
+        return GetValue(L"OriginalFilename");
+    }
+
+    std::wstring special_build() const
+    {
+        return GetValue(L"SpecialBuild");
+    }
 
 private:
     FileVersionInfo(internal::VersionData&& data);
     
-    std::wstring GetValue(const wchar_t* name);
+    // Returns the value associated with the |name|.
+    // Returns an empty string otherwise.
+    std::wstring GetValue(const wchar_t* name) const;
 
 private:
     internal::VersionData data_;
