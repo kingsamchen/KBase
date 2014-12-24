@@ -9,9 +9,12 @@
 #ifndef KBASE_ENVIRONMENT_H_
 #define KBASE_ENVIRONMENT_H_
 
+#include <map>
 #include <string>
 
 namespace kbase {
+
+using EnvTable = std::map<std::wstring, std::wstring>;
 
 class Environment {
 public:
@@ -33,6 +36,10 @@ public:
     // Removes an existing environment variable.
     // This function has no effect if the variable to be removed does not exist.
     static void RemoveVar(const wchar_t* name);
+
+    static EnvTable CurrentEnvironmentTable();
+
+    static std::wstring GetEnvironmentBlock(const EnvTable& env_table);
 };
 
 }   // namespace kbase
