@@ -47,6 +47,7 @@
     <ClCompile Include="kbase\files\file_version_info.cpp">
       <Filter>files</Filter>
     </ClCompile>
+    <ClCompile Include="kbase\environment.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="kbase\at_exit_manager.h" />
@@ -102,5 +103,6 @@
     <ClInclude Include="kbase\files\file_version_info.h">
       <Filter>files</Filter>
     </ClInclude>
+    <ClInclude Include="kbase\environment.h" />
   </ItemGroup>
 </Project>
