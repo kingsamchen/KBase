@@ -93,6 +93,7 @@
     <ClCompile Include="samples\auto_reset_unittest.cpp" />
     <ClCompile Include="samples\command_line_unittest.cpp" />
     <ClCompile Include="samples\date_time_unittest.cpp" />
+    <ClCompile Include="samples\environment_unittest.cpp" />
     <ClCompile Include="samples\error_exception_util_unittest.cpp" />
     <ClCompile Include="samples\file_path_unittest.cpp" />
     <ClCompile Include="samples\file_util_unittest.cpp" />

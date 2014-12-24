@@ -1,3 +1,6 @@
+/*
+ @ Kingsley Chen
+*/
 
 #if defined(_MSC_VER)
 #pragma once
@@ -16,13 +19,20 @@ public:
 
     ~Environment() = delete;
 
-    std::wstring GetVar(const wchar_t* name);
+    // Gets the value of an environment variable.
+    // Returns an empty string if no such variable exists.
+    static std::wstring GetVar(const wchar_t* name);
 
-    bool HasVar(const wchar_t* name);
+    // Returns true if an environment variable specified by the given |name| exists.
+    // Returns false otherwise.
+    static bool HasVar(const wchar_t* name);
 
-    void SetVar(const wchar_t* name, const std::wstring& value);
+    // Creates an environment variable with the given name and value.
+    static void SetVar(const wchar_t* name, const std::wstring& value);
 
-    void RemoveVar(const wchar_t* name);
+    // Removes an existing environment variable.
+    // This function has no effect if the variable to be removed does not exist.
+    static void RemoveVar(const wchar_t* name);
 };
 
 }   // namespace kbase
