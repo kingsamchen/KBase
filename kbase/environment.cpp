@@ -9,11 +9,34 @@
 #include <vector>
 
 #include "kbase\error_exception_util.h"
+#include "kbase\strings\string_piece.h"
 
 namespace {
 
 // not including null-terminator
 const DWORD kEnvVarMaxSize = 32766;
+
+void ParseEnvironmentBlock(const wchar_t* block_string, kbase::EnvTable* env_table)
+{
+    assert(block_string && *block_string != L'\0');
+
+    auto* cur = block_string;
+    auto* field_begin = cur;
+    kbase::WStringPiece key, value;
+
+    while (*cur != L'\0' || *(cur - 1) != L'\0') {
+        if (*cur == L'=') {
+            key.set(field_begin, cur);
+            field_begin = cur + 1;
+        } else if (*cur == L'\0') {
+            value.set(field_begin, cur);
+            field_begin = cur + 1;
+            env_table->emplace(std::make_pair(key.as_string(), value.as_string()));
+        }
+
+        ++cur;
+    }
+}
 
 }   // namespace
 
@@ -54,6 +77,34 @@ void Environment::SetVar(const wchar_t* name, const std::wstring& value)
 void Environment::RemoveVar(const wchar_t* name)
 {
     SetEnvironmentVariableW(name, nullptr);
+}
+
+// static
+EnvTable Environment::CurrentEnvironmentTable()
+{
+    auto env_block = GetEnvironmentStringsW();
+    EnvTable current_env_table;
+    ParseEnvironmentBlock(env_block, &current_env_table);
+    FreeEnvironmentStringsW(env_block);
+
+    return current_env_table;
+}
+
+// static
+std::wstring Environment::GetEnvironmentBlock(const EnvTable& env_table)
+{
+    assert(!env_table.empty());
+
+    std::wstring env_block;
+
+    for (const auto& item : env_table) {
+        env_block.append(item.first).append(1, L'=');
+        env_block.append(item.second).append(1, L'\0');
+    }
+
+    env_block.append(1, L'\0');
+
+    return env_block;
 }
 
 }   // namespace kbase

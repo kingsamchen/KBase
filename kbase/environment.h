@@ -37,8 +37,11 @@ public:
     // This function has no effect if the variable to be removed does not exist.
     static void RemoveVar(const wchar_t* name);
 
+    // Gets an environment table corresponding to the environment block of
+    // current process.
     static EnvTable CurrentEnvironmentTable();
 
+    // Gets an environment block from an environment table.
     static std::wstring GetEnvironmentBlock(const EnvTable& env_table);
 };
 
