@@ -107,6 +107,12 @@ public:
         length_ = len;
     }
 
+    void set(const_iterator cbegin, const_iterator cend)
+    {
+        ptr_ = cbegin < cend ? &(*cbegin) : nullptr;
+        length_ = cbegin < cend ? static_cast<size_type>(cend - cbegin) : 0;
+    }
+
     value_type operator[](size_type i) const
     {
         return ptr_[i];
