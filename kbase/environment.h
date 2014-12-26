@@ -20,6 +20,14 @@ class Environment {
 public:
     Environment() = delete;
 
+    Environment(const Environment&) = delete;
+
+    Environment(Environment&&) = delete;
+
+    Environment& operator=(const Environment&) = delete;
+
+    Environment& operator=(Environment&&) = delete;
+
     ~Environment() = delete;
 
     // Gets the value of an environment variable.
