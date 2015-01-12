@@ -34,7 +34,7 @@ namespace kbase {
 
 FilePath BasePathProvider(PathKey key)
 {
-    // Though the system does have support for long file path, I decide to ignore 
+    // Though the system does have support for long file path, I decide to ignore
     // it here.
     const size_t kMaxPath = MAX_PATH + 1;
     wchar_t buffer[kMaxPath] {0};

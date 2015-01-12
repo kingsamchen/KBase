@@ -55,7 +55,7 @@ OSInfo* OSInfo::GetInstance()
 }
 
 OSInfo::OSInfo()
-    : architecture_(UNKNOWN_ARCHITECTURE), 
+    : architecture_(UNKNOWN_ARCHITECTURE),
       wow64_status_(GetWOW64StatusForProcess(GetCurrentProcess())),
       is_server_(IsWindowsServer()),
       processor_model_name_(GetProcessorModelName())
@@ -67,9 +67,9 @@ OSInfo::OSInfo()
     // for more details.
     OSVERSIONINFOEX os_version_info = { sizeof(os_version_info) };
     GetVersionEx(reinterpret_cast<OSVERSIONINFO*>(&os_version_info));
-    version_number_.major_version = 
+    version_number_.major_version =
         static_cast<WORD>(os_version_info.dwMajorVersion);
-    version_number_.minor_version = 
+    version_number_.minor_version =
         static_cast<WORD>(os_version_info.dwMinorVersion);
     version_number_.service_pack_major =
         static_cast<WORD>(os_version_info.wServicePackMajor);
@@ -102,7 +102,7 @@ bool OSInfo::IsVersionOrGreater(Version version) const
     bool ret = IsWindowsVersionOrGreater(version_number.major_version,
                                          version_number.minor_version,
                                          version_number.service_pack_major);
-    
+
     return ret;
 }
 
@@ -110,7 +110,7 @@ bool OSInfo::IsVersionOrGreater(Version version) const
 WOW64Status OSInfo::GetWOW64StatusForProcess(HANDLE process)
 {
     typedef BOOL (WINAPI *IsWow64ProcessFunc) (HANDLE, BOOL*);
-    
+
     IsWow64ProcessFunc is_wow64_process = reinterpret_cast<IsWow64ProcessFunc>(
         GetProcAddress(GetModuleHandle(L"kernel32.dll"), "IsWow64Process"));
 
@@ -134,7 +134,7 @@ std::wstring OSInfo::GetProcessorModelName() const
     key.OpenKey(kKeyName, KEY_READ);
     std::wstring processor_model_name;
     key.ReadValue(L"ProcessorNameString", &processor_model_name);
-    
+
     return processor_model_name;
 }
 

@@ -84,7 +84,7 @@ DateTime::DateTime(const SYSTEMTIME& systime)
         static_cast<int>(systime.wDay), static_cast<int>(systime.wHour),
         static_cast<int>(systime.wMinute), static_cast<int>(systime.wSecond),
         static_cast<int>(systime.wMilliseconds));
-    
+
     *this = tmp;
 }
 

@@ -31,7 +31,7 @@ public:
     static const PathChar kStringTerminator;
 
     FilePath() = default;
-    
+
     FilePath(const FilePath& other);
 
     FilePath(FilePath&& other);
@@ -95,7 +95,7 @@ public:
     // Retrieves every components of the path, including the root slash.
     // Example: C:\foo\bar  ->  ["C:", "\\", "foo", "bar"]
     void GetComponents(std::vector<PathString>* components) const;
-    
+
     // Returns true if it is a absolute path.
     bool IsAbsolute() const;
 
@@ -167,7 +167,7 @@ public:
     bool ReferenceParent() const;
 
     // Returns the string in native encoding of the path.
-    // If the path contains any non-ASCII character, the return value is an empty 
+    // If the path contains any non-ASCII character, the return value is an empty
     // object.
     std::string AsASCII() const;
 

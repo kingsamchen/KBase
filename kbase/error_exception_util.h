@@ -46,7 +46,7 @@ enum { ENSURE_ON = ENSURE_MODE };
 #define DO_ENSURE(exp)                                                    \
     if ((exp || !kbase::internal::ENSURE_ON)) ;                           \
     else                                                                  \
-        MAKE_GUARANTOR(#exp).GUARANTOR_A     
+        MAKE_GUARANTOR(#exp).GUARANTOR_A
 
 #ifdef NDEBUG
 #define ENSURE(exp) DO_ENSURE(exp)
@@ -60,7 +60,7 @@ class Guarantor {
 public:
     Guarantor(const char* msg, const char* file_name, int line)
     {
-        std::string context  
+        std::string context
             = StringPrintf("Failed: %s\nFile: %s Line: %d\nCurrent Variables:\n",
                            msg, file_name, line);
         exception_desc_ << context;
@@ -120,7 +120,7 @@ private:
 class Win32Exception : public std::runtime_error {
 public:
     Win32Exception(unsigned long last_error, const std::string& message);
-    
+
     unsigned long error_code() const;
 
 private:
@@ -133,7 +133,7 @@ private:
 // Throws a Win32Exception if |expression| is true.
 // This function internally displays description of the last error, which means that
 // ex.what() does return text like "user_message (descption_of_last_error)"
-void ThrowLastErrorIfInternal(const char* file, int line, const char* fn_name, 
+void ThrowLastErrorIfInternal(const char* file, int line, const char* fn_name,
                               bool expression, const std::string& user_message);
 
 }   // namespace kbase

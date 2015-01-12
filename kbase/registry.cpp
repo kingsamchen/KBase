@@ -162,7 +162,7 @@ bool RegKey::HasValue(const wchar_t* value_name) const
     SetLastError(result);
     LastError err;
     ThrowLastErrorIf(err.last_error_code() != ERROR_FILE_NOT_FOUND, "error occured");
-    
+
     return false;
 }
 
@@ -175,7 +175,7 @@ size_t RegKey::GetValueCount() const
 
     SetLastError(result);
     ThrowLastErrorIf(result != ERROR_SUCCESS, "failed to get value count");
-    
+
     return static_cast<size_t>(value_count);
 }
 
@@ -232,8 +232,8 @@ bool RegKey::ReadValue(const wchar_t* value_name, std::wstring* value) const
 {
     const size_t kCharSize = sizeof(wchar_t);
     size_t str_length = 1024;   // including null
-    // It seems that automatic expansion for environment strings in RegGetValue 
-    // behaves incorrect when using std::basic_string as its buffer. 
+    // It seems that automatic expansion for environment strings in RegGetValue
+    // behaves incorrect when using std::basic_string as its buffer.
     // Therefore, does expansions on our own.
     DWORD restricted_type = RRF_RT_REG_SZ | RRF_NOEXPAND | RRF_RT_REG_EXPAND_SZ;
     DWORD data_type = 0;
@@ -248,7 +248,7 @@ bool RegKey::ReadValue(const wchar_t* value_name, std::wstring* value) const
                              data_ptr, &data_size);
         if (result == ERROR_SUCCESS) {
             if (data_type == REG_SZ) {
-                size_t written_length = data_size / kCharSize - 1;  
+                size_t written_length = data_size / kCharSize - 1;
                 value->assign(data_ptr, written_length);
                 return true;
             } else if (data_type == REG_EXPAND_SZ) {
@@ -296,7 +296,7 @@ bool RegKey::ReadValue(const wchar_t* value_name,
     }
 
     Tokenize(raw_data, std::wstring(1, 0), values);
-    
+
     return true;
 }
 
@@ -377,7 +377,7 @@ RegKeyIterator::RegKeyIterator(HKEY rootkey, const wchar_t* folder_key)
         } else {
             subkey_count_ = subkey_count;
             index_ = subkey_count - 1;
-        }       
+        }
     }
 
     Read();
@@ -531,7 +531,7 @@ bool RegValueIterator::Read()
         if (result == ERROR_MORE_DATA) {
             assert(value_size < max_value_length_);
             assert(name_length < max_value_name_length_);
-            
+
             value_size = max_value_length_;
             name_length = max_value_name_length_;
             name = WriteInto(&value_name_, name_length);

@@ -81,10 +81,10 @@ void ThrowLastErrorIfInternal(const char* file, int line, const char* fn_name,
         // Since GetVerboseMessage internally uses English as its displaying language,
         // it is safe here to call WideToASCII.
         std::string last_error_message = WideToASCII(last_error.GetVerboseMessage());
-        std::string error_message = 
+        std::string error_message =
             StringPrintf("File: %s Line: %d Function: %s\n", file, line, fn_name);
         error_message += user_message + " (" + last_error_message + ")";
-        
+
         throw Win32Exception(last_error.last_error_code(), error_message);
     }
 }

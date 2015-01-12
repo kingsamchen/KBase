@@ -45,17 +45,17 @@ public:
     {
         return is_directory_;
     }
-    
+
     DateTime creation_time() const
     {
         return creation_time_;
     }
-    
+
     DateTime last_modified_time() const
     {
         return last_modified_time_;
     }
-    
+
     DateTime last_accessed_time() const
     {
         return last_accessed_time_;

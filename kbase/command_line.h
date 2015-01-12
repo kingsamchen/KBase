@@ -29,7 +29,7 @@ namespace kbase {
 // Besides, the first argument is called program, since it always refers to the full
 // path of the program.
 // The general order of arguments in command line is as follows:
-// { program, [(-|--|/)switchs[=value]], [parameters] } 
+// { program, [(-|--|/)switchs[=value]], [parameters] }
 // that is, switches always precede with arguments.
 class CommandLine {
 public:
@@ -117,7 +117,7 @@ public:
 
 private:
     using Argv = std::list<StringType>;
-    
+
     static Lazy<CommandLine> current_process_cmdline_;
     Argv argv_;
     Argv::iterator last_not_param_;

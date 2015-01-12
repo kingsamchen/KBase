@@ -106,7 +106,7 @@ FilePath PathService::Get(PathKey key)
             return path;
         }
 
-        // To prevent head being modified by accidently registering a new provider 
+        // To prevent head being modified by accidently registering a new provider
         // from other threads.
         provider = path_data.providers.begin();
     }
@@ -136,7 +136,7 @@ FilePath PathService::Get(PathKey key)
     if (!path_data.cache_disabled && key != DIR_CURRENT) {
         path_data.cached_path_table[key] = path;
     }
-    
+
     return path;
 }
 

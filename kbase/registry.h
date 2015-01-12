@@ -28,13 +28,13 @@ public:
     };
 
     RegKey();
-    
+
     explicit RegKey(HKEY key);
-    
+
     // Creates or opens the specific registry key when constructing the object.
     // Throws an exception when fails.
     RegKey(HKEY rootkey, const wchar_t* subkey, REGSAM access);
-    
+
     ~RegKey();
 
     RegKey(const RegKey&) = delete;

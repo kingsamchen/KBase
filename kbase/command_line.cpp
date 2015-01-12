@@ -68,7 +68,7 @@ StringType QuoteArg(const StringType& arg)
     StringType quoted_arg(1, L'"');
     for (auto it = arg.cbegin(); ; ++it) {
         size_t number_of_backslash = 0U;
-        
+
         // Count number adjacent backslashes.
         while (it != arg.cend() && *it == L'\\') {
             ++it;
@@ -252,7 +252,7 @@ void CommandLine::ParseFromArgv(const ArgList& argv)
 void CommandLine::AppendSwitch(const StringType& name, const StringType& value)
 {
     switches_[name] = value;
-    
+
     auto original = last_not_param_++;
     // Since we have |last_not_param_| to demarcate switches and parameters, we here
     // leave switch prefix unprepended.
@@ -261,7 +261,7 @@ void CommandLine::AppendSwitch(const StringType& name, const StringType& value)
         switch_arg.append(L"=").append(value);
     }
     argv_.emplace(last_not_param_, switch_arg);
-    last_not_param_ = ++original;    
+    last_not_param_ = ++original;
 }
 
 void CommandLine::AppendParameter(const StringType& parameter)

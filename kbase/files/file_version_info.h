@@ -110,7 +110,7 @@ public:
 
 private:
     FileVersionInfo(internal::VersionData&& data);
-    
+
     // Returns the value associated with the |name|.
     // Returns an empty string otherwise.
     std::wstring GetValue(const wchar_t* name) const;

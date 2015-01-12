@@ -66,7 +66,7 @@ const charT* ExtractFileName(const charT* file_path)
     return last_pos ? last_pos + 1 : file_path;
 }
 
-// Returns the path of default log file. 
+// Returns the path of default log file.
 // We use the same path as the EXE file.
 PathString GetDefaultLogFile()
 {
@@ -131,7 +131,7 @@ public:
 
         if (logging_lock_option == LoggingLockOption::USE_GLOBAL_LOCK) {
             PathString log_name = GetDefaultLogFile();
-            // We want the file name to be part of the mutex name, and \ is not a 
+            // We want the file name to be part of the mutex name, and \ is not a
             // legal character, so we replace \ with /.
             std::replace(log_name.begin(), log_name.end(), L'\\', L'/');
 
@@ -210,7 +210,7 @@ LogMessage::LogMessage(const char* file, int line, LogSeverity severity)
 }
 
 LogMessage::LogMessage(const char* file, int line)
- : LogMessage(file, line, LOG_INFO) 
+ : LogMessage(file, line, LOG_INFO)
 {
     Init(file, line);
 }
@@ -247,15 +247,15 @@ LogMessage::~LogMessage()
 void LogMessage::Init(const char* file, int line)
 {
     stream_ << "[";
-    
+
     if (log_item_options & LogItemOptions::ENABLE_PROCESS_ID) {
         stream_ << GetCurrentProcessId() << ":";
-    } 
-    
+    }
+
     if (log_item_options & LogItemOptions::ENABLE_THREAD_ID) {
         stream_ << GetCurrentThreadId() << ":";
-    } 
-    
+    }
+
     if (log_item_options & LogItemOptions::ENABLE_TIMESTAMP) {
         time_t time_now = time(nullptr);
         struct tm local_time_now;
@@ -272,7 +272,7 @@ void LogMessage::Init(const char* file, int line)
     }
 
     stream_ << kLogSeverityNames[severity_];
-    
+
     const char* file_name = ExtractFileName(file);
 
     stream_ << ':' << file_name << '(' << line << ")]";
