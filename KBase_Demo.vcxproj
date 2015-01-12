@@ -80,6 +80,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="kbase\at_exit_manager.cpp" />
+    <ClCompile Include="kbase\base64.cpp" />
     <ClCompile Include="kbase\base_path_provider.cpp" />
     <ClCompile Include="kbase\command_line.cpp" />
     <ClCompile Include="kbase\date_time.cpp" />
@@ -103,6 +104,7 @@
   <ItemGroup>
     <ClInclude Include="kbase\at_exit_manager.h" />
     <ClInclude Include="kbase\auto_reset.h" />
+    <ClInclude Include="kbase\base64.h" />
     <ClInclude Include="kbase\base_path_provider.h" />
     <ClInclude Include="kbase\basic_types.h" />
     <ClInclude Include="kbase\command_line.h" />
