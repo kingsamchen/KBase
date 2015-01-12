@@ -8,7 +8,7 @@
 
 #ifndef KBASE_DATE_TIME_H_
 #define KBASE_DATE_TIME_H_
-    
+
 #include <windows.h>
 
 #include <ctime>
@@ -284,7 +284,7 @@ public:
     FILETIME ToFileTime() const;
 
     FILETIME ToLocalFileTime() const;
-    
+
 private:
     internal::time_type time_;
 };
@@ -335,7 +335,7 @@ inline const DateTime operator-(const DateTime& lhs, const DateTimeSpan& rhs)
 inline const DateTimeSpan operator-(const DateTime& lhs, const DateTime& rhs)
 {
     int64_t time_span = lhs.raw_time_since_epoch() - rhs.raw_time_since_epoch();
-    
+
     return DateTimeSpan(time_span);
 }
 

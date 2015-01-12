@@ -52,7 +52,7 @@ public:
                    const PathString& pattern);
 
     ~FileEnumerator() = default;
-    
+
     FileEnumerator(const FileEnumerator&) = delete;
     FileEnumerator& operator=(const FileEnumerator&) = delete;
 

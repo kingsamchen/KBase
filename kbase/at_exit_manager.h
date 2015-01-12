@@ -17,14 +17,14 @@ namespace kbase {
 
 class AtExitManager {
 public:
-    typedef std::function<void()> AtExitCallbackType;    
+    typedef std::function<void()> AtExitCallbackType;
 
     AtExitManager();
 
     ~AtExitManager();
 
     static void RegisterCallback(const AtExitCallbackType& callback);
-    
+
     static void ProcessCallbackNow();
 
     AtExitManager(const AtExitManager&) = delete;

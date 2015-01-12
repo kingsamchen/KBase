@@ -102,7 +102,7 @@ PathString::size_type ExtensionSeparatorPosition(const PathString& path)
 
 bool IsPathEmptyOrSpecialCase(const PathString& path)
 {
-    if (path.empty() || path == FilePath::kCurrentDir || 
+    if (path.empty() || path == FilePath::kCurrentDir ||
         path == FilePath::kParentDir) {
         return true;
     }
@@ -146,7 +146,7 @@ FilePath& FilePath::operator=(FilePath&& other)
 
 bool operator==(const FilePath& lhs, const FilePath& rhs)
 {
-    return EqualDriveLetterCaseInsensitive(lhs.value(), rhs.value());    
+    return EqualDriveLetterCaseInsensitive(lhs.value(), rhs.value());
 }
 
 bool operator!=(const FilePath& lhs, const FilePath& rhs)
@@ -202,7 +202,7 @@ void FilePath::StripTrailingSeparatorsInternal()
     PathString::size_type pos = path_.length();
     for (; pos > start && IsSeparator(path_[pos-1]); --pos) {
         if (pos != start + 1 ||
-            !IsSeparator(path_[start-1]) || 
+            !IsSeparator(path_[start-1]) ||
             last_stripped != PathString::npos) {
             last_stripped = pos;
         } else {
@@ -300,7 +300,7 @@ void FilePath::GetComponents(std::vector<PathString>* components) const
     while (current != current.DirName()) {
         base = current.BaseName();
         if (!AreAllSeparators(base.value())) {
-            parts.push_back(base.value());        
+            parts.push_back(base.value());
         }
         current = current.DirName();
     }
@@ -387,7 +387,7 @@ bool FilePath::AppendRelativePath(const FilePath& child, FilePath* path) const
     GetComponents(&current_components);
     child.GetComponents(&child_components);
 
-    if (current_components.empty() || 
+    if (current_components.empty() ||
         current_components.size() >= child_components.size()) {
         return false;
     }
@@ -436,7 +436,7 @@ PathString FilePath::Extension() const
 
     if (separator_pos == PathString::npos) {
         return PathString();
-    }    
+    }
 
     return base.path_.substr(separator_pos);
 }
@@ -509,11 +509,11 @@ FilePath FilePath::ReplaceExtension(const PathString& extension) const
     }
 
     FilePath new_path = StripExtention();
-    
+
     if (extension.empty() || extension == PathString(1, kExtensionSeparator)) {
         return new_path;
     }
-    
+
     if (extension[0] != kExtensionSeparator) {
         new_path.path_.append(1, kExtensionSeparator);
     }
@@ -542,7 +542,7 @@ bool FilePath::ReferenceParent() const
             return true;
         }
     }
-    
+
     return false;
 }
 
@@ -578,7 +578,7 @@ FilePath FilePath::FromUTF8(const std::string& path_in_utf8)
 
 void FilePath::WriteToPickle(Pickle* pickle) const
 {
-    pickle->Write(path_);            
+    pickle->Write(path_);
 }
 
 bool FilePath::ReadFromPickle(PickleIterator* iter)
@@ -597,7 +597,7 @@ bool FilePath::ReadFromPickle(PickleIterator* iter)
 FilePath FilePath::NormalizePathSeparatorTo(PathChar separator) const
 {
     PathString new_path_str = path_;
-    
+
     for (PathChar sep : kSeparators) {
         std::replace(new_path_str.begin(), new_path_str.end(), sep, separator);
     }

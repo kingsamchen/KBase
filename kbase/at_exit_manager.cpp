@@ -22,7 +22,7 @@ AtExitManager::~AtExitManager()
 {
     ENSURE(g_top_exit_manager == this)(reinterpret_cast<int>(g_top_exit_manager))
         (reinterpret_cast<int>(this)).raise();
-    
+
     ProcessCallbackNow();
     g_top_exit_manager = next_at_exit_manager_;
 }

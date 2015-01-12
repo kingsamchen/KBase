@@ -53,7 +53,7 @@ static bool RemoveCharsT(const strT& in,
     strT tmp(in.size(), 0);
 
     auto char_in = [=](typename strT::value_type ch) -> bool {
-        return std::find(remove_chars.cbegin(), remove_chars.cend(), ch) 
+        return std::find(remove_chars.cbegin(), remove_chars.cend(), ch)
             != remove_chars.cend();
     };
 
@@ -146,14 +146,14 @@ static TrimPosition TrimStringHelper(const strT& in,
         in.find_last_not_of(trim_chars.data(), strT::npos, trim_chars.size()) : last;
 
     // in any case, we should clear |out|
-    if (in.empty() || 
+    if (in.empty() ||
         not_matched_first == strT::npos || not_matched_last == strT::npos) {
         out->clear();
         return in.empty() ? TrimPosition::TRIM_NONE : pos;
     }
 
     *out = in.substr(not_matched_first, not_matched_last - not_matched_first + 1);
-    
+
     unsigned leading_case = not_matched_first != 0 ?
         TrimPosition::TRIM_LEADING : TrimPosition::TRIM_NONE;
     unsigned tailing_case = not_matched_last != last ?
@@ -233,7 +233,7 @@ void StringToLower(std::string* str)
     }
 
     auto buff = WriteInto(str, str->length() + 1);
-    CharLowerBuffA(buff, str->length()); 
+    CharLowerBuffA(buff, str->length());
 }
 
 std::string StringToLower(const std::string& str)
@@ -329,7 +329,7 @@ static bool StartsWithT(const strT& str, const strT& token, bool case_sensitive)
             return ToLower(lhs) == ToLower(rhs);
         };
 
-        return std::equal(token.cbegin(), token.cend(), str.cbegin(), icmp); 
+        return std::equal(token.cbegin(), token.cend(), str.cbegin(), icmp);
     }
 }
 

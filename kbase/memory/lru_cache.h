@@ -94,7 +94,7 @@ public:
 
     iterator Put(const Key& key, const Entry& entry)
     {
-        return PutInternal(key, entry);    
+        return PutInternal(key, entry);
     }
 
     iterator Put(const Key& key, Entry&& entry)
@@ -188,9 +188,9 @@ public:
     }
 
     iterator begin() { return entry_ordering_list_.begin(); }
-    
+
     const_iterator begin() const { return entry_ordering_list_.begin(); }
-    
+
     const_iterator cbegin() const { return entry_ordering_list_.cbegin(); }
 
     iterator end() { return entry_ordering_list_.end(); }
@@ -213,7 +213,7 @@ private:
         entry_ordering_list_.push_back(value_type(key, std::forward<Entry>(entry)));
         auto rv = key_table_.insert(
             std::make_pair(key, --entry_ordering_list_.end()));
-        
+
         return rv.first->second;
     }
 

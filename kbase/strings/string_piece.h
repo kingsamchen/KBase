@@ -44,15 +44,15 @@ public:
     StringPieceDetail() : ptr_(nullptr), length_(0)
     {}
 
-    StringPieceDetail(const value_type* str) 
-        : ptr_(str), length_(typename STRING_TYPE::traits_type::length(str)) 
+    StringPieceDetail(const value_type* str)
+        : ptr_(str), length_(typename STRING_TYPE::traits_type::length(str))
     {}
 
-    StringPieceDetail(const STRING_TYPE& str) 
+    StringPieceDetail(const STRING_TYPE& str)
         : ptr_(str.data()), length_(str.length())
     {}
 
-    StringPieceDetail(const value_type* data, size_type len) 
+    StringPieceDetail(const value_type* data, size_type len)
         : ptr_(data), length_(len)
     {}
 
@@ -122,7 +122,7 @@ public:
     {
         size_type min_length = std::min(length_, other.length_);
         int ret = wordmemcmp(ptr_, other.ptr_, min_length);
-        
+
         if (ret == 0) {
             if (length_ < other.length_) {
                 return -1
@@ -133,7 +133,7 @@ public:
 
         return ret;
     }
-    
+
     void RemovePrefix(size_type n)
     {
         ptr_ += n;
@@ -183,7 +183,7 @@ protected:
 
 template<typename STRING_TYPE>
 const typename StringPieceDetail<STRING_TYPE>::size_type
-StringPieceDetail<STRING_TYPE>::npos = 
+StringPieceDetail<STRING_TYPE>::npos =
     static_cast<typename StringPieceDetail<STRING_TYPE>::size_type>(-1);
 
 // internal helper functions
@@ -243,8 +243,8 @@ typename BasicStringPiece<STRING_TYPE>::size_type
         return BasicStringPiece<STRING_TYPE>::npos;
 
     auto result_it = std::find(self.cbegin() + pos, self.cend(), ch);
-    
-    return result_it != self.cend() ? 
+
+    return result_it != self.cend() ?
         static_cast<size_t>(result_it - self.cbegin()) :
         BasicStringPiece<STRING_TYPE>::npos;
 }
@@ -265,8 +265,8 @@ typename BasicStringPiece<STRING_TYPE>::size_type
     auto last = self.cbegin() + std::min(self.size() - s.size(), pos) + s.size();
     auto result_it = std::find_end(self.cbegin(), last, s.cbegin(), s.cend());
 
-    return result_it != last ? 
-        static_cast<size_t>(result_it - self.cbegin()) : 
+    return result_it != last ?
+        static_cast<size_t>(result_it - self.cbegin()) :
         BasicStringPiece<STRING_TYPE>::npos;
 }
 
@@ -279,9 +279,9 @@ typename BasicStringPiece<STRING_TYPE>::size_type
     typename BasicStringPiece<STRING_TYPE>::size_type begin_pos =
         std::min(pos, self.size() - 1);
 
-    auto result_it = 
+    auto result_it =
         std::find(self.crbegin() + ((self.size() - 1) - begin_pos), self.crend(), ch);
-    
+
     return result_it != self.crend() ?
         static_cast<size_t>(result_it.base() - 1 - self.cbegin()) :
         BasicStringPiece<STRING_TYPE>::npos;
@@ -346,7 +346,7 @@ typename BasicStringPiece<STRING_TYPE>::size_type
 
         if (i == 0) break;
     }
-    
+
     return BasicStringPiece<STRING_TPYE>::npos;
 }
 
@@ -380,18 +380,18 @@ BasicStringPiece<STRING_TYPE> substr(const BasicStringPiece<STRING_TYPE>& self,
     auto begin_pos = std::min(pos, self.size());
     if (begin_pos + n > self.size())
         n = self.size() - begin_pos;
-        
+
     return BasicStringPiece<STRING_TYPE>(self.data() + begin_pos, n);
 }
 
 // specialized internal find_*_of operations for std::string
 
-StringPieceDetail<std::string>::size_type 
+StringPieceDetail<std::string>::size_type
     find_first_of(const StringPiece& self,
                   const StringPiece& s,
                   StringPieceDetail<std::string>::size_type pos = 0);
 
-StringPieceDetail<std::string>::size_type 
+StringPieceDetail<std::string>::size_type
     find_first_not_of(const StringPiece& self,
                       const StringPiece& s,
                       StringPieceDetail<std::string>::size_type pos = 0);
@@ -411,7 +411,7 @@ StringPieceDetail<std::string>::size_type
 template<typename STRING_TYPE>
 class BasicStringPiece : public internal::StringPieceDetail<STRING_TYPE> {
 public:
-    typedef typename internal::StringPieceDetail<STRING_TYPE>::value_type 
+    typedef typename internal::StringPieceDetail<STRING_TYPE>::value_type
         value_type;
     typedef typename internal::StringPieceDetail<STRING_TYPE>::size_type
         size_type;
@@ -475,7 +475,7 @@ public:
     }
 
     // |rfind| functions find the last substring equal to the given character
-    // sequence within the range [begin, pos + s.size]. 
+    // sequence within the range [begin, pos + s.size].
     // therefor, substring that begins at which following the pos is passed
 
     size_type rfind(const BasicStringPiece& s, size_type pos = npos) const

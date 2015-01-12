@@ -84,7 +84,7 @@ FilePath FileEnumerator::Next()
             return cur_file;
         }
     }
-    
+
     return FilePath();
 }
 

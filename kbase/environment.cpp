@@ -50,7 +50,7 @@ std::wstring Environment::GetVar(const wchar_t* name)
         LastError().last_error_code() == ERROR_ENVVAR_NOT_FOUND) {
         return std::wstring();
     }
-    
+
     std::vector<wchar_t> buf(required_size);
     DWORD rv = GetEnvironmentVariableW(name, &buf[0], required_size);
     ThrowLastErrorIf(!rv, "failed to get environment variable");

@@ -195,12 +195,12 @@ Pickle::Pickle() : header_(nullptr), capacity_(0)
     header_->payload_size = 0;
 }
 
-Pickle::Pickle(const char* data, int) 
+Pickle::Pickle(const char* data, int)
     : header_(reinterpret_cast<Header*>(const_cast<char*>(data))),
       capacity_(kCapacityReadOnly)
 {}
 
-Pickle::Pickle(const Pickle& other) 
+Pickle::Pickle(const Pickle& other)
     : header_(nullptr), capacity_(0)
 {
     // If |other| is constructed from a const buffer, its capacity value is

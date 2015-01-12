@@ -3,7 +3,7 @@
 */
 
 #if defined(_MSC_VER)
-#pragma once  
+#pragma once
 #endif
 
 #ifndef KBASE_LOGGING_H_

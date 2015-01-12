@@ -29,7 +29,7 @@ std::unique_ptr<FileVersionInfo> FileVersionInfo::CreateForFile(const FilePath& 
 {
     DWORD info_size = GetFileVersionInfoSizeW(file.value().c_str(), nullptr);
     ThrowLastErrorIf(info_size == 0, "failed to get file version info size.");
-    
+
     VersionData version_data(info_size);
     BOOL rv = GetFileVersionInfoW(file.value().c_str(), 0, info_size,
                                   version_data.data());

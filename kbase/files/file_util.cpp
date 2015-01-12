@@ -77,7 +77,7 @@ void RemoveFile(const FilePath& path, bool recursive)
         ThrowLastErrorIf(!rv, "Failed to delete the file");
         return;
     }
-    
+
     // SHFileOperationW requires that path must end with double null-terminators.
     // Moreover, if the path passed to SHFileOperationW is not a full path, the
     // invocation of SHFileOperationW is not thread safe.
@@ -130,7 +130,7 @@ void DuplicateDirectory(const FilePath& src, const FilePath& dest, bool recursiv
     }
 
     // The destination cannot be a subfolder of the source in recursive mode.
-    bool permitted = !(recursive && 
+    bool permitted = !(recursive &&
                        StartsWith(full_dest.value(), full_src.value(), false));
     ENSURE(permitted)(full_src.value())(full_dest.value()).raise();
 
@@ -164,7 +164,7 @@ void MakeFileMove(const FilePath& src, const FilePath& dest)
                     MOVEFILE_COPY_ALLOWED | MOVEFILE_REPLACE_EXISTING)) {
         return;
     }
-    
+
     LastError last_error;
 
     if (DirectoryExists(src)) {
@@ -214,7 +214,7 @@ void WriteStringToFile(const FilePath& path, const std::string& data)
         DLOG(WARNING) << "Create/open file faield for path " << path.AsUTF8();
         return;
     }
-    
+
     out.write(data.data(), data.size());
 }
 

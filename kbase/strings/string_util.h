@@ -7,7 +7,7 @@
 #endif
 
 #ifndef KBASE_STRINGS_STRING_UTIL_H_
-#define KBASE_STRINGS_STRING_UTIL_H_ 
+#define KBASE_STRINGS_STRING_UTIL_H_
 
 #include <cassert>
 #include <string>
@@ -18,7 +18,7 @@
 namespace kbase {
 
 // Removes any characters specified by |remove_chars| in string |in|.
-// Returns true, if any characters are removed; return false, otherwise. 
+// Returns true, if any characters are removed; return false, otherwise.
 // It is safe to make |in| and |out| both refer to a same object.
 
 bool RemoveChars(const std::string& in,
@@ -50,8 +50,8 @@ void ReplaceFirstSubstring(std::wstring* str,
                            const WStringPiece& replace_with,
                            std::wstring::size_type pos = 0);
 
-// Removes characters in |trim_chars| in a certain range of |in|. 
-// |trim_chars| indicates characters that need to be removed from |in|. 
+// Removes characters in |trim_chars| in a certain range of |in|.
+// |trim_chars| indicates characters that need to be removed from |in|.
 // Returns true if having trimed; otherwise returns false.
 
 bool TrimString(const std::string& in,
@@ -152,11 +152,11 @@ int SysStringCompareCaseInsensitive(const std::wstring& x, const std::wstring& y
 // Returns true, if |str| starts with |token|.
 // Returns false, otherwise.
 
-bool StartsWith(const std::string& str, 
-                const std::string& token, 
+bool StartsWith(const std::string& str,
+                const std::string& token,
                 bool case_sensitive = true);
-bool StartsWith(const std::wstring& str, 
-                const std::wstring& token, 
+bool StartsWith(const std::wstring& str,
+                const std::wstring& token,
                 bool case_sensitive = true);
 
 // Returns true, if |str| ends with |token|.
@@ -169,13 +169,13 @@ bool EndsWith(const std::wstring& str,
               const std::wstring& token,
               bool case_sensitive = true);
 
-// Set up enough memory in |str| to accomodate a c-style string with length 
+// Set up enough memory in |str| to accomodate a c-style string with length
 // of | length_including_null | .be wary of that real size of the string data
 // does not count the null - terminate character. this function is useful when
 // interaction between a string object and a legacy API is required.
 // Returns pointer to the underlying data of the string object.
 template<typename strT>
-inline typename strT::value_type* WriteInto(strT* str, 
+inline typename strT::value_type* WriteInto(strT* str,
                                             size_t length_including_null)
 {
     // if the length is equal to 1, the underlying string size is 0,

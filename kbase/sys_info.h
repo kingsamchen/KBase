@@ -54,7 +54,7 @@ public:
     // Returns the amount of physical memory currently available, in bytes.
     static uint64_t AmountOfAvailablePhysicalMemory();
 
-    // Returns the size of the user mode portion of the virtual address space of the 
+    // Returns the size of the user mode portion of the virtual address space of the
     // calling process, in bytes. This value may vary in different type of process,
     // processors, or configurations of the system.
     static uint64_t AmountOfTotalVirtualMemory();
@@ -62,7 +62,7 @@ public:
     // Returns the amount of unreserved and uncommitted memory currently in user mode
     // portion of the virtual address space of the calling process, in bytes.
     static uint64_t AmountOfAvailableVirtualMemory();
-    
+
     // Returns the total number of bytes on a disk that are available to the user,
     // i.e. quota related.
     static uint64_t AmountOfTotalDiskSpace(const FilePath& path);

@@ -3,7 +3,7 @@
 */
 
 #if defined(_MSC_VER)
-#pragma once  
+#pragma once
 #endif
 
 #ifndef KBASE_AUTO_RESET_H_
