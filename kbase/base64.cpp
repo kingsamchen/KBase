@@ -67,9 +67,40 @@ const char kCipher2[256] {
     '8', '9', '+', '/'
 };
 
+inline size_t EncodeLength(size_t plain_text_len)
+{
+    return (plain_text_len + 2) / 3 * 4;
+}
+
 template<typename Container>
 void Encode(const byte* data, size_t len, Container* result)
 {
+    result->clear();
+    result->Resize(EncodeLength(len), 0);
+
+    byte t0, t1, t2;
+    size_t i = 0;
+    char* p = &(*result)[0];
+
+    if (len > 2) {
+        for (; i < len - 2; i += 3) {
+            t0 = data[i];
+            t1 = data[i+1];
+            t2 = data[i+2];
+            *p++ = kCipher0[t0];
+            // middle-two
+            *p++ = kCipher2[t2];
+        }
+    }
+
+    switch (len - i) {
+    case 0:
+        break;
+    case 1:
+        break;
+    case 2:
+        break;
+    }
 }
 
 template<typename Container>
