@@ -15,13 +15,13 @@
 
 namespace kbase {
 
-std::string Base64Encode(const void* data, size_t len);
-
 std::string Base64Encode(const std::string& src);
 
-std::vector<byte> Base64Decode(const void* data, size_t len);
+std::string Base64Encode(const void* data, size_t len);
 
 std::string Base64Decode(const std::string& src);
+
+std::vector<byte> Base64Decode(const void* data, size_t len);
 
 }   // namespace kbase
 

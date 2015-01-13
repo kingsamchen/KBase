@@ -8,6 +8,8 @@ namespace {
 
 using kbase::byte;
 
+const char kPadding = '=';
+
 const char kCipher0[256] {
     'A', 'A', 'A', 'A', 'B', 'B', 'B', 'B', 'C', 'C', 'C', 'C',
     'D', 'D', 'D', 'D', 'E', 'E', 'E', 'E', 'F', 'F', 'F', 'F',
@@ -67,6 +69,7 @@ const char kCipher2[256] {
     '8', '9', '+', '/'
 };
 
+// ceil(PTL / 3) * 4 == floor(PTL + 3 - 1 / 3) * 4
 inline size_t EncodeLength(size_t plain_text_len)
 {
     return (plain_text_len + 2) / 3 * 4;
@@ -76,7 +79,7 @@ template<typename Container>
 void Encode(const byte* data, size_t len, Container* result)
 {
     result->clear();
-    result->Resize(EncodeLength(len), 0);
+    result->resize(EncodeLength(len), 0);
 
     byte t0, t1, t2;
     size_t i = 0;
@@ -88,7 +91,8 @@ void Encode(const byte* data, size_t len, Container* result)
             t1 = data[i+1];
             t2 = data[i+2];
             *p++ = kCipher0[t0];
-            // middle-two
+            *p++ = kCipher1[((t0 & 0x03) << 4) | ((t1 >> 4) & 0x0F)];
+            *p++ = kCipher1[((t1 & 0x0F) << 2) | ((t2 >> 6) & 0x03)];
             *p++ = kCipher2[t2];
         }
     }
@@ -97,8 +101,19 @@ void Encode(const byte* data, size_t len, Container* result)
     case 0:
         break;
     case 1:
+        t0 = data[i];
+        *p++ = kCipher0[t0];
+        *p++ = kCipher1[(t0 & 0x03) << 4];
+        *p++ = kPadding;
+        *p = kPadding;
         break;
     case 2:
+        t0 = data[i];
+        t1 = data[i+1];
+        *p++ = kCipher0[t0];
+        *p++ = kCipher1[((t0 & 0x03) << 4) | ((t1 >> 4) & 0x0F)];
+        *p++ = kCipher1[(t1 & 0x0F) << 2];
+        *p = kPadding;
         break;
     }
 }
@@ -112,5 +127,21 @@ void Decode(const byte* data, size_t len, Container* result)
 }   // namespace
 
 namespace kbase {
+
+std::string Base64Encode(const std::string& src)
+{
+    std::string encoded;
+    Encode<std::string>(reinterpret_cast<const byte*>(src.data()), src.size(), &encoded);
+
+    return encoded;
+}
+
+std::string Base64Encode(const void* data, size_t len)
+{
+    std::string encoded;
+    Encode<std::string>(static_cast<const byte*>(data), len, &encoded);
+
+    return encoded;
+}
 
 }   // namespace kbase
