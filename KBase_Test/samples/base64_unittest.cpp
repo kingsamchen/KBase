@@ -27,3 +27,18 @@ TEST(Base64Test, Encode)
         EXPECT_EQ(encoded, cp.second);
     }
 }
+
+TEST(Base64Test, Decode)
+{
+    for (const auto& cp : ciphers) {
+        auto decoded = kbase::Base64Decode(cp.second);
+        EXPECT_EQ(decoded, cp.first);
+    }
+}
+
+TEST(Base64Test, DecodeInvalid)
+{
+    std::string s = "aHR0c\\~DovLzEj";
+    auto decoded = kbase::Base64Decode(s);
+    EXPECT_TRUE(decoded.empty());
+}
