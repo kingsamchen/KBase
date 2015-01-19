@@ -184,8 +184,8 @@ void RegKey::GetValueNameAt(size_t index, std::wstring* value_name) const
     wchar_t buf[MAX_PATH];
     DWORD buf_size = _countof(buf);
 
-    long result = RegEnumValue(key_, index, buf, &buf_size, nullptr, nullptr, nullptr,
-                               nullptr);
+    long result = RegEnumValue(key_, static_cast<DWORD>(index), buf, &buf_size,
+                               nullptr, nullptr, nullptr, nullptr);
     SetLastError(result);
     ThrowLastErrorIf(result != ERROR_SUCCESS, "failed to get value name");
 
@@ -230,8 +230,8 @@ bool RegKey::ReadValue(const wchar_t* value_name, DWORD restricted_type, void* d
 
 bool RegKey::ReadValue(const wchar_t* value_name, std::wstring* value) const
 {
-    const size_t kCharSize = sizeof(wchar_t);
-    size_t str_length = 1024;   // including null
+    const DWORD kCharSize = sizeof(wchar_t);
+    DWORD str_length = 1024;   // including null
     // It seems that automatic expansion for environment strings in RegGetValue
     // behaves incorrect when using std::basic_string as its buffer.
     // Therefore, does expansions on our own.
@@ -254,7 +254,7 @@ bool RegKey::ReadValue(const wchar_t* value_name, std::wstring* value) const
             } else if (data_type == REG_EXPAND_SZ) {
                 std::wstring expanded;
                 wchar_t* ptr = WriteInto(&expanded, str_length);
-                size_t size = ExpandEnvironmentStrings(data_ptr, ptr, str_length);
+                DWORD size = ExpandEnvironmentStrings(data_ptr, ptr, str_length);
                 if (size == 0) {
                     // functions fails, and it internally sets the last error.
                     return false;
@@ -351,12 +351,16 @@ void RegKey::WriteValue(const wchar_t* value_name, const wchar_t* value)
     WriteValue(value_name, value, sizeof(wchar_t) * (wcslen(value) + 1), REG_SZ);
 }
 
-void RegKey::WriteValue(const wchar_t* value_name, const void* data, DWORD data_size,
+void RegKey::WriteValue(const wchar_t* value_name, const void* data, size_t data_size,
                         DWORD data_type)
 {
     assert(data && data_size > 0);
-    long result = RegSetValueEx(key_, value_name, 0, data_type,
-                                static_cast<const BYTE*>(data), data_size);
+    long result = RegSetValueEx(key_,
+                                value_name,
+                                0,
+                                data_type,
+                                static_cast<const BYTE*>(data),
+                                static_cast<DWORD>(data_size));
     SetLastError(result);
     ThrowLastErrorIf(result != ERROR_SUCCESS, "failed to write value");
 }

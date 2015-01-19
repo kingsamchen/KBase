@@ -232,8 +232,14 @@ void StringToLower(std::string* str)
         return;
     }
 
+#if !defined(_M_X64)
     auto buff = WriteInto(str, str->length() + 1);
     CharLowerBuffA(buff, str->length());
+#else
+    std::for_each(str->begin(), str->end(), [](char& ch) {
+        CharLowerA(&ch);
+    });
+#endif
 }
 
 std::string StringToLower(const std::string& str)
@@ -250,8 +256,14 @@ void StringToLower(std::wstring* str)
         return;
     }
 
+#if !defined(_M_X64)
     auto buff = WriteInto(str, str->length() + 1);
     CharLowerBuffW(buff, str->length());
+#else
+    std::for_each(str->begin(), str->end(), [](wchar_t& ch) {
+        CharLowerW(&ch);
+    });
+#endif
 }
 
 std::wstring StringToLower(const std::wstring& str)
@@ -268,8 +280,14 @@ void StringToUpper(std::string* str)
         return;
     }
 
+#if !defined(_M_X64)
     auto buff = WriteInto(str, str->length() + 1);
     CharUpperBuffA(buff, str->length());
+#else
+    std::for_each(str->begin(), str->end(), [](char& ch) {
+        CharUpperA(&ch);
+    });
+#endif
 }
 
 std::string StringToUpper(const std::string& str)
@@ -286,8 +304,14 @@ void StringToUpper(std::wstring* str)
         return;
     }
 
+#if !defined(_M_X64)
     auto buff = WriteInto(str, str->length() + 1);
     CharUpperBuffW(buff, str->length());
+#else
+    std::for_each(str->begin(), str->end(), [](wchar_t& ch) {
+        CharUpperW(&ch);
+    });
+#endif
 }
 
 std::wstring StringToUpper(const std::wstring& str)
@@ -310,7 +334,8 @@ int StringCompareCaseInsensitive(const std::wstring& x, const std::wstring& y)
 
 int SysStringCompareCaseInsensitive(const std::wstring& x, const std::wstring& y)
 {
-    int ret = CompareStringOrdinal(x.data(), x.length(), y.data(), y.length(), TRUE);
+    int ret = CompareStringOrdinal(x.data(), static_cast<int>(x.length()),
+                                   y.data(), static_cast<int>(y.length()), TRUE);
     ENSURE(ret != 0)(x)(y).raise();
 
     return ret - CSTR_EQUAL;

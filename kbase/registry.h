@@ -103,8 +103,8 @@ public:
     // Throws an exception if an error occurs.
     void DeleteValue(const wchar_t* value_name);
 
-    // For each of the following read functions, it returns true if a function 
-    // succeeds; and returns false, if an error occurs, and last error implies the 
+    // For each of the following read functions, it returns true if a function
+    // succeeds; and returns false, if an error occurs, and last error implies the
     // reason for the failure.
     // Moreover, the variable that stores the value being read remains unchanged if
     // the function fails.
@@ -141,7 +141,7 @@ public:
     void WriteValue(const wchar_t* value_name, const wchar_t* value);
 
     // Sets a raw data into a specific registry field.
-    void WriteValue(const wchar_t* value_name, const void* data, DWORD data_size,
+    void WriteValue(const wchar_t* value_name, const void* data, size_t data_size,
                     DWORD data_type);
 
 private:
@@ -260,8 +260,8 @@ private:
     HKEY key_;
     int index_;
     size_t value_count_;
-    size_t max_value_name_length_;  // always in characters.
-    size_t max_value_length_;       // in bytes.
+    DWORD max_value_name_length_;  // always in characters.
+    DWORD max_value_length_;       // in bytes.
     DWORD type_;
     std::wstring value_name_;
     std::vector<char> value_;

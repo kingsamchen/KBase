@@ -38,7 +38,7 @@ public:
     using ArgList = std::vector<StringType>;
     using SwitchTable = std::map<StringType, StringType>;
 
-    enum DefaultSwitchPrefix : size_t {
+    enum DefaultSwitchPrefix : unsigned int {
         PREFIX_DASH = 0,
         PREFIX_DOUBLE_DASH,
         PREFIX_SLASH
