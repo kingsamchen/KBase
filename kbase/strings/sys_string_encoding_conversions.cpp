@@ -74,7 +74,7 @@ std::string SysWideToMultiByte(const std::wstring& wide_str, CodePage code_page)
     return mb_str;
 }
 
-std::wstring ASCIIToWide(const std::string& ascii_str)
+std::wstring ASCIIToWide(const StringPiece& ascii_str)
 {
     assert(IsStringASCII(ascii_str));
 #if defined(NDEBUG)
@@ -86,7 +86,7 @@ std::wstring ASCIIToWide(const std::string& ascii_str)
     return std::wstring(ascii_str.cbegin(), ascii_str.cend());
 }
 
-std::string WideToASCII(const std::wstring& wide_str)
+std::string WideToASCII(const WStringPiece& wide_str)
 {
     assert(IsStringASCII(wide_str));
 #if defined(NDEBUG)

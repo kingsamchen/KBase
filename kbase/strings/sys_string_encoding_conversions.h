@@ -11,6 +11,8 @@
 
 #include <string>
 
+#include "kbase\strings\string_piece.h"
+
 namespace kbase {
 
 // defined according to MSDN
@@ -31,8 +33,8 @@ std::string SysWideToMultiByte(const std::wstring& wide_str, CodePage code_page)
 
 // If the string being converted contains non-ASCII characters, functions throw
 // an invalid_argument exception.
-std::wstring ASCIIToWide(const std::string& ascii_str);
-std::string WideToASCII(const std::wstring& wide_str);
+std::wstring ASCIIToWide(const StringPiece& ascii_str);
+std::string WideToASCII(const WStringPiece& wide_str);
 
 }   // namespace kbase
 
