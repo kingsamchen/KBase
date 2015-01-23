@@ -9,6 +9,7 @@
 #include <array>
 #include <cassert>
 
+#include "kbase\strings\string_piece.h"
 #include "kbase\strings\sys_string_encoding_conversions.h"
 
 namespace kbase {
@@ -27,7 +28,10 @@ std::string GenerateGUID()
     int count_written = StringFromGUID2(guid, guid_str.data(), kGUIDSize);
 
     // Since GUID contains ASCII-only characters, it is safe to do this conversion.
-    return count_written ? WideToASCII(guid_str.data()) : std::string();
+    // Strips off { and }.
+    return count_written ?
+        WideToASCII(WStringPiece(guid_str.data() + 1, count_written - 3)) :
+        std::string();
 }
 
 }   // namespace kbase
