@@ -8,6 +8,7 @@
 
 #include <array>
 #include <cassert>
+#include <xutility>
 
 #include "kbase\strings\string_piece.h"
 #include "kbase\strings\sys_string_encoding_conversions.h"
@@ -42,11 +43,25 @@ bool IsGUIDValid(const std::string& guid)
         return false;
     }
 
+    // ord('0') ~ ord('9'), ord('A') ~ ord('F')
+    std::pair<int, int> ranges[] {{48, 57}, {65, 70}};
     for (size_t i = 0; i < guid.length(); ++i) {
-        if (i == 8 || i == 13 || i == 18 || i == 23) {
-        
+        if (guid[i] == '-') {
+            if (i == 8 || i == 13 || i == 18 || i == 23) {
+                continue;
+            }
+
+            return false;
+        }
+
+        int ascii_code = static_cast<int>(guid[i]);
+        if ((ascii_code < ranges[0].first || ascii_code > ranges[0].second) &&
+            (ascii_code < ranges[1].first || ascii_code > ranges[1].second)) {
+            return false;
         }
     }
+
+    return true;
 }
 
 }   // namespace kbase
