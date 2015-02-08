@@ -11,6 +11,8 @@
 
 #include <string>
 
+#include "kbase\memory\singleton.h"
+
 typedef void* HANDLE;
 typedef unsigned short WORD;
 
@@ -105,6 +107,7 @@ public:
     }
 
 private:
+    friend DefaultSingletonTraits<OSInfo>;
     OSInfo();
     ~OSInfo();
 

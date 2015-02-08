@@ -12,13 +12,11 @@
 
 #include "kbase\registry.h"
 
-namespace kbase {
-
-typedef OSInfo::WOW64Status WOW64Status;
-typedef OSInfo::VersionNumber VersionNumber;
-typedef OSInfo::Version Version;
-
 namespace {
+
+using Version = kbase::OSInfo::Version;
+using VersionNumber = kbase::OSInfo::VersionNumber;
+using WOW64Status = kbase::OSInfo::WOW64Status;
 
 const std::map<Version, VersionNumber> version_name_to_number = {
     {Version::WIN_XP, {5, 1, 0}},
@@ -32,26 +30,12 @@ const std::map<Version, VersionNumber> version_name_to_number = {
 
 }   // namespace
 
+namespace kbase {
+
 // static
 OSInfo* OSInfo::GetInstance()
 {
-    static OSInfo* info = nullptr;
-    auto deleter = [](OSInfo* ptr) {
-        ptr->DestroyInstance();
-    };
-    static std::unique_ptr<OSInfo, decltype(deleter)> info_custody;
-    if (!info) {
-        OSInfo* new_info = new OSInfo();
-        if (InterlockedCompareExchangePointer(reinterpret_cast<PVOID*>(&info),
-                                              new_info,
-                                              nullptr)) {
-            delete new_info;
-        } else {
-            info_custody.reset(info);
-        }
-    }
-
-    return info;
+    return Singleton<OSInfo, LeakySingletonTraits<OSInfo>>::instance();
 }
 
 OSInfo::OSInfo()
@@ -65,6 +49,8 @@ OSInfo::OSInfo()
     // are using. see
     // http://msdn.microsoft.com/en-us/library/windows/desktop/ms724451(v=vs.85).aspx
     // for more details.
+#pragma warning(push)
+#pragma warning(disable: 4996 28159)
     OSVERSIONINFOEX os_version_info = { sizeof(os_version_info) };
     GetVersionEx(reinterpret_cast<OSVERSIONINFO*>(&os_version_info));
     version_number_.major_version =
@@ -73,6 +59,7 @@ OSInfo::OSInfo()
         static_cast<WORD>(os_version_info.dwMinorVersion);
     version_number_.service_pack_major =
         static_cast<WORD>(os_version_info.wServicePackMajor);
+#pragma warning(pop)
 
     SYSTEM_INFO system_info = {0};
     GetNativeSystemInfo(&system_info);

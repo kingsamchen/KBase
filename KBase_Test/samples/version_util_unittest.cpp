@@ -35,7 +35,7 @@ namespace {
 
 bool CompareVersionNumber(const OSInfo::VersionNumber& lhs, const OSInfo::VersionNumber& rhs)
 {
-    return lhs.major_version == rhs.major_version && 
+    return lhs.major_version == rhs.major_version &&
            lhs.minor_version == rhs.minor_version;
 }
 
@@ -53,7 +53,7 @@ TEST_F(OSInfoTest, Singleton)
         });
 
         th.join();
-    }    
+    }
 }
 
 OSInfo* OSInfoTest::instance_;
@@ -64,11 +64,8 @@ TEST_F(OSInfoTest, SysVersion)
     EXPECT_TRUE(instance()->IsVersionOrGreater(OSInfo::WIN_XP));
     EXPECT_TRUE(instance()->IsVersionOrGreater(OSInfo::WIN_VISTA));
     EXPECT_TRUE(instance()->IsVersionOrGreater(OSInfo::WIN_7));
-    EXPECT_FALSE(instance()->IsVersionOrGreater(OSInfo::WIN_8));
-    EXPECT_FALSE(instance()->IsVersionOrGreater(OSInfo::WIN_8_1));
-
-    OSInfo::VersionNumber win7_number = {6, 1, 0};
-    EXPECT_TRUE(CompareVersionNumber(win7_number, instance()->version_number()));
+    EXPECT_TRUE(instance()->IsVersionOrGreater(OSInfo::WIN_8));
+    EXPECT_TRUE(instance()->IsVersionOrGreater(OSInfo::WIN_8_1));
 }
 
 TEST_F(OSInfoTest, SysArchitecture)
@@ -81,7 +78,7 @@ TEST_F(OSInfoTest, SysArchitecture)
 
     EXPECT_EQ(OSInfo::X64_ARCHITECTURE, instance()->architecture());
 
-    EXPECT_EQ(8, instance()->processors());
+    EXPECT_NE(0, instance()->processors());
 
     EXPECT_EQ(65536, instance()->allocation_granularity());
 }
