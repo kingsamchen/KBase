@@ -137,9 +137,8 @@ bool RegKey::KeyExists(HKEY rootkey, const wchar_t* subkey, WOW6432Node node_key
 
     HKEY key = nullptr;
     long rv = RegOpenKeyExW(rootkey, subkey, 0, access, &key);
-    RegCloseKey(key);
-
     if (rv == ERROR_SUCCESS) {
+        RegCloseKey(key);
         return true;
     }
 
