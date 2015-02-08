@@ -35,7 +35,7 @@ std::wstring LastError::GetVerboseMessage() const
     if (text_length == 0) {
         HMODULE dll = ::LoadLibraryEx(L"netmsg.dll", nullptr,
                                       DONT_RESOLVE_DLL_REFERENCES);
-        if (!dll) {
+        if (dll) {
             text_length = ::FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER |
                                           FORMAT_MESSAGE_IGNORE_INSERTS |
                                           FORMAT_MESSAGE_FROM_HMODULE,
