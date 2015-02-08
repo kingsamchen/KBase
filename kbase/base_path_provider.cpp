@@ -42,7 +42,7 @@ FilePath BasePathProvider(PathKey key)
 
     switch (key) {
         case FILE_EXE:
-          GetModuleFileName(nullptr, buffer, kMaxPath);
+            GetModuleFileName(nullptr, buffer, kMaxPath);
             path = FilePath(buffer);
             break;
 

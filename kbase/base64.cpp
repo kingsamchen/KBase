@@ -135,24 +135,24 @@ void Encode(const byte* data, size_t len, Container* result)
     }
 
     switch (len - i) {
-    case 0:
-        break;
-    case 1:
-        t0 = data[i];
-        *p++ = kCipher0[t0];
-        *p++ = kCipher1[(t0 & 0x03) << 4];
-        *p++ = kPadding;
-        *p = kPadding;
-        break;
-    // Case 2 actually.
-    default:
-        t0 = data[i];
-        t1 = data[i+1];
-        *p++ = kCipher0[t0];
-        *p++ = kCipher1[((t0 & 0x03) << 4) | ((t1 >> 4) & 0x0F)];
-        *p++ = kCipher1[(t1 & 0x0F) << 2];
-        *p = kPadding;
-        break;
+        case 0:
+            break;
+        case 1:
+            t0 = data[i];
+            *p++ = kCipher0[t0];
+            *p++ = kCipher1[(t0 & 0x03) << 4];
+            *p++ = kPadding;
+            *p = kPadding;
+            break;
+        // Case 2 actually.
+        default:
+            t0 = data[i];
+            t1 = data[i+1];
+            *p++ = kCipher0[t0];
+            *p++ = kCipher1[((t0 & 0x03) << 4) | ((t1 >> 4) & 0x0F)];
+            *p++ = kCipher1[(t1 & 0x0F) << 2];
+            *p = kPadding;
+            break;
     }
 }
 
@@ -204,31 +204,31 @@ void Decode(const byte* data, size_t len, Container* result)
     }
 
     switch (valid_len - i) {
-    case 0:
-        break;
-    case 2:
-        c0 = kCode[data[i]];
-        c1 = kCode[data[i+1]];
-        if ((c0 | c1) >= kBadChar) {
-            return;
-        }
+        case 0:
+            break;
+        case 2:
+            c0 = kCode[data[i]];
+            c1 = kCode[data[i+1]];
+            if ((c0 | c1) >= kBadChar) {
+                return;
+            }
 
-        *p = (c0 << 2) | ((c1 >> 4) & 0x03);
-        break;
-    case 3:
-        c0 = kCode[data[i]];
-        c1 = kCode[data[i + 1]];
-        c2 = kCode[data[i + 2]];
-        if ((c0 | c1 | c2) >= kBadChar) {
-            return;
-        }
+            *p = (c0 << 2) | ((c1 >> 4) & 0x03);
+            break;
+        case 3:
+            c0 = kCode[data[i]];
+            c1 = kCode[data[i + 1]];
+            c2 = kCode[data[i + 2]];
+            if ((c0 | c1 | c2) >= kBadChar) {
+                return;
+            }
 
-        *p++ = (c0 << 2) | ((c1 >> 4) & 0x03);
-        *p = (c1 << 4) | ((c2 >> 2) & 0x0F);
-        break;
-    // Abnormal cases.
-    default:
-        return;
+            *p++ = (c0 << 2) | ((c1 >> 4) & 0x03);
+            *p = (c1 << 4) | ((c2 >> 2) & 0x0F);
+            break;
+        // Abnormal cases.
+        default:
+            return;
     }
 
     clear_on_error.Dismiss();

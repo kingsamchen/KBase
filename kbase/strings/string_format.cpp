@@ -10,12 +10,14 @@
 
 namespace kbase {
 
-inline int vsnprintfT(char* buf, size_t buf_size, size_t count_to_write, const char* fmt, va_list args)
+inline int vsnprintfT(char* buf, size_t buf_size, size_t count_to_write,
+                      const char* fmt, va_list args)
 {
     return vsnprintf_s(buf, buf_size, count_to_write, fmt, args);
 }
 
-inline int vsnprintfT(wchar_t* buf, size_t buf_size, size_t count_to_write, const wchar_t* fmt, va_list args)
+inline int vsnprintfT(wchar_t* buf, size_t buf_size, size_t count_to_write,
+                      const wchar_t* fmt, va_list args)
 {
     return _vsnwprintf_s(buf, buf_size, count_to_write, fmt, args);
 }
@@ -43,7 +45,7 @@ void StringAppendFT(strT* str, const typename strT::value_type* fmt, va_list ap)
     while (true) {
         tentative_char_count <<= 1;
         if (tentative_char_count > kMaxAllowedCharCount) {
-            throw StringFormatDataLengthError("memory needed exceeds the maximum value");
+            throw StringFormatDataLengthError("memory needed exceeds the threshold");
         }
 
         std::vector<charT> dynamic_buf(tentative_char_count);
