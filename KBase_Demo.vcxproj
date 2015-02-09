@@ -167,6 +167,7 @@
     <ClCompile Include="kbase\files\file_version_info.cpp" />
     <ClCompile Include="kbase\guid.cpp" />
     <ClCompile Include="kbase\logging.cpp" />
+    <ClCompile Include="kbase\md5.cpp" />
     <ClCompile Include="kbase\path_service.cpp" />
     <ClCompile Include="kbase\pickle.cpp" />
     <ClCompile Include="kbase\registry.cpp" />
@@ -193,6 +194,7 @@
     <ClInclude Include="kbase\files\file_util.h" />
     <ClInclude Include="kbase\files\file_version_info.h" />
     <ClInclude Include="kbase\guid.h" />
+    <ClInclude Include="kbase\md5.h" />
     <ClInclude Include="kbase\memory\lazy.h" />
     <ClInclude Include="kbase\logging.h" />
     <ClInclude Include="kbase\memory\lru_cache.h" />
