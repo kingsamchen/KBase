@@ -86,6 +86,15 @@ using kbase::MD5uint32;
     (context->block[(n)])
 #endif
 
+// When a mass of narrowing conversion is inevitably desired, such as int->char,
+// use this function to make the intention clear.
+// You also are responsible for the possible loss of data.
+template<typename To, typename From>
+inline void TuckInto(To& dest, const From& src)
+{
+    dest = static_cast<To>(src);
+}
+
 // This processes one or more 64-byte data blocks, but does NOT update
 // the bit counters. There are no alignment requirements.
 const void* Transform(MD5Context* context, const void* data, size_t size)
@@ -241,7 +250,7 @@ void MD5Update(MD5Context* context, const void* data, size_t size)
     memcpy(context->buffer, data, size);
 }
 
-void MD5Final(unsigned char* result, MD5Context* context)
+void MD5Final(MD5Context* context, MD5Digest* digest)
 {
     unsigned long used, free;
     used = context->lo & 0x3f;
@@ -258,33 +267,34 @@ void MD5Final(unsigned char* result, MD5Context* context)
     memset(&context->buffer[used], 0, free - 8);
 
     context->lo <<= 3;
-    context->buffer[56] = static_cast<unsigned char>(context->lo);
-    context->buffer[57] = static_cast<unsigned char>(context->lo >> 8);
-    context->buffer[58] = static_cast<unsigned char>(context->lo >> 16);
-    context->buffer[59] = static_cast<unsigned char>(context->lo >> 24);
-    context->buffer[60] = static_cast<unsigned char>(context->hi);
-    context->buffer[61] = static_cast<unsigned char>(context->hi >> 8);
-    context->buffer[62] = static_cast<unsigned char>(context->hi >> 16);
-    context->buffer[63] = static_cast<unsigned char>(context->hi >> 24);
+    TuckInto(context->buffer[56], context->lo);
+    TuckInto(context->buffer[57], context->lo >> 8);
+    TuckInto(context->buffer[58], context->lo >> 16);
+    TuckInto(context->buffer[59], context->lo >> 24);
+    TuckInto(context->buffer[60], context->hi);
+    TuckInto(context->buffer[61], context->hi >> 8);
+    TuckInto(context->buffer[62], context->hi >> 16);
+    TuckInto(context->buffer[63], context->hi >> 24);
 
     Transform(context, context->buffer, 64);
 
-    result[0] = static_cast<unsigned char>(context->a);
-    result[1] = static_cast<unsigned char>(context->a >> 8);
-    result[2] = static_cast<unsigned char>(context->a >> 16);
-    result[3] = static_cast<unsigned char>(context->a >> 24);
-    result[4] = static_cast<unsigned char>(context->b);
-    result[5] = static_cast<unsigned char>(context->b >> 8);
-    result[6] = static_cast<unsigned char>(context->b >> 16);
-    result[7] = static_cast<unsigned char>(context->b >> 24);
-    result[8] = static_cast<unsigned char>(context->c);
-    result[9] = static_cast<unsigned char>(context->c >> 8);
-    result[10] = static_cast<unsigned char>(context->c >> 16);
-    result[11] = static_cast<unsigned char>(context->c >> 24);
-    result[12] = static_cast<unsigned char>(context->d);
-    result[13] = static_cast<unsigned char>(context->d >> 8);
-    result[14] = static_cast<unsigned char>(context->d >> 16);
-    result[15] = static_cast<unsigned char>(context->d >> 24);
+    MD5Digest& d = *digest;
+    TuckInto(d[0], context->a);
+    TuckInto(d[1], context->a >> 8);
+    TuckInto(d[2], context->a >> 16);
+    TuckInto(d[3], context->a >> 24);
+    TuckInto(d[4], context->b);
+    TuckInto(d[5], context->b >> 8);
+    TuckInto(d[6], context->b >> 16);
+    TuckInto(d[7], context->b >> 24);
+    TuckInto(d[8], context->c);
+    TuckInto(d[9], context->c >> 8);
+    TuckInto(d[10], context->c >> 16);
+    TuckInto(d[11], context->c >> 24);
+    TuckInto(d[12], context->d);
+    TuckInto(d[13], context->d >> 8);
+    TuckInto(d[14], context->d >> 16);
+    TuckInto(d[15], context->d >> 24);
 
     memset(context, 0, sizeof(*context));
 }
