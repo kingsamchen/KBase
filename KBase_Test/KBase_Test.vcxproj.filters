@@ -99,7 +99,7 @@
       <Filter>samples</Filter>
     </ClCompile>
     <ClCompile Include="samples\md5_unittest.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>samples</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

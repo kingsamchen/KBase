@@ -25,17 +25,23 @@ struct MD5Context {
     MD5uint32 block[16];
 };
 
+// The following three functions are all together used to incrementally calculate
+// the MD5 checksum of a bunch of data.
+
 void MD5Init(MD5Context* context);
 
 void MD5Update(MD5Context* context, const void* data, size_t size);
 
 void MD5Final(MD5Context* context, MD5Digest* digest);
 
+// Converts a digest into hexadecimal string.
 std::string MD5DigestToString(const MD5Digest& digest);
 
+// Calculates the MD5 checksum of a given data.
 void MD5Sum(const void* data, size_t size, MD5Digest* digest);
 
-std::string MD5String(const std::string str);
+// Returns the MD5, in hexadecimal, of the |str|.
+std::string MD5String(const std::string& str);
 
 }   // namespace kbase
 

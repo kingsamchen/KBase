@@ -299,4 +299,34 @@ void MD5Final(MD5Context* context, MD5Digest* digest)
     memset(context, 0, sizeof(*context));
 }
 
+std::string MD5DigestToString(const MD5Digest& digest)
+{
+    const char kHexDigits[] = "0123456789abcdef";
+
+    std::string str;
+    str.reserve(16);
+    for (unsigned char n : digest) {
+        str += kHexDigits[(n >> 4) & 0x0F];
+        str += kHexDigits[n & 0x0F];
+    }
+
+    return str;
+}
+
+void MD5Sum(const void* data, size_t size, MD5Digest* digest)
+{
+    MD5Context context;
+    MD5Init(&context);
+    MD5Update(&context, data, size);
+    MD5Final(&context, digest);
+}
+
+std::string MD5String(const std::string& str)
+{
+    MD5Digest digest;
+    MD5Sum(str.data(), str.size(), &digest);
+
+    return MD5DigestToString(digest);
+}
+
 }   // namespace kbase
