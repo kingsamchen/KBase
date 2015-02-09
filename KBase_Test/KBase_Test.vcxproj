@@ -176,6 +176,7 @@
     <ClCompile Include="samples\lazy_unittest.cpp" />
     <ClCompile Include="samples\logging_unittest.cpp" />
     <ClCompile Include="samples\lru_cache_unittest.cpp" />
+    <ClCompile Include="samples\md5_unittest.cpp" />
     <ClCompile Include="samples\path_service_unittest.cpp" />
     <ClCompile Include="samples\pickle_unittest.cpp" />
     <ClCompile Include="samples\registry_unittest.cpp" />
