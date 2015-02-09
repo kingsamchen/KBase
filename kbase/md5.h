@@ -11,21 +11,21 @@
 
 namespace kbase {
 
-/* Any 32-bit or wider unsigned integer data type will do */
-typedef unsigned int MD5uint32;
+// Any 32-bit or wider unsigned integer data type will do
+using MD5uint32 = unsigned int;
 
-typedef struct {
+struct MD5Context {
     MD5uint32 lo, hi;
     MD5uint32 a, b, c, d;
     unsigned char buffer[64];
     MD5uint32 block[16];
-} MD5_CTX;
+};
 
-void MD5_Init(MD5_CTX *ctx);
+void MD5Init(MD5Context* context);
 
-void MD5_Update(MD5_CTX *ctx, void *data, unsigned long size);
+void MD5Update(MD5Context* context, const void* data, size_t size);
 
-void MD5_Final(unsigned char *result, MD5_CTX *ctx);
+void MD5Final(unsigned char *result, MD5Context *context);
 
 }   // namespace kbase
 
