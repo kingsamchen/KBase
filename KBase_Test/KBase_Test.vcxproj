@@ -181,6 +181,7 @@
     <ClCompile Include="samples\pickle_unittest.cpp" />
     <ClCompile Include="samples\registry_unittest.cpp" />
     <ClCompile Include="samples\scoped_handle_unittest.cpp" />
+    <ClCompile Include="samples\sha_unittest.cpp" />
     <ClCompile Include="samples\singleton_unittest.cpp" />
     <ClCompile Include="samples\string_util_unittest.cpp" />
     <ClCompile Include="samples\sys_info_unittest.cpp" />

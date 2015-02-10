@@ -14,6 +14,8 @@ const std::pair<std::string, std::string> hash_pairs[] {
     {"The quick brown fox jumps over the lazy dog.", "e4d909c290d0fb1ca068ffaddf22cbd0"}
 };
 
+}   // namespace
+
 TEST(MD5Test, IncrementHashAndDigestToString)
 {
     kbase::MD5Digest ret;
@@ -39,5 +41,3 @@ TEST(MD5Test, MD5String)
         EXPECT_EQ(hp.second, kbase::MD5String(hp.first));
     }
 }
-
-}   // namespace

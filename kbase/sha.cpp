@@ -1,3 +1,6 @@
+/*
+ @ Kingsley Chen
+*/
 
 #include "kbase\sha.h"
 
@@ -19,7 +22,7 @@ void SHAHash(const void* data, size_t size, SHAType type, Digest* digest)
     // Acquire service provider.
     HCRYPTPROV provider = 0;
     ON_SCOPE_EXIT([&provider] { if (provider) CryptReleaseContext(provider, 0); });
-    BOOL rv = CryptAcquireContextW(&provider, nullptr, nullptr, PROV_RSA_FULL,
+    BOOL rv = CryptAcquireContextW(&provider, nullptr, nullptr, PROV_RSA_AES,
                                    CRYPT_VERIFYCONTEXT);
     ThrowLastErrorIf(!rv, "CryptAcquireContext failed.");
 
@@ -54,6 +57,21 @@ void SHAHash(const void* data, size_t size, SHAType type, Digest* digest)
     }
 }
 
+template<typename Digest>
+std::string DigestToString(const Digest& digest)
+{
+    const char kHexDigits[] = "0123456789abcdef";
+
+    std::string str;
+    str.reserve(digest.size());
+    for (unsigned char n : digest) {
+        str += kHexDigits[(n >> 4) & 0x0F];
+        str += kHexDigits[n & 0x0F];
+    }
+
+    return str;
+}
+
 }   // namespace
 
 namespace kbase {
@@ -61,6 +79,37 @@ namespace kbase {
 void SHA1Sum(const void* data, size_t size, SHA1Digest* digest)
 {
     SHAHash(data, size, SHAType::SHA_1, digest);
+}
+
+std::string SHA1String(const std::string& str)
+{
+    SHA1Digest digest;
+    SHA1Sum(str.data(), str.size(), &digest);
+
+    return SHADigestToString(digest);
+}
+
+void SHA256Sum(const void* data, size_t size, SHA256Digest* digest)
+{
+    SHAHash(data, size, SHAType::SHA_256, digest);
+}
+
+std::string SHA256String(const std::string& str)
+{
+    SHA256Digest digest;
+    SHA256Sum(str.data(), str.size(), &digest);
+
+    return SHADigestToString(digest);
+}
+
+std::string SHADigestToString(const SHA1Digest& digest)
+{
+    return DigestToString(digest);
+}
+
+std::string SHADigestToString(const SHA256Digest& digest)
+{
+    return DigestToString(digest);
 }
 
 }   // namespace kbase
