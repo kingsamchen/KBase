@@ -13,6 +13,9 @@
 
 namespace kbase {
 
+// The underlying implementation of the functions that perform MD5 operations, is
+// the openssl-compatible version, and is in the public domain.
+
 // Any 32-bit or wider unsigned integer data type will do
 using MD5uint32 = unsigned int;
 
@@ -34,7 +37,7 @@ void MD5Update(MD5Context* context, const void* data, size_t size);
 
 void MD5Final(MD5Context* context, MD5Digest* digest);
 
-// Converts a digest into hexadecimal string.
+// Converts a digest into a hexadecimal string.
 std::string MD5DigestToString(const MD5Digest& digest);
 
 // Calculates the MD5 checksum of a given data.
