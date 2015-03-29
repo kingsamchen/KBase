@@ -237,8 +237,6 @@ LogMessage::~LogMessage()
     if ((logging_dest & LoggingDestination::LOG_TO_SYSTEM_DEBUG_LOG) ||
         (severity_ >= kAlwaysPrintErrorMinLevel)) {
         OutputDebugStringA(msg.c_str());
-        fprintf_s(stderr, "%s", msg.c_str());
-        fflush(stderr);
     }
 
     if (logging_dest & LoggingDestination::LOG_TO_FILE) {
