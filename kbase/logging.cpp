@@ -7,6 +7,7 @@
 #include <Windows.h>
 
 #include <algorithm>
+#include <cassert>
 #include <cstdio>
 #include <ctime>
 #include <iomanip>
@@ -30,16 +31,16 @@ using kbase::PathChar;
 using kbase::PathString;
 using kbase::ScopedStdioHandle;
 
-typedef kbase::ScopedSysHandle GlobalLockHandle;
-typedef std::unique_ptr<std::unique_lock<std::mutex>> ThreadLockHandle;
+using GlobalLockHandle = kbase::ScopedSysHandle;
+using ThreadLockHandle = std::unique_ptr<std::unique_lock<std::mutex>>;
 
 const char* kLogSeverityNames[] {"INFO", "WARNING", "FATAL"};
 
-const LogSeverity kAlwaysPrintErrorLevel = kbase::LOG_WARNING;
+const LogSeverity kAlwaysPrintErrorMinLevel = kbase::LOG_WARNING;
 
 LogItemOptions log_item_options = LogItemOptions::ENABLE_TIMESTAMP;
 
-LoggingDestination logging_dest = LoggingDestination::LOG_TO_FILE;
+LoggingDestination logging_dest = LoggingDestination::LOG_TO_ALL;
 
 OldFileOption old_file_option = OldFileOption::APPEND_TO_OLD_LOG_FILE;
 
@@ -123,6 +124,7 @@ public:
         Unlock();
     }
 
+    // This function should be called on the main thread before any logging.
     static void InitLock()
     {
         if (initialized_) {
@@ -138,10 +140,16 @@ public:
             std::wstring mutex_name = L"Global\\";
             mutex_name.append(log_name);
 
-            // if the mutex has alread been created by another thread or process
+            // If the mutex has alread been created by another thread or process
             // this call returns the handle to the existed mutex
             global_lock_.Reset(CreateMutexW(nullptr, false, mutex_name.c_str()));
-            ThrowLastErrorIf(!global_lock_, "failed to create a mutex object!");
+            if (!global_lock_) {
+#if _DEBUG
+                kbase::LastError error;
+                assert(false);
+#endif
+                return;
+            }
         } else {
             local_lock_.reset(
                 new std::unique_lock<std::mutex>(local_mutex_, std::defer_lock));
@@ -190,7 +198,7 @@ namespace kbase {
 
 LoggingSettings::LoggingSettings()
  : log_item_options(LogItemOptions::ENABLE_TIMESTAMP),
-   logging_dest(LoggingDestination::LOG_TO_FILE),
+   logging_dest(LoggingDestination::LOG_TO_ALL),
    old_file_option(OldFileOption::APPEND_TO_OLD_LOG_FILE),
    logging_lock_option(LoggingLockOption::USE_GLOBAL_LOCK)
 {}
@@ -201,6 +209,8 @@ void InitLoggingSettings(const LoggingSettings& settings)
     logging_dest = settings.logging_dest;
     old_file_option = settings.old_file_option;
     logging_lock_option = settings.logging_lock_option;
+
+    LoggingLock::InitLock();
 }
 
 LogMessage::LogMessage(const char* file, int line, LogSeverity severity)
@@ -211,9 +221,7 @@ LogMessage::LogMessage(const char* file, int line, LogSeverity severity)
 
 LogMessage::LogMessage(const char* file, int line)
  : LogMessage(file, line, LOG_INFO)
-{
-    Init(file, line);
-}
+{}
 
 LogMessage::~LogMessage()
 {
@@ -227,7 +235,7 @@ LogMessage::~LogMessage()
     std::string msg = stream_.str();
 
     if ((logging_dest & LoggingDestination::LOG_TO_SYSTEM_DEBUG_LOG) ||
-        (severity_ >= kAlwaysPrintErrorLevel)) {
+        (severity_ >= kAlwaysPrintErrorMinLevel)) {
         OutputDebugStringA(msg.c_str());
         fprintf_s(stderr, "%s", msg.c_str());
         fflush(stderr);

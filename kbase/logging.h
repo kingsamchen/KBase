@@ -15,7 +15,7 @@
 namespace kbase {
 
 // These log severities are used to index into the array |log_severity_names|.
-typedef int LogSeverity;
+using LogSeverity = int;
 
 const LogSeverity LOG_INFO = 0;
 const LogSeverity LOG_WARNING = 1;
