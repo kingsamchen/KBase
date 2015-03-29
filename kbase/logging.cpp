@@ -48,7 +48,7 @@ LoggingLockOption logging_lock_option = LoggingLockOption::USE_GLOBAL_LOCK;
 
 ScopedStdioHandle log_file;
 
-const PathChar kLogFileName[] = L"debug_message.log";
+const PathChar kLogFileName[] = L"_debug_message.log";
 
 // Due to the performance consideration, I decide not to use std::string and
 // neither StringPiece, since I also want to keep this file more independent
@@ -75,7 +75,10 @@ PathString GetDefaultLogFile()
     GetModuleFileName(nullptr, exe_path, MAX_PATH);
 
     const PathChar* end_past_slash = ExtractFileName(exe_path);
+    const PathChar* ext_dot = std::find(end_past_slash, std::cend(exe_path), L'.');
+
     PathString default_path(exe_path, end_past_slash);
+    default_path.append(end_past_slash, ext_dot);
     default_path.append(kLogFileName);
 
     return default_path;
@@ -87,12 +90,13 @@ PathString GetDefaultLogFile()
 // Returns true, if the file is ready to write; return false, otherwise.
 bool InitLogFile()
 {
+    PathString&& log_file_name = GetDefaultLogFile();
+
     if (old_file_option == OldFileOption::DELETE_OLD_LOG_FILE) {
         if (log_file) {
             log_file = nullptr;
         }
 
-        PathString&& log_file_name = GetDefaultLogFile();
         _wremove(log_file_name.c_str());
     }
 
@@ -100,7 +104,6 @@ bool InitLogFile()
         return true;
     }
 
-    PathString&& log_file_name = GetDefaultLogFile();
     log_file.Reset(_wfsopen(log_file_name.c_str(), L"a", _SH_DENYNO));
 
     if (!log_file) {
