@@ -1,5 +1,10 @@
+/*
+ @ Kingsley Chen
+*/
 
 #include "stdafx.h"
+
+#include <vector>
 
 #include "gtest\gtest.h"
 #include "kbase\memory\scoped_handle.h"
@@ -21,13 +26,7 @@ TEST(ScopedHandleTest, Normal)
         ScopedSysHandle event_h(CreateEventW(nullptr, TRUE, TRUE, nullptr));
         EXPECT_TRUE(static_cast<bool>(event_h));
         std::cout << "event_h underlying handle: " << event_h.Get() << std::endl;
-        h = event_h.Get();
     }
-    EXPECT_TRUE(h != nullptr);
-    BOOL rv = CloseHandle(h);
-    DWORD err = GetLastError();
-    EXPECT_FALSE(rv);
-    EXPECT_EQ(err, ERROR_INVALID_HANDLE);    
 
     ScopedStdioHandle::Handle fh = nullptr;
     {
@@ -61,7 +60,7 @@ TEST(ScopedHandleTest, MoveSemantics)
 {
     {
         FILE* fp = nullptr;
-        fopen_s(&fp, "C:\\test.t", "w");
+        fopen_s(&fp, "test.t", "w");
         ScopedStdioHandle fh(fp);
         ASSERT_TRUE(static_cast<bool>(fh));
         fwrite("abcd", sizeof(char), 4, static_cast<FILE*>(fh));
@@ -70,8 +69,8 @@ TEST(ScopedHandleTest, MoveSemantics)
         EXPECT_TRUE(static_cast<bool>(new_fh));
         fwrite("1234", sizeof(char), 4, static_cast<FILE*>(new_fh));
         new_fh = nullptr;
-        remove("C:\\test.t");
-    }    
+        remove("test.t");
+    }
 
     {
         ScopedSysHandle event_h(CreateEventW(nullptr, TRUE, TRUE, nullptr));
@@ -79,11 +78,11 @@ TEST(ScopedHandleTest, MoveSemantics)
         ScopedSysHandle another_h(CreateEventW(nullptr, TRUE, TRUE, nullptr));
         ASSERT_TRUE(static_cast<bool>(event_h));
         ASSERT_NE(event_h.Get(), another_h.Get());
-        
+
         auto reserved_h = static_cast<HANDLE>(event_h);
         auto reserved_another_h = static_cast<HANDLE>(another_h);
         event_h = std::move(another_h);
-        
+
         EXPECT_FALSE(static_cast<bool>(another_h));
         EXPECT_TRUE(static_cast<bool>(event_h));
         EXPECT_EQ(reserved_another_h, event_h.Get());
@@ -91,5 +90,12 @@ TEST(ScopedHandleTest, MoveSemantics)
         DWORD err = GetLastError();
         EXPECT_FALSE(rv);
         EXPECT_EQ(err, ERROR_INVALID_HANDLE);
+    }
+
+    {
+        std::vector<ScopedSysHandle> events;
+        for (int i = 0; i < 10; ++i) {
+            events.emplace_back(CreateEventW(nullptr, TRUE, TRUE, nullptr));
+        }
     }
 }
