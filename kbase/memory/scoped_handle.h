@@ -78,9 +78,7 @@ public:
     typedef HandleType Handle;
     typedef TraitsType Traits;
 
-    ScopedHandle()
-        : handle_(Traits::NullHandle())
-    {}
+    ScopedHandle() = default;
 
     explicit ScopedHandle(Handle handle)
         : handle_(handle)
@@ -166,7 +164,7 @@ public:
     }
 
 private:
-    Handle handle_;
+    Handle handle_ = Traits::NullHandle();
 };
 
 // Specialized version for std::swap.
