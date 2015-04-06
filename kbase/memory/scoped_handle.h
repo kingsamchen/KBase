@@ -18,7 +18,7 @@ namespace kbase {
 
 template<typename HandleType>
 struct HandleTraits {
-    typedef HandleType Handle;
+    using Handle = HandleType;
 
     HandleTraits() = delete;
     ~HandleTraits() = delete;
@@ -26,7 +26,7 @@ struct HandleTraits {
 
 template<>
 struct HandleTraits<HANDLE> {
-    typedef HANDLE Handle;
+    using Handle = HANDLE;
 
     HandleTraits() = delete;
 
@@ -50,7 +50,7 @@ struct HandleTraits<HANDLE> {
 
 template<>
 struct HandleTraits<FILE*> {
-    typedef FILE* Handle;
+    using Handle = FILE*;
 
     HandleTraits() = delete;
 
@@ -75,8 +75,8 @@ struct HandleTraits<FILE*> {
 template<typename HandleType, typename TraitsType = HandleTraits<HandleType>>
 class ScopedHandle {
 public:
-    typedef HandleType Handle;
-    typedef TraitsType Traits;
+    using Handle = HandleType;
+    using Traits = TraitsType;
 
     ScopedHandle() = default;
 
@@ -174,8 +174,8 @@ void swap(ScopedHandle<HandleType>& lhs, ScopedHandle<HandleType>& rhs)
     lhs.swap(rhs);
 }
 
-typedef ScopedHandle<HANDLE> ScopedSysHandle;
-typedef ScopedHandle<FILE*> ScopedStdioHandle;
+using ScopedSysHandle = ScopedHandle<HANDLE>;
+using ScopedStdioHandle = ScopedHandle<FILE*>;
 
 }   // namespace kbase
 
