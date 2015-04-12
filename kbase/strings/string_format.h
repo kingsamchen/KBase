@@ -16,9 +16,7 @@
 
 namespace kbase {
 
-// this file underlyingly relies on scope_guard.h
-
-// all the following functions can throw an exception, if the size of the buffer
+// All Printf-series functions may throw an exception, if the size of the buffer
 // that stores the formatted data exceeds the threshold.
 
 class StringFormatDataLengthError : public std::length_error {
@@ -32,14 +30,18 @@ public:
     {}
 };
 
+// Return a string with given format.
+
 std::string StringPrintf(const char* fmt, ...);
 std::wstring StringPrintf(const wchar_t* fmt, ...);
 
-const std::string& SStringPrintf(std::string* str, const char* fmt, ...);
-const std::wstring& SStringPrintf(std::string* str, const wchar_t* fmt, ...);
+// Modify a string with given format and return the string.
 
-void StringAppendF(std::string* str, const char* fmt, ...);
-void StringAppendF(std::wstring* str, const wchar_t* fmt, ...);
+const std::string& StringPrintf(std::string* str, const char* fmt, ...);
+const std::wstring& StringPrintf(std::string* str, const wchar_t* fmt, ...);
+
+void StringAppendPrintf(std::string* str, const char* fmt, ...);
+void StringAppendPrintf(std::wstring* str, const wchar_t* fmt, ...);
 
 }   // namespace kbase
 

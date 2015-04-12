@@ -23,7 +23,7 @@ inline int vsnprintfT(wchar_t* buf, size_t buf_size, size_t count_to_write,
 }
 
 template<typename strT>
-void StringAppendFT(strT* str, const typename strT::value_type* fmt, va_list ap)
+void StringAppendPrintfT(strT* str, const typename strT::value_type* fmt, va_list ap)
 {
     typedef typename strT::value_type charT;
 
@@ -64,20 +64,20 @@ void StringAppendFT(strT* str, const typename strT::value_type* fmt, va_list ap)
     }
 }
 
-void StringAppendF(std::string* str, const char* fmt, ...)
+void StringAppendPrintf(std::string* str, const char* fmt, ...)
 {
     va_list args;
     va_start(args, fmt);
     ON_SCOPE_EXIT([&] { va_end(args); });
-    StringAppendFT(str, fmt, args);
+    StringAppendPrintfT(str, fmt, args);
 }
 
-void StringAppendF(std::wstring* str, const wchar_t* fmt, ...)
+void StringAppendPrintf(std::wstring* str, const wchar_t* fmt, ...)
 {
     va_list args;
     va_start(args, fmt);
     ON_SCOPE_EXIT([&] { va_end(args); });
-    StringAppendFT(str, fmt, args);
+    StringAppendPrintfT(str, fmt, args);
 }
 
 std::string StringPrintf(const char* fmt, ...)
@@ -87,7 +87,7 @@ std::string StringPrintf(const char* fmt, ...)
     ON_SCOPE_EXIT([&] { va_end(args); });
 
     std::string str;
-    StringAppendFT(&str, fmt, args);
+    StringAppendPrintfT(&str, fmt, args);
 
     return str;
 }
@@ -99,31 +99,31 @@ std::wstring StringPrintf(const wchar_t* fmt, ...)
     ON_SCOPE_EXIT([&] { va_end(args); });
 
     std::wstring str;
-    StringAppendFT(&str, fmt, args);
+    StringAppendPrintfT(&str, fmt, args);
 
     return str;
 }
 
-const std::string& SStringPrintf(std::string* str, const char* fmt, ...)
+const std::string& StringPrintf(std::string* str, const char* fmt, ...)
 {
     va_list args;
     va_start(args, fmt);
     ON_SCOPE_EXIT([&] { va_end(args); });
 
     str->clear();
-    StringAppendFT(str, fmt, args);
+    StringAppendPrintfT(str, fmt, args);
 
     return *str;
 }
 
-const std::wstring& SStringPrintf(std::wstring* str, const wchar_t* fmt, ...)
+const std::wstring& StringPrintf(std::wstring* str, const wchar_t* fmt, ...)
 {
     va_list args;
     va_start(args, fmt);
     ON_SCOPE_EXIT([&] { va_end(args); });
 
     str->clear();
-    StringAppendFT(str, fmt, args);
+    StringAppendPrintfT(str, fmt, args);
 
     return *str;
 }
