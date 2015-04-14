@@ -43,6 +43,44 @@ const std::wstring& StringPrintf(std::string* str, const wchar_t* fmt, ...);
 void StringAppendPrintf(std::string* str, const char* fmt, ...);
 void StringAppendPrintf(std::wstring* str, const wchar_t* fmt, ...);
 
+namespace internal {
+
+template<typename CharT>
+struct FmtStr {
+    using String = std::conditional_t<std::is_same<CharT, char>::value,
+                                      std::string, std::wstring>;
+    using Stream = std::conditional_t<std::is_same<CharT, char>::value,
+                                      std::ostringstream, std::wostringstream>;
+};
+
+template<typename CharT>
+typename FmtStr<CharT>::String StringFormatInternal(const CharT* fmt)
+{
+    return typename FmtStr<CharT>::String();
+}
+
+template<typename CharT, typename Arg, typename... Args>
+typename FmtStr<CharT>::String StringFormatInternal(const CharT* fmt, Arg arg, Args ... args)
+{
+    return StringFormatInternal(fmt, args...);
+}
+
+}   // namespace internal
+
+// C#-like string format facility.
+
+template<typename... Args>
+std::string StringFormat(const char* fmt, Args... args)
+{
+    return internal::StringFormatInternal(fmt, args...);
+}
+
+template<typename... Args>
+std::wstring StringFormat(const wchar_t* fmt, Args... args)
+{
+    return internal::StringFormatInternal(fmt, args...);
+}
+
 }   // namespace kbase
 
 #endif  // KBASE_STRINGS_STRING_FORMAT_H_

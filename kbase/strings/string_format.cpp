@@ -10,6 +10,10 @@
 
 namespace kbase {
 
+namespace internal {
+
+}   // namespace internal
+
 inline int vsnprintfT(char* buf, size_t buf_size, size_t count_to_write,
                       const char* fmt, va_list args)
 {
