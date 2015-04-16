@@ -125,7 +125,7 @@ public:
 
         if (ret == 0) {
             if (length_ < other.length_) {
-                return -1
+                return -1;
             } else if (length_ > other.length_) {
                 return 1;
             }
