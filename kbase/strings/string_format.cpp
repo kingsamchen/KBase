@@ -2,15 +2,144 @@
  @ Kingsley Chen
 */
 
-#include "kbase/strings/string_format.h"
+#include "kbase\strings\string_format.h"
 
-#include <vector>
+#include <algorithm>
+#include <cctype>
 
-#include "kbase/scope_guard.h"
+#include "kbase\scope_guard.h"
+
+namespace {
+
+using kbase::StringFormatSpecifierError;
+using kbase::internal::Placeholder;
+using kbase::internal::PlaceholderList;
+
+enum class FormatStringParseState {
+    IN_TEXT,
+    IN_FORMAT
+};
+
+const char kEscapeBegin = '{';
+const char kEscapeEnd = '}';
+const char kSpecifierDelimeter = ':';
+const char kPlaceholderChar = '@';
+
+inline bool IsDigit(char ch)
+{
+    return isdigit(ch) != 0;
+}
+
+inline bool IsDigit(wchar_t ch)
+{
+    return iswdigit(ch) != 0;
+}
+
+inline unsigned long ExtractPlaceholderIndex(const char* first_digit, char** last_digit)
+{
+    auto index = strtoul(first_digit, last_digit, 10);
+    --*last_digit;
+
+    return index;
+}
+
+inline unsigned long ExtractPlaceholderIndex(const wchar_t* first_digit,
+                                             wchar_t** last_digit)
+{
+    auto index = wcstoul(first_digit, last_digit, 10);
+    --*last_digit;
+
+    return index;
+}
+
+// This wrapper provides a more semantic validation.
+inline void EnsureFormatSpecifier(bool expr)
+{
+    if (!expr) {
+        throw StringFormatSpecifierError("Format string is not valid");
+    }
+}
+
+template<typename StrT>
+StrT AnalyzeFormatStringT(const typename StrT::value_type* fmt,
+                          PlaceholderList<StrT>* placeholders)
+{
+    const size_t kInitialCapacity = 32;
+    StrT analyzed_fmt;
+    analyzed_fmt.reserve(kInitialCapacity);
+
+    placeholders->clear();
+    Placeholder<StrT> placeholder;
+
+    auto state = FormatStringParseState::IN_TEXT;
+    for (auto ptr = fmt; *ptr != '\0'; ++ptr) {
+        if (*ptr == kEscapeBegin) {
+            // `{` is an invalid token for format-state.
+            EnsureFormatSpecifier(state != FormatStringParseState::IN_FORMAT);
+
+            if (*(ptr + 1) == kEscapeBegin) {
+                // Use `{{` to represent literal `{`.
+                analyzed_fmt += kEscapeBegin;
+                ++ptr;
+            } else if (IsDigit(*(ptr + 1))) {
+                typename StrT::value_type* last_digit;
+                placeholder.index = ExtractPlaceholderIndex(ptr + 1, &last_digit);
+                ptr = last_digit;
+                EnsureFormatSpecifier(*(ptr + 1) == kEscapeEnd ||
+                                      *(ptr + 1) == kSpecifierDelimeter);
+                if (*(ptr + 1) == kSpecifierDelimeter) {
+                    ++ptr;
+                }
+
+                // Get into format-state.
+                state = FormatStringParseState::IN_FORMAT;
+            } else {
+                throw StringFormatSpecifierError("Format string is not valid");
+            }
+        } else if (*ptr == kEscapeEnd) {
+            if (state == FormatStringParseState::IN_TEXT) {
+                EnsureFormatSpecifier(*(ptr + 1) == kEscapeEnd);
+                analyzed_fmt += kEscapeEnd;
+                ++ptr;
+            } else {
+                placeholder.pos = analyzed_fmt.length();
+                analyzed_fmt += '@';
+                placeholders->push_back(placeholder);
+
+                // Now we turn back to text-state.
+                state = FormatStringParseState::IN_TEXT;
+            }
+        } else {
+            if (state == FormatStringParseState::IN_TEXT) {
+                analyzed_fmt += *ptr;
+            } else {
+                placeholder.format_specifier += *ptr;
+            }
+        }
+    }
+
+    EnsureFormatSpecifier(state == FormatStringParseState::IN_TEXT);
+
+    return analyzed_fmt;
+}
+
+} // namespace
 
 namespace kbase {
 
 namespace internal {
+
+std::string AnalyzeFormatString(const char* fmt,
+                                PlaceholderList<std::string>* placeholders)
+{
+    return AnalyzeFormatStringT(fmt, placeholders);
+}
+
+std::wstring AnalyzeFormatString(const wchar_t* fmt,
+                                 PlaceholderList<std::wstring>* placeholders)
+{
+    return AnalyzeFormatStringT(fmt, placeholders);
+}
 
 }   // namespace internal
 
@@ -49,7 +178,7 @@ void StringAppendPrintfT(strT* str, const typename strT::value_type* fmt, va_lis
     while (true) {
         tentative_char_count <<= 1;
         if (tentative_char_count > kMaxAllowedCharCount) {
-            throw StringFormatDataLengthError("memory needed exceeds the threshold");
+            throw StringPrintfDataLengthError("memory needed exceeds the threshold");
         }
 
         std::vector<charT> dynamic_buf(tentative_char_count);

@@ -65,16 +65,37 @@ struct FmtStr {
                                       std::ostringstream, std::wostringstream>;
 };
 
+template<typename StrT>
+struct Placeholder {
+    unsigned long index = static_cast<unsigned long>(-1);
+    unsigned long pos = static_cast<unsigned long>(-1);
+    StrT format_specifier;
+    StrT formatted;
+};
+
+template<typename StrT>
+using PlaceholderList = std::vector<Placeholder<StrT>>;
+
+// Return a simplified/analyzed format string, and store every specifiers into
+// `placeholders`.
+
+std::string AnalyzeFormatString(const char* fmt,
+                                PlaceholderList<std::string>* placeholders);
+std::wstring AnalyzeFormatString(const wchar_t* fmt,
+                                 PlaceholderList<std::wstring>* placeholders);
+
 template<typename CharT>
-typename FmtStr<CharT>::String StringFormatInternal(const CharT* fmt)
+typename FmtStr<CharT>::String StringFormatT(const std::basic_string<CharT>& fmt)
 {
     return typename FmtStr<CharT>::String();
 }
 
 template<typename CharT, typename Arg, typename... Args>
-typename FmtStr<CharT>::String StringFormatInternal(const CharT* fmt, Arg arg, Args ... args)
+typename FmtStr<CharT>::String StringFormatT(const std::basic_string<CharT>& fmt,
+                                             Arg arg,
+                                             Args ... args)
 {
-    return StringFormatInternal(fmt, args...);
+    return StringFormatT(fmt, args...);
 }
 
 }   // namespace internal
@@ -84,13 +105,25 @@ typename FmtStr<CharT>::String StringFormatInternal(const CharT* fmt, Arg arg, A
 template<typename... Args>
 std::string StringFormat(const char* fmt, Args... args)
 {
-    return internal::StringFormatInternal(fmt, args...);
+    using namespace kbase::internal;
+
+    PlaceholderList<std::string> placeholders;
+    placeholders.reserve(sizeof...(args));
+    auto simplified_fmt = AnalyzeFormatString(fmt, &placeholders);
+
+    return internal::StringFormatT(simplified_fmt, args...);
 }
 
 template<typename... Args>
 std::wstring StringFormat(const wchar_t* fmt, Args... args)
 {
-    return internal::StringFormatInternal(fmt, args...);
+    using namespace kbase::internal;
+
+    PlaceholderList<std::wstring> placeholders;
+    placeholders.reserve(sizeof...(args));
+    auto simplified_fmt = AnalyzeFormatString(fmt, &placeholders);
+
+    return internal::StringFormatT(simplified_fmt, args...);
 }
 
 }   // namespace kbase
