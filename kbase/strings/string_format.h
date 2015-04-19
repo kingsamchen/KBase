@@ -13,20 +13,32 @@
 
 #include <stdexcept>
 #include <string>
+#include <vector>
 
 namespace kbase {
 
 // All Printf-series functions may throw an exception, if the size of the buffer
 // that stores the formatted data exceeds the threshold.
 
-class StringFormatDataLengthError : public std::length_error {
+class StringPrintfDataLengthError : public std::length_error {
 public:
-    explicit StringFormatDataLengthError(const std::string& what)
+    explicit StringPrintfDataLengthError(const std::string& what)
         : std::length_error(what)
     {}
 
-    explicit StringFormatDataLengthError(const char* what)
+    explicit StringPrintfDataLengthError(const char* what)
         : std::length_error(what)
+    {}
+};
+
+class StringFormatSpecifierError : public std::invalid_argument {
+public:
+    explicit StringFormatSpecifierError(const std::string& what)
+        : std::invalid_argument(what)
+    {}
+
+    explicit StringFormatSpecifierError(const char* what)
+        : invalid_argument(what)
     {}
 };
 
