@@ -12,6 +12,7 @@
 namespace {
 
 using kbase::StringFormatSpecifierError;
+using kbase::internal::FmtStr;
 using kbase::internal::Placeholder;
 using kbase::internal::PlaceholderList;
 
@@ -60,16 +61,16 @@ inline void EnsureFormatSpecifier(bool expr)
     }
 }
 
-template<typename StrT>
-StrT AnalyzeFormatStringT(const typename StrT::value_type* fmt,
-                          PlaceholderList<StrT>* placeholders)
+template<typename CharT>
+typename FmtStr<CharT>::String AnalyzeFormatStringT(const CharT* fmt,
+                                                    PlaceholderList<CharT>* placeholders)
 {
     const size_t kInitialCapacity = 32;
-    StrT analyzed_fmt;
+    typename FmtStr<CharT>::String analyzed_fmt;
     analyzed_fmt.reserve(kInitialCapacity);
 
     placeholders->clear();
-    Placeholder<StrT> placeholder;
+    Placeholder<CharT> placeholder;
 
     auto state = FormatStringParseState::IN_TEXT;
     for (auto ptr = fmt; *ptr != '\0'; ++ptr) {
@@ -82,7 +83,7 @@ StrT AnalyzeFormatStringT(const typename StrT::value_type* fmt,
                 analyzed_fmt += kEscapeBegin;
                 ++ptr;
             } else if (IsDigit(*(ptr + 1))) {
-                typename StrT::value_type* last_digit;
+                CharT* last_digit;
                 placeholder.index = ExtractPlaceholderIndex(ptr + 1, &last_digit);
                 ptr = last_digit;
                 EnsureFormatSpecifier(*(ptr + 1) == kEscapeEnd ||
@@ -120,6 +121,11 @@ StrT AnalyzeFormatStringT(const typename StrT::value_type* fmt,
 
     EnsureFormatSpecifier(state == FormatStringParseState::IN_TEXT);
 
+    std::sort(std::begin(*placeholders), std::end(*placeholders),
+              [](const Placeholder<CharT>& lhs, const Placeholder<CharT>& rhs) {
+        return lhs.index < rhs.index;
+    });
+
     return analyzed_fmt;
 }
 
@@ -129,14 +135,13 @@ namespace kbase {
 
 namespace internal {
 
-std::string AnalyzeFormatString(const char* fmt,
-                                PlaceholderList<std::string>* placeholders)
+std::string AnalyzeFormatString(const char* fmt, PlaceholderList<char>* placeholders)
 {
     return AnalyzeFormatStringT(fmt, placeholders);
 }
 
 std::wstring AnalyzeFormatString(const wchar_t* fmt,
-                                 PlaceholderList<std::wstring>* placeholders)
+                                 PlaceholderList<wchar_t>* placeholders)
 {
     return AnalyzeFormatStringT(fmt, placeholders);
 }

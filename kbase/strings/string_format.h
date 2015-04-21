@@ -23,18 +23,18 @@ namespace kbase {
 class StringPrintfDataLengthError : public std::length_error {
 public:
     explicit StringPrintfDataLengthError(const std::string& what)
-        : std::length_error(what)
+        : length_error(what)
     {}
 
     explicit StringPrintfDataLengthError(const char* what)
-        : std::length_error(what)
+        : length_error(what)
     {}
 };
 
 class StringFormatSpecifierError : public std::invalid_argument {
 public:
     explicit StringFormatSpecifierError(const std::string& what)
-        : std::invalid_argument(what)
+        : invalid_argument(what)
     {}
 
     explicit StringFormatSpecifierError(const char* what)
@@ -59,43 +59,48 @@ namespace internal {
 
 template<typename CharT>
 struct FmtStr {
-    using String = std::conditional_t<std::is_same<CharT, char>::value,
-                                      std::string, std::wstring>;
-    using Stream = std::conditional_t<std::is_same<CharT, char>::value,
-                                      std::ostringstream, std::wostringstream>;
+    using String = std::basic_string<CharT>;
+    using Stream = std::basic_ostringstream<CharT>;
 };
 
-template<typename StrT>
+template<typename CharT>
 struct Placeholder {
+    using StrT = typename FmtStr<CharT>::String;
+
     unsigned long index = static_cast<unsigned long>(-1);
     unsigned long pos = static_cast<unsigned long>(-1);
     StrT format_specifier;
     StrT formatted;
 };
 
-template<typename StrT>
-using PlaceholderList = std::vector<Placeholder<StrT>>;
+template<typename CharT>
+using PlaceholderList = std::vector<Placeholder<CharT>>;
 
 // Return a simplified/analyzed format string, and store every specifiers into
 // `placeholders`.
+// Be aware of that elements in `placeholders` are sorted in the ascending order
+// of index.
 
-std::string AnalyzeFormatString(const char* fmt,
-                                PlaceholderList<std::string>* placeholders);
+std::string AnalyzeFormatString(const char* fmt, PlaceholderList<char>* placeholders);
 std::wstring AnalyzeFormatString(const wchar_t* fmt,
-                                 PlaceholderList<std::wstring>* placeholders);
+                                 PlaceholderList<wchar_t>* placeholders);
 
 template<typename CharT>
-typename FmtStr<CharT>::String StringFormatT(const std::basic_string<CharT>& fmt)
+typename FmtStr<CharT>::String StringFormatT(const typename FmtStr<CharT>::String& fmt,
+                                             PlaceholderList<CharT>* placeholders,
+                                             unsigned long arg_processing_index)
 {
     return typename FmtStr<CharT>::String();
 }
 
 template<typename CharT, typename Arg, typename... Args>
-typename FmtStr<CharT>::String StringFormatT(const std::basic_string<CharT>& fmt,
+typename FmtStr<CharT>::String StringFormatT(const typename FmtStr<CharT>::String& fmt,
+                                             PlaceholderList<CharT>* placeholders,
+                                             unsigned long arg_processing_index,
                                              Arg arg,
-                                             Args ... args)
+                                             Args... args)
 {
-    return StringFormatT(fmt, args...);
+    return StringFormatT(fmt, placeholders, arg_processing_index + 1, args...);
 }
 
 }   // namespace internal
@@ -107,11 +112,11 @@ std::string StringFormat(const char* fmt, Args... args)
 {
     using namespace kbase::internal;
 
-    PlaceholderList<std::string> placeholders;
+    PlaceholderList<char> placeholders;
     placeholders.reserve(sizeof...(args));
     auto simplified_fmt = AnalyzeFormatString(fmt, &placeholders);
 
-    return internal::StringFormatT(simplified_fmt, args...);
+    return internal::StringFormatT(simplified_fmt, &placeholders, 0, args...);
 }
 
 template<typename... Args>
@@ -119,11 +124,11 @@ std::wstring StringFormat(const wchar_t* fmt, Args... args)
 {
     using namespace kbase::internal;
 
-    PlaceholderList<std::wstring> placeholders;
+    PlaceholderList<wchar_t> placeholders;
     placeholders.reserve(sizeof...(args));
     auto simplified_fmt = AnalyzeFormatString(fmt, &placeholders);
 
-    return internal::StringFormatT(simplified_fmt, args...);
+    return internal::StringFormatT(simplified_fmt, &placeholders, 0, args...);
 }
 
 }   // namespace kbase
