@@ -5,6 +5,7 @@
 #include "kbase\strings\string_format.h"
 
 #include <cctype>
+#include <cstdarg>
 
 #include "kbase\scope_guard.h"
 
@@ -82,6 +83,7 @@ typename FmtStr<CharT>::String AnalyzeFormatStringT(const CharT* fmt,
                 placeholder.pos = analyzed_fmt.length();
                 analyzed_fmt += '@';
                 placeholders->push_back(placeholder);
+                placeholder.format_specifier.clear();
 
                 // Now we turn back to text-state.
                 state = FormatStringParseState::IN_TEXT;
