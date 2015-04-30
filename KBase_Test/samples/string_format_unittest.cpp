@@ -55,6 +55,5 @@ TEST(StringFormatTest, AnalyzeFormatString)
 
 TEST(StringFormatTest, tt)
 {
-    kbase::StringFormat("abc", 123, 13);
-    kbase::StringFormat(L"abc", 123, 123);
+    auto str = kbase::StringFormat("hello {0:X} {1} Pi-day {2}", 255, "world", 3.14);
 }

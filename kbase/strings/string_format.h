@@ -358,9 +358,27 @@ void FormatWithSpecifier(const Arg& arg,
 template<typename CharT>
 typename FmtStr<CharT>::String StringFormatT(const typename FmtStr<CharT>::String& fmt,
                                              PlaceholderList<CharT>* placeholders,
-                                             unsigned long arg_processing_index)
+                                             unsigned long arg_count)
 {
-    return typename FmtStr<CharT>::String();
+    EnsureFormatSpecifier(std::all_of(placeholders->begin(), placeholders->end(),
+                                      [arg_count](const Placeholder<CharT>& ph) {
+        return ph.index < arg_count;
+    }));
+
+    auto formatted_str(fmt);
+
+    // Sort in the decreasing order of pos, since we are going to expand
+    // `formatted_str` from right to left.
+    std::sort(placeholders->begin(), placeholders->end(),
+              [](const Placeholder<CharT>& lhs, const Placeholder<CharT>& rhs) {
+        return lhs.pos > rhs.pos;
+    });
+
+    for (const auto& ph : *placeholders) {
+        formatted_str.replace(ph.pos, 1, ph.formatted);
+    }
+
+    return formatted_str;
 }
 
 template<typename CharT, typename Arg, typename... Args>
