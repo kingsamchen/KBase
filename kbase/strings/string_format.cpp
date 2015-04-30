@@ -4,7 +4,6 @@
 
 #include "kbase\strings\string_format.h"
 
-#include <algorithm>
 #include <cctype>
 
 #include "kbase\scope_guard.h"
@@ -15,6 +14,9 @@ using kbase::StringFormatSpecifierError;
 using kbase::internal::FmtStr;
 using kbase::internal::Placeholder;
 using kbase::internal::PlaceholderList;
+using kbase::internal::IsDigit;
+using kbase::internal::StrToUL;
+using kbase::internal::EnsureFormatSpecifier;
 
 enum class FormatStringParseState {
     IN_TEXT,
@@ -26,39 +28,13 @@ const char kEscapeEnd = '}';
 const char kSpecifierDelimeter = ':';
 const char kPlaceholderChar = '@';
 
-inline bool IsDigit(char ch)
+template<typename CharT>
+inline unsigned long ExtractPlaceholderIndex(const CharT* first_digit, CharT** last_digit)
 {
-    return isdigit(ch) != 0;
-}
-
-inline bool IsDigit(wchar_t ch)
-{
-    return iswdigit(ch) != 0;
-}
-
-inline unsigned long ExtractPlaceholderIndex(const char* first_digit, char** last_digit)
-{
-    auto index = strtoul(first_digit, last_digit, 10);
+    auto index = StrToUL(first_digit, last_digit);
     --*last_digit;
 
     return index;
-}
-
-inline unsigned long ExtractPlaceholderIndex(const wchar_t* first_digit,
-                                             wchar_t** last_digit)
-{
-    auto index = wcstoul(first_digit, last_digit, 10);
-    --*last_digit;
-
-    return index;
-}
-
-// This wrapper provides a more semantic validation.
-inline void EnsureFormatSpecifier(bool expr)
-{
-    if (!expr) {
-        throw StringFormatSpecifierError("Format string is not valid");
-    }
 }
 
 template<typename CharT>

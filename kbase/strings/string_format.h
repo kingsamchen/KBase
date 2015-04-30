@@ -11,6 +11,9 @@
 
 #include <stdarg.h>
 
+#include <algorithm>
+#include <cassert>
+#include <iomanip>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -71,10 +74,40 @@ struct Placeholder {
     unsigned long pos = static_cast<unsigned long>(-1);
     StrT format_specifier;
     StrT formatted;
+
+    // For std::equal_range.
+    struct RangeCmp {
+        bool operator()(unsigned long index, const Placeholder& rhs) const
+        {
+            return index < rhs.index;
+        }
+
+        bool operator()(const Placeholder& lhs, unsigned long index) const
+        {
+            return lhs.index < index;
+        }
+
+        // HACK: VS2013 needs this function for a paranoid pre-sorted check
+        // only in debug mode.
+#if _DEBUG
+        bool operator()(const Placeholder& lhs, const Placeholder& rhs)
+        {
+            return lhs.index < rhs.index;
+        }
+#endif
+    };
 };
 
 template<typename CharT>
 using PlaceholderList = std::vector<Placeholder<CharT>>;
+
+// This wrapper provides a more semantic validation.
+inline void EnsureFormatSpecifier(bool expr)
+{
+    if (!expr) {
+        throw StringFormatSpecifierError("Format string is not valid");
+    }
+}
 
 // Return a simplified/analyzed format string, and store every specifiers into
 // `placeholders`.
@@ -84,6 +117,243 @@ using PlaceholderList = std::vector<Placeholder<CharT>>;
 std::string AnalyzeFormatString(const char* fmt, PlaceholderList<char>* placeholders);
 std::wstring AnalyzeFormatString(const wchar_t* fmt,
                                  PlaceholderList<wchar_t>* placeholders);
+
+enum class SpecifierCategory {
+    NONE = 0,
+    PADDING_ALIGN,
+    SIGN,
+    WIDTH,
+    PRECISION,
+    TYPE
+};
+
+inline bool IsDigit(char ch)
+{
+    return isdigit(ch) != 0;
+}
+
+inline bool IsDigit(wchar_t ch)
+{
+    return iswdigit(ch) != 0;
+}
+
+inline unsigned long StrToUL(const char* str, char** end_ptr)
+{
+    return strtoul(str, end_ptr, 10);
+}
+
+inline unsigned long StrToUL(const wchar_t* str, wchar_t** end_ptr)
+{
+    return wcstoul(str, end_ptr, 10);
+}
+
+inline bool IsTypeSpecifier(wchar_t ch)
+{
+    return ch == L'b' || ch == 'x' || ch == 'X' || ch == 'o' || ch == 'e' || ch == 'E';
+}
+
+template<typename CharT>
+SpecifierCategory GuessNextSpecCategory(const CharT* spec)
+{
+    // Maybe we have finished parsing.
+    if (*spec == '\0') {
+        return SpecifierCategory::NONE;
+    }
+
+    if (*(spec + 1) == '<' || *(spec + 1) == '>') {
+        return SpecifierCategory::PADDING_ALIGN;
+    }
+
+    if (*spec == '+') {
+        return SpecifierCategory::SIGN;
+    }
+
+    if (IsDigit(*spec)) {
+        return SpecifierCategory::WIDTH;
+    }
+
+    if (*spec == '.') {
+        return SpecifierCategory::PRECISION;
+    }
+
+    if (IsTypeSpecifier(*spec)) {
+        return SpecifierCategory::TYPE;
+    }
+
+    // Not reached.
+    assert(false);
+    EnsureFormatSpecifier(false);
+    return SpecifierCategory::NONE;
+}
+
+template<typename CharT>
+void ApplyPaddingAlignFormat(const CharT* spec,
+                             SpecifierCategory last_spec_type,
+                             typename FmtStr<CharT>::Stream* stream,
+                             const CharT** spec_end)
+{
+    EnsureFormatSpecifier(last_spec_type < SpecifierCategory::PADDING_ALIGN);
+
+    typename FmtStr<CharT>::Stream& os = *stream;
+
+    CharT fill_ch = *spec++;
+    os << std::setfill(fill_ch);
+    if (*spec == '<') {
+        os << std::left;
+    } else {
+        os << std::right;
+    }
+
+    *spec_end = spec + 1;
+}
+
+template<typename CharT>
+void ApplySignFormat(const CharT* spec,
+                     SpecifierCategory last_spec_type,
+                     typename FmtStr<CharT>::Stream* stream,
+                     const CharT** spec_end)
+{
+    EnsureFormatSpecifier(last_spec_type < SpecifierCategory::SIGN);
+
+    typename FmtStr<CharT>::Stream& os = *stream;
+
+    os << std::showpos;
+
+    *spec_end = spec + 1;
+}
+
+template<typename CharT>
+void ApplyWidthFormat(const CharT* spec,
+                      SpecifierCategory last_spec_type,
+                      typename FmtStr<CharT>::Stream* stream,
+                      const CharT** spec_end)
+{
+    EnsureFormatSpecifier(last_spec_type < SpecifierCategory::WIDTH);
+
+    typename FmtStr<CharT>::Stream& os = *stream;
+
+    CharT* digit_end = nullptr;
+    auto width = StrToUL(spec, &digit_end);
+    os << std::setw(width);
+
+    *spec_end = digit_end;
+}
+
+template<typename CharT>
+void ApplyPrecisionFormat(const CharT* spec,
+                          SpecifierCategory last_spec_type,
+                          typename FmtStr<CharT>::Stream* stream,
+                          const CharT** spec_end)
+{
+    EnsureFormatSpecifier(last_spec_type < SpecifierCategory::PRECISION);
+
+    typename FmtStr<CharT>::Stream& os = *stream;
+
+    CharT* digit_end = nullptr;
+    auto precision_size = StrToUL(spec + 1, &digit_end);
+    os << std::setprecision(precision_size);
+
+    *spec_end = digit_end;
+}
+
+template<typename CharT>
+void ApplyTypeFormat(const CharT* spec,
+                     SpecifierCategory last_spec_type,
+                     typename FmtStr<CharT>::Stream* stream,
+                     const CharT** spec_end)
+{
+    EnsureFormatSpecifier(last_spec_type < SpecifierCategory::TYPE);
+
+    typename FmtStr<CharT>::Stream& os = *stream;
+
+    CharT type_mark = *spec;
+    switch (type_mark) {
+        case 'b':
+            os << std::boolalpha;
+            break;
+
+        case 'x':
+            os << std::hex;
+            break;
+
+        case 'X':
+            os << std::hex << std::uppercase;
+            break;
+
+        case 'o':
+            os << std::oct;
+            break;
+
+        case 'e':
+            os << std::scientific;
+            break;
+
+        case 'E':
+            os << std::scientific << std::uppercase;
+            break;
+
+        default:
+            // Not reached.
+            assert(false);
+            break;
+    }
+
+    *spec_end = spec + 1;
+}
+
+template<typename CharT, typename Arg>
+void FormatWithSpecifier(const Arg& arg,
+                         const typename FmtStr<CharT>::String& specifier,
+                         typename FmtStr<CharT>::Stream* stream,
+                         typename FmtStr<CharT>::String* formatted)
+{
+    if (specifier.empty()) {
+        (*stream) << arg;
+        *formatted = stream->str();
+        return;
+    }
+
+    auto spec = specifier.data();
+    auto last_spec_type = SpecifierCategory::NONE;
+    auto next_spec_type = SpecifierCategory::NONE;
+    while ((next_spec_type = GuessNextSpecCategory(spec)) != SpecifierCategory::NONE) {
+        switch (next_spec_type) {
+            case SpecifierCategory::PADDING_ALIGN:
+                ApplyPaddingAlignFormat(spec, last_spec_type, stream, &spec);
+                last_spec_type = SpecifierCategory::PADDING_ALIGN;
+                break;
+
+            case SpecifierCategory::SIGN:
+                ApplySignFormat(spec, last_spec_type, stream, &spec);
+                last_spec_type = SpecifierCategory::SIGN;
+                break;
+
+            case SpecifierCategory::WIDTH:
+                ApplyWidthFormat(spec, last_spec_type, stream, &spec);
+                last_spec_type = SpecifierCategory::WIDTH;
+                break;
+
+            case SpecifierCategory::PRECISION:
+                ApplyPrecisionFormat(spec, last_spec_type, stream, &spec);
+                last_spec_type = SpecifierCategory::PRECISION;
+                break;
+
+            case SpecifierCategory::TYPE:
+                ApplyTypeFormat(spec, last_spec_type, stream, &spec);
+                last_spec_type = SpecifierCategory::TYPE;
+                break;
+
+            // Not reached.
+            default:
+                assert(false);
+                EnsureFormatSpecifier(false);
+                break;
+        }
+    }
+
+    (*stream) << arg;
+    *formatted = stream->str();
+}
 
 template<typename CharT>
 typename FmtStr<CharT>::String StringFormatT(const typename FmtStr<CharT>::String& fmt,
@@ -97,9 +367,26 @@ template<typename CharT, typename Arg, typename... Args>
 typename FmtStr<CharT>::String StringFormatT(const typename FmtStr<CharT>::String& fmt,
                                              PlaceholderList<CharT>* placeholders,
                                              unsigned long arg_processing_index,
-                                             Arg arg,
-                                             Args... args)
+                                             const Arg& arg,
+                                             const Args&... args)
 {
+    auto ph_range = std::equal_range(placeholders->begin(),
+                                     placeholders->end(),
+                                     arg_processing_index,
+                                     typename Placeholder<CharT>::RangeCmp());
+    typename FmtStr<CharT>::Stream output;
+    auto default_fmt_flags = output.flags();
+    for (auto it = ph_range.first; it != ph_range.second; ++it) {
+        FormatWithSpecifier<CharT, Arg>(arg,
+                                        it->format_specifier,
+                                        &output,
+                                        &it->formatted);
+        // Reset stream.
+        output.str(typename FmtStr<CharT>::String());
+        output.clear();
+        output.flags(default_fmt_flags);
+    }
+
     return StringFormatT(fmt, placeholders, arg_processing_index + 1, args...);
 }
 
