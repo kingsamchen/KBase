@@ -10,6 +10,15 @@
     <Filter Include="memory">
       <UniqueIdentifier>{eae32fa7-dbc4-4337-8516-19158c4eb948}</UniqueIdentifier>
     </Filter>
+    <Filter Include="..">
+      <UniqueIdentifier>{9fdb534d-5ed5-4093-8171-c4960ec7abda}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="..\build">
+      <UniqueIdentifier>{25133c96-6b1e-4e64-8290-bf2050ef1519}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="..\build\pch">
+      <UniqueIdentifier>{59bb4354-9b52-40a4-8557-e935073983bf}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="kbase\at_exit_manager.cpp" />
@@ -52,6 +61,9 @@
     <ClCompile Include="kbase\guid.cpp" />
     <ClCompile Include="kbase\md5.cpp" />
     <ClCompile Include="kbase\sha.cpp" />
+    <ClCompile Include="build\pch\precompile.cpp">
+      <Filter>..\build\pch</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="kbase\at_exit_manager.h" />

@@ -96,6 +96,9 @@
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4127;</DisableSpecificWarnings>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>build\pch\precompile.h</PrecompiledHeaderFile>
+      <ForcedIncludeFiles>build\pch\precompile.h</ForcedIncludeFiles>
     </ClCompile>
     <Link>
       <TargetMachine>MachineX86</TargetMachine>
@@ -154,6 +157,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="build\pch\precompile.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">build\pch\precompile.h</ForcedIncludeFiles>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">build\pch\precompile.h</PrecompiledHeaderFile>
+    </ClCompile>
     <ClCompile Include="kbase\at_exit_manager.cpp" />
     <ClCompile Include="kbase\base64.cpp" />
     <ClCompile Include="kbase\base_path_provider.cpp" />
