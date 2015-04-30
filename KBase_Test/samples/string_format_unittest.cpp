@@ -5,8 +5,9 @@
 #include "stdafx.h"
 
 #include "gtest\gtest.h"
+#define NDEBUG
 #include "kbase\strings\string_format.h"
-
+#undef NDEBUG
 #include <iostream>
 #include <string>
 
@@ -25,7 +26,6 @@ bool ComparePlaceholder(const Placeholder<CharT>& p, unsigned i, unsigned pos, c
 
 TEST(StringFormatTest, AnalyzeFormatString)
 {
-
     PlaceholderList<char> placeholder_list;
     std::string afmt;
 
@@ -53,7 +53,19 @@ TEST(StringFormatTest, AnalyzeFormatString)
     EXPECT_THROW(AnalyzeFormatString ("test {1:", &placeholder_list), StringFormatSpecifierError);
 }
 
-TEST(StringFormatTest, tt)
+TEST(StringFormatTest, Format)
 {
-    auto str = kbase::StringFormat("hello {0:X} {1} Pi-day {2}", 255, "world", 3.14);
+    std::string str, exp_str;
+
+    str = StringFormat("abc {0:0>4X} {1} def {2:.4} {0:+}", 255, "test", 3.14, 123);
+    exp_str = "abc 00FF test def 3.1400 +255";
+    EXPECT_EQ(exp_str, str);
+
+    // --- a bunch of invalid cases ---.
+
+    EXPECT_ANY_THROW(StringFormat("{0} {1}", 123)); // redundant specifier
+    EXPECT_ANY_THROW(StringFormat("{0:>4}", 123));  // fill is missing
+    EXPECT_ANY_THROW(StringFormat("{0:.6+4}", 3.1464232));  // specifier order is wrong
+    EXPECT_ANY_THROW(StringFormat("{0: >bx}", 123));    // type-mark is more than once
+    EXPECT_ANY_THROW(StringFormat("{0: }", 123));    // empty specifier
 }
