@@ -9,8 +9,6 @@
 #ifndef KBASE_STRINGS_STRING_FORMAT_H_
 #define KBASE_STRINGS_STRING_FORMAT_H_
 
-#include <stdarg.h>
-
 #include <algorithm>
 #include <cassert>
 #include <iomanip>
@@ -251,7 +249,7 @@ void ApplyPrecisionFormat(const CharT* spec,
 
     CharT* digit_end = nullptr;
     auto precision_size = StrToUL(spec + 1, &digit_end);
-    os << std::setprecision(precision_size);
+    os << std::fixed << std::setprecision(precision_size);
 
     *spec_end = digit_end;
 }
@@ -411,6 +409,20 @@ typename FmtStr<CharT>::String StringFormatT(const typename FmtStr<CharT>::Strin
 }   // namespace internal
 
 // C#-like string format facility.
+// For each format-specifier in `fmt`, it can be in the form of
+// {index[:[fill|align]|sign|width|.precision|type]}
+// index := the 0-based index number of specifier.
+// fill := any single character other than `{` and `}` for filling the padding.
+// align := `<` for left-alignemnt with fill character and `>` for right-alignment.
+// sign := +, prepend `+` with the positive number.
+// width := the width of the field.
+// .precision := floating-point precision.
+// type := can be one of [b, x, X, o, e, E].
+// Specifier marks `fill` and `align` **must** be in presence together.
+// Although all of these specifier marks are optional, their relative orders, if any
+// present, do matter; otherwise, a StringFormatSpecifierError exception would be raised.
+// Also, if a specifier mark has no effect on its corresponding argument, this specifier
+// mark is simply ignored, and no exception would be raised.
 
 template<typename... Args>
 std::string StringFormat(const char* fmt, Args... args)
