@@ -9,17 +9,18 @@ A light-weight base library for C++.
 
 KBase is initially a toy project for fun, not aimd for cross-platform.
 
-Since I made these files by using Visual Studio 2013 on Windows 7, some facilities or infrastructures that do jeopardize library portability are inevitably employed.
+Since I build this project by using Visual Studio 2013 on Windows 7, some facilities or infrastructures that may jeopardize code portability to other compilers or platforms are inevitably employed.
+
+Including but not limited to
 
 - part of C++11 features
-- brand new APIs provided only since Windows Vista/7
+- brand new APIs firstly introduced by Windows Vista/7
 - un-portable CRT implementations, such as secured-string-manipulation functions 
 
 Therefore, the **minimum** requirements are
 
 - Visual Studio 2013 on Windows 7 (32/64-bit)
-- GNU C++ that supports C++11 on cygwin might possibly be used if non-portable part was replaced with standard counterparts or your own implementations.
-
+- GNU C++ that supports C++11 on cygwin could possibly be used if non-portable part was replaced with standard counterparts or your own implementations.
 
 ### Installation
 
@@ -29,9 +30,9 @@ If you use GNU C++, you may need to write makefile to build the entire project o
 
 ### Disclaimer
 
-Once again, KBase is a toy project I do in spare time. There is no any guarantee for its long-term maintenance.
+Once again, KBase is a personal-interest-driven project I do in spare time. There is no any guarantee for its long-term maintenance.
 
-KBase is inspired by base of Chromium. However, I don't approve of the way they use C++, thus I wrote KBase in my own coding flavor, and also with adapting to my personal needs.
+KBase is inspired by base lib of Chromium. However, I don't approve of the way they use C++, thus I code KBase in my own coding flavor, and also with adapting to my personal needs.
 
 ### Usage and Samples
 
