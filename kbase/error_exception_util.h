@@ -14,6 +14,7 @@
 #include <string>
 #include <stdexcept>
 
+#include "kbase\logging.h"
 #include "kbase\strings\string_format.h"
 #include "kbase\strings\sys_string_encoding_conversions.h"
 
@@ -70,7 +71,11 @@ public:
 
     Guarantor(const Guarantor&) = delete;
 
+    Guarantor(Guarantor&& other) = delete;
+
     Guarantor& operator=(const Guarantor&) = delete;
+
+    Guarantor& operator=(Guarantor&& other) = delete;
 
     // Incorporates variable value.
     template<typename T>
@@ -80,17 +85,26 @@ public:
         return *this;
     }
 
-    template<>
     Guarantor& current_value(const char* name, const std::wstring& value)
     {
         std::string converted = SysWideToNativeMB(value);
-        exception_desc_ << "    " << name << " = " << converted << "\n";
-        return *this;
+        return current_value(name, converted);
+    }
+
+    Guarantor& current_value(const char* name, const wchar_t* value)
+    {
+        std::string converted = SysWideToNativeMB(value);
+        return current_value(name, converted);
     }
 
     void raise()
     {
         throw std::runtime_error(exception_desc_.str());
+    }
+
+    void logging()
+    {
+        LOG(FATAL) << exception_desc_.str();
     }
 
     // access stubs
