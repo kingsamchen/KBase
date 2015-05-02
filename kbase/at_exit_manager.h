@@ -2,7 +2,7 @@
  @ Kingsley Chen
 */
 
-#if _MSC_VER > 1000
+#if defined(_MSC_VER)
 #pragma once
 #endif
 
@@ -17,15 +17,11 @@ namespace kbase {
 
 class AtExitManager {
 public:
-    typedef std::function<void()> AtExitCallbackType;
+    using AtExitCallback = std::function<void()>;
 
     AtExitManager();
 
     ~AtExitManager();
-
-    static void RegisterCallback(const AtExitCallbackType& callback);
-
-    static void ProcessCallbackNow();
 
     AtExitManager(const AtExitManager&) = delete;
 
@@ -35,9 +31,14 @@ public:
 
     AtExitManager& operator=(AtExitManager&&) = delete;
 
+    static void RegisterCallback(const AtExitCallback& callback);
+
+private:
+    static void ProcessCallbackNow();
+
 private:
     std::mutex lock_;
-    std::stack<std::function<void()>> callback_stack_;
+    std::stack<AtExitCallback> callback_stack_;
     AtExitManager* next_at_exit_manager_;
 };
 
