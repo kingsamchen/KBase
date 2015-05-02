@@ -163,6 +163,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="samples\at_exit_manager_unittest.cpp" />
     <ClCompile Include="samples\auto_reset_unittest.cpp" />
     <ClCompile Include="samples\base64_unittest.cpp" />
     <ClCompile Include="samples\command_line_unittest.cpp" />
