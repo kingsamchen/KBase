@@ -17,18 +17,23 @@ namespace kbase {
 template<typename T>
 class AutoReset {
 public:
-    AutoReset(T* scoped_var)
+    explicit AutoReset(T* scoped_var)
         : scoped_var_(scoped_var), original_value_(*scoped_var)
     {}
 
     ~AutoReset()
     {
+        // Our backup is discardable now, move it back may more efficient.
         *scoped_var_ = std::move(original_value_);
     }
 
     AutoReset(const AutoReset&) = delete;
 
+    AutoReset(AutoReset&&) = delete;
+
     AutoReset& operator=(const AutoReset&) = delete;
+
+    AutoReset& operator=(AutoReset&&) = delete;
 
 private:
     T* scoped_var_;

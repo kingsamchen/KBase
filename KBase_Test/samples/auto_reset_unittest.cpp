@@ -7,23 +7,21 @@
 #include <string>
 #include <vector>
 
-using namespace kbase;
-
 namespace {
 
-std::vector<std::string> origin {"hello", "world", "kc"};
+std::vector<std::string> value {"hello", "world", "kc"};
 
 }   // namespace
 
 TEST(AutoResetTest, AutoReset)
 {
-    std::vector<std::string> v = origin;
+    auto vec = value;
     {
-        AutoReset<decltype(v)> value_guard(&v);    
-        v.pop_back();
-        v.push_back("this is a test");
-        EXPECT_NE(origin, v);
+        kbase::AutoReset<decltype(vec)> value_guard(&vec);
+        vec.pop_back();
+        vec.push_back("this is a test");
+        EXPECT_NE(value, vec);
     }
-    
-    EXPECT_EQ(origin, v);
+
+    EXPECT_EQ(value, vec);
 }
