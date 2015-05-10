@@ -178,7 +178,7 @@ void Decode(const byte* data, size_t len, Container* result)
     }
 
     result->resize(DecodeLength(valid_len, number_of_padding), 0);
-    Container::value_type* p = &(*result)[0];
+    typename Container::value_type* p = &(*result)[0];
     byte c0, c1, c2, c3;
     size_t i = 0;
     ScopeGuard clear_on_error([result]() {
