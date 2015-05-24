@@ -169,12 +169,6 @@ CommandLine& CommandLine::operator=(CommandLine&& rhs)
 }
 
 // static
-CommandLine CommandLine::FromString(const StringType& cmdline)
-{
-    return CommandLine(cmdline);
-}
-
-// static
 const CommandLine& CommandLine::ForCurrentProcess()
 {
     return current_process_cmdline_.value();
@@ -249,24 +243,27 @@ void CommandLine::ParseFromArgv(const ArgList& argv)
     AddArguments(this, argv);
 }
 
-void CommandLine::AppendSwitch(const StringType& name, const StringType& value)
+CommandLine& CommandLine::AppendSwitch(const StringType& name, const StringType& value)
 {
     switches_[name] = value;
-
-    auto original = last_not_param_++;
     // Since we have |last_not_param_| to demarcate switches and parameters, we here
     // leave switch prefix unprepended.
     StringType switch_arg(name);
     if (!value.empty()) {
         switch_arg.append(L"=").append(value);
     }
-    argv_.emplace(last_not_param_, switch_arg);
-    last_not_param_ = ++original;
+
+    argv_.emplace(std::next(last_not_param_), switch_arg);
+    ++last_not_param_;
+
+    return *this;
 }
 
-void CommandLine::AppendParameter(const StringType& parameter)
+CommandLine& CommandLine::AppendParameter(const StringType& parameter)
 {
     argv_.emplace_back(parameter);
+
+    return *this;
 }
 
 bool CommandLine::HasSwitch(const StringType& name) const

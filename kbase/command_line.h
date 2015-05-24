@@ -20,8 +20,8 @@
 
 namespace kbase {
 
-// A command line on Windows consists of one or more arguments, which are tokens
-// separated by spaces or tabs.
+// A command line consists of one or more arguments, which are tokens separated by
+// spaces or tabs.
 // Arguments with preceded '--', '-', and '/' are switches. A switch can optionally
 // have a value that is delimited by '='.
 // Arguments that are not switches are called parameters. They are just specific
@@ -29,7 +29,7 @@ namespace kbase {
 // Besides, the first argument is called program, since it always refers to the full
 // path of the program.
 // The general order of arguments in command line is as follows:
-// { program, [(-|--|/)switchs[=value]], [parameters] }
+// { program, [(-|--|/)switch[=value]], [parameter] }
 // that is, switches always precede with arguments.
 class CommandLine {
 public:
@@ -63,8 +63,6 @@ public:
 
     CommandLine& operator=(CommandLine&& rhs);
 
-    static CommandLine FromString(const StringType& cmdline);
-
     // Returns the singleton command line object for the current process.
     static const CommandLine& ForCurrentProcess();
 
@@ -90,9 +88,9 @@ public:
     void SetProgram(const FilePath& program);
 
     // |name| should not be preceded with a prefix.
-    void AppendSwitch(const StringType& name, const StringType& value = StringType());
+    CommandLine& AppendSwitch(const StringType& name, const StringType& value = StringType());
 
-    void AppendParameter(const StringType& arg);
+    CommandLine& AppendParameter(const StringType& arg);
 
     // |name| should not be preceded with a prefix.
     bool HasSwitch(const StringType& name) const;
@@ -120,6 +118,7 @@ private:
 
     static Lazy<CommandLine> current_process_cmdline_;
     Argv argv_;
+    // References to the last argument that is not parameter.
     Argv::iterator last_not_param_;
     SwitchTable switches_;
     static const size_t kSwitchPrefixSizeLimit = 3;
