@@ -15,6 +15,10 @@ TEST(CommandLineTest, Ctors)
         auto program = cmdline.GetProgram();
         std::cout << program.AsASCII() << std::endl;
         EXPECT_EQ(program, path);
+
+        int argc = 3;
+        const wchar_t* argv[] {L"C:\\abc.exe", L"-topmost=true", L"123"};
+        kbase::CommandLine dummy_cmdline(argc, argv);
     }
 
     // copy-semantics
@@ -40,7 +44,7 @@ TEST(CommandLineTest, CurrentProcessCommandLine)
     const kbase::CommandLine& cmdline = kbase::CommandLine::ForCurrentProcess();
     auto argv = cmdline.GetArgv();
     for (const auto& arg : argv) {
-        std::wcout << arg << std::endl;    
+        std::wcout << arg << std::endl;
     }
     EXPECT_FALSE(argv.empty());
 }
@@ -89,7 +93,7 @@ TEST(CommandLineTest, HasSwitch)
 TEST(CommandLineTest, QuerySwitchValue)
 {
     kbase::CommandLine cmdline(L"C:\\windows\\system32\\notepad.exe -a=1 --maxmize --t=1024 D:\\test.txt");
-    
+
     std::wstring value;
     bool rv = cmdline.GetSwitchValue(L"a", &value);
     EXPECT_TRUE(rv);
