@@ -9,6 +9,7 @@
 
 #include <algorithm>
 #include <functional>
+#include <iterator>
 #include <stdexcept>
 
 #include "kbase\error_exception_util.h"
