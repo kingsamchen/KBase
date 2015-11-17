@@ -22,6 +22,7 @@
     <ProjectGuid>{5BA05C2A-5604-4326-BCDB-CC443D8806B9}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>KBase_Test</RootNamespace>
+    <ProjectName>KBase_Test</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

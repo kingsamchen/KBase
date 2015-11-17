@@ -21,6 +21,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{09A7A9C8-4AE9-4606-8104-9100C4C910DF}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
+    <ProjectName>KBase</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
