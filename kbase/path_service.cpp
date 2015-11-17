@@ -11,9 +11,9 @@
 
 #include "kbase\base_path_provider.h"
 #include "kbase\error_exception_util.h"
-#include "kbase\files\file_util.h"
-#include "kbase\memory\lazy.h"
-#include "kbase\strings\sys_string_encoding_conversions.h"
+#include "kbase\file_util.h"
+#include "kbase\lazy.h"
+#include "kbase\sys_string_encoding_conversions.h"
 
 using kbase::FilePath;
 using kbase::PathKey;

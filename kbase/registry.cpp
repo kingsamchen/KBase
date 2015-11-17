@@ -8,7 +8,7 @@
 #include <cstdlib>
 
 #include "kbase\error_exception_util.h"
-#include "kbase\strings\string_util.h"
+#include "kbase\string_util.h"
 
 namespace kbase {
 

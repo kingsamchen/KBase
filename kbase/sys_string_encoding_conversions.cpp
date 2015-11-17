@@ -2,14 +2,14 @@
  @ Kingsley Chen
 */
 
-#include "kbase/strings/sys_string_encoding_conversions.h"
+#include "kbase/sys_string_encoding_conversions.h"
 
 #include <windows.h>
 
 #include <cassert>
 #include <stdexcept>
 
-#include "kbase/strings/string_util.h"
+#include "kbase/string_util.h"
 
 namespace kbase {
 

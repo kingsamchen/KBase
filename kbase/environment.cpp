@@ -9,7 +9,7 @@
 #include <vector>
 
 #include "kbase\error_exception_util.h"
-#include "kbase\strings\string_piece.h"
+#include "kbase\string_piece.h"
 
 namespace {
 

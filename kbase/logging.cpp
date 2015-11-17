@@ -17,7 +17,7 @@
 
 #include "kbase\basic_types.h"
 #include "kbase\error_exception_util.h"
-#include "kbase\memory\scoped_handle.h"
+#include "kbase\scoped_handle.h"
 
 namespace {
 
@@ -77,7 +77,7 @@ PathString GetDefaultLogFile()
     const PathChar* end_past_slash = ExtractFileName(exe_path);
     const PathChar* ext_dot = std::find(end_past_slash, std::cend(exe_path), L'.');
 
-    PathString default_path(exe_path, end_past_slash);
+    PathString default_path(const_cast<const PathChar*>(exe_path), end_past_slash);
     default_path.append(end_past_slash, ext_dot);
     default_path.append(kLogFileName);
 

@@ -2,7 +2,7 @@
  @ Kingsley Chen
 */
 
-#include "kbase\files\file_util.h"
+#include "kbase\file_util.h"
 
 #include <Windows.h>
 
@@ -12,9 +12,9 @@
 
 #include "kbase\date_time.h"
 #include "kbase\error_exception_util.h"
-#include "kbase\files\file_enumerator.h"
+#include "kbase\file_enumerator.h"
 #include "kbase\logging.h"
-#include "kbase\strings\string_util.h"
+#include "kbase\string_util.h"
 
 namespace kbase {
 

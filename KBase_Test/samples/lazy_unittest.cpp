@@ -5,7 +5,7 @@
 #include "stdafx.h"
 
 #include "gtest\gtest.h"
-#include "kbase\memory\lazy.h"
+#include "kbase\lazy.h"
 
 #include <atomic>
 #include <string>

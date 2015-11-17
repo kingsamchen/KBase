@@ -11,8 +11,8 @@
 
 #include <string>
 
-#include "kbase\files\file_info.h"
-#include "kbase\files\file_path.h"
+#include "kbase\file_info.h"
+#include "kbase\file_path.h"
 
 namespace kbase {
 

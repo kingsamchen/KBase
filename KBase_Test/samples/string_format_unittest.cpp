@@ -6,7 +6,7 @@
 
 #include "gtest\gtest.h"
 #define NDEBUG
-#include "kbase\strings\string_format.h"
+#include "kbase\string_format.h"
 #undef NDEBUG
 #include <iostream>
 #include <string>

@@ -10,8 +10,8 @@
 #include <cassert>
 #include <xutility>
 
-#include "kbase\strings\string_piece.h"
-#include "kbase\strings\sys_string_encoding_conversions.h"
+#include "kbase\string_piece.h"
+#include "kbase\sys_string_encoding_conversions.h"
 
 namespace kbase {
 

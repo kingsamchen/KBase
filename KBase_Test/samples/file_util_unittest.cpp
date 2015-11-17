@@ -5,13 +5,13 @@
 #include "stdafx.h"
 
 #include "gtest\gtest.h"
-#include "kbase\files\file_util.h"
+#include "kbase\file_util.h"
 
 #include <iostream>
 #include <utility>
 
 #include "kbase\path_service.h"
-#include "kbase\strings\string_util.h"
+#include "kbase\string_util.h"
 
 using namespace kbase;
 
@@ -27,7 +27,7 @@ void CreateDirectoryWithFile()
         CreateFileW(file_path.value().c_str(), GENERIC_READ | GENERIC_WRITE, 0, nullptr,
                     CREATE_NEW, FILE_ATTRIBUTE_NORMAL, nullptr);
     if (handle != INVALID_HANDLE_VALUE) {
-        CloseHandle(handle);   
+        CloseHandle(handle);
     }
 }
 

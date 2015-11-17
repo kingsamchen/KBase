@@ -11,7 +11,7 @@
 
 #include <string>
 
-#include "kbase\memory\singleton.h"
+#include "kbase\singleton.h"
 
 typedef void* HANDLE;
 typedef unsigned short WORD;

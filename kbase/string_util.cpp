@@ -2,7 +2,7 @@
  @ Kingsley Chen
 */
 
-#include "kbase\strings\string_util.h"
+#include "kbase\string_util.h"
 
 #include <Windows.h>
 

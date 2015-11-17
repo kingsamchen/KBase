@@ -5,7 +5,7 @@
 #include "stdafx.h"
 
 #include "gtest\gtest.h"
-#include "kbase\memory\singleton.h"
+#include "kbase\singleton.h"
 
 #include <atomic>
 #include <thread>

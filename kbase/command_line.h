@@ -15,8 +15,8 @@
 #include <string>
 #include <vector>
 
-#include "kbase\files\file_path.h"
-#include "kbase\memory\lazy.h"
+#include "kbase\file_path.h"
+#include "kbase\lazy.h"
 
 namespace kbase {
 
