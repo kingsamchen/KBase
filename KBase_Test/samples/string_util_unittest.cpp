@@ -5,7 +5,7 @@
 #include "stdafx.h"
 
 #include "gtest\gtest.h"
-#include "kbase\strings\string_util.h"
+#include "kbase\string_util.h"
 
 #include <string>
 
@@ -17,13 +17,13 @@ TEST(StringUtilTest, RemoveChars)
 {
     std::string str = "hello world";
     std::string new_str;
-    
+
     EXPECT_TRUE(RemoveChars(str, "ol", &new_str));
     EXPECT_EQ(new_str, std::string("he wrd"));
-    
+
     EXPECT_FALSE(RemoveChars(str, "tx", &new_str));
     EXPECT_EQ(str, new_str);
-    
+
     EXPECT_FALSE(RemoveChars(str, "", &new_str));
     EXPECT_EQ(str, new_str);
 

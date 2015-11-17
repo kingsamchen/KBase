@@ -1,15 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="strings">
-      <UniqueIdentifier>{f2d9cb75-3a3d-4794-8139-2c56f4366ae3}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="files">
-      <UniqueIdentifier>{f813d0c1-6464-4439-9264-2cf930330d14}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="memory">
-      <UniqueIdentifier>{eae32fa7-dbc4-4337-8516-19158c4eb948}</UniqueIdentifier>
-    </Filter>
     <Filter Include="..">
       <UniqueIdentifier>{9fdb534d-5ed5-4093-8171-c4960ec7abda}</UniqueIdentifier>
     </Filter>
@@ -19,110 +10,183 @@
     <Filter Include="..\build\pch">
       <UniqueIdentifier>{59bb4354-9b52-40a4-8557-e935073983bf}</UniqueIdentifier>
     </Filter>
+    <Filter Include="kbase">
+      <UniqueIdentifier>{3fc1a955-b1fc-40db-b7f7-fc3b2d2d7840}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="kbase\at_exit_manager.cpp" />
-    <ClCompile Include="kbase\logging.cpp" />
-    <ClCompile Include="kbase\strings\string_format.cpp">
-      <Filter>strings</Filter>
-    </ClCompile>
-    <ClCompile Include="kbase\strings\string_piece.cpp">
-      <Filter>strings</Filter>
-    </ClCompile>
-    <ClCompile Include="kbase\strings\string_util.cpp">
-      <Filter>strings</Filter>
-    </ClCompile>
-    <ClCompile Include="kbase\strings\sys_string_encoding_conversions.cpp">
-      <Filter>strings</Filter>
-    </ClCompile>
-    <ClCompile Include="kbase\pickle.cpp" />
-    <ClCompile Include="kbase\files\file_path.cpp">
-      <Filter>files</Filter>
-    </ClCompile>
-    <ClCompile Include="kbase\files\file_enumerator.cpp">
-      <Filter>files</Filter>
-    </ClCompile>
-    <ClCompile Include="kbase\version_util.cpp" />
-    <ClCompile Include="kbase\registry.cpp" />
-    <ClCompile Include="kbase\error_exception_util.cpp" />
-    <ClCompile Include="kbase\sys_info.cpp" />
-    <ClCompile Include="kbase\date_time.cpp" />
-    <ClCompile Include="kbase\path_service.cpp" />
-    <ClCompile Include="kbase\base_path_provider.cpp" />
-    <ClCompile Include="kbase\files\file_util.cpp">
-      <Filter>files</Filter>
-    </ClCompile>
-    <ClCompile Include="kbase\command_line.cpp" />
-    <ClCompile Include="kbase\files\file_version_info.cpp">
-      <Filter>files</Filter>
-    </ClCompile>
-    <ClCompile Include="kbase\environment.cpp" />
-    <ClCompile Include="kbase\base64.cpp" />
-    <ClCompile Include="kbase\guid.cpp" />
-    <ClCompile Include="kbase\md5.cpp" />
-    <ClCompile Include="kbase\sha.cpp" />
     <ClCompile Include="build\pch\precompile.cpp">
       <Filter>..\build\pch</Filter>
     </ClCompile>
+    <ClCompile Include="kbase\at_exit_manager.cpp">
+      <Filter>kbase</Filter>
+    </ClCompile>
+    <ClCompile Include="kbase\base_path_provider.cpp">
+      <Filter>kbase</Filter>
+    </ClCompile>
+    <ClCompile Include="kbase\base64.cpp">
+      <Filter>kbase</Filter>
+    </ClCompile>
+    <ClCompile Include="kbase\command_line.cpp">
+      <Filter>kbase</Filter>
+    </ClCompile>
+    <ClCompile Include="kbase\date_time.cpp">
+      <Filter>kbase</Filter>
+    </ClCompile>
+    <ClCompile Include="kbase\environment.cpp">
+      <Filter>kbase</Filter>
+    </ClCompile>
+    <ClCompile Include="kbase\error_exception_util.cpp">
+      <Filter>kbase</Filter>
+    </ClCompile>
+    <ClCompile Include="kbase\file_enumerator.cpp">
+      <Filter>kbase</Filter>
+    </ClCompile>
+    <ClCompile Include="kbase\file_path.cpp">
+      <Filter>kbase</Filter>
+    </ClCompile>
+    <ClCompile Include="kbase\file_util.cpp">
+      <Filter>kbase</Filter>
+    </ClCompile>
+    <ClCompile Include="kbase\file_version_info.cpp">
+      <Filter>kbase</Filter>
+    </ClCompile>
+    <ClCompile Include="kbase\guid.cpp">
+      <Filter>kbase</Filter>
+    </ClCompile>
+    <ClCompile Include="kbase\logging.cpp">
+      <Filter>kbase</Filter>
+    </ClCompile>
+    <ClCompile Include="kbase\md5.cpp">
+      <Filter>kbase</Filter>
+    </ClCompile>
+    <ClCompile Include="kbase\path_service.cpp">
+      <Filter>kbase</Filter>
+    </ClCompile>
+    <ClCompile Include="kbase\pickle.cpp">
+      <Filter>kbase</Filter>
+    </ClCompile>
+    <ClCompile Include="kbase\registry.cpp">
+      <Filter>kbase</Filter>
+    </ClCompile>
+    <ClCompile Include="kbase\sha.cpp">
+      <Filter>kbase</Filter>
+    </ClCompile>
+    <ClCompile Include="kbase\string_format.cpp">
+      <Filter>kbase</Filter>
+    </ClCompile>
+    <ClCompile Include="kbase\string_piece.cpp">
+      <Filter>kbase</Filter>
+    </ClCompile>
+    <ClCompile Include="kbase\string_util.cpp">
+      <Filter>kbase</Filter>
+    </ClCompile>
+    <ClCompile Include="kbase\sys_info.cpp">
+      <Filter>kbase</Filter>
+    </ClCompile>
+    <ClCompile Include="kbase\sys_string_encoding_conversions.cpp">
+      <Filter>kbase</Filter>
+    </ClCompile>
+    <ClCompile Include="kbase\version_util.cpp">
+      <Filter>kbase</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="kbase\at_exit_manager.h" />
-    <ClInclude Include="kbase\auto_reset.h" />
-    <ClInclude Include="kbase\logging.h" />
-    <ClInclude Include="kbase\scope_guard.h" />
-    <ClInclude Include="kbase\strings\string_format.h">
-      <Filter>strings</Filter>
+    <ClInclude Include="kbase\at_exit_manager.h">
+      <Filter>kbase</Filter>
     </ClInclude>
-    <ClInclude Include="kbase\strings\string_piece.h">
-      <Filter>strings</Filter>
+    <ClInclude Include="kbase\auto_reset.h">
+      <Filter>kbase</Filter>
     </ClInclude>
-    <ClInclude Include="kbase\strings\string_util.h">
-      <Filter>strings</Filter>
+    <ClInclude Include="kbase\base_path_provider.h">
+      <Filter>kbase</Filter>
     </ClInclude>
-    <ClInclude Include="kbase\strings\sys_string_encoding_conversions.h">
-      <Filter>strings</Filter>
+    <ClInclude Include="kbase\base64.h">
+      <Filter>kbase</Filter>
     </ClInclude>
-    <ClInclude Include="kbase\pickle.h" />
-    <ClInclude Include="kbase\files\file_path.h">
-      <Filter>files</Filter>
+    <ClInclude Include="kbase\basic_types.h">
+      <Filter>kbase</Filter>
     </ClInclude>
-    <ClInclude Include="kbase\files\file_enumerator.h">
-      <Filter>files</Filter>
+    <ClInclude Include="kbase\command_line.h">
+      <Filter>kbase</Filter>
     </ClInclude>
-    <ClInclude Include="kbase\version_util.h" />
-    <ClInclude Include="kbase\registry.h" />
-    <ClInclude Include="kbase\error_exception_util.h" />
-    <ClInclude Include="kbase\sys_info.h" />
-    <ClInclude Include="kbase\date_time.h" />
-    <ClInclude Include="kbase\path_service.h" />
-    <ClInclude Include="kbase\base_path_provider.h" />
-    <ClInclude Include="kbase\basic_types.h" />
-    <ClInclude Include="kbase\files\file_util.h">
-      <Filter>files</Filter>
+    <ClInclude Include="kbase\date_time.h">
+      <Filter>kbase</Filter>
     </ClInclude>
-    <ClInclude Include="kbase\files\file_info.h">
-      <Filter>files</Filter>
+    <ClInclude Include="kbase\environment.h">
+      <Filter>kbase</Filter>
     </ClInclude>
-    <ClInclude Include="kbase\memory\scoped_handle.h">
-      <Filter>memory</Filter>
+    <ClInclude Include="kbase\error_exception_util.h">
+      <Filter>kbase</Filter>
     </ClInclude>
-    <ClInclude Include="kbase\memory\singleton.h">
-      <Filter>memory</Filter>
+    <ClInclude Include="kbase\file_enumerator.h">
+      <Filter>kbase</Filter>
     </ClInclude>
-    <ClInclude Include="kbase\memory\lazy.h">
-      <Filter>memory</Filter>
+    <ClInclude Include="kbase\file_info.h">
+      <Filter>kbase</Filter>
     </ClInclude>
-    <ClInclude Include="kbase\command_line.h" />
-    <ClInclude Include="kbase\memory\lru_cache.h">
-      <Filter>memory</Filter>
+    <ClInclude Include="kbase\file_path.h">
+      <Filter>kbase</Filter>
     </ClInclude>
-    <ClInclude Include="kbase\files\file_version_info.h">
-      <Filter>files</Filter>
+    <ClInclude Include="kbase\file_util.h">
+      <Filter>kbase</Filter>
     </ClInclude>
-    <ClInclude Include="kbase\environment.h" />
-    <ClInclude Include="kbase\base64.h" />
-    <ClInclude Include="kbase\guid.h" />
-    <ClInclude Include="kbase\md5.h" />
-    <ClInclude Include="kbase\sha.h" />
+    <ClInclude Include="kbase\file_version_info.h">
+      <Filter>kbase</Filter>
+    </ClInclude>
+    <ClInclude Include="kbase\guid.h">
+      <Filter>kbase</Filter>
+    </ClInclude>
+    <ClInclude Include="kbase\lazy.h">
+      <Filter>kbase</Filter>
+    </ClInclude>
+    <ClInclude Include="kbase\logging.h">
+      <Filter>kbase</Filter>
+    </ClInclude>
+    <ClInclude Include="kbase\lru_cache.h">
+      <Filter>kbase</Filter>
+    </ClInclude>
+    <ClInclude Include="kbase\md5.h">
+      <Filter>kbase</Filter>
+    </ClInclude>
+    <ClInclude Include="kbase\path_service.h">
+      <Filter>kbase</Filter>
+    </ClInclude>
+    <ClInclude Include="kbase\pickle.h">
+      <Filter>kbase</Filter>
+    </ClInclude>
+    <ClInclude Include="kbase\registry.h">
+      <Filter>kbase</Filter>
+    </ClInclude>
+    <ClInclude Include="kbase\scope_guard.h">
+      <Filter>kbase</Filter>
+    </ClInclude>
+    <ClInclude Include="kbase\scoped_handle.h">
+      <Filter>kbase</Filter>
+    </ClInclude>
+    <ClInclude Include="kbase\sha.h">
+      <Filter>kbase</Filter>
+    </ClInclude>
+    <ClInclude Include="kbase\singleton.h">
+      <Filter>kbase</Filter>
+    </ClInclude>
+    <ClInclude Include="kbase\string_format.h">
+      <Filter>kbase</Filter>
+    </ClInclude>
+    <ClInclude Include="kbase\string_piece.h">
+      <Filter>kbase</Filter>
+    </ClInclude>
+    <ClInclude Include="kbase\string_util.h">
+      <Filter>kbase</Filter>
+    </ClInclude>
+    <ClInclude Include="kbase\sys_info.h">
+      <Filter>kbase</Filter>
+    </ClInclude>
+    <ClInclude Include="kbase\sys_string_encoding_conversions.h">
+      <Filter>kbase</Filter>
+    </ClInclude>
+    <ClInclude Include="kbase\version_util.h">
+      <Filter>kbase</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

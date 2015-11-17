@@ -2,11 +2,11 @@
 #include "stdafx.h"
 
 #include "gtest\gtest.h"
-#include "kbase\files\file_version_info.h"
+#include "kbase\file_version_info.h"
 
 #include <iostream>
 
-#include "kbase\files\file_path.h"
+#include "kbase\file_path.h"
 
 namespace {
 

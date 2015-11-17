@@ -5,7 +5,7 @@
 #include "stdafx.h"
 
 #include "gtest\gtest.h"
-#include "kbase\memory\lru_cache.h"
+#include "kbase\lru_cache.h"
 
 #include <algorithm>
 #include <memory>
@@ -17,7 +17,7 @@ template<typename CacheType>
 bool CacheOrderingMatch(const CacheType& cache,
                         const std::vector<typename CacheType::key_type>& seq)
 {
-    return 
+    return
         std::equal(cache.begin(), cache.end(), seq.begin(),
                [](const typename CacheType::value_type& entry,
                   const typename CacheType::key_type& key)->bool {

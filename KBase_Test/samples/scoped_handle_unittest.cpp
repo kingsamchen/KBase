@@ -7,7 +7,7 @@
 #include <vector>
 
 #include "gtest\gtest.h"
-#include "kbase\memory\scoped_handle.h"
+#include "kbase\scoped_handle.h"
 
 using kbase::ScopedSysHandle;
 using kbase::ScopedStdioHandle;

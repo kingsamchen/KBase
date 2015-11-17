@@ -17,7 +17,7 @@
 
 #include "kbase\basic_types.h"
 #include "kbase\error_exception_util.h"
-#include "kbase\memory\scoped_handle.h"
+#include "kbase\scoped_handle.h"
 
 namespace {
 

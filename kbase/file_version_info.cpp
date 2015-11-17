@@ -2,12 +2,12 @@
  @ Kingsley Chen
 */
 
-#include "kbase\files\file_version_info.h"
+#include "kbase\file_version_info.h"
 
 #include <utility>
 
 #include "kbase\error_exception_util.h"
-#include "kbase\files\file_path.h"
+#include "kbase\file_path.h"
 
 #pragma comment(lib, "version.lib")
 

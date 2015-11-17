@@ -9,8 +9,8 @@
 #include <tuple>
 
 #include "kbase\error_exception_util.h"
-#include "kbase\files\file_path.h"
-#include "kbase\strings\sys_string_encoding_conversions.h"
+#include "kbase\file_path.h"
+#include "kbase\sys_string_encoding_conversions.h"
 #include "kbase\version_util.h"
 
 namespace kbase {

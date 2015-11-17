@@ -2,7 +2,7 @@
  @ Kingsley Chen
 */
 
-#include "kbase\strings\string_format.h"
+#include "kbase\string_format.h"
 
 #include <cctype>
 #include <cstdarg>

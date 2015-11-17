@@ -6,7 +6,7 @@
 
 #include <iostream>
 
-#include "kbase\files\file_path.h"
+#include "kbase\file_path.h"
 #include "kbase\error_exception_util.h"
 #include "kbase\sys_info.h"
 

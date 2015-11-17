@@ -5,7 +5,7 @@
 #include "stdafx.h"
 
 #include "gtest\gtest.h"
-#include "kbase\files\file_path.h"
+#include "kbase\file_path.h"
 
 #include <algorithm>
 #include <functional>
