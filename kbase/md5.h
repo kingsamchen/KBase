@@ -1,5 +1,5 @@
 /*
- @ Kingsley Chen
+ @ 0xCCCCCCCC
 */
 
 #if defined(_MSC_VER)
@@ -17,15 +17,16 @@ namespace kbase {
 // the openssl-compatible version, and is in the public domain.
 
 // Any 32-bit or wider unsigned integer data type will do
-using MD5uint32 = unsigned int;
+using MD5uint = uint32_t;
+using MD5byte = uint8_t;
 
-using MD5Digest = std::array<unsigned char, 16>;
+using MD5Digest = std::array<MD5byte, 16>;
 
 struct MD5Context {
-    MD5uint32 lo, hi;
-    MD5uint32 a, b, c, d;
-    unsigned char buffer[64];
-    MD5uint32 block[16];
+    MD5uint lo, hi;
+    MD5uint a, b, c, d;
+    MD5byte buffer[64];
+    MD5uint block[16];
 };
 
 // The following three functions are all together used to incrementally calculate

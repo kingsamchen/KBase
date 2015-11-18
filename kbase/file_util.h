@@ -1,13 +1,13 @@
 /*
- @ Kingsley Chen
+ @ 0xCCCCCCCC
 */
 
 #if defined(_MSC_VER)
 #pragma once
 #endif
 
-#ifndef KBASE_FILES_FILE_UTIL_H_
-#define KBASE_FILES_FILE_UTIL_H_
+#ifndef KBASE_FILE_UTIL_H_
+#define KBASE_FILE_UTIL_H_
 
 #include <string>
 
@@ -84,4 +84,4 @@ void AppendStringToFile(const FilePath& path, const std::string& data);
 
 }   // namespace kbase
 
-#endif  // KBASE_FILES_FILE_UTIL_H_
+#endif  // KBASE_FILE_UTIL_H_

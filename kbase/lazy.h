@@ -1,13 +1,13 @@
 /*
- @ Kingsley Chen
+ @ 0xCCCCCCCC
 */
 
 #if defined(_MSC_VER)
 #pragma once
 #endif
 
-#ifndef KBASE_MEMORY_LAZY_H_
-#define KBASE_MEMORY_LAZY_H_
+#ifndef KBASE_LAZY_H_
+#define KBASE_LAZY_H_
 
 #include <functional>
 #include <memory>
@@ -76,4 +76,4 @@ private:
 
 }   // namespace kbase
 
-#endif  // KBASE_MEMORY_LAZY_H_
+#endif  // KBASE_LAZY_H_

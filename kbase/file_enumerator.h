@@ -1,13 +1,13 @@
 /*
- @ Kingsley Chen
+ @ 0xCCCCCCCC
 */
 
 #if defined(_MSC_VER)
 #pragma once
 #endif
 
-#ifndef KBASE_FILES_FILE_ENUMERATOR_H_
-#define KBASE_FILES_FILE_ENUMERATOR_H_
+#ifndef KBASE_FILE_ENUMERATOR_H_
+#define KBASE_FILE_ENUMERATOR_H_
 
 #include <cstdint>
 #include <stack>
@@ -82,4 +82,4 @@ private:
 
 }   // namespace kbase
 
-#endif  // KBASE_FILES_FILE_ENUMERATOR_H_
+#endif  // KBASE_FILE_ENUMERATOR_H_

@@ -1,5 +1,5 @@
 /*
- @ Kingsley Chen
+ @ 0xCCCCCCCC
 */
 
 #include "kbase\file_util.h"
@@ -150,8 +150,8 @@ void DuplicateDirectory(const FilePath& src, const FilePath& dest, bool recursiv
         bool rv = full_src.AppendRelativePath(cur, &dest_for_cur);
         ENSURE(rv)(full_src.value())(cur.value())(dest_for_cur.value()).raise();
         if (file_it.GetInfo().is_directory() && !DirectoryExists(dest_for_cur)) {
-            BOOL rv = CreateDirectoryW(dest_for_cur.value().c_str(), nullptr);
-            ThrowLastErrorIf(!rv, "Failed to create top-level dest dir");
+            BOOL ret = CreateDirectoryW(dest_for_cur.value().c_str(), nullptr);
+            ThrowLastErrorIf(!ret, "Failed to create top-level dest dir");
         } else {
             DuplicateFile(cur, dest_for_cur);
         }

@@ -1,13 +1,13 @@
 /*
- @ Kingsley Chen
+ @ 0xCCCCCCCC
 */
 
-#if _MSC_VER > 1000
+#if defined(_MSC_VER)
 #pragma once
 #endif
 
-#ifndef KBASE_STRINGS_STRING_PIECE_H_
-#define KBASE_STRINGS_STRING_PIECE_H_
+#ifndef KBASE_STRING_PIECE_H_
+#define KBASE_STRING_PIECE_H_
 
 // try to include few header files as you could to speed up compilation
 
@@ -614,7 +614,7 @@ namespace std {
 
 template<>
 struct std::hash<kbase::StringPiece> {
-    size_t operator()(const kbase::StringPiece& sp)
+    size_t operator()(const kbase::StringPiece& sp) const
     {
         HASH_STRING_PIECE(sp);
     }
@@ -622,7 +622,7 @@ struct std::hash<kbase::StringPiece> {
 
 template<>
 struct std::hash<kbase::WStringPiece> {
-    size_t operator()(const kbase::WStringPiece& sp)
+    size_t operator()(const kbase::WStringPiece& sp) const
     {
         HASH_STRING_PIECE(sp);
     }
@@ -630,4 +630,4 @@ struct std::hash<kbase::WStringPiece> {
 
 }   // namespace std
 
-#endif  // KBASE_STRINGS_STRING_PIECE_H_
+#endif  // KBASE_STRING_PIECE_H_

@@ -1,13 +1,13 @@
 /*
- @ Kingsley Chen
+ @ 0xCCCCCCCC
 */
 
 #if defined(_MSC_VER)
 #pragma once
 #endif
 
-#ifndef KBASE_MEMORY_LRU_CACHE_H_
-#define KBASE_MEMORY_LRU_CACHE_H_
+#ifndef KBASE_LRU_CACHE_H_
+#define KBASE_LRU_CACHE_H_
 
 #include <map>
 #include <unordered_map>
@@ -231,4 +231,4 @@ using LRUHashCache = LRUCache<Key, Entry, HashMap>;
 
 }   // namespace kbase
 
-#endif  // KBASE_MEMORY_LRU_CACHE_H_
+#endif  // KBASE_LRU_CACHE_H_

@@ -1,13 +1,13 @@
 /*
- @ Kingsley Chen
+ @ 0xCCCCCCCC
 */
 
-#if _MSC_VER > 1000
+#if defined(_MSC_VER)
 #pragma once
 #endif
 
-#ifndef KBASE_STRINGS_STRING_FORMAT_H_
-#define KBASE_STRINGS_STRING_FORMAT_H_
+#ifndef KBASE_STRING_FORMAT_H_
+#define KBASE_STRING_FORMAT_H_
 
 #include <algorithm>
 #include <cassert>
@@ -68,8 +68,8 @@ template<typename CharT>
 struct Placeholder {
     using StrT = typename FmtStr<CharT>::String;
 
-    unsigned long index = static_cast<unsigned long>(-1);
-    unsigned long pos = static_cast<unsigned long>(-1);
+    size_t index = static_cast<size_t>(-1);
+    size_t pos = static_cast<size_t>(-1);
     StrT format_specifier;
     StrT formatted;
 
@@ -450,4 +450,4 @@ std::wstring StringFormat(const wchar_t* fmt, Args... args)
 
 }   // namespace kbase
 
-#endif  // KBASE_STRINGS_STRING_FORMAT_H_
+#endif  // KBASE_STRING_FORMAT_H_

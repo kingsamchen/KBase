@@ -1,5 +1,5 @@
 /*
- @ Kingsley Chen
+ @ 0xCCCCCCCC
 */
 
 #include "kbase\path_service.h"
@@ -30,7 +30,7 @@ namespace {
 typedef kbase::PathService::ProviderFunc ProviderFunc;
 typedef std::unordered_map<PathKey, FilePath> PathMap;
 
-// Both |start| and |end| are used to prevent path keys claimed by different 
+// Both |start| and |end| are used to prevent path keys claimed by different
 // providers being overlapped.
 struct PathProvider {
     ProviderFunc fn;
