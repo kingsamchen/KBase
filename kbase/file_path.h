@@ -1,13 +1,13 @@
 /*
- @ Kingsley Chen
+ @ 0xCCCCCCCC
 */
 
 #if defined(_MSC_VER)
 #pragma once
 #endif
 
-#ifndef KBASE_FILES_FILE_PATH_H_
-#define KBASE_FILES_FILE_PATH_H_
+#ifndef KBASE_FILE_PATH_H_
+#define KBASE_FILE_PATH_H_
 
 #include <string>
 #include <vector>
@@ -214,7 +214,7 @@ namespace std {
 
 template<>
 struct std::hash<kbase::FilePath> {
-    size_t operator()(const kbase::FilePath& file_path)
+    size_t operator()(const kbase::FilePath& file_path) const
     {
         return std::hash<kbase::PathString>()(file_path.value());
     }
@@ -222,4 +222,4 @@ struct std::hash<kbase::FilePath> {
 
 }   // namespace std
 
-#endif  // KBASE_FILES_FILE_PATH_H_
+#endif  // KBASE_FILE_PATH_H_

@@ -1,13 +1,13 @@
 /*
- @ Kingsley Chen
+ @ 0xCCCCCCCC
 */
 
-#if _MSC_VER > 1000
+#if defined(_MSC_VER)
 #pragma once
 #endif
 
-#ifndef KBASE_STRINGS_STRING_UTIL_H_
-#define KBASE_STRINGS_STRING_UTIL_H_
+#ifndef KBASE_STRING_UTIL_H_
+#define KBASE_STRING_UTIL_H_
 
 #include <cassert>
 #include <string>
@@ -242,4 +242,4 @@ struct ToUnsigned<wchar_t> {
 
 }   // namespace kbase
 
-#endif  // KBASE_STRINGS_STRING_UTIL_H_
+#endif  // KBASE_STRING_UTIL_H_

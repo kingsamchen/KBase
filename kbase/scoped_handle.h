@@ -1,13 +1,13 @@
 /*
- @ Kingsley Chen
+ @ 0xCCCCCCCC
 */
 
 #if defined(_MSC_VER)
 #pragma once
 #endif
 
-#ifndef KBASE_MEMORY_SCOPED_HANDLE_H_
-#define KBASE_MEMORY_SCOPED_HANDLE_H_
+#ifndef KBASE_SCOPED_HANDLE_H_
+#define KBASE_SCOPED_HANDLE_H_
 
 #include <Windows.h>
 
@@ -179,4 +179,4 @@ using ScopedStdioHandle = ScopedHandle<FILE*>;
 
 }   // namespace kbase
 
-#endif  // KBASE_MEMORY_SCOPED_HANDLE_H_
+#endif  // KBASE_SCOPED_HANDLE_H_

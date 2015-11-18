@@ -1,5 +1,5 @@
 /*
- @ Kingsley Chen
+ @ 0xCCCCCCCC
 */
 
 #include "kbase\string_format.h"
@@ -171,10 +171,10 @@ void StringAppendPrintfT(strT* str, const typename strT::value_type* fmt, va_lis
         // if you use VS2013 or higher, or compilers that support C99
         // you alternatively can use |va_copy| to make a copy of |ap|
         // during each iteration.
-        int ret = vsnprintfT(&dynamic_buf[0], tentative_char_count,
+        int rv = vsnprintfT(&dynamic_buf[0], tentative_char_count,
                              tentative_char_count - 1, fmt, ap);
-        if (ret >= 0) {
-            str->append(&dynamic_buf[0], ret);
+        if (rv >= 0) {
+            str->append(&dynamic_buf[0], rv);
             return;
         }
     }

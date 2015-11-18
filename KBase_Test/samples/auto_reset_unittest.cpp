@@ -1,3 +1,6 @@
+/*
+ @ 0xCCCCCCCC
+*/
 
 #include "stdafx.h"
 

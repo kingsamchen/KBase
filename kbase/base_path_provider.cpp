@@ -1,5 +1,5 @@
 /*
- @ Kingsley Chen
+ @ 0xCCCCCCCC
 */
 
 #include "kbase\base_path_provider.h"

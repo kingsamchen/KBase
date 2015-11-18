@@ -1,5 +1,5 @@
 /*
- @ Kingsley Chen
+ @ 0xCCCCCCCC
 */
 
 // Revised from the openssl version.
@@ -97,7 +97,7 @@ inline void TuckInto(To& dest, const From& src)
 
 // This processes one or more 64-byte data blocks, but does NOT update
 // the bit counters. There are no alignment requirements.
-const void* Transform(MD5Context* context, const void* data, size_t size)
+const void* Transform(MD5Context* context, const void* data, unsigned int size)
 {
     MD5uint32 a, b, c, d;
     MD5uint32 saved_a, saved_b, saved_c, saved_d;
@@ -217,7 +217,7 @@ void MD5Init(MD5Context* context)
     context->hi = 0;
 }
 
-void MD5Update(MD5Context* context, const void* data, size_t size)
+void MD5Update(MD5Context* context, const void* data, unsigned int size)
 {
     MD5uint32 saved_lo = context->lo;
     unsigned long used, free;
@@ -313,7 +313,7 @@ std::string MD5DigestToString(const MD5Digest& digest)
     return str;
 }
 
-void MD5Sum(const void* data, size_t size, MD5Digest* digest)
+void MD5Sum(const void* data, unsigned int size, MD5Digest* digest)
 {
     MD5Context context;
     MD5Init(&context);
@@ -324,7 +324,8 @@ void MD5Sum(const void* data, size_t size, MD5Digest* digest)
 std::string MD5String(const std::string& str)
 {
     MD5Digest digest;
-    MD5Sum(str.data(), str.size(), &digest);
+    // TODO: Get rid of the cast.
+    MD5Sum(str.data(), static_cast<unsigned int>(str.size()), &digest);
 
     return MD5DigestToString(digest);
 }

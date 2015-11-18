@@ -1,13 +1,13 @@
 /*
- @ Kingsley Chen
+ @ 0xCCCCCCCC
 */
 
-#if _MSC_VER > 1000
+#if defined(_MSC_VER)
 #pragma once
 #endif
 
-#ifndef KBASE_STRINGS_SYS_STRING_ENCODING_CONVERSIONS_H_
-#define KBASE_STRINGS_SYS_STRING_ENCODING_CONVERSIONS_H_
+#ifndef KBASE_SYS_STRING_ENCODING_CONVERSIONS_H_
+#define KBASE_SYS_STRING_ENCODING_CONVERSIONS_H_
 
 #include <string>
 
@@ -38,4 +38,4 @@ std::string WideToASCII(const WStringPiece& wide_str);
 
 }   // namespace kbase
 
-#endif  // KBASE_STRINGS_SYS_STRING_ENCODING_CONVERSIONS_H_
+#endif  // KBASE_SYS_STRING_ENCODING_CONVERSIONS_H_

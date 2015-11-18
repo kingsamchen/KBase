@@ -1,13 +1,13 @@
 /*
- @ Kingsley Chen
+ @ 0xCCCCCCCC
 */
 
 #if defined(_MSC_VER)
 #pragma once
 #endif
 
-#ifndef KBASE_MEMORY_SINGLETON_H_
-#define KBASE_MEMORY_SINGLETON_H_
+#ifndef KBASE_SINGLETON_H_
+#define KBASE_SINGLETON_H_
 
 #include <mutex>
 
@@ -76,4 +76,4 @@ std::once_flag Singleton<T, Traits>::flag_;
 
 }   // namespace kbase
 
-#endif  // KBASE_MEMORY_SINGLETON_H_
+#endif  // KBASE_SINGLETON_H_

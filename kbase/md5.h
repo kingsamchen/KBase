@@ -1,5 +1,5 @@
 /*
- @ Kingsley Chen
+ @ 0xCCCCCCCC
 */
 
 #if defined(_MSC_VER)
@@ -33,7 +33,7 @@ struct MD5Context {
 
 void MD5Init(MD5Context* context);
 
-void MD5Update(MD5Context* context, const void* data, size_t size);
+void MD5Update(MD5Context* context, const void* data, unsigned int size);
 
 void MD5Final(MD5Context* context, MD5Digest* digest);
 
@@ -41,7 +41,7 @@ void MD5Final(MD5Context* context, MD5Digest* digest);
 std::string MD5DigestToString(const MD5Digest& digest);
 
 // Calculates the MD5 checksum of a given data.
-void MD5Sum(const void* data, size_t size, MD5Digest* digest);
+void MD5Sum(const void* data, unsigned int size, MD5Digest* digest);
 
 // Returns the MD5, in hexadecimal, of the |str|.
 std::string MD5String(const std::string& str);

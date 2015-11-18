@@ -1,13 +1,13 @@
 /*
- @ Kingsley Chen
+ @ 0xCCCCCCCC
 */
 
 #if defined(_MSC_VER)
 #pragma once
 #endif
 
-#ifndef KBASE_FILES_FILE_VERSION_INFO_H_
-#define KBASE_FILES_FILE_VERSION_INFO_H_
+#ifndef KBASE_FILE_VERSION_INFO_H_
+#define KBASE_FILE_VERSION_INFO_H_
 
 #include <Windows.h>
 
@@ -124,4 +124,4 @@ private:
 
 }   // namespace kbase
 
-#endif  // KBASE_FILES_FILE_VERSION_INFO_H_
+#endif  // KBASE_FILE_VERSION_INFO_H_
