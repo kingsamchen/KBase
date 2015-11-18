@@ -17,15 +17,16 @@ namespace kbase {
 // the openssl-compatible version, and is in the public domain.
 
 // Any 32-bit or wider unsigned integer data type will do
-using MD5uint32 = unsigned int;
+using MD5uint = uint32_t;
+using MD5byte = uint8_t;
 
-using MD5Digest = std::array<unsigned char, 16>;
+using MD5Digest = std::array<MD5byte, 16>;
 
 struct MD5Context {
-    MD5uint32 lo, hi;
-    MD5uint32 a, b, c, d;
-    unsigned char buffer[64];
-    MD5uint32 block[16];
+    MD5uint lo, hi;
+    MD5uint a, b, c, d;
+    MD5byte buffer[64];
+    MD5uint block[16];
 };
 
 // The following three functions are all together used to incrementally calculate
@@ -33,7 +34,7 @@ struct MD5Context {
 
 void MD5Init(MD5Context* context);
 
-void MD5Update(MD5Context* context, const void* data, unsigned int size);
+void MD5Update(MD5Context* context, const void* data, size_t size);
 
 void MD5Final(MD5Context* context, MD5Digest* digest);
 
@@ -41,7 +42,7 @@ void MD5Final(MD5Context* context, MD5Digest* digest);
 std::string MD5DigestToString(const MD5Digest& digest);
 
 // Calculates the MD5 checksum of a given data.
-void MD5Sum(const void* data, unsigned int size, MD5Digest* digest);
+void MD5Sum(const void* data, size_t size, MD5Digest* digest);
 
 // Returns the MD5, in hexadecimal, of the |str|.
 std::string MD5String(const std::string& str);

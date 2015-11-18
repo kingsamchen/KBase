@@ -43,12 +43,11 @@
 
 #include "kbase\md5.h"
 
-#include <cstring>
-
 namespace {
 
+using kbase::MD5uint;
+using kbase::MD5byte;
 using kbase::MD5Context;
-using kbase::MD5uint32;
 
 // The basic MD5 functions.
 // F and G are optimized compared to their RFC 1321 definitions for
@@ -72,16 +71,16 @@ using kbase::MD5uint32;
 // doesn't work.
 #if defined(_MSC_VER) ||defined(__i386__) || defined(__x86_64__)
 #define SET(n) \
-    (*(MD5uint32 *)&ptr[(n) * 4])
+    (*(MD5uint *)&ptr[(n) * 4])
 #define GET(n) \
     SET(n)
 #else
 #define SET(n) \
     (context->block[(n)] = \
-    (MD5uint32)ptr[(n) * 4] | \
-    ((MD5uint32)ptr[(n) * 4 + 1] << 8) | \
-    ((MD5uint32)ptr[(n) * 4 + 2] << 16) | \
-    ((MD5uint32)ptr[(n) * 4 + 3] << 24))
+    (MD5uint)ptr[(n) * 4] | \
+    ((MD5uint)ptr[(n) * 4 + 1] << 8) | \
+    ((MD5uint)ptr[(n) * 4 + 2] << 16) | \
+    ((MD5uint)ptr[(n) * 4 + 3] << 24))
 #define GET(n) \
     (context->block[(n)])
 #endif
@@ -97,11 +96,11 @@ inline void TuckInto(To& dest, const From& src)
 
 // This processes one or more 64-byte data blocks, but does NOT update
 // the bit counters. There are no alignment requirements.
-const void* Transform(MD5Context* context, const void* data, unsigned int size)
+const void* Transform(MD5Context* context, const void* data, size_t size)
 {
-    MD5uint32 a, b, c, d;
-    MD5uint32 saved_a, saved_b, saved_c, saved_d;
-    const unsigned char* ptr = static_cast<const unsigned char*>(data);
+    MD5uint a, b, c, d;
+    MD5uint saved_a, saved_b, saved_c, saved_d;
+    const MD5byte* ptr = static_cast<const MD5byte*>(data);
 
     a = context->a;
     b = context->b;
@@ -217,16 +216,16 @@ void MD5Init(MD5Context* context)
     context->hi = 0;
 }
 
-void MD5Update(MD5Context* context, const void* data, unsigned int size)
+void MD5Update(MD5Context* context, const void* data, size_t size)
 {
-    MD5uint32 saved_lo = context->lo;
-    unsigned long used, free;
+    MD5uint saved_lo = context->lo;
+    MD5uint used, free;
 
-    if ((context->lo = (saved_lo + size) & 0x1fffffff) < saved_lo) {
+    if ((context->lo = static_cast<MD5uint>((saved_lo + size) & 0x1fffffff)) < saved_lo) {
         context->hi++;
     }
 
-    context->hi += size >> 29;
+    context->hi += static_cast<MD5uint>(size >> 29);
     used = saved_lo & 0x3f;
 
     if (used) {
@@ -237,13 +236,13 @@ void MD5Update(MD5Context* context, const void* data, unsigned int size)
         }
 
         memcpy(&context->buffer[used], data, free);
-        data = (unsigned char *)data + free;
+        data = static_cast<const MD5byte*>(data) + free;
         size -= free;
         Transform(context, context->buffer, 64);
     }
 
     if (size >= 64) {
-        data = Transform(context, data, size & ~(unsigned long)0x3f);
+        data = Transform(context, data, size & ~static_cast<size_t>(0x3f));
         size &= 0x3f;
     }
 
@@ -305,7 +304,7 @@ std::string MD5DigestToString(const MD5Digest& digest)
 
     std::string str;
     str.reserve(16);
-    for (unsigned char n : digest) {
+    for (auto n : digest) {
         str += kHexDigits[(n >> 4) & 0x0F];
         str += kHexDigits[n & 0x0F];
     }
@@ -313,7 +312,7 @@ std::string MD5DigestToString(const MD5Digest& digest)
     return str;
 }
 
-void MD5Sum(const void* data, unsigned int size, MD5Digest* digest)
+void MD5Sum(const void* data, size_t size, MD5Digest* digest)
 {
     MD5Context context;
     MD5Init(&context);
@@ -324,8 +323,7 @@ void MD5Sum(const void* data, unsigned int size, MD5Digest* digest)
 std::string MD5String(const std::string& str)
 {
     MD5Digest digest;
-    // TODO: Get rid of the cast.
-    MD5Sum(str.data(), static_cast<unsigned int>(str.size()), &digest);
+    MD5Sum(str.data(), str.size(), &digest);
 
     return MD5DigestToString(digest);
 }
