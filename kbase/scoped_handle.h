@@ -14,6 +14,8 @@
 #include <cstdio>
 #include <cstddef>
 
+#include "kbase\basic_macros.h"
+
 namespace kbase {
 
 template<typename HandleType>
@@ -84,8 +86,6 @@ public:
         : handle_(handle)
     {}
 
-    ScopedHandle(const ScopedHandle&) = delete;
-
     ScopedHandle(ScopedHandle&& other)
     {
         *this = std::move(other);
@@ -95,8 +95,6 @@ public:
     {
         *this = nullptr;
     }
-
-    ScopedHandle& operator=(const ScopedHandle&) = delete;
 
     ScopedHandle& operator=(ScopedHandle&& rhs)
     {
@@ -108,6 +106,8 @@ public:
 
         return *this;
     }
+
+    DISALLOW_COPY(ScopedHandle);
 
     // A convenient way for destroying the object.
     ScopedHandle& operator=(nullptr_t)

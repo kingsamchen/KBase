@@ -11,6 +11,8 @@
 
 #include <functional>
 
+#include "kbase\basic_macros.h"
+
 namespace kbase {
 
 #define SCOPE_GUARD_NAME_CAT(name, line) name##line
@@ -31,14 +33,14 @@ public:
         }
     }
 
+    DISALLOW_COPY(ScopeGuard);
+
+    DISALLOW_MOVE(ScopeGuard);
+
     void Dismiss()
     {
         dismissed_ = true;
     }
-
-    ScopeGuard(const ScopeGuard&) = delete;
-
-    ScopeGuard& operator=(const ScopeGuard&) = delete;
 
 private:
     std::function<void()> on_scope_exit_;

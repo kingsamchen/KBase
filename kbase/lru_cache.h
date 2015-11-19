@@ -12,6 +12,7 @@
 #include <map>
 #include <unordered_map>
 
+#include "kbase\basic_macros.h"
 #include "kbase\error_exception_util.h"
 
 namespace kbase {
@@ -61,15 +62,11 @@ public:
         : max_size_(max_size)
     {}
 
-    LRUCache(const LRUCache&) = delete;
-
     LRUCache(LRUCache&& other)
         : max_size_(std::move(other.max_size_)),
           entry_ordering_list_(std::move(other.entry_ordering_list_)),
           key_table_(std::move(other.key_table_))
     {}
-
-    LRUCache& operator=(const LRUCache&) = delete;
 
     LRUCache& operator=(LRUCache&& rhs)
     {
@@ -85,6 +82,8 @@ public:
     }
 
     ~LRUCache() = default;
+
+    DISALLOW_COPY(LRUCache);
 
     // Add a pair of <key, entry> into the cache. If the key already exists, update
     // the entry.

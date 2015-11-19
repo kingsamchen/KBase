@@ -14,6 +14,7 @@
 #include <string>
 #include <stdexcept>
 
+#include "kbase\basic_macros.h"
 #include "kbase\logging.h"
 #include "kbase\string_format.h"
 #include "kbase\sys_string_encoding_conversions.h"
@@ -69,13 +70,9 @@ public:
 
     ~Guarantor() = default;
 
-    Guarantor(const Guarantor&) = delete;
+    DISALLOW_COPY(Guarantor);
 
-    Guarantor(Guarantor&& other) = delete;
-
-    Guarantor& operator=(const Guarantor&) = delete;
-
-    Guarantor& operator=(Guarantor&& other) = delete;
+    DISALLOW_MOVE(Guarantor);
 
     // Incorporates variable value.
     template<typename T>

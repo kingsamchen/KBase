@@ -15,6 +15,8 @@
 
 #include <Windows.h>
 
+#include "kbase\basic_macros.h"
+
 namespace kbase {
 
 // Some operations when failed would throw Win32Expcetion.
@@ -37,13 +39,11 @@ public:
 
     ~RegKey();
 
-    RegKey(const RegKey&) = delete;
-
-    RegKey& operator=(const RegKey&) = delete;
-
-    // Support for move-semantics.
     RegKey(RegKey&& other);
+
     RegKey& operator=(RegKey&& other);
+
+    DISALLOW_COPY(RegKey);
 
     // Release the ownership of the opened key.
     HKEY Release();
@@ -155,13 +155,11 @@ public:
 
     ~RegKeyIterator();
 
-    // Disallow copy.
-    RegKeyIterator(const RegKeyIterator&) = delete;
-    RegKeyIterator& operator=(const RegKeyIterator&) = delete;
-
     // Support for move-semantics
     RegKeyIterator(RegKeyIterator&& other);
     RegKeyIterator& operator=(RegKeyIterator&& other);
+
+    DISALLOW_COPY(RegKeyIterator);
 
     bool Valid() const
     {

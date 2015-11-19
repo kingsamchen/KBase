@@ -12,6 +12,8 @@
 #include <cstdint>
 #include <string>
 
+#include "kbase\basic_macros.h"
+
 namespace kbase {
 
 class FilePath;
@@ -19,7 +21,12 @@ class FilePath;
 class SysInfo {
 public:
     SysInfo() = delete;
+
     ~SysInfo() = delete;
+
+    DISALLOW_COPY(SysInfo);
+
+    DISALLOW_MOVE(SysInfo);
 
     // Returns the number of logical cores on the machine.
     static unsigned long NumberOfProcessors();

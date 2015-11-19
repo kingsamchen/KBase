@@ -188,5 +188,8 @@
     <ClInclude Include="kbase\version_util.h">
       <Filter>kbase</Filter>
     </ClInclude>
+    <ClInclude Include="kbase\basic_macros.h">
+      <Filter>kbase</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

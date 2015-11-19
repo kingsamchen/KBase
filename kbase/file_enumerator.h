@@ -14,6 +14,7 @@
 
 #include <windows.h>
 
+#include "kbase\basic_macros.h"
 #include "kbase\basic_types.h"
 #include "kbase\date_time.h"
 #include "kbase\file_info.h"
@@ -53,8 +54,9 @@ public:
 
     ~FileEnumerator() = default;
 
-    FileEnumerator(const FileEnumerator&) = delete;
-    FileEnumerator& operator=(const FileEnumerator&) = delete;
+    DISALLOW_COPY(FileEnumerator);
+
+    DISALLOW_MOVE(FileEnumerator);
 
     FilePath Next();
 

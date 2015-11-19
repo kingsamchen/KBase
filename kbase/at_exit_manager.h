@@ -13,6 +13,8 @@
 #include <mutex>
 #include <stack>
 
+#include "kbase\basic_macros.h"
+
 namespace kbase {
 
 class AtExitManager {
@@ -23,13 +25,9 @@ public:
 
     ~AtExitManager();
 
-    AtExitManager(const AtExitManager&) = delete;
+    DISALLOW_COPY(AtExitManager);
 
-    AtExitManager(AtExitManager&&) = delete;
-
-    AtExitManager& operator=(const AtExitManager&) = delete;
-
-    AtExitManager& operator=(AtExitManager&&) = delete;
+    DISALLOW_MOVE(AtExitManager);
 
     static void RegisterCallback(const AtExitCallback& callback);
 
