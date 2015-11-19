@@ -9,6 +9,8 @@
 #ifndef KBASE_AUTO_RESET_H_
 #define KBASE_AUTO_RESET_H_
 
+#include "kbase\basic_macros.h"
+
 namespace kbase {
 
 // Be cautious of that an AutoReset object must have shorter lifetime than
@@ -27,13 +29,9 @@ public:
         *scoped_var_ = std::move(original_value_);
     }
 
-    AutoReset(const AutoReset&) = delete;
+    DISALLOW_COPY(AutoReset);
 
-    AutoReset(AutoReset&&) = delete;
-
-    AutoReset& operator=(const AutoReset&) = delete;
-
-    AutoReset& operator=(AutoReset&&) = delete;
+    DISALLOW_MOVE(AutoReset);
 
 private:
     T* scoped_var_;

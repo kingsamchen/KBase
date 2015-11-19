@@ -15,6 +15,7 @@
 #include <string>
 #include <vector>
 
+#include "kbase\basic_macros.h"
 #include "kbase\basic_types.h"
 
 namespace kbase {
@@ -31,13 +32,9 @@ class FileVersionInfo {
 public:
     ~FileVersionInfo() = default;
 
-    FileVersionInfo(const FileVersionInfo&) = delete;
+    DISALLOW_COPY(FileVersionInfo);
 
-    FileVersionInfo(FileVersionInfo&&) = delete;
-
-    FileVersionInfo& operator=(const FileVersionInfo&) = delete;
-
-    FileVersionInfo& operator=(FileVersionInfo&&) = delete;
+    DISALLOW_MOVE(FileVersionInfo);
 
     static std::unique_ptr<FileVersionInfo> CreateForFile(const FilePath& file);
 

@@ -12,6 +12,8 @@
 #include <map>
 #include <string>
 
+#include "kbase\basic_macros.h"
+
 namespace kbase {
 
 using EnvTable = std::map<std::wstring, std::wstring>;
@@ -20,15 +22,11 @@ class Environment {
 public:
     Environment() = delete;
 
-    Environment(const Environment&) = delete;
-
-    Environment(Environment&&) = delete;
-
-    Environment& operator=(const Environment&) = delete;
-
-    Environment& operator=(Environment&&) = delete;
-
     ~Environment() = delete;
+
+    DISALLOW_COPY(Environment);
+
+    DISALLOW_MOVE(Environment);
 
     // Gets the value of an environment variable.
     // Returns an empty string if no such variable exists.

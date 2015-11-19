@@ -12,6 +12,8 @@
 #include <sstream>
 #include <string>
 
+#include "kbase\basic_macros.h"
+
 namespace kbase {
 
 // These log severities are used to index into the array |log_severity_names|.
@@ -106,16 +108,16 @@ public:
 
     ~LogMessage();
 
+    DISALLOW_COPY(LogMessage);
+
+    DISALLOW_MOVE(LogMessage);
+
     std::ostream& stream()
     {
         return stream_;
     }
 
 private:
-    LogMessage(const LogMessage&) = delete;
-
-    LogMessage& operator=(const LogMessage&) = delete;
-
     // Writes the common info header into the stream.
     // The info header is in the following format:
     //  [pid:tid:mmdd/hhmmss:severity:filename(line)]

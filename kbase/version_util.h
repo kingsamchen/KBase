@@ -11,6 +11,7 @@
 
 #include <string>
 
+#include "kbase\basic_macros.h"
 #include "kbase\singleton.h"
 
 typedef void* HANDLE;
@@ -50,8 +51,9 @@ public:
         WORD service_pack_major;
     };
 
-    OSInfo(const OSInfo&) = delete;
-    OSInfo& operator=(const OSInfo&) = delete;
+    DISALLOW_COPY(OSInfo);
+
+    DISALLOW_MOVE(OSInfo);
 
     static OSInfo* GetInstance();
 
