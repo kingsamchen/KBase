@@ -191,5 +191,8 @@
     <ClInclude Include="kbase\basic_macros.h">
       <Filter>kbase</Filter>
     </ClInclude>
+    <ClInclude Include="kbase\signals.h">
+      <Filter>kbase</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
