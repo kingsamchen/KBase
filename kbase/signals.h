@@ -17,8 +17,11 @@
 
 #include "kbase\basic_macros.h"
 
+namespace kbase {
+
 namespace internal {
 
+// This class/interface makes slots able to disconnect from their associated signal.
 class IDisposable {
 public:
     virtual ~IDisposable() = default;
@@ -146,6 +149,15 @@ private:
 
 }   // namespace internal
 
+// The signal/slot provides yet another thread-safe style of notification/callback mechanism for
+// classes.
+// It aims to displace the observer pattern which is old-fashioned yet extensively employed.
+// A signal object represents a message plugin board. It offers support for a given function to
+// register in, i.e. establishing a connection between the signal and the function. When a message
+// is emitted on a signal, all signed up functions are called, with the message passed in as
+// the parameter.
+// A slot object represents the connection between the function and it's associated signal. Someone
+// with a slot object can disconnect from its signal, to stop receiving any message.
 template<typename... Args>
 class Signal;
 
@@ -246,5 +258,7 @@ public:
 private:
     std::shared_ptr<SignalImpl> impl_;
 };
+
+}   // namespace kbase
 
 #endif  // KBASE_SIGNALS_H_
