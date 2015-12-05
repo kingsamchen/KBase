@@ -25,7 +25,7 @@ using kbase::LogSeverity;
 using kbase::LogItemOptions;
 using kbase::LoggingDestination;
 using kbase::LoggingLockOption;
-using kbase::OldFileOption;
+using kbase::OldFileDisposalOption;
 
 using kbase::PathChar;
 using kbase::PathString;
@@ -34,21 +34,27 @@ using kbase::ScopedStdioHandle;
 using GlobalLockHandle = kbase::ScopedSysHandle;
 using ThreadLockHandle = std::unique_ptr<std::unique_lock<std::mutex>>;
 
-const char* kLogSeverityNames[] {"INFO", "WARNING", "FATAL"};
+const char* kLogSeverityNames[] {"INFO", "WARNING", "ERROR", "FATAL"};
 
-const LogSeverity kAlwaysPrintErrorMinLevel = kbase::LOG_WARNING;
+const LogSeverity kAlwaysPrintErrorMinLevel = kbase::LogSeverity::LOG_ERROR;
 
 LogItemOptions log_item_options = LogItemOptions::ENABLE_TIMESTAMP;
 
 LoggingDestination logging_dest = LoggingDestination::LOG_TO_ALL;
 
-OldFileOption old_file_option = OldFileOption::APPEND_TO_OLD_LOG_FILE;
+OldFileDisposalOption old_file_option = OldFileDisposalOption::APPEND_TO_OLD_LOG_FILE;
 
 LoggingLockOption logging_lock_option = LoggingLockOption::USE_GLOBAL_LOCK;
 
 ScopedStdioHandle log_file;
 
 const PathChar kLogFileName[] = L"_debug_message.log";
+
+template<typename E>
+constexpr auto ToUnderlying(E e)
+{
+    return static_cast<std::underlying_type_t<E>>(e);
+}
 
 // Due to the performance consideration, I decide not to use std::string and
 // neither StringPiece, since I also want to keep this file more independent
@@ -92,7 +98,7 @@ bool InitLogFile()
 {
     PathString&& log_file_name = GetDefaultLogFile();
 
-    if (old_file_option == OldFileOption::DELETE_OLD_LOG_FILE) {
+    if (old_file_option == OldFileDisposalOption::DELETE_OLD_LOG_FILE) {
         if (log_file) {
             log_file = nullptr;
         }
@@ -201,16 +207,16 @@ namespace kbase {
 
 LoggingSettings::LoggingSettings()
  : log_item_options(LogItemOptions::ENABLE_TIMESTAMP),
-   logging_dest(LoggingDestination::LOG_TO_ALL),
-   old_file_option(OldFileOption::APPEND_TO_OLD_LOG_FILE),
+   logging_destination(LoggingDestination::LOG_TO_ALL),
+   old_file_disposal_option(OldFileDisposalOption::APPEND_TO_OLD_LOG_FILE),
    logging_lock_option(LoggingLockOption::USE_GLOBAL_LOCK)
 {}
 
 void InitLoggingSettings(const LoggingSettings& settings)
 {
     log_item_options = settings.log_item_options;
-    logging_dest = settings.logging_dest;
-    old_file_option = settings.old_file_option;
+    logging_dest = settings.logging_destination;
+    old_file_option = settings.old_file_disposal_option;
     logging_lock_option = settings.logging_lock_option;
 
     LoggingLock::InitLock();
@@ -223,13 +229,13 @@ LogMessage::LogMessage(const char* file, int line, LogSeverity severity)
 }
 
 LogMessage::LogMessage(const char* file, int line)
- : LogMessage(file, line, LOG_INFO)
+ : LogMessage(file, line, LogSeverity::LOG_INFO)
 {}
 
 LogMessage::~LogMessage()
 {
 #if _DEBUG
-    if (severity_ == LOG_FATAL) {
+    if (severity_ == LogSeverity::LOG_FATAL) {
         // TODO: log stack trace information
     }
 #endif
@@ -280,7 +286,7 @@ void LogMessage::Init(const char* file, int line)
                 << ':';
     }
 
-    stream_ << kLogSeverityNames[severity_];
+    stream_ << kLogSeverityNames[ToUnderlying(severity_)];
 
     const char* file_name = ExtractFileName(file);
 

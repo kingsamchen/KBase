@@ -16,16 +16,17 @@
 
 namespace kbase {
 
-// These log severities are used to index into the array |log_severity_names|.
-using LogSeverity = int;
-
-const LogSeverity LOG_INFO = 0;
-const LogSeverity LOG_WARNING = 1;
-const LogSeverity LOG_FATAL = 2;
+// These log severities will be used as index into the array `log_severity_names`.
+enum class LogSeverity : int {
+    LOG_INFO = 0,
+    LOG_WARNING,
+    LOG_ERROR,
+    LOG_FATAL
+};
 
 namespace internal {
 
-#ifdef _DEBUG
+#if !defined(NDEBUG)
 #define ENABLE_DLOG 1
 #else
 #define ENABLE_DLOG 0
@@ -38,15 +39,22 @@ enum { DLOG_ON = ENABLE_DLOG };
 }   // namespace internal
 
 #define COMPACT_LOG_EX_INFO(ClassName) \
-    kbase::ClassName(__FILE__, __LINE__, kbase::LOG_INFO)
+    kbase::ClassName(__FILE__, __LINE__, kbase::LogSeverity::LOG_INFO)
 #define COMPACT_LOG_EX_WARNING(ClassName) \
-    kbase::ClassName(__FILE__, __LINE__, kbase::LOG_WARNING)
+    kbase::ClassName(__FILE__, __LINE__, kbase::LogSeverity::LOG_WARNING)
+#define COMPACT_LOG_EX_ERROR(ClassName) \
+    kbase::ClassName(__FILE__, __LINE__, kbase::LogSeverity::LOG_ERROR)
 #define COMPACT_LOG_EX_FATAL(ClassName) \
-    kbase::ClassName(__FILE__, __LINE__, kbase::LOG_FATAL)
+    kbase::ClassName(__FILE__, __LINE__, kbase::LogSeverity::LOG_FATAL)
 
-#define COMPACT_LOG_INFO COMPACT_LOG_EX_INFO(LogMessage)
+// Surprisingly, a macro `ERROR` is defined as 0 in file <wingdi.h>, which is
+// included by <windows.h>, so we add a special macro to handle this peculiar
+// chaos, in case the file was included.
+#define COMPACT_LOG_INFO    COMPACT_LOG_EX_INFO(LogMessage)
 #define COMPACT_LOG_WARNING COMPACT_LOG_EX_WARNING(LogMessage)
-#define COMPACT_LOG_FATAL COMPACT_LOG_EX_FATAL(LogMessage)
+#define COMPACT_LOG_ERROR   COMPACT_LOG_EX_ERROR(LogMessage)
+#define COMPACT_LOG_0       COMPACT_LOG_EX_ERROR(LogMessage)
+#define COMPACT_LOG_FATAL   COMPACT_LOG_EX_FATAL(LogMessage)
 
 #define LAZY_STREAM(stream, condition) \
     !(condition) ? (void)0 : kbase::LogMessageVoidfy() & (stream)
@@ -74,7 +82,7 @@ enum LoggingDestination {
     LOG_TO_ALL = LOG_TO_FILE | LOG_TO_SYSTEM_DEBUG_LOG
 };
 
-enum OldFileOption {
+enum OldFileDisposalOption {
     APPEND_TO_OLD_LOG_FILE,
     DELETE_OLD_LOG_FILE
 };
@@ -89,8 +97,8 @@ struct LoggingSettings {
     LoggingSettings();
 
     LogItemOptions log_item_options;
-    LoggingDestination logging_dest;
-    OldFileOption old_file_option;
+    LoggingDestination logging_destination;
+    OldFileDisposalOption old_file_disposal_option;
     LoggingLockOption logging_lock_option;
 };
 
