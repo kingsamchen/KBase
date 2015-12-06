@@ -36,15 +36,13 @@ using ThreadLockHandle = std::unique_ptr<std::unique_lock<std::mutex>>;
 
 const char* kLogSeverityNames[] {"INFO", "WARNING", "ERROR", "FATAL"};
 
-const LogSeverity kAlwaysPrintErrorMinLevel = kbase::LogSeverity::LOG_ERROR;
+const LogSeverity kAlwaysPrintErrorMinLevel = LogSeverity::LOG_ERROR;
 
-LogItemOptions log_item_options = LogItemOptions::ENABLE_TIMESTAMP;
-
-LoggingDestination logging_dest = LoggingDestination::LOG_TO_ALL;
-
-OldFileDisposalOption old_file_option = OldFileDisposalOption::APPEND_TO_OLD_LOG_FILE;
-
-LoggingLockOption logging_lock_option = LoggingLockOption::USE_GLOBAL_LOCK;
+LogSeverity g_min_severity_level = LogSeverity::LOG_INFO;
+LogItemOptions g_log_item_options = LogItemOptions::ENABLE_TIMESTAMP;
+LoggingDestination g_logging_dest = LoggingDestination::LOG_TO_SYSTEM_DEBUG_LOG;
+OldFileDisposalOption g_old_file_option = OldFileDisposalOption::APPEND_TO_OLD_LOG_FILE;
+LoggingLockOption g_logging_lock_option = LoggingLockOption::USE_GLOBAL_LOCK;
 
 ScopedStdioHandle log_file;
 
@@ -98,7 +96,7 @@ bool InitLogFile()
 {
     PathString&& log_file_name = GetDefaultLogFile();
 
-    if (old_file_option == OldFileDisposalOption::DELETE_OLD_LOG_FILE) {
+    if (g_old_file_option == OldFileDisposalOption::DELETE_OLD_LOG_FILE) {
         if (log_file) {
             log_file = nullptr;
         }
@@ -140,7 +138,7 @@ public:
             return;
         }
 
-        if (logging_lock_option == LoggingLockOption::USE_GLOBAL_LOCK) {
+        if (g_logging_lock_option == LoggingLockOption::USE_GLOBAL_LOCK) {
             PathString log_name = GetDefaultLogFile();
             // We want the file name to be part of the mutex name, and \ is not a
             // legal character, so we replace \ with /.
@@ -173,7 +171,7 @@ private:
 
     void Lock()
     {
-        if (logging_lock_option == LoggingLockOption::USE_GLOBAL_LOCK) {
+        if (g_logging_lock_option == LoggingLockOption::USE_GLOBAL_LOCK) {
             WaitForSingleObject(global_lock_, INFINITE);
         } else {
             local_lock_->lock();
@@ -182,7 +180,7 @@ private:
 
     void Unlock()
     {
-        if (logging_lock_option == LoggingLockOption::USE_GLOBAL_LOCK) {
+        if (g_logging_lock_option == LoggingLockOption::USE_GLOBAL_LOCK) {
             ReleaseMutex(global_lock_);
         } else {
             local_lock_->unlock();
@@ -205,19 +203,30 @@ std::mutex LoggingLock::local_mutex_;
 
 namespace kbase {
 
+namespace internal {
+
+LogSeverity GetMinSeverityLevel()
+{
+    return g_min_severity_level;
+}
+
+}   // namespace internal
+
 LoggingSettings::LoggingSettings()
- : log_item_options(LogItemOptions::ENABLE_TIMESTAMP),
-   logging_destination(LoggingDestination::LOG_TO_ALL),
+ : min_severity_level(LogSeverity::LOG_INFO),
+   log_item_options(LogItemOptions::ENABLE_TIMESTAMP),
+   logging_destination(LoggingDestination::LOG_TO_SYSTEM_DEBUG_LOG),
    old_file_disposal_option(OldFileDisposalOption::APPEND_TO_OLD_LOG_FILE),
    logging_lock_option(LoggingLockOption::USE_GLOBAL_LOCK)
 {}
 
-void InitLoggingSettings(const LoggingSettings& settings)
+void ConfigureLoggingSettings(const LoggingSettings& settings)
 {
-    log_item_options = settings.log_item_options;
-    logging_dest = settings.logging_destination;
-    old_file_option = settings.old_file_disposal_option;
-    logging_lock_option = settings.logging_lock_option;
+    g_min_severity_level = settings.min_severity_level;
+    g_log_item_options = settings.log_item_options;
+    g_logging_dest = settings.logging_destination;
+    g_old_file_option = settings.old_file_disposal_option;
+    g_logging_lock_option = settings.logging_lock_option;
 
     LoggingLock::InitLock();
 }
@@ -243,12 +252,12 @@ LogMessage::~LogMessage()
     stream_ << std::endl;
     std::string msg = stream_.str();
 
-    if ((logging_dest & LoggingDestination::LOG_TO_SYSTEM_DEBUG_LOG) ||
+    if ((g_logging_dest & LoggingDestination::LOG_TO_SYSTEM_DEBUG_LOG) ||
         (severity_ >= kAlwaysPrintErrorMinLevel)) {
         OutputDebugStringA(msg.c_str());
     }
 
-    if (logging_dest & LoggingDestination::LOG_TO_FILE) {
+    if (g_logging_dest & LoggingDestination::LOG_TO_FILE) {
         LoggingLock::InitLock();
         LoggingLock lock;
         if (InitLogFile()) {
@@ -263,15 +272,15 @@ void LogMessage::Init(const char* file, int line)
 {
     stream_ << "[";
 
-    if (log_item_options & LogItemOptions::ENABLE_PROCESS_ID) {
+    if (g_log_item_options & LogItemOptions::ENABLE_PROCESS_ID) {
         stream_ << GetCurrentProcessId() << ":";
     }
 
-    if (log_item_options & LogItemOptions::ENABLE_THREAD_ID) {
+    if (g_log_item_options & LogItemOptions::ENABLE_THREAD_ID) {
         stream_ << GetCurrentThreadId() << ":";
     }
 
-    if (log_item_options & LogItemOptions::ENABLE_TIMESTAMP) {
+    if (g_log_item_options & LogItemOptions::ENABLE_TIMESTAMP) {
         time_t time_now = time(nullptr);
         struct tm local_time_now;
         localtime_s(&local_time_now, &time_now);
