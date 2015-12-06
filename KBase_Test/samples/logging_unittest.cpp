@@ -6,7 +6,6 @@
 
 #include "gtest\gtest.h"
 #include "kbase\logging.h"
-
 #include <Windows.h>
 
 #include <iostream>
@@ -28,6 +27,12 @@ void ThreadFn(int id)
     DLOG(INFO) << "The thread " << id << " is currently running";
 }
 
+bool Boolean(bool b)
+{
+    std::cout << "Boolean() is called\n";
+    return b;
+}
+
 }   // namespace
 
 TEST(LoggingTest, MT)
@@ -36,7 +41,7 @@ TEST(LoggingTest, MT)
 #if _USE_LOCAL_LOCK_
     settings.logging_lock_option = LoggingLockOption::USE_LOCAL_LOCK;
 #endif
-    InitLoggingSettings(settings);
+    ConfigureLoggingSettings(settings);
 
     action_event = CreateEventW(nullptr, TRUE, FALSE, nullptr);
 
@@ -49,4 +54,19 @@ TEST(LoggingTest, MT)
     std::cout << "all are prepared" << std::endl;
     SetEvent(action_event);
     std::cin.get();
+}
+
+TEST(LoggingTest, MinLevelAndConditionalLogging)
+{
+    LoggingSettings logging_settings;
+    logging_settings.min_severity_level = LogSeverity::LOG_ERROR;
+    logging_settings.logging_destination = LoggingDestination::LOG_TO_ALL;
+    ConfigureLoggingSettings(logging_settings);
+    LOG(WARNING) << "LOG(WARNING)";
+    LOG_IF(ERROR, Boolean(true)) << "LOG_IF(ERROR, Boolean(true))";
+    LOG_IF(ERROR, Boolean(false)) << "LOG_IF(ERROR, Boolean(false))";
+    DLOG(INFO) << "DLOG(INFO)";
+    DLOG(ERROR) << "DLOG(ERROR)";
+    DLOG_IF(FATAL, Boolean(true)) << "DLOG_IF(FATAL, Boolean(true))";
+    DLOG_IF(FATAL, Boolean(false)) << "DLOG_IF(FATAL, Boolean(false))";
 }
