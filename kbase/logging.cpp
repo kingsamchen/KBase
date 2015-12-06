@@ -40,11 +40,11 @@ const LogSeverity kAlwaysPrintErrorMinLevel = LogSeverity::LOG_ERROR;
 
 LogSeverity g_min_severity_level = LogSeverity::LOG_INFO;
 LogItemOptions g_log_item_options = LogItemOptions::ENABLE_TIMESTAMP;
-LoggingDestination g_logging_dest = LoggingDestination::LOG_TO_SYSTEM_DEBUG_LOG;
+LoggingDestination g_logging_dest = LoggingDestination::LOG_TO_FILE;
 OldFileDisposalOption g_old_file_option = OldFileDisposalOption::APPEND_TO_OLD_LOG_FILE;
 LoggingLockOption g_logging_lock_option = LoggingLockOption::USE_GLOBAL_LOCK;
 
-ScopedStdioHandle log_file;
+ScopedStdioHandle g_log_file;
 
 const PathChar kLogFileName[] = L"_debug_message.log";
 
@@ -97,20 +97,20 @@ bool InitLogFile()
     PathString&& log_file_name = GetDefaultLogFile();
 
     if (g_old_file_option == OldFileDisposalOption::DELETE_OLD_LOG_FILE) {
-        if (log_file) {
-            log_file = nullptr;
+        if (g_log_file) {
+            g_log_file = nullptr;
         }
 
         _wremove(log_file_name.c_str());
     }
 
-    if (log_file) {
+    if (g_log_file) {
         return true;
     }
 
-    log_file.Reset(_wfsopen(log_file_name.c_str(), L"a", _SH_DENYNO));
+    g_log_file.Reset(_wfsopen(log_file_name.c_str(), L"a", _SH_DENYNO));
 
-    if (!log_file) {
+    if (!g_log_file) {
         return false;
     }
 
@@ -215,7 +215,7 @@ LogSeverity GetMinSeverityLevel()
 LoggingSettings::LoggingSettings()
  : min_severity_level(LogSeverity::LOG_INFO),
    log_item_options(LogItemOptions::ENABLE_TIMESTAMP),
-   logging_destination(LoggingDestination::LOG_TO_SYSTEM_DEBUG_LOG),
+   logging_destination(LoggingDestination::LOG_TO_FILE),
    old_file_disposal_option(OldFileDisposalOption::APPEND_TO_OLD_LOG_FILE),
    logging_lock_option(LoggingLockOption::USE_GLOBAL_LOCK)
 {}
@@ -262,8 +262,8 @@ LogMessage::~LogMessage()
         LoggingLock lock;
         if (InitLogFile()) {
             fwrite(static_cast<const void*>(msg.c_str()), sizeof(char), msg.length(),
-                   log_file);
-            fflush(log_file);
+                   g_log_file);
+            fflush(g_log_file);
         }
     }
 }
