@@ -252,9 +252,13 @@ LogMessage::~LogMessage()
     stream_ << std::endl;
     std::string msg = stream_.str();
 
-    if ((g_logging_dest & LoggingDestination::LOG_TO_SYSTEM_DEBUG_LOG) ||
-        (severity_ >= kAlwaysPrintErrorMinLevel)) {
+    if (g_logging_dest & LoggingDestination::LOG_TO_SYSTEM_DEBUG_LOG) {
         OutputDebugStringA(msg.c_str());
+    }
+
+    if (severity_ >= kAlwaysPrintErrorMinLevel) {
+        fwrite(msg.c_str(), sizeof(char), msg.length(), stderr);
+        fflush(stderr);
     }
 
     if (g_logging_dest & LoggingDestination::LOG_TO_FILE) {
