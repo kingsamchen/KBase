@@ -15,7 +15,6 @@
 #include <mutex>
 #include <stdexcept>
 
-#include "kbase\basic_types.h"
 #include "kbase\error_exception_util.h"
 #include "kbase\scoped_handle.h"
 
@@ -24,15 +23,11 @@ namespace {
 using kbase::LogSeverity;
 using kbase::LogItemOptions;
 using kbase::LoggingDestination;
-using kbase::LoggingLockOption;
 using kbase::OldFileDisposalOption;
 
 using kbase::PathChar;
 using kbase::PathString;
-using kbase::ScopedStdioHandle;
-
-using GlobalLockHandle = kbase::ScopedSysHandle;
-using ThreadLockHandle = std::unique_ptr<std::unique_lock<std::mutex>>;
+using kbase::ScopedSysHandle;
 
 const char* kLogSeverityNames[] {"INFO", "WARNING", "ERROR", "FATAL"};
 
@@ -42,9 +37,9 @@ LogSeverity g_min_severity_level = LogSeverity::LOG_INFO;
 LogItemOptions g_log_item_options = LogItemOptions::ENABLE_TIMESTAMP;
 LoggingDestination g_logging_dest = LoggingDestination::LOG_TO_FILE;
 OldFileDisposalOption g_old_file_option = OldFileDisposalOption::APPEND_TO_OLD_LOG_FILE;
-LoggingLockOption g_logging_lock_option = LoggingLockOption::USE_GLOBAL_LOCK;
 
-ScopedStdioHandle g_log_file;
+PathString g_log_file_path;
+ScopedSysHandle g_log_file;
 
 const PathChar kLogFileName[] = L"_debug_message.log";
 
@@ -54,9 +49,6 @@ constexpr auto ToUnderlying(E e)
     return static_cast<std::underlying_type_t<E>>(e);
 }
 
-// Due to the performance consideration, I decide not to use std::string and
-// neither StringPiece, since I also want to keep this file more independent
-// as possible
 template<typename charT>
 const charT* ExtractFileName(const charT* file_path)
 {
@@ -71,133 +63,73 @@ const charT* ExtractFileName(const charT* file_path)
     return last_pos ? last_pos + 1 : file_path;
 }
 
-// Returns the path of default log file.
+// Returns the default path for log file.
 // We use the same path as the EXE file.
-PathString GetDefaultLogFile()
+PathString GetDefaultLogFilePath()
 {
-    PathChar exe_path[MAX_PATH];
-    GetModuleFileName(nullptr, exe_path, MAX_PATH);
+    const size_t kMaxPath = MAX_PATH + 1;
+    PathChar exe_path[kMaxPath];
+    GetModuleFileNameW(nullptr, exe_path, kMaxPath);
 
-    const PathChar* end_past_slash = ExtractFileName(exe_path);
-    const PathChar* ext_dot = std::find(end_past_slash, std::cend(exe_path), L'.');
-
-    PathString default_path(const_cast<const PathChar*>(exe_path), end_past_slash);
-    default_path.append(end_past_slash, ext_dot);
-    default_path.append(kLogFileName);
+    const PathChar kExeExt[] = L".exe";
+    PathString default_path(exe_path);
+    auto dot_pos = default_path.rfind(kExeExt);
+    default_path.replace(dot_pos, _countof(kExeExt) - 1, kLogFileName);
 
     return default_path;
 }
 
-// This function needs an global mutex-like protector that has this call enclosed.
-// We can have multiple threads and/or processes, try to prevent messing up each
-// other's writes.
-// Returns true, if the file is ready to write; return false, otherwise.
-bool InitLogFile()
+// Returns the fallback path for the log file.
+// We use the path in current directory as the fallback path, when using the
+// default path is not possible.
+PathString GetFallbackLogFilePath()
 {
-    PathString&& log_file_name = GetDefaultLogFile();
+    const size_t kMaxPath = MAX_PATH + 1;
+    PathChar cur_path[kMaxPath];
+    GetCurrentDirectoryW(kMaxPath, cur_path);
 
-    if (g_old_file_option == OldFileDisposalOption::DELETE_OLD_LOG_FILE) {
-        if (g_log_file) {
-            g_log_file = nullptr;
-        }
+    PathString fallback_path(cur_path);
+    fallback_path.append(L"\\").append(ExtractFileName(g_log_file_path.c_str()));
 
-        _wremove(log_file_name.c_str());
-    }
-
-    if (g_log_file) {
-        return true;
-    }
-
-    g_log_file.Reset(_wfsopen(log_file_name.c_str(), L"a", _SH_DENYNO));
-
-    if (!g_log_file) {
-        return false;
-    }
-
-    return true;
+    return fallback_path;
 }
 
-// A well-tailored lock for resolving race-condition when multiple threads or even
-// multiple processes are logging to the file simultanesouly.
-class LoggingLock {
-public:
-    LoggingLock()
-    {
-        Lock();
+// Once this function succeed, `g_log_file` refers to a valid and writable file.
+// Returns true, if we initialized the log file successfully, false otherwise.
+bool InitLogFile()
+{
+    if (g_log_file_path.empty()) {
+        g_log_file_path = GetDefaultLogFilePath();
     }
 
-    ~LoggingLock()
-    {
-        Unlock();
+    if (g_old_file_option == OldFileDisposalOption::DELETE_OLD_LOG_FILE) {
+        DeleteFileW(g_log_file_path.c_str());
     }
 
-    // This function should be called on the main thread before any logging.
-    static void InitLock()
-    {
-        if (initialized_) {
-            return;
-        }
-
-        if (g_logging_lock_option == LoggingLockOption::USE_GLOBAL_LOCK) {
-            PathString log_name = GetDefaultLogFile();
-            // We want the file name to be part of the mutex name, and \ is not a
-            // legal character, so we replace \ with /.
-            std::replace(log_name.begin(), log_name.end(), L'\\', L'/');
-
-            std::wstring mutex_name = L"Global\\";
-            mutex_name.append(log_name);
-
-            // If the mutex has alread been created by another thread or process
-            // this call returns the handle to the existed mutex
-            global_lock_.Reset(CreateMutexW(nullptr, false, mutex_name.c_str()));
-            if (!global_lock_) {
-#if _DEBUG
-                kbase::LastError error;
-                assert(false);
-#endif
-                return;
-            }
-        } else {
-            local_lock_.reset(
-                new std::unique_lock<std::mutex>(local_mutex_, std::defer_lock));
-        }
-
-        initialized_ = true;
+    // Surprisingly, we need neither a local nor a global lock here, on Windows.
+    // Because if we opened a file with `FILE_APPEND_DATA` flag only, the system
+    // will ensure that each appending is atomic.
+    // See https://msdn.microsoft.com/en-us/library/windows/hardware/ff548289(v=vs.85).aspx.
+    g_log_file.Reset(CreateFileW(g_log_file_path.c_str(),
+                                 FILE_APPEND_DATA,
+                                 FILE_SHARE_READ | FILE_SHARE_WRITE,
+                                 nullptr,
+                                 OPEN_ALWAYS,
+                                 FILE_ATTRIBUTE_NORMAL,
+                                 nullptr));
+    if (!g_log_file) {
+        g_log_file_path = GetFallbackLogFilePath();
+        g_log_file.Reset(CreateFileW(g_log_file_path.c_str(),
+                                     FILE_APPEND_DATA,
+                                     FILE_SHARE_READ | FILE_SHARE_WRITE,
+                                     nullptr,
+                                     OPEN_ALWAYS,
+                                     FILE_ATTRIBUTE_NORMAL,
+                                     nullptr));
     }
 
-private:
-    LoggingLock(const LoggingLock&) = delete;
-    LoggingLock& operator=(const LoggingLock&) = delete;
-
-    void Lock()
-    {
-        if (g_logging_lock_option == LoggingLockOption::USE_GLOBAL_LOCK) {
-            WaitForSingleObject(global_lock_, INFINITE);
-        } else {
-            local_lock_->lock();
-        }
-    }
-
-    void Unlock()
-    {
-        if (g_logging_lock_option == LoggingLockOption::USE_GLOBAL_LOCK) {
-            ReleaseMutex(global_lock_);
-        } else {
-            local_lock_->unlock();
-        }
-    }
-
-private:
-    static bool initialized_;
-    static GlobalLockHandle global_lock_;
-    static ThreadLockHandle local_lock_;
-    static std::mutex local_mutex_;
-};
-
-bool LoggingLock::initialized_ = false;
-GlobalLockHandle LoggingLock::global_lock_;
-ThreadLockHandle LoggingLock::local_lock_;
-std::mutex LoggingLock::local_mutex_;
+    return static_cast<bool>(g_log_file);
+}
 
 }   // namespace
 
@@ -216,8 +148,7 @@ LoggingSettings::LoggingSettings()
  : min_severity_level(LogSeverity::LOG_INFO),
    log_item_options(LogItemOptions::ENABLE_TIMESTAMP),
    logging_destination(LoggingDestination::LOG_TO_FILE),
-   old_file_disposal_option(OldFileDisposalOption::APPEND_TO_OLD_LOG_FILE),
-   logging_lock_option(LoggingLockOption::USE_GLOBAL_LOCK)
+   old_file_disposal_option(OldFileDisposalOption::APPEND_TO_OLD_LOG_FILE)
 {}
 
 void ConfigureLoggingSettings(const LoggingSettings& settings)
@@ -226,9 +157,17 @@ void ConfigureLoggingSettings(const LoggingSettings& settings)
     g_log_item_options = settings.log_item_options;
     g_logging_dest = settings.logging_destination;
     g_old_file_option = settings.old_file_disposal_option;
-    g_logging_lock_option = settings.logging_lock_option;
 
-    LoggingLock::InitLock();
+    if (!(g_logging_dest & LoggingDestination::LOG_TO_FILE)) {
+        return;
+    }
+
+    if (!settings.log_file_path.empty()) {
+        g_log_file_path = settings.log_file_path;
+    }
+
+    // TODO: consider assert the result value on DEBUG mode.
+    InitLogFile();
 }
 
 LogMessage::LogMessage(const char* file, int line, LogSeverity severity)
@@ -255,20 +194,19 @@ LogMessage::~LogMessage()
     if (g_logging_dest & LoggingDestination::LOG_TO_SYSTEM_DEBUG_LOG) {
         OutputDebugStringA(msg.c_str());
         // Also writes to standard error stream.
-        fwrite(msg.c_str(), sizeof(char), msg.length(), stderr);
+        fwrite(msg.data(), sizeof(char), msg.length(), stderr);
         fflush(stderr);
     } else if (severity_ >= kAlwaysPrintErrorMinLevel) {
-        fwrite(msg.c_str(), sizeof(char), msg.length(), stderr);
+        fwrite(msg.data(), sizeof(char), msg.length(), stderr);
         fflush(stderr);
     }
 
+    // If unfortunately, we failed to initialize the log file, just skip the writting.
     if (g_logging_dest & LoggingDestination::LOG_TO_FILE) {
-        LoggingLock::InitLock();
-        LoggingLock lock;
-        if (InitLogFile()) {
-            fwrite(static_cast<const void*>(msg.c_str()), sizeof(char), msg.length(),
-                   g_log_file);
-            fflush(g_log_file);
+        if (g_log_file) {
+            DWORD bytes_written = 0;
+            WriteFile(g_log_file, msg.data(), static_cast<DWORD>(msg.length() * sizeof(char)),
+                      &bytes_written, nullptr);
         }
     }
 }

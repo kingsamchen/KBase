@@ -13,6 +13,7 @@
 #include <string>
 
 #include "kbase\basic_macros.h"
+#include "kbase\basic_types.h"
 
 namespace kbase {
 
@@ -51,20 +52,16 @@ enum OldFileDisposalOption {
     DELETE_OLD_LOG_FILE
 };
 
-enum LoggingLockOption {
-    USE_GLOBAL_LOCK,
-    USE_LOCAL_LOCK
-};
-
 struct LoggingSettings {
     // Initializes to default values.
+    // Note that, if `log_file_path` wasn't specified, use default path.
     LoggingSettings();
 
     LogSeverity min_severity_level;
     LogItemOptions log_item_options;
     LoggingDestination logging_destination;
     OldFileDisposalOption old_file_disposal_option;
-    LoggingLockOption logging_lock_option;
+    PathString log_file_path;
 };
 
 // You should better configure these settings at the beginning of the program, or
