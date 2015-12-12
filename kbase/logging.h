@@ -17,6 +17,9 @@
 
 namespace kbase {
 
+// For keeping this facility independent as possible, try to not introduce other modules,
+// such as `FilePath`, `PathService` etc.
+
 // These log severities will be used as index into the array `log_severity_names`.
 enum class LogSeverity : int {
     LOG_INFO = 0,
