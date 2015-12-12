@@ -6,16 +6,11 @@
 
 #include <Windows.h>
 
-#include <algorithm>
-#include <cassert>
 #include <cstdio>
 #include <ctime>
 #include <iomanip>
-#include <memory>
-#include <mutex>
 #include <stdexcept>
 
-#include "kbase\error_exception_util.h"
 #include "kbase\scoped_handle.h"
 
 namespace {
@@ -182,11 +177,9 @@ LogMessage::LogMessage(const char* file, int line)
 
 LogMessage::~LogMessage()
 {
-#if _DEBUG
     if (severity_ == LogSeverity::LOG_FATAL) {
-        // TODO: log stack trace information
+        // TODO: logging stack trace.
     }
-#endif
 
     stream_ << std::endl;
     std::string msg = stream_.str();

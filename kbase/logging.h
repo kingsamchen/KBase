@@ -137,9 +137,9 @@ public:
 private:
     // Writes the common info header into the stream.
     // The info header is in the following format:
-    //  [pid:tid:mmdd/hhmmss:severity:filename(line)]
-    // in which, pid tid and logging time all are optional, and are controlled by
-    // logging setting.
+    //   [pid:tid:mmdd/hhmmss:severity:filename(line)]
+    // in which, pid, tid and timestamp are optional, though timestamp by default
+    // is enabled.
     void Init(const char* file, int line);
 
 private:
@@ -155,7 +155,7 @@ private:
 class LogMessageVoidfy {
 public:
     LogMessageVoidfy() {}
-    void operator&(std::ostream&) {}
+    void operator&(std::ostream&) const {}
 };
 
 }   // namespace kbase
