@@ -5,26 +5,23 @@
 #include "stdafx.h"
 
 #include "gtest\gtest.h"
-#include "kbase\logging.h"
 #include <Windows.h>
 
 #include <iostream>
 #include <thread>
 #include <vector>
 
-#define _USE_LOCAL_LOCK_ 1
+#include "kbase\file_util.h"
+#include "kbase\logging.h"
 
 using namespace kbase;
 
 namespace {
 
-HANDLE action_event = nullptr;
-
 void ThreadFn(int id)
 {
-    WaitForSingleObject(action_event, INFINITE);
     std::cout << "thread " << id << std::endl;
-    DLOG(INFO) << "The thread " << id << " is currently running";
+    LOG(INFO) << "The thread " << id << " is currently running";
 }
 
 bool Boolean(bool b)
@@ -38,22 +35,18 @@ bool Boolean(bool b)
 TEST(LoggingTest, MT)
 {
     LoggingSettings settings;
-#if _USE_LOCAL_LOCK_
-    settings.logging_lock_option = LoggingLockOption::USE_LOCAL_LOCK;
-#endif
+    settings.log_item_options = LogItemOptions::ENABLE_ALL;
     ConfigureLoggingSettings(settings);
-
-    action_event = CreateEventW(nullptr, TRUE, FALSE, nullptr);
 
     std::vector<std::thread> vth;
     for (int i = 0; i < 5; ++i) {
         vth.emplace_back(ThreadFn, i);
-        vth.back().detach();
     }
 
     std::cout << "all are prepared" << std::endl;
-    SetEvent(action_event);
-    std::cin.get();
+    for (auto& th : vth) {
+        th.join();
+    }
 }
 
 TEST(LoggingTest, MinLevelAndConditionalLogging)
@@ -69,4 +62,14 @@ TEST(LoggingTest, MinLevelAndConditionalLogging)
     DLOG(ERROR) << "DLOG(ERROR)";
     DLOG_IF(FATAL, Boolean(true)) << "DLOG_IF(FATAL, Boolean(true))";
     DLOG_IF(FATAL, Boolean(false)) << "DLOG_IF(FATAL, Boolean(false))";
+}
+
+TEST(LoggingTest, CustomLogFileName)
+{
+    PathString log_name = L"my_test_debug.log";
+    LoggingSettings logging_settings;
+    logging_settings.log_file_path = log_name;
+    ConfigureLoggingSettings(logging_settings);
+    LOG(INFO) << "testing customized log file name";
+    ASSERT_TRUE(PathExists(FilePath(log_name)));
 }
