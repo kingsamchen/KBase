@@ -11,10 +11,10 @@
 
 #include <functional>
 
-#include "kbase\basic_macros.h"
-#include "kbase\basic_types.h"
-#include "kbase\base_path_provider.h"
-#include "kbase\file_path.h"
+#include "kbase/basic_macros.h"
+#include "kbase/basic_types.h"
+#include "kbase/base_path_provider.h"
+#include "kbase/file_path.h"
 
 namespace kbase {
 

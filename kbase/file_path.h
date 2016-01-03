@@ -12,7 +12,7 @@
 #include <string>
 #include <vector>
 
-#include "kbase\basic_types.h"
+#include "kbase/basic_types.h"
 
 namespace kbase {
 

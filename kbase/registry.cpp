@@ -2,13 +2,13 @@
  @ 0xCCCCCCCC
 */
 
-#include "kbase\registry.h"
+#include "kbase/registry.h"
 
 #include <cassert>
 #include <cstdlib>
 
-#include "kbase\error_exception_util.h"
-#include "kbase\string_util.h"
+#include "kbase/error_exception_util.h"
+#include "kbase/string_util.h"
 
 namespace kbase {
 

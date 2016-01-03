@@ -11,8 +11,8 @@
 
 #include <mutex>
 
-#include "kbase\at_exit_manager.h"
-#include "kbase\basic_macros.h"
+#include "kbase/at_exit_manager.h"
+#include "kbase/basic_macros.h"
 
 namespace kbase {
 

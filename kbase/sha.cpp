@@ -2,12 +2,12 @@
  @ 0xCCCCCCCC
 */
 
-#include "kbase\sha.h"
+#include "kbase/sha.h"
 
 #include <Windows.h>
 
-#include "kbase\error_exception_util.h"
-#include "kbase\scope_guard.h"
+#include "kbase/error_exception_util.h"
+#include "kbase/scope_guard.h"
 
 namespace {
 

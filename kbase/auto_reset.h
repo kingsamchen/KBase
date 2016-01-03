@@ -9,7 +9,7 @@
 #ifndef KBASE_AUTO_RESET_H_
 #define KBASE_AUTO_RESET_H_
 
-#include "kbase\basic_macros.h"
+#include "kbase/basic_macros.h"
 
 namespace kbase {
 

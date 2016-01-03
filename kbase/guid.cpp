@@ -2,7 +2,7 @@
  @ 0xCCCCCCCC
 */
 
-#include "kbase\guid.h"
+#include "kbase/guid.h"
 
 #include <objbase.h>
 
@@ -10,8 +10,8 @@
 #include <cassert>
 #include <xutility>
 
-#include "kbase\string_piece.h"
-#include "kbase\sys_string_encoding_conversions.h"
+#include "kbase/string_piece.h"
+#include "kbase/sys_string_encoding_conversions.h"
 
 namespace kbase {
 

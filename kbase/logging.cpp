@@ -2,7 +2,7 @@
  @ 0xCCCCCCCC
 */
 
-#include "kbase\logging.h"
+#include "kbase/logging.h"
 
 #include <Windows.h>
 
@@ -11,7 +11,7 @@
 #include <iomanip>
 #include <stdexcept>
 
-#include "kbase\scoped_handle.h"
+#include "kbase/scoped_handle.h"
 
 namespace {
 

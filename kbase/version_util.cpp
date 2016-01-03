@@ -2,7 +2,7 @@
  @ 0xCCCCCCCC
 */
 
-#include "kbase\version_util.h"
+#include "kbase/version_util.h"
 
 #include <map>
 #include <memory>
@@ -10,7 +10,7 @@
 #include <Windows.h>
 #include <VersionHelpers.h>
 
-#include "kbase\registry.h"
+#include "kbase/registry.h"
 
 namespace {
 

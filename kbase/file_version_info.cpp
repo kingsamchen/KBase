@@ -2,12 +2,12 @@
  @ 0xCCCCCCCC
 */
 
-#include "kbase\file_version_info.h"
+#include "kbase/file_version_info.h"
 
 #include <utility>
 
-#include "kbase\error_exception_util.h"
-#include "kbase\file_path.h"
+#include "kbase/error_exception_util.h"
+#include "kbase/file_path.h"
 
 #pragma comment(lib, "version.lib")
 

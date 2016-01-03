@@ -2,14 +2,14 @@
  @ 0xCCCCCCCC
 */
 
-#include "kbase\base_path_provider.h"
+#include "kbase/base_path_provider.h"
 
 #include <Windows.h>
 #include <ShlObj.h>
 
-#include "kbase\error_exception_util.h"
-#include "kbase\path_service.h"
-#include "kbase\scope_guard.h"
+#include "kbase/error_exception_util.h"
+#include "kbase/path_service.h"
+#include "kbase/scope_guard.h"
 
 // See @ http://blogs.msdn.com/b/oldnewthing/archive/2004/10/25/247180.aspx
 extern "C" IMAGE_DOS_HEADER __ImageBase;

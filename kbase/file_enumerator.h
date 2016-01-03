@@ -14,12 +14,12 @@
 
 #include <windows.h>
 
-#include "kbase\basic_macros.h"
-#include "kbase\basic_types.h"
-#include "kbase\date_time.h"
-#include "kbase\file_info.h"
-#include "kbase\file_path.h"
-#include "kbase\scoped_handle.h"
+#include "kbase/basic_macros.h"
+#include "kbase/basic_types.h"
+#include "kbase/date_time.h"
+#include "kbase/file_info.h"
+#include "kbase/file_path.h"
+#include "kbase/scoped_handle.h"
 
 namespace kbase {
 
