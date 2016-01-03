@@ -2,18 +2,18 @@
  @ 0xCCCCCCCC
 */
 
-#include "kbase\path_service.h"
+#include "kbase/path_service.h"
 
 #include <algorithm>
 #include <forward_list>
 #include <mutex>
 #include <unordered_map>
 
-#include "kbase\base_path_provider.h"
-#include "kbase\error_exception_util.h"
-#include "kbase\file_util.h"
-#include "kbase\lazy.h"
-#include "kbase\sys_string_encoding_conversions.h"
+#include "kbase/base_path_provider.h"
+#include "kbase/error_exception_util.h"
+#include "kbase/file_util.h"
+#include "kbase/lazy.h"
+#include "kbase/sys_string_encoding_conversions.h"
 
 using kbase::FilePath;
 using kbase::PathKey;

@@ -2,7 +2,7 @@
  @ 0xCCCCCCCC
 */
 
-#include "kbase\command_line.h"
+#include "kbase/command_line.h"
 
 #include <Windows.h>
 
@@ -10,8 +10,8 @@
 #include <cstdlib>
 #include <utility>
 
-#include "kbase\error_exception_util.h"
-#include "kbase\string_util.h"
+#include "kbase/error_exception_util.h"
+#include "kbase/string_util.h"
 
 namespace {
 

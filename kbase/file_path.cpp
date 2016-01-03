@@ -2,7 +2,7 @@
  @ 0xCCCCCCCC
 */
 
-#include "kbase\file_path.h"
+#include "kbase/file_path.h"
 
 #include <cassert>
 #include <cstdlib>
@@ -12,10 +12,10 @@
 #include <iterator>
 #include <stdexcept>
 
-#include "kbase\error_exception_util.h"
-#include "kbase\pickle.h"
-#include "kbase\string_util.h"
-#include "kbase\sys_string_encoding_conversions.h"
+#include "kbase/error_exception_util.h"
+#include "kbase/pickle.h"
+#include "kbase/string_util.h"
+#include "kbase/sys_string_encoding_conversions.h"
 
 namespace kbase {
 

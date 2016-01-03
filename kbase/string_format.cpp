@@ -2,12 +2,12 @@
  @ 0xCCCCCCCC
 */
 
-#include "kbase\string_format.h"
+#include "kbase/string_format.h"
 
 #include <cctype>
 #include <cstdarg>
 
-#include "kbase\scope_guard.h"
+#include "kbase/scope_guard.h"
 
 namespace {
 

@@ -12,8 +12,8 @@
 #include <sstream>
 #include <string>
 
-#include "kbase\basic_macros.h"
-#include "kbase\basic_types.h"
+#include "kbase/basic_macros.h"
+#include "kbase/basic_types.h"
 
 namespace kbase {
 

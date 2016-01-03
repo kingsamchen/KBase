@@ -11,8 +11,8 @@
 
 #include <string>
 
-#include "kbase\basic_macros.h"
-#include "kbase\singleton.h"
+#include "kbase/basic_macros.h"
+#include "kbase/singleton.h"
 
 typedef void* HANDLE;
 typedef unsigned short WORD;

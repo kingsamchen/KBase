@@ -14,10 +14,10 @@
 #include <string>
 #include <stdexcept>
 
-#include "kbase\basic_macros.h"
-#include "kbase\logging.h"
-#include "kbase\string_format.h"
-#include "kbase\sys_string_encoding_conversions.h"
+#include "kbase/basic_macros.h"
+#include "kbase/logging.h"
+#include "kbase/string_format.h"
+#include "kbase/sys_string_encoding_conversions.h"
 
 namespace kbase {
 

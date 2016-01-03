@@ -9,7 +9,7 @@
 #ifndef KBASE_BASE_PATH_PROVIDER_H_
 #define KBASE_BASE_PATH_PROVIDER_H_
 
-#include "kbase\basic_types.h"
+#include "kbase/basic_types.h"
 
 namespace kbase {
 
