@@ -21,42 +21,16 @@
 
 namespace kbase {
 
-namespace internal {
-
-// Defines the macro _ENSURE_DISABLED ahead of including this file to disable error
-// context catching functionality.
-// Be wary of that this marco does not disable assert in DEBUG mode.
-#if defined(_ENSURE_DISABLED)
-#define ENSURE_MODE 0
-#else
-#define ENSURE_MODE 1
-#endif
-
-enum { ENSURE_ON = ENSURE_MODE };
-
-#undef ENSURE_MODE
-
-}   // namespace internal
-
 #define GUARANTOR_A(x) GUARANTOR_OP(x, B)
 #define GUARANTOR_B(x) GUARANTOR_OP(x, A)
 #define GUARANTOR_OP(x, next) \
     GUARANTOR_A.current_value(#x, (x)).GUARANTOR_ ## next
 
-#define MAKE_GUARANTOR(exp) kbase::Guarantor(exp, __FILE__, __LINE__)
+#define MAKE_GUARANTOR(cond) \
+    kbase::Guarantor(cond, __FILE__, __LINE__)
 
-#define DO_ENSURE(exp)                                                    \
-    if ((exp || !kbase::internal::ENSURE_ON)) ;                           \
-    else                                                                  \
-        MAKE_GUARANTOR(#exp).GUARANTOR_A
-
-#ifdef NDEBUG
-#define ENSURE(exp) DO_ENSURE(exp)
-#else
-#define ENSURE(exp)                                                       \
-  assert(exp);                                                            \
-  DO_ENSURE(exp)
-#endif
+#define ENSURE(cond) \
+    (cond) ? (void)0 : MAKE_GUARANTOR(#cond).GUARANTOR_A
 
 class Guarantor {
 public:
