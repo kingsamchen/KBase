@@ -175,7 +175,7 @@ void MakeFileMove(const FilePath& src, const FilePath& dest)
         return;
     }
 
-    SetLastError(last_error.last_error_code());
+    SetLastError(last_error.error_code());
     ThrowLastErrorIf(true, "Failed to move file");
 }
 

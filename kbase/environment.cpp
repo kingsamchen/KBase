@@ -47,7 +47,7 @@ std::wstring Environment::GetVar(const wchar_t* name)
 {
     DWORD required_size = GetEnvironmentVariableW(name, nullptr, 0);
     if (required_size == 0 &&
-        LastError().last_error_code() == ERROR_ENVVAR_NOT_FOUND) {
+        LastError().error_code() == ERROR_ENVVAR_NOT_FOUND) {
         return std::wstring();
     }
 

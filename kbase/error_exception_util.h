@@ -118,11 +118,13 @@ class LastError {
 public:
     LastError();
 
-    unsigned long last_error_code() const;
+    ~LastError() = default;
+
+    unsigned long error_code() const;
 
     // Since the description of the error is intended for programmers only, the
     // function insists on using English as its dispalying language.
-    std::wstring GetVerboseMessage() const;
+    std::wstring GetDescriptiveMessage() const;
 
 private:
     unsigned long error_code_;

@@ -144,7 +144,7 @@ bool RegKey::KeyExists(HKEY rootkey, const wchar_t* subkey, WOW6432Node node_key
 
     SetLastError(rv);
     LastError err;
-    ThrowLastErrorIf(err.last_error_code() != ERROR_FILE_NOT_FOUND,
+    ThrowLastErrorIf(err.error_code() != ERROR_FILE_NOT_FOUND,
                      "Error in RegOpenKeyEx");
 
     return false;
@@ -160,7 +160,7 @@ bool RegKey::HasValue(const wchar_t* value_name) const
 
     SetLastError(result);
     LastError err;
-    ThrowLastErrorIf(err.last_error_code() != ERROR_FILE_NOT_FOUND, "error occured");
+    ThrowLastErrorIf(err.error_code() != ERROR_FILE_NOT_FOUND, "error occured");
 
     return false;
 }

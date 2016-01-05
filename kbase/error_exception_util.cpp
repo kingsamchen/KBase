@@ -6,58 +6,59 @@
 
 #include <Windows.h>
 
+#include "kbase/scope_guard.h"
+
 namespace kbase {
 
 LastError::LastError()
     : error_code_(GetLastError())
 {}
 
-unsigned long LastError::last_error_code() const
+unsigned long LastError::error_code() const
 {
     return error_code_;
 }
 
-std::wstring LastError::GetVerboseMessage() const
+std::wstring LastError::GetDescriptiveMessage() const
 {
     HLOCAL buffer = nullptr;
     DWORD lang_id = MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US);
-    DWORD text_length = FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER |
-                                      FORMAT_MESSAGE_FROM_SYSTEM |
-                                      FORMAT_MESSAGE_IGNORE_INSERTS,
-                                      nullptr,
-                                      error_code_,
-                                      lang_id,
-                                      reinterpret_cast<LPTSTR>(&buffer),
-                                      0,
-                                      nullptr);
+    DWORD text_length = FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER |
+                                       FORMAT_MESSAGE_FROM_SYSTEM |
+                                       FORMAT_MESSAGE_IGNORE_INSERTS,
+                                       nullptr,
+                                       error_code_,
+                                       lang_id,
+                                       reinterpret_cast<LPTSTR>(&buffer),
+                                       0,
+                                       nullptr);
+    ON_SCOPE_EXIT([&buffer] { if (buffer) LocalFree(buffer); });
 
-    // checks if network-related error
+    // Check if it's a network-related error.
     if (text_length == 0) {
-        HMODULE dll = ::LoadLibraryEx(L"netmsg.dll", nullptr,
-                                      DONT_RESOLVE_DLL_REFERENCES);
+        HMODULE dll = LoadLibraryExW(L"netmsg.dll", nullptr, DONT_RESOLVE_DLL_REFERENCES);
         if (dll) {
-            text_length = ::FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER |
-                                          FORMAT_MESSAGE_IGNORE_INSERTS |
-                                          FORMAT_MESSAGE_FROM_HMODULE,
-                                          dll,
-                                          error_code_,
-                                          lang_id,
-                                          reinterpret_cast<LPTSTR>(&buffer),
-                                          0,
-                                          nullptr);
-            ::FreeLibrary(dll);
+            ON_SCOPE_EXIT([&dll] { FreeLibrary(dll); });
+            text_length = FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER |
+                                         FORMAT_MESSAGE_IGNORE_INSERTS |
+                                         FORMAT_MESSAGE_FROM_HMODULE,
+                                         dll,
+                                         error_code_,
+                                         lang_id,
+                                         reinterpret_cast<LPTSTR>(&buffer),
+                                         0,
+                                         nullptr);
         }
     }
 
-    // best efforts only...
+    // Best efforts only...
     std::wstring message_text;
     if (text_length == 0 || !buffer) {
         return message_text;
     }
 
-    // Removes the trailing \r\n.
+    // Remove the trailing \r\n.
     message_text.assign(static_cast<LPCTSTR>(LocalLock(buffer)), text_length - 2);
-    ::LocalFree(buffer);
 
     return message_text;
 }
@@ -80,12 +81,12 @@ void ThrowLastErrorIfInternal(const char* file, int line, const char* fn_name,
 
         // Since GetVerboseMessage internally uses English as its displaying language,
         // it is safe here to call WideToASCII.
-        std::string last_error_message = WideToASCII(last_error.GetVerboseMessage());
+        std::string last_error_message = WideToASCII(last_error.GetDescriptiveMessage());
         std::string error_message =
             StringPrintf("File: %s Line: %d Function: %s\n", file, line, fn_name);
         error_message += user_message + " (" + last_error_message + ")";
 
-        throw Win32Exception(last_error.last_error_code(), error_message);
+        throw Win32Exception(last_error.error_code(), error_message);
     }
 }
 
