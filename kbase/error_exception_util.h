@@ -15,31 +15,45 @@
 #include <stdexcept>
 
 #include "kbase/basic_macros.h"
-#include "kbase/logging.h"
 #include "kbase/string_format.h"
 #include "kbase/sys_string_encoding_conversions.h"
 
 namespace kbase {
 
+enum class EnsureAction : int {
+    CHECK,
+    RAISE,
+    RAISE_WITH_DUMP
+};
+
+// The action `CHECK` is performed only in debug mode.
+// Besides, we also need to make the CHECK-call cause no runtime penalty,
+// when in non-debug mode.
+#if defined(NDEBUG)
+#define ACTION_IS_ON(action) (kbase::EnsureAction::##action != kbase::EnsureAction::CHECK)
+#else
+#define ACTION_IS_ON(action) true
+#endif
+
 #define GUARANTOR_A(x) GUARANTOR_OP(x, B)
 #define GUARANTOR_B(x) GUARANTOR_OP(x, A)
 #define GUARANTOR_OP(x, next) \
-    GUARANTOR_A.current_value(#x, (x)).GUARANTOR_ ## next
+    GUARANTOR_A.CaptureValue(#x, (x)).GUARANTOR_##next
 
-#define MAKE_GUARANTOR(cond) \
-    kbase::Guarantor(cond, __FILE__, __LINE__)
+#define MAKE_GUARANTOR(cond, action) \
+    kbase::Guarantor(cond, __FILE__, __LINE__, kbase::EnsureAction::##action)
 
-#define ENSURE(cond) \
-    (cond) ? (void)0 : MAKE_GUARANTOR(#cond).GUARANTOR_A
+#define ENSURE(action, cond) \
+    (!ACTION_IS_ON(action) || (cond)) ? (void)0 : MAKE_GUARANTOR(#cond, action).GUARANTOR_A
 
 class Guarantor {
 public:
-    Guarantor(const char* msg, const char* file_name, int line)
+    Guarantor(const char* msg, const char* file_name, int line, EnsureAction action)
+        : action_required_(action)
     {
-        std::string context
-            = StringPrintf("Failed: %s\nFile: %s Line: %d\nCurrent Variables:\n",
-                           msg, file_name, line);
-        exception_desc_ << context;
+        // TODO: capture stack trace in constructor, but append data in final action.
+        exception_desc_ << StringPrintf("Failed: %s\nFile: %s Line: %d\nCurrent Variables:\n",
+                                        msg, file_name, line);
     }
 
     ~Guarantor() = default;
@@ -48,41 +62,44 @@ public:
 
     DISALLOW_MOVE(Guarantor);
 
-    // Incorporates variable value.
+    // Capture diagnostic variables.
+
     template<typename T>
-    Guarantor& current_value(const char* name, const T& value)
+    Guarantor& CaptureValue(const char* name, T&& value)
     {
         exception_desc_ << "    " << name << " = " << value << "\n";
         return *this;
     }
 
-    Guarantor& current_value(const char* name, const std::wstring& value)
+    Guarantor& CaptureValue(const char* name, const std::wstring& value)
     {
-        std::string converted = SysWideToNativeMB(value);
-        return current_value(name, converted);
+        std::string converted = SysWideToUTF8(value);
+        return CaptureValue(name, converted);
     }
 
-    Guarantor& current_value(const char* name, const wchar_t* value)
+    Guarantor& CaptureValue(const char* name, const wchar_t* value)
     {
-        std::string converted = SysWideToNativeMB(value);
-        return current_value(name, converted);
+        std::string converted = SysWideToUTF8(value);
+        return CaptureValue(name, converted);
     }
 
-    void raise()
-    {
-        throw std::runtime_error(exception_desc_.str());
-    }
+    void Require() const;
 
-    void logging()
-    {
-        LOG(FATAL) << exception_desc_.str();
-    }
+    void Require(const std::string msg);
 
-    // access stubs
+    // Access stubs for infinite variable capture.
     Guarantor& GUARANTOR_A = *this;
     Guarantor& GUARANTOR_B = *this;
 
 private:
+    void Check() const;
+
+    void Raise() const;
+
+    void RaiseWithDump() const;
+
+private:
+    EnsureAction action_required_;
     std::ostringstream exception_desc_;
 };
 
@@ -103,6 +120,8 @@ public:
 private:
     unsigned long error_code_;
 };
+
+void EnableAlwaysCheckForEnsureInDebug(bool always_check);
 
 class Win32Exception : public std::runtime_error {
 public:

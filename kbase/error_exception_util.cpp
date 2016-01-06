@@ -8,6 +8,17 @@
 
 #include "kbase/scope_guard.h"
 
+namespace {
+
+bool g_always_enable_check_in_debug = true;
+
+inline bool ShouldCheckFirst()
+{
+    return ACTION_IS_ON(CHECK) && g_always_enable_check_in_debug;
+}
+
+}   // namespace
+
 namespace kbase {
 
 LastError::LastError()
@@ -61,6 +72,59 @@ std::wstring LastError::GetDescriptiveMessage() const
     message_text.assign(static_cast<LPCTSTR>(LocalLock(buffer)), text_length - 2);
 
     return message_text;
+}
+
+void Guarantor::Require() const
+{
+    switch (action_required_) {
+        case EnsureAction::CHECK:
+            Check();
+            break;
+
+        case EnsureAction::RAISE:
+            Raise();
+            break;
+
+        case EnsureAction::RAISE_WITH_DUMP:
+            RaiseWithDump();
+            break;
+    }
+}
+
+void Guarantor::Require(const std::string msg)
+{
+    exception_desc_ << "Extra Message: " << msg << "\n";
+    Require();
+}
+
+void Guarantor::Check() const
+{
+    std::wstring message = SysUTF8ToWide(exception_desc_.str());
+    MessageBoxW(nullptr, message.c_str(), L"Checking Failed", MB_OK | MB_TOPMOST | MB_ICONHAND);
+    __debugbreak();
+}
+
+void Guarantor::Raise() const
+{
+    if (ShouldCheckFirst()) {
+        Check();
+    }
+
+    throw std::runtime_error(exception_desc_.str());
+}
+
+void Guarantor::RaiseWithDump() const
+{
+    if (ShouldCheckFirst()) {
+        Check();
+    }
+
+    // TODO: dump and throw.
+}
+
+void EnableAlwaysCheckForEnsureInDebug(bool always_check)
+{
+    g_always_enable_check_in_debug = always_check;
 }
 
 Win32Exception::Win32Exception(unsigned long last_error,
