@@ -48,6 +48,8 @@ constexpr bool NotReached()
     kbase::Guarantor(cond, __FILE__, __LINE__, kbase::EnsureAction::##action)
 
 #define ENSURE(action, cond) \
+    static_assert(std::is_same<std::remove_const_t<decltype(cond)>, bool>::value, \
+                  "cond must be a bool expression"); \
     (!ACTION_IS_ON(action) || (cond)) ? (void)0 : MAKE_GUARANTOR(#cond, action).GUARANTOR_A
 
 class Guarantor {
