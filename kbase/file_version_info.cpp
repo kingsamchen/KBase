@@ -28,12 +28,12 @@ namespace kbase {
 std::unique_ptr<FileVersionInfo> FileVersionInfo::CreateForFile(const FilePath& file)
 {
     DWORD info_size = GetFileVersionInfoSizeW(file.value().c_str(), nullptr);
-    ThrowLastErrorIf(info_size == 0, "failed to get file version info size.");
+    ENSURE(RAISE, info_size != 0)(LastError()).Require("Failed to get file version info size.");
 
     VersionData version_data(info_size);
     BOOL rv = GetFileVersionInfoW(file.value().c_str(), 0, info_size,
                                   version_data.data());
-    ThrowLastErrorIf(!rv, "failed to get file version info");
+    ENSURE(RAISE, rv != 0)(LastError()).Require("Failed to get file version info");
 
     return std::unique_ptr<FileVersionInfo>(
         new FileVersionInfo(std::move(version_data)));
@@ -44,7 +44,7 @@ std::unique_ptr<FileVersionInfo> FileVersionInfo::CreateForModule(HMODULE module
 {
     wchar_t file_name[MAX_PATH];
     DWORD rv = GetModuleFileNameW(module, file_name, MAX_PATH);
-    ThrowLastErrorIf(!rv, "failed to get file name for a module");
+    ENSURE(RAISE, rv != 0)(LastError()).Require("Failed to get file name for a module");
 
     return CreateForFile(kbase::FilePath(file_name));
 }

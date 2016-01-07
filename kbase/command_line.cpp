@@ -216,7 +216,7 @@ void CommandLine::ParseFromString(const StringType& cmdline)
     int argc = 0;
     wchar_t** argv = nullptr;
     argv = CommandLineToArgvW(sanitized_cmdline_str.c_str(), &argc);
-    ThrowLastErrorIf(!argv, "Failed to parse command line string");
+    ENSURE(RAISE, argv != nullptr)(LastError()).Require("Failed to parse command line string");
 
     ParseFromArgv(argc, argv);
     LocalFree(argv);

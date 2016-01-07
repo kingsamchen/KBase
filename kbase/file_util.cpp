@@ -50,7 +50,7 @@ FileInfo GetFileInfo(const FilePath& path)
     WIN32_FILE_ATTRIBUTE_DATA attr_data;
     BOOL ret = GetFileAttributesExW(path.value().c_str(), GetFileExInfoStandard,
                                     &attr_data);
-    ThrowLastErrorIf(!ret, "Failed to call GetFileAttributesEx");
+    ENSURE(RAISE, ret != 0)(LastError()).Require("Failed to call GetFileAttributesEx");
 
     ULARGE_INTEGER file_size;
     file_size.HighPart = attr_data.nFileSizeHigh;
@@ -69,12 +69,12 @@ void RemoveFile(const FilePath& path, bool recursive)
     if (!recursive) {
         if (GetFileInfo(path).is_directory()) {
             BOOL rv = RemoveDirectoryW(path.value().c_str());
-            ThrowLastErrorIf(!rv, "Failed to remove the directory");
+            ENSURE(RAISE, rv != 0)(LastError()).Require("Failed to remove the directory");
             return;
         }
 
         BOOL rv = DeleteFileW(path.value().c_str());
-        ThrowLastErrorIf(!rv, "Failed to delete the file");
+        ENSURE(RAISE, rv != 0)(LastError()).Require("Failed to delete the file");
         return;
     }
 
@@ -95,19 +95,19 @@ void RemoveFile(const FilePath& path, bool recursive)
 
     int rv = SHFileOperationW(&file_op);
     bool err = rv || file_op.fAnyOperationsAborted;
-    ThrowLastErrorIf(err, "Failed to remove files recursively");
+    ENSURE(RAISE, !err)(LastError()).Require("Failed to remove files recursively");
 }
 
 void RemoveFileAfterReboot(const FilePath& path)
 {
     BOOL rv = MoveFileExW(path.value().c_str(), nullptr, MOVEFILE_DELAY_UNTIL_REBOOT);
-    ThrowLastErrorIf(!rv, "Failed to mark delay delete");
+    ENSURE(RAISE, rv != 0)(LastError()).Require("Failed to mark delay delete");
 }
 
 void DuplicateFile(const FilePath& src, const FilePath& dest)
 {
     BOOL rv = CopyFileW(src.value().c_str(), dest.value().c_str(), false);
-    ThrowLastErrorIf(!rv, "Failed to duplicate file");
+    ENSURE(RAISE, rv != 0)(LastError()).Require("Failed to duplicate file");
 }
 
 void DuplicateDirectory(const FilePath& src, const FilePath& dest, bool recursive)
@@ -136,7 +136,7 @@ void DuplicateDirectory(const FilePath& src, const FilePath& dest, bool recursiv
 
     if (!DirectoryExists(full_dest)) {
         BOOL rv = CreateDirectoryW(full_dest.value().c_str(), nullptr);
-        ThrowLastErrorIf(!rv, "Failed to create top-level dest dir");
+        ENSURE(RAISE, rv != 0)(LastError()).Require("Failed to create top-level dest dir");
     }
 
     int file_type = FileEnumerator::FILES;
@@ -151,7 +151,7 @@ void DuplicateDirectory(const FilePath& src, const FilePath& dest, bool recursiv
         ENSURE(CHECK, rv)(full_src.value())(cur.value())(dest_for_cur.value()).Require();
         if (file_it.GetInfo().is_directory() && !DirectoryExists(dest_for_cur)) {
             BOOL ret = CreateDirectoryW(dest_for_cur.value().c_str(), nullptr);
-            ThrowLastErrorIf(!ret, "Failed to create top-level dest dir");
+            ENSURE(RAISE, ret != 0)(LastError()).Require("Failed to create top-level dest dir");
         } else {
             DuplicateFile(cur, dest_for_cur);
         }
@@ -176,7 +176,7 @@ void MakeFileMove(const FilePath& src, const FilePath& dest)
     }
 
     SetLastError(last_error.error_code());
-    ThrowLastErrorIf(true, "Failed to move file");
+    ENSURE(RAISE, NotReached())(LastError()).Require("Failed to move file");
 }
 
 void ReadFileToString(const FilePath& path, std::string* data)

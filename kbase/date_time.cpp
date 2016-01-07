@@ -94,14 +94,14 @@ DateTime::DateTime(const FILETIME& filetime, bool in_utc /* = true */)
     FILETIME local_file_time;
     if (in_utc) {
         ret = FileTimeToLocalFileTime(&filetime, &local_file_time);
-        ThrowLastErrorIf(!ret, "failed to convert FileTime to LocalFileTime");
+        ENSURE(RAISE, ret != 0)(LastError()).Require("Failed to convert FileTime to LocalFileTime");
     } else {
         local_file_time = filetime;
     }
 
     SYSTEMTIME systime;
     ret = FileTimeToSystemTime(&local_file_time, &systime);
-    ThrowLastErrorIf(!ret, "failed to convert FileTime to SystemTime");
+    ENSURE(RAISE, ret != 0)(LastError()).Require("Failed to convert FileTime to SystemTime");
 
     DateTime tmp(systime);
 
@@ -190,7 +190,7 @@ FILETIME DateTime::ToFileTime() const
     FILETIME local_file_time = ToLocalFileTime();
     FILETIME utc_file_time;
     BOOL ret = LocalFileTimeToFileTime(&local_file_time, &utc_file_time);
-    ThrowLastErrorIf(!ret, "failed to convert local file time to file time");
+    ENSURE(RAISE, ret != 0)(LastError()).Require("Failed to convert local file time to file time");
 
     return utc_file_time;
 }
@@ -200,7 +200,7 @@ FILETIME DateTime::ToLocalFileTime() const
     FILETIME local_file_time;
     SYSTEMTIME sys_local_time = ToSystemTime();
     BOOL ret = SystemTimeToFileTime(&sys_local_time, &local_file_time);
-    ThrowLastErrorIf(!ret, "failed to convert system time to file time");
+    ENSURE(RAISE, ret != 0)(LastError()).Require("Failed to convert system time to file time");
 
     return local_file_time;
 }

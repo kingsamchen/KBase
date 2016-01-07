@@ -21,7 +21,7 @@ uint64_t AmountOfMemory(DWORDLONG MEMORYSTATUSEX::* memory_field)
 {
     MEMORYSTATUSEX memory_status = { sizeof(memory_status) };
     BOOL ret = GlobalMemoryStatusEx(&memory_status);
-    ThrowLastErrorIf(!ret, "Failed to get global memory status!");
+    ENSURE(RAISE, ret != 0)(LastError()).Require("Failed to get global memory status!");
 
     return memory_status.*memory_field;
 }
@@ -34,7 +34,7 @@ void GetDiskSpace(const FilePath& path, const SpaceType& type)
                                   std::get<0>(type),
                                   std::get<1>(type),
                                   std::get<2>(type));
-    ThrowLastErrorIf(!ret, "Failed to get disk space information!");
+    ENSURE(RAISE, ret != 0)(LastError()).Require("Failed to get disk space information!");
 }
 
 }   // namespace
@@ -110,7 +110,7 @@ uint64_t SysInfo::Uptime()
 {
     unsigned long long raw_time = 0;
     BOOL ret = QueryUnbiasedInterruptTime(&raw_time);
-    ThrowLastErrorIf(!ret, "failed to query unbiased interrupt time");
+    ENSURE(RAISE, ret != 0)(LastError()).Require("Failed to query unbiased interrupt time");
 
     return raw_time / (10 * 1000);
 }

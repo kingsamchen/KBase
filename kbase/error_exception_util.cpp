@@ -136,31 +136,4 @@ std::ostream& operator<<(std::ostream& os, const LastError& last_error)
     return os;
 }
 
-Win32Exception::Win32Exception(unsigned long last_error,
-                               const std::string& message)
-    : runtime_error(message), error_code_(last_error)
-{}
-
-unsigned long Win32Exception::error_code() const
-{
-    return error_code_;
-}
-
-void ThrowLastErrorIfInternal(const char* file, int line, const char* fn_name,
-                              bool expression, const std::string& user_message)
-{
-    if (expression) {
-        LastError last_error;
-
-        // Since GetVerboseMessage internally uses English as its displaying language,
-        // it is safe here to call WideToASCII.
-        std::string last_error_message = WideToASCII(last_error.GetDescriptiveMessage());
-        std::string error_message =
-            StringPrintf("File: %s Line: %d Function: %s\n", file, line, fn_name);
-        error_message += user_message + " (" + last_error_message + ")";
-
-        throw Win32Exception(last_error.error_code(), error_message);
-    }
-}
-
 }   // namespace kbase

@@ -53,7 +53,7 @@ std::wstring Environment::GetVar(const wchar_t* name)
 
     std::vector<wchar_t> buf(required_size);
     DWORD rv = GetEnvironmentVariableW(name, &buf[0], required_size);
-    ThrowLastErrorIf(!rv, "failed to get environment variable");
+    ENSURE(RAISE, rv != 0)(LastError()).Require("Failed to get environment variable");
 
     return std::wstring(buf.data(), rv);
 }
@@ -70,7 +70,7 @@ void Environment::SetVar(const wchar_t* name, const std::wstring& value)
 {
     ENSURE(CHECK, value.size() <= kEnvVarMaxSize)(value.size()).Require();
     BOOL rv = SetEnvironmentVariableW(name, value.c_str());
-    ThrowLastErrorIf(!rv, "failed to set environment variable");
+    ENSURE(RAISE, rv != 0)(LastError()).Require("Failed to set environment variable");
 }
 
 // static
