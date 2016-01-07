@@ -15,7 +15,6 @@
 #include <stdexcept>
 
 #include "kbase/basic_macros.h"
-#include "kbase/string_format.h"
 #include "kbase/sys_string_encoding_conversions.h"
 
 namespace kbase {
@@ -51,9 +50,11 @@ public:
     Guarantor(const char* msg, const char* file_name, int line, EnsureAction action)
         : action_required_(action)
     {
-        // TODO: capture stack trace in constructor, but append data in final action.
-        exception_desc_ << StringPrintf("Failed: %s\nFile: %s Line: %d\nCurrent Variables:\n",
-                                        msg, file_name, line);
+        // Keep execution in construction short, and try not to call WinAPI here,
+        // which might overwrite last-error code we need, even when they succeed.
+        exception_desc_ << "Failed: " << msg
+                        << "\nFile: " << file_name << " Line: " << line
+                        << "\nCaptured Variables:\n";
     }
 
     ~Guarantor() = default;
@@ -103,6 +104,8 @@ private:
     std::ostringstream exception_desc_;
 };
 
+void EnableAlwaysCheckForEnsureInDebug(bool always_check);
+
 // This class automatically retrieves the last error code of the calling thread when
 // constructing an instance, and stores the value internally.
 class LastError {
@@ -121,7 +124,7 @@ private:
     unsigned long error_code_;
 };
 
-void EnableAlwaysCheckForEnsureInDebug(bool always_check);
+std::ostream& operator<<(std::ostream& os, const LastError& last_error);
 
 class Win32Exception : public std::runtime_error {
 public:

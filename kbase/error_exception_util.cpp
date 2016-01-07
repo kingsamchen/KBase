@@ -21,6 +21,59 @@ inline bool ShouldCheckFirst()
 
 namespace kbase {
 
+void Guarantor::Require() const
+{
+    switch (action_required_) {
+        case EnsureAction::CHECK:
+            Check();
+            break;
+
+        case EnsureAction::RAISE:
+            Raise();
+            break;
+
+        case EnsureAction::RAISE_WITH_DUMP:
+            RaiseWithDump();
+            break;
+    }
+}
+
+void Guarantor::Require(const std::string msg)
+{
+    exception_desc_ << "Extra Message: " << msg << "\n";
+    Require();
+}
+
+void Guarantor::Check() const
+{
+    std::wstring message = SysUTF8ToWide(exception_desc_.str());
+    MessageBoxW(nullptr, message.c_str(), L"Checking Failed", MB_OK | MB_TOPMOST | MB_ICONHAND);
+    __debugbreak();
+}
+
+void Guarantor::Raise() const
+{
+    if (ShouldCheckFirst()) {
+        Check();
+    }
+
+    throw std::runtime_error(exception_desc_.str());
+}
+
+void Guarantor::RaiseWithDump() const
+{
+    if (ShouldCheckFirst()) {
+        Check();
+    }
+
+    // TODO: dump and throw.
+}
+
+void EnableAlwaysCheckForEnsureInDebug(bool always_check)
+{
+    g_always_enable_check_in_debug = always_check;
+}
+
 LastError::LastError()
     : error_code_(GetLastError())
 {}
@@ -74,57 +127,13 @@ std::wstring LastError::GetDescriptiveMessage() const
     return message_text;
 }
 
-void Guarantor::Require() const
+std::ostream& operator<<(std::ostream& os, const LastError& last_error)
 {
-    switch (action_required_) {
-        case EnsureAction::CHECK:
-            Check();
-            break;
+    std::string error_message = WideToASCII(last_error.GetDescriptiveMessage());
+    os << last_error.error_code()
+       << " (" + error_message + ")";
 
-        case EnsureAction::RAISE:
-            Raise();
-            break;
-
-        case EnsureAction::RAISE_WITH_DUMP:
-            RaiseWithDump();
-            break;
-    }
-}
-
-void Guarantor::Require(const std::string msg)
-{
-    exception_desc_ << "Extra Message: " << msg << "\n";
-    Require();
-}
-
-void Guarantor::Check() const
-{
-    std::wstring message = SysUTF8ToWide(exception_desc_.str());
-    MessageBoxW(nullptr, message.c_str(), L"Checking Failed", MB_OK | MB_TOPMOST | MB_ICONHAND);
-    __debugbreak();
-}
-
-void Guarantor::Raise() const
-{
-    if (ShouldCheckFirst()) {
-        Check();
-    }
-
-    throw std::runtime_error(exception_desc_.str());
-}
-
-void Guarantor::RaiseWithDump() const
-{
-    if (ShouldCheckFirst()) {
-        Check();
-    }
-
-    // TODO: dump and throw.
-}
-
-void EnableAlwaysCheckForEnsureInDebug(bool always_check)
-{
-    g_always_enable_check_in_debug = always_check;
+    return os;
 }
 
 Win32Exception::Win32Exception(unsigned long last_error,
