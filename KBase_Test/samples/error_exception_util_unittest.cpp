@@ -38,7 +38,7 @@ void ClearLastError()
 void EnsureMacroTestIntermediate(const std::vector<int>& vec)
 {
     // Must explicitly call the function to throw exception.
-    ENSURE(vec.size() >= 0 && vec.size() <= 5)(vec.size()).raise();
+    ENSURE(RAISE, vec.size() >= 0 && vec.size() <= 5)(vec.size()).Require();
 }
 
 }   // namespace
@@ -70,16 +70,6 @@ TEST_F(ErrorExceptionUtilTest, LastError_Message)
     ErrorEmitter(666);
     error = LastError();
     EXPECT_TRUE(error.GetDescriptiveMessage().empty());
-}
-
-TEST_F(ErrorExceptionUtilTest, ThrowLastError)
-{
-    ClearLastError();
-
-    EXPECT_NO_THROW(ThrowLastErrorIf(GetLastError() != 0, "the last error should be 0"));
-
-    ErrorEmitter(64);
-    EXPECT_THROW(ThrowLastErrorIf(GetLastError() != ERROR_SUCCESS, ""), Win32Exception);
 }
 
 TEST_F(ErrorExceptionUtilTest, EnsureMacro)

@@ -60,6 +60,6 @@ TEST_F(SysInfoTest, DiskspaceInfo)
     EXPECT_LT(0, kbase::SysInfo::AmountOfTotalDiskSpace(kbase::FilePath(L"C:")) >> 20);
 
     // F: does not exist, and hence the following invocations would throw an exception.
-    EXPECT_THROW(kbase::SysInfo::AmountOfFreeDiskSpace(kbase::FilePath(L"F:")), kbase::Win32Exception);
-    EXPECT_THROW(kbase::SysInfo::AmountOfTotalDiskSpace(kbase::FilePath(L"F:")), kbase::Win32Exception);
+    EXPECT_ANY_THROW(kbase::SysInfo::AmountOfFreeDiskSpace(kbase::FilePath(L"F:")));
+    EXPECT_ANY_THROW(kbase::SysInfo::AmountOfTotalDiskSpace(kbase::FilePath(L"F:")));
 }
