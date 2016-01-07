@@ -183,14 +183,14 @@ CommandLine::DefaultSwitchPrefix CommandLine::GetDefaultSwitchPrefix() const
     }
 
     // Shall never get here.
-    ENSURE(false)(default_switch_prefix_.data()).raise();
+    ENSURE(CHECK, NotReached())(default_switch_prefix_.data()).Require();
     return DefaultSwitchPrefix::PREFIX_DASH;
 }
 
 void CommandLine::SetDefaultSwitchPrefix(DefaultSwitchPrefix prefix_type)
 {
     size_t index = static_cast<size_t>(prefix_type);
-    ENSURE(index < _countof(kSwitchPrefixes))(prefix_type).raise();
+    ENSURE(CHECK, index < _countof(kSwitchPrefixes))(prefix_type).Require();
     wcscpy_s(default_switch_prefix_.data(), default_switch_prefix_.size(),
              kSwitchPrefixes[index]);
 }

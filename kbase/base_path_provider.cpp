@@ -23,7 +23,7 @@ FilePath ShellGetFolderPath(const KNOWNFOLDERID& folder_id)
     wchar_t* folder_path = nullptr;
     HRESULT ret = SHGetKnownFolderPath(folder_id, 0, nullptr, &folder_path);
     ON_SCOPE_EXIT([&] { CoTaskMemFree(folder_path); });
-    ENSURE(ret == S_OK)(ret).raise();
+    ENSURE(CHECK, ret == S_OK)(ret).Require();
 
     return FilePath(folder_path);
 }

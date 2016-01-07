@@ -82,8 +82,8 @@ FilePath GetPathFromCache(PathKey key, const PathData& path_data)
 void EnsureNoPathKeyOverlapped(PathKey start, PathKey end, const PathData& path_data)
 {
     for (const PathProvider& provider : path_data.providers) {
-        ENSURE(start >= provider.end || end <= provider.start)
-            (start)(end)(provider.start)(provider.end).raise();
+        ENSURE(CHECK, start >= provider.end || end <= provider.start)
+            (start)(end)(provider.start)(provider.end).Require();
     }
 }
 
@@ -95,8 +95,8 @@ namespace kbase {
 FilePath PathService::Get(PathKey key)
 {
     PathData& path_data = GetPathData();
-    ENSURE(key >= BASE_PATH_START)(key).raise();
-    ENSURE(path_data.providers.empty() == false).raise();
+    ENSURE(CHECK, key >= BASE_PATH_START)(key).Require();
+    ENSURE(CHECK, path_data.providers.empty() == false).Require();
 
     ProviderChain::const_iterator provider;
     {
@@ -127,7 +127,7 @@ FilePath PathService::Get(PathKey key)
     // Ensure that the returned path never contains '..'.
     if (!path.IsAbsolute()) {
         FilePath&& full_path = MakeAbsoluteFilePath(path);
-        ENSURE(!full_path.empty())(SysWideToNativeMB(path.value())).raise();
+        ENSURE(CHECK, !full_path.empty())(SysWideToNativeMB(path.value())).Require();
         path = std::move(full_path);
     }
 
@@ -145,10 +145,8 @@ void PathService::RegisterPathProvider(ProviderFunc provider,
                                        PathKey start, PathKey end)
 {
     PathData& path_data = GetPathData();
-    ENSURE(path_data.providers.empty() == false).raise();
-#ifdef _DEBUG
-    ENSURE(start < end)(start)(end).raise();
-#endif
+    ENSURE(CHECK, path_data.providers.empty() == false).Require();
+    ENSURE(CHECK, start < end)(start)(end).Require();
 
     std::lock_guard<std::mutex> scoped_lock(path_data.lock);
 

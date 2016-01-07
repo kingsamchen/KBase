@@ -113,15 +113,15 @@ void DuplicateFile(const FilePath& src, const FilePath& dest)
 void DuplicateDirectory(const FilePath& src, const FilePath& dest, bool recursive)
 {
     FilePath full_src = MakeAbsoluteFilePath(src);
-    ENSURE(!full_src.empty())(src.value()).raise();
+    ENSURE(CHECK, !full_src.empty())(src.value()).Require();
     FilePath full_dest = dest;
     if (PathExists(full_dest)) {
         full_dest = MakeAbsoluteFilePath(full_dest);
-        ENSURE(!full_dest.empty())(dest.value()).raise();
+        ENSURE(CHECK, !full_dest.empty())(dest.value()).Require();
     } else {
         // Parent directory of the |dest| must exist.
         auto&& dest_parent = MakeAbsoluteFilePath(full_dest.DirName());
-        ENSURE(!dest_parent.empty())(dest.value()).raise();
+        ENSURE(CHECK, !dest_parent.empty())(dest.value()).Require();
     }
 
     // Treats this condition as succeeded.
@@ -132,7 +132,7 @@ void DuplicateDirectory(const FilePath& src, const FilePath& dest, bool recursiv
     // The destination cannot be a subfolder of the source in recursive mode.
     bool permitted = !(recursive &&
                        StartsWith(full_dest.value(), full_src.value(), false));
-    ENSURE(permitted)(full_src.value())(full_dest.value()).raise();
+    ENSURE(CHECK, permitted)(full_src.value())(full_dest.value()).Require();
 
     if (!DirectoryExists(full_dest)) {
         BOOL rv = CreateDirectoryW(full_dest.value().c_str(), nullptr);
@@ -148,7 +148,7 @@ void DuplicateDirectory(const FilePath& src, const FilePath& dest, bool recursiv
     for (auto&& cur = file_it.Next(); !cur.empty(); cur = file_it.Next()) {
         FilePath dest_for_cur = full_dest;
         bool rv = full_src.AppendRelativePath(cur, &dest_for_cur);
-        ENSURE(rv)(full_src.value())(cur.value())(dest_for_cur.value()).raise();
+        ENSURE(CHECK, rv)(full_src.value())(cur.value())(dest_for_cur.value()).Require();
         if (file_it.GetInfo().is_directory() && !DirectoryExists(dest_for_cur)) {
             BOOL ret = CreateDirectoryW(dest_for_cur.value().c_str(), nullptr);
             ThrowLastErrorIf(!ret, "Failed to create top-level dest dir");

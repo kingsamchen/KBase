@@ -68,7 +68,7 @@ bool Environment::HasVar(const wchar_t* name)
 // static
 void Environment::SetVar(const wchar_t* name, const std::wstring& value)
 {
-    ENSURE(value.size() <= kEnvVarMaxSize)(value.size()).raise();
+    ENSURE(CHECK, value.size() <= kEnvVarMaxSize)(value.size()).Require();
     BOOL rv = SetEnvironmentVariableW(name, value.c_str());
     ThrowLastErrorIf(!rv, "failed to set environment variable");
 }

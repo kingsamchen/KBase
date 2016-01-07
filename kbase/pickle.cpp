@@ -207,7 +207,7 @@ Pickle::Pickle(const Pickle& other)
     // kCapacityReadOnly. therefore, calculate its capacity on hand.
     size_t capacity = sizeof(Header) + other.header_->payload_size;
     bool resized = Resize(capacity);
-    ENSURE(resized)(capacity).raise();
+    ENSURE(CHECK, resized)(capacity).Require();
 
     memcpy_s(header_, capacity_, other.header_, capacity);
 }
@@ -230,7 +230,7 @@ Pickle& Pickle::operator=(const Pickle& rhs)
 
     size_t capacity = sizeof(Header) + rhs.header_->payload_size;
     bool resized = Resize(capacity);
-    ENSURE(resized)(capacity_)(capacity).raise();
+    ENSURE(CHECK, resized)(capacity_)(capacity).Require();
 
     memcpy_s(header_, capacity_, rhs.header_, capacity);
 
@@ -259,9 +259,8 @@ Pickle::~Pickle()
 
 bool Pickle::Resize(size_t new_capacity)
 {
-#ifdef _DEBUG
-    ENSURE(capacity_ != kCapacityReadOnly).raise();
-#endif
+    ENSURE(CHECK, capacity_ != kCapacityReadOnly).Require();
+
     new_capacity = AlignInt(new_capacity, kPayloadUnit);
 
     void* p = realloc(header_, new_capacity);
@@ -302,9 +301,7 @@ bool Pickle::Write(const std::wstring& value)
 bool Pickle::WriteByte(const void* data, int data_len)
 {
     if (capacity_ == kCapacityReadOnly) {
-#ifdef _DEBUG
-        ENSURE(false).raise();
-#endif
+        ENSURE(CHECK, NotReached()).Require();
         return false;
     }
 

@@ -336,7 +336,7 @@ int SysStringCompareCaseInsensitive(const std::wstring& x, const std::wstring& y
 {
     int ret = CompareStringOrdinal(x.data(), static_cast<int>(x.length()),
                                    y.data(), static_cast<int>(y.length()), TRUE);
-    ENSURE(ret != 0)(x)(y).raise();
+    ENSURE(CHECK, ret != 0)(x)(y).Require();
 
     return ret - CSTR_EQUAL;
 }

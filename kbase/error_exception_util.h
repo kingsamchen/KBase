@@ -25,6 +25,11 @@ enum class EnsureAction : int {
     RAISE_WITH_DUMP
 };
 
+constexpr bool NotReached()
+{
+    return false;
+}
+
 // The action `CHECK` is performed only in debug mode.
 // Besides, we also need to make the CHECK-call cause no runtime penalty,
 // when in non-debug mode.
