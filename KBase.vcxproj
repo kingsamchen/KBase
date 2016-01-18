@@ -181,6 +181,7 @@
     <ClCompile Include="kbase\pickle.cpp" />
     <ClCompile Include="kbase\registry.cpp" />
     <ClCompile Include="kbase\sha.cpp" />
+    <ClCompile Include="kbase\stack_walker.cpp" />
     <ClCompile Include="kbase\string_format.cpp" />
     <ClCompile Include="kbase\string_piece.cpp" />
     <ClCompile Include="kbase\string_util.cpp" />
@@ -217,6 +218,7 @@
     <ClInclude Include="kbase\registry.h" />
     <ClInclude Include="kbase\scope_guard.h" />
     <ClInclude Include="kbase\sha.h" />
+    <ClInclude Include="kbase\stack_walker.h" />
     <ClInclude Include="kbase\string_format.h" />
     <ClInclude Include="kbase\string_piece.h" />
     <ClInclude Include="kbase\string_util.h" />
