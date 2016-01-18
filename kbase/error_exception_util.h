@@ -91,7 +91,7 @@ public:
         return CaptureValue(name, converted);
     }
 
-    void Require() const;
+    void Require();
 
     void Require(const std::string msg);
 
@@ -100,11 +100,11 @@ public:
     Guarantor& GUARANTOR_B = *this;
 
 private:
-    void Check() const;
+    void Check();
 
-    void Raise() const;
+    void Raise();
 
-    void RaiseWithDump() const;
+    void RaiseWithDump();
 
 private:
     EnsureAction action_required_;

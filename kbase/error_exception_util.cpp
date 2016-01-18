@@ -7,6 +7,7 @@
 #include <Windows.h>
 
 #include "kbase/scope_guard.h"
+#include "kbase/stack_walker.h"
 
 namespace {
 
@@ -21,7 +22,7 @@ inline bool ShouldCheckFirst()
 
 namespace kbase {
 
-void Guarantor::Require() const
+void Guarantor::Require()
 {
     switch (action_required_) {
         case EnsureAction::CHECK:
@@ -44,14 +45,16 @@ void Guarantor::Require(const std::string msg)
     Require();
 }
 
-void Guarantor::Check() const
+void Guarantor::Check()
 {
+    StackWalker callstack;
+    callstack.DumpCallStack(exception_desc_);
     std::wstring message = SysUTF8ToWide(exception_desc_.str());
     MessageBoxW(nullptr, message.c_str(), L"Checking Failed", MB_OK | MB_TOPMOST | MB_ICONHAND);
     __debugbreak();
 }
 
-void Guarantor::Raise() const
+void Guarantor::Raise()
 {
     if (ShouldCheckFirst()) {
         Check();
@@ -60,7 +63,7 @@ void Guarantor::Raise() const
     throw std::runtime_error(exception_desc_.str());
 }
 
-void Guarantor::RaiseWithDump() const
+void Guarantor::RaiseWithDump()
 {
     if (ShouldCheckFirst()) {
         Check();
