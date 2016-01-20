@@ -1,5 +1,5 @@
 /*
- @ Kingsley Chen
+ @ 0xCCCCCCCC
 */
 
 // This file is intended to be blank, since it is used as the precompiled header
