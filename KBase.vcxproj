@@ -177,6 +177,7 @@
     <ClCompile Include="kbase\guid.cpp" />
     <ClCompile Include="kbase\logging.cpp" />
     <ClCompile Include="kbase\md5.cpp" />
+    <ClCompile Include="kbase\minidump.cpp" />
     <ClCompile Include="kbase\path_service.cpp" />
     <ClCompile Include="kbase\pickle.cpp" />
     <ClCompile Include="kbase\registry.cpp" />
@@ -210,6 +211,7 @@
     <ClInclude Include="kbase\lazy.h" />
     <ClInclude Include="kbase\logging.h" />
     <ClInclude Include="kbase\lru_cache.h" />
+    <ClInclude Include="kbase\minidump.h" />
     <ClInclude Include="kbase\scoped_handle.h" />
     <ClInclude Include="kbase\signals.h" />
     <ClInclude Include="kbase\singleton.h" />

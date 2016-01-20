@@ -93,6 +93,9 @@
     <ClCompile Include="kbase\stack_walker.cpp">
       <Filter>kbase</Filter>
     </ClCompile>
+    <ClCompile Include="kbase\minidump.cpp">
+      <Filter>kbase</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="kbase\at_exit_manager.h">
@@ -198,6 +201,9 @@
       <Filter>kbase</Filter>
     </ClInclude>
     <ClInclude Include="kbase\stack_walker.h">
+      <Filter>kbase</Filter>
+    </ClInclude>
+    <ClInclude Include="kbase\minidump.h">
       <Filter>kbase</Filter>
     </ClInclude>
   </ItemGroup>
