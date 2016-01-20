@@ -6,16 +6,30 @@
 
 #include <Windows.h>
 
+#include "kbase/minidump.h"
 #include "kbase/scope_guard.h"
 #include "kbase/stack_walker.h"
 
 namespace {
 
+using kbase::FilePath;
+using kbase::PathString;
+
 bool g_always_enable_check_in_debug = true;
+FilePath g_minidump_dir_path;
 
 inline bool ShouldCheckFirst()
 {
     return ACTION_IS_ON(CHECK) && g_always_enable_check_in_debug;
+}
+
+PathString GenerateMiniDumpFileName()
+{
+    PathString file_name(L"crash_");
+    file_name += std::to_wstring(time(nullptr));
+    file_name += L".dmp";
+
+    return file_name;
 }
 
 }   // namespace
@@ -69,12 +83,25 @@ void Guarantor::RaiseWithDump()
         Check();
     }
 
-    // TODO: dump and throw.
+    // If succeeded in creating the minidump, throws an exception with path attached;
+    // Otherwise, throws a normal exception instead.
+    auto dump_file_path = g_minidump_dir_path.AppendTo(GenerateMiniDumpFileName());
+    bool created = CreateMiniDump(dump_file_path);
+    if (created) {
+        throw ExceptionWithMiniDump(dump_file_path, exception_desc_.str());
+    }
+
+    throw std::runtime_error(exception_desc_.str());
 }
 
 void EnableAlwaysCheckForEnsureInDebug(bool always_check)
 {
     g_always_enable_check_in_debug = always_check;
+}
+
+void SetMiniDumpDirectory(const FilePath& dump_dir)
+{
+    g_minidump_dir_path = dump_dir;
 }
 
 LastError::LastError()

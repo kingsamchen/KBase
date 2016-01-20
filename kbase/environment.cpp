@@ -18,7 +18,7 @@ const DWORD kEnvVarMaxSize = 32766;
 
 void ParseEnvironmentBlock(const wchar_t* block_string, kbase::EnvTable* env_table)
 {
-    assert(block_string && *block_string != L'\0');
+    ENSURE(CHECK, block_string && *block_string != L'\0').Require();
 
     auto* cur = block_string;
     auto* field_begin = cur;
@@ -93,7 +93,7 @@ EnvTable Environment::CurrentEnvironmentTable()
 // static
 std::wstring Environment::GetEnvironmentBlock(const EnvTable& env_table)
 {
-    assert(!env_table.empty());
+    ENSURE(CHECK, !env_table.empty()).Require();
 
     std::wstring env_block;
 
