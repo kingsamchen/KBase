@@ -219,7 +219,7 @@ void StackWalker::DumpCallStack(std::ostream& stream)
         stream << "Failed to initialize symbols ("
                << SymbolContext::GetInstance()->error_code()
                << "). Dumping unresolved callstack:\n";
-        for (auto i = 0; i < valid_frame_count_; ++i) {
+        for (size_t i = 0; i < valid_frame_count_; ++i) {
             stream << "\t" << stack_frames_[i] << "\n";
         }
     } else {
