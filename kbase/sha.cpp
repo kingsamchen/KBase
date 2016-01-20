@@ -11,6 +11,8 @@
 
 namespace {
 
+using kbase::LastError;
+
 enum SHAType : unsigned int {
     SHA_1 = CALG_SHA1,
     SHA_256 = CALG_SHA_256
@@ -24,36 +26,36 @@ void SHAHash(const void* data, size_t size, SHAType type, Digest* digest)
     ON_SCOPE_EXIT([&provider] { if (provider) CryptReleaseContext(provider, 0); });
     BOOL rv = CryptAcquireContextW(&provider, nullptr, nullptr, PROV_RSA_AES,
                                    CRYPT_VERIFYCONTEXT);
-    ThrowLastErrorIf(!rv, "CryptAcquireContext failed.");
+    ENSURE(RAISE, rv != 0)(LastError()).Require("CryptAcquireContext failed.");
 
     {
         // Acquire hash object.
         HCRYPTHASH hash = 0;
         ON_SCOPE_EXIT([&hash] { if (hash) CryptDestroyHash(hash); });
         rv = CryptCreateHash(provider, type, 0, 0, &hash);
-        ThrowLastErrorIf(!rv, "CryptCreateHash failed.");
+        ENSURE(RAISE, rv != 0)(LastError()).Require("CryptCreateHash failed.");
 
         // Hash data.
         rv = CryptHashData(hash,
                            static_cast<const BYTE*>(data),
                            static_cast<DWORD>(size),
                            0);
-        ThrowLastErrorIf(!rv, "CryptHashData failed.");
+        ENSURE(RAISE, rv != 0)(LastError()).Require("CryptHashData failed.");
 
         // Retrieve it back.
         DWORD hash_len = 0;
         DWORD buffer_size = sizeof(hash_len);
         rv = CryptGetHashParam(hash, HP_HASHSIZE, reinterpret_cast<BYTE*>(&hash_len),
                                &buffer_size, 0);
-        ThrowLastErrorIf(!rv, "CryptGetHashParam for HASHSIZE failed.");
-        ThrowLastErrorIf(hash_len != digest->size(), "Hash value is wrong length.");
+        ENSURE(RAISE, rv != 0)(LastError()).Require("CryptGetHashParam for HASHSIZE failed.");
+        ENSURE(CHECK, hash_len == digest->size())(LastError())(hash_len)(digest->size());
 
         rv = CryptGetHashParam(hash,
                                HP_HASHVAL,
                                reinterpret_cast<BYTE*>(digest->data()),
                                &hash_len,
                                0);
-        ThrowLastErrorIf(!rv, "CryptGetHashParam for HASHVAL failed.");
+        ENSURE(RAISE, rv != 0)(LastError()).Require("CryptGetHashParam for HASHVAL failed.");
     }
 }
 

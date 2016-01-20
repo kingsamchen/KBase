@@ -160,7 +160,7 @@ public:
 
     void Evict(size_type count_to_evict)
     {
-        ENSURE(count_to_evict <= size())(count_to_evict)(size()).raise();
+        ENSURE(CHECK, count_to_evict <= size())(count_to_evict)(size()).Require();
         for (size_type i = 0; i < count_to_evict; ++i) {
             Evict();
         }

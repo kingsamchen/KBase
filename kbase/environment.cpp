@@ -18,7 +18,7 @@ const DWORD kEnvVarMaxSize = 32766;
 
 void ParseEnvironmentBlock(const wchar_t* block_string, kbase::EnvTable* env_table)
 {
-    assert(block_string && *block_string != L'\0');
+    ENSURE(CHECK, block_string && *block_string != L'\0').Require();
 
     auto* cur = block_string;
     auto* field_begin = cur;
@@ -47,13 +47,13 @@ std::wstring Environment::GetVar(const wchar_t* name)
 {
     DWORD required_size = GetEnvironmentVariableW(name, nullptr, 0);
     if (required_size == 0 &&
-        LastError().last_error_code() == ERROR_ENVVAR_NOT_FOUND) {
+        LastError().error_code() == ERROR_ENVVAR_NOT_FOUND) {
         return std::wstring();
     }
 
     std::vector<wchar_t> buf(required_size);
     DWORD rv = GetEnvironmentVariableW(name, &buf[0], required_size);
-    ThrowLastErrorIf(!rv, "failed to get environment variable");
+    ENSURE(RAISE, rv != 0)(LastError()).Require("Failed to get environment variable");
 
     return std::wstring(buf.data(), rv);
 }
@@ -68,9 +68,9 @@ bool Environment::HasVar(const wchar_t* name)
 // static
 void Environment::SetVar(const wchar_t* name, const std::wstring& value)
 {
-    ENSURE(value.size() <= kEnvVarMaxSize)(value.size()).raise();
+    ENSURE(CHECK, value.size() <= kEnvVarMaxSize)(value.size()).Require();
     BOOL rv = SetEnvironmentVariableW(name, value.c_str());
-    ThrowLastErrorIf(!rv, "failed to set environment variable");
+    ENSURE(RAISE, rv != 0)(LastError()).Require("Failed to set environment variable");
 }
 
 // static
@@ -93,7 +93,7 @@ EnvTable Environment::CurrentEnvironmentTable()
 // static
 std::wstring Environment::GetEnvironmentBlock(const EnvTable& env_table)
 {
-    assert(!env_table.empty());
+    ENSURE(CHECK, !env_table.empty()).Require();
 
     std::wstring env_block;
 

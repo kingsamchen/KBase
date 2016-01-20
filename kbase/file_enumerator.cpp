@@ -90,7 +90,7 @@ FilePath FileEnumerator::Next()
 
 FileInfo FileEnumerator::GetInfo() const
 {
-    ENSURE(has_find_data_).raise();
+    ENSURE(CHECK, has_find_data_).Require();
 
     ULARGE_INTEGER file_size;
     file_size.LowPart = find_data_.nFileSizeLow;

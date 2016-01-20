@@ -337,7 +337,7 @@ void FilePath::Append(const PathString& components)
         need_appended = &without_null;
     }
 
-    ENSURE(!IsPathAbsolute(*need_appended)).raise();
+    ENSURE(CHECK, !IsPathAbsolute(*need_appended)).Require();
 
     // If appends to the current dir, just set the path as the components.
     if (path_ == kCurrentDir) {
@@ -417,7 +417,7 @@ bool FilePath::IsParent(const FilePath& child) const
 
 void FilePath::AppendASCII(const std::string& components)
 {
-    ENSURE(IsStringASCII(components)).raise();
+    ENSURE(CHECK, IsStringASCII(components)).Require();
 
     Append(ASCIIToWide(components));
 }

@@ -75,7 +75,7 @@ void RegKey::Create(HKEY rootkey, const wchar_t* subkey, REGSAM access,
     // It seems that Reg* API series does not set calling thread's last error code
     // when they fail.
     SetLastError(result);
-    ThrowLastErrorIf(result != ERROR_SUCCESS, "cannot create or open the key!");
+    ENSURE(RAISE, result == ERROR_SUCCESS)(LastError()).Require("Can't create or open the key!");
 }
 
 void RegKey::CreateKey(const wchar_t* key_name, REGSAM access)
@@ -86,7 +86,7 @@ void RegKey::CreateKey(const wchar_t* key_name, REGSAM access)
     long result = RegCreateKeyEx(key_, key_name, 0, nullptr, REG_OPTION_NON_VOLATILE,
                                  access, nullptr, &subkey, nullptr);
     SetLastError(result);
-    ThrowLastErrorIf(result != ERROR_SUCCESS, "cannot create or open the key!");
+    ENSURE(RAISE, result == ERROR_SUCCESS)(LastError()).Require("Can't create or open the key!");
 
     Close();
 
@@ -100,7 +100,7 @@ void RegKey::Open(HKEY rootkey, const wchar_t* subkey, REGSAM access)
 
     long result = RegOpenKeyEx(rootkey, subkey, 0, access, &key_);
     SetLastError(result);
-    ThrowLastErrorIf(result != ERROR_SUCCESS, "cannot open the key!");
+    ENSURE(RAISE, result == ERROR_SUCCESS)(LastError()).Require("Can't open the key!");
 }
 
 void RegKey::OpenKey(const wchar_t* key_name, REGSAM access)
@@ -110,7 +110,7 @@ void RegKey::OpenKey(const wchar_t* key_name, REGSAM access)
     HKEY subkey = nullptr;
     long result = RegOpenKeyEx(key_, key_name, 0, access, &subkey);
     SetLastError(result);
-    ThrowLastErrorIf(result != ERROR_SUCCESS, "cannot open the key!");
+    ENSURE(RAISE, result == ERROR_SUCCESS)(LastError()).Require("Can't open the key!");
 
     Close();
 
@@ -144,8 +144,7 @@ bool RegKey::KeyExists(HKEY rootkey, const wchar_t* subkey, WOW6432Node node_key
 
     SetLastError(rv);
     LastError err;
-    ThrowLastErrorIf(err.last_error_code() != ERROR_FILE_NOT_FOUND,
-                     "Error in RegOpenKeyEx");
+    ENSURE(RAISE, err.error_code() == ERROR_FILE_NOT_FOUND)(err).Require("Error in RegOpenKeyEx");
 
     return false;
 }
@@ -160,7 +159,7 @@ bool RegKey::HasValue(const wchar_t* value_name) const
 
     SetLastError(result);
     LastError err;
-    ThrowLastErrorIf(err.last_error_code() != ERROR_FILE_NOT_FOUND, "error occured");
+    ENSURE(RAISE, err.error_code() == ERROR_FILE_NOT_FOUND)(err).Require("Error occured");
 
     return false;
 }
@@ -173,7 +172,7 @@ size_t RegKey::GetValueCount() const
                                   nullptr);
 
     SetLastError(result);
-    ThrowLastErrorIf(result != ERROR_SUCCESS, "failed to get value count");
+    ENSURE(RAISE, result == ERROR_SUCCESS)(LastError()).Require("Failed to get value count");
 
     return static_cast<size_t>(value_count);
 }
@@ -186,7 +185,7 @@ void RegKey::GetValueNameAt(size_t index, std::wstring* value_name) const
     long result = RegEnumValue(key_, static_cast<DWORD>(index), buf, &buf_size,
                                nullptr, nullptr, nullptr, nullptr);
     SetLastError(result);
-    ThrowLastErrorIf(result != ERROR_SUCCESS, "failed to get value name");
+    ENSURE(RAISE, result == ERROR_SUCCESS)(LastError()).Require("Failed to get value name");
 
     *value_name = buf;
 }
@@ -197,7 +196,7 @@ void RegKey::DeleteKey(const wchar_t* key_name)
 
     long result = RegDeleteTree(key_, key_name);
     SetLastError(result);
-    ThrowLastErrorIf(result != ERROR_SUCCESS, "failed to delete the key");
+    ENSURE(RAISE, result == ERROR_SUCCESS)(LastError()).Require("Failed to delete the key");
 }
 
 void RegKey::DeleteValue(const wchar_t* value_name)
@@ -206,7 +205,7 @@ void RegKey::DeleteValue(const wchar_t* value_name)
 
     long result = RegDeleteValue(key_, value_name);
     SetLastError(result);
-    ThrowLastErrorIf(result != ERROR_SUCCESS, "failed to delete the value");
+    ENSURE(RAISE, result == ERROR_SUCCESS)(LastError()).Require("Failed to delete the value");
 }
 
 bool RegKey::ReadValue(const wchar_t* value_name, void* data, DWORD* data_size,
@@ -361,7 +360,7 @@ void RegKey::WriteValue(const wchar_t* value_name, const void* data, size_t data
                                 static_cast<const BYTE*>(data),
                                 static_cast<DWORD>(data_size));
     SetLastError(result);
-    ThrowLastErrorIf(result != ERROR_SUCCESS, "failed to write value");
+    ENSURE(RAISE, result == ERROR_SUCCESS)(LastError()).Require("Failed to write value");
 }
 
 // RegKeyIterator class implementations.

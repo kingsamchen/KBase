@@ -9,63 +9,59 @@
 #ifndef KBASE_ERROR_EXCEPTION_UTIL_H_
 #define KBASE_ERROR_EXCEPTION_UTIL_H_
 
-#include <cassert>
 #include <sstream>
 #include <string>
 #include <stdexcept>
 
 #include "kbase/basic_macros.h"
-#include "kbase/logging.h"
-#include "kbase/string_format.h"
+#include "kbase/file_path.h"
 #include "kbase/sys_string_encoding_conversions.h"
 
 namespace kbase {
 
-namespace internal {
+enum class EnsureAction : int {
+    CHECK,
+    RAISE,
+    RAISE_WITH_DUMP
+};
 
-// Defines the macro _ENSURE_DISABLED ahead of including this file to disable error
-// context catching functionality.
-// Be wary of that this marco does not disable assert in DEBUG mode.
-#if defined(_ENSURE_DISABLED)
-#define ENSURE_MODE 0
+constexpr bool NotReached()
+{
+    return false;
+}
+
+// The action `CHECK` is performed only in debug mode.
+// Besides, we also need to make the CHECK-call cause no runtime penalty,
+// when in non-debug mode.
+#if defined(NDEBUG)
+#define ACTION_IS_ON(action) (kbase::EnsureAction::##action != kbase::EnsureAction::CHECK)
 #else
-#define ENSURE_MODE 1
+#define ACTION_IS_ON(action) true
 #endif
-
-enum { ENSURE_ON = ENSURE_MODE };
-
-#undef ENSURE_MODE
-
-}   // namespace internal
 
 #define GUARANTOR_A(x) GUARANTOR_OP(x, B)
 #define GUARANTOR_B(x) GUARANTOR_OP(x, A)
 #define GUARANTOR_OP(x, next) \
-    GUARANTOR_A.current_value(#x, (x)).GUARANTOR_ ## next
+    GUARANTOR_A.CaptureValue(#x, (x)).GUARANTOR_##next
 
-#define MAKE_GUARANTOR(exp) kbase::Guarantor(exp, __FILE__, __LINE__)
+#define MAKE_GUARANTOR(cond, action) \
+    kbase::Guarantor(cond, __FILE__, __LINE__, kbase::EnsureAction::##action)
 
-#define DO_ENSURE(exp)                                                    \
-    if ((exp || !kbase::internal::ENSURE_ON)) ;                           \
-    else                                                                  \
-        MAKE_GUARANTOR(#exp).GUARANTOR_A
-
-#ifdef NDEBUG
-#define ENSURE(exp) DO_ENSURE(exp)
-#else
-#define ENSURE(exp)                                                       \
-  assert(exp);                                                            \
-  DO_ENSURE(exp)
-#endif
+#define ENSURE(action, cond) \
+    static_assert(std::is_same<std::remove_const_t<decltype(cond)>, bool>::value, \
+                  "cond must be a bool expression"); \
+    (!ACTION_IS_ON(action) || (cond)) ? (void)0 : MAKE_GUARANTOR(#cond, action).GUARANTOR_A
 
 class Guarantor {
 public:
-    Guarantor(const char* msg, const char* file_name, int line)
+    Guarantor(const char* msg, const char* file_name, int line, EnsureAction action)
+        : action_required_(action)
     {
-        std::string context
-            = StringPrintf("Failed: %s\nFile: %s Line: %d\nCurrent Variables:\n",
-                           msg, file_name, line);
-        exception_desc_ << context;
+        // Keep execution in construction short, and try not to call WinAPI here,
+        // which might overwrite last-error code we need, even when they succeed.
+        exception_desc_ << "Failed: " << msg
+                        << "\nFile: " << file_name << " Line: " << line
+                        << "\nCaptured Variables:\n";
     }
 
     ~Guarantor() = default;
@@ -74,43 +70,51 @@ public:
 
     DISALLOW_MOVE(Guarantor);
 
-    // Incorporates variable value.
+    // Capture diagnostic variables.
+
     template<typename T>
-    Guarantor& current_value(const char* name, const T& value)
+    Guarantor& CaptureValue(const char* name, T&& value)
     {
         exception_desc_ << "    " << name << " = " << value << "\n";
         return *this;
     }
 
-    Guarantor& current_value(const char* name, const std::wstring& value)
+    Guarantor& CaptureValue(const char* name, const std::wstring& value)
     {
-        std::string converted = SysWideToNativeMB(value);
-        return current_value(name, converted);
+        std::string converted = SysWideToUTF8(value);
+        return CaptureValue(name, converted);
     }
 
-    Guarantor& current_value(const char* name, const wchar_t* value)
+    Guarantor& CaptureValue(const char* name, const wchar_t* value)
     {
-        std::string converted = SysWideToNativeMB(value);
-        return current_value(name, converted);
+        std::string converted = SysWideToUTF8(value);
+        return CaptureValue(name, converted);
     }
 
-    void raise()
-    {
-        throw std::runtime_error(exception_desc_.str());
-    }
+    void Require();
 
-    void logging()
-    {
-        LOG(FATAL) << exception_desc_.str();
-    }
+    void Require(const std::string msg);
 
-    // access stubs
+    // Access stubs for infinite variable capture.
     Guarantor& GUARANTOR_A = *this;
     Guarantor& GUARANTOR_B = *this;
 
 private:
+    void Check();
+
+    void Raise();
+
+    void RaiseWithDump();
+
+private:
+    EnsureAction action_required_;
     std::ostringstream exception_desc_;
 };
+
+void EnableAlwaysCheckForEnsureInDebug(bool always_check);
+
+// If `dump_dir` wasn't specified, current directory is used as storage location.
+void SetMiniDumpDirectory(const FilePath& dump_dir);
 
 // This class automatically retrieves the last error code of the calling thread when
 // constructing an instance, and stores the value internally.
@@ -118,34 +122,40 @@ class LastError {
 public:
     LastError();
 
-    unsigned long last_error_code() const;
-
-    // Since the description of the error is intended for programmers only, the
-    // function insists on using English as its dispalying language.
-    std::wstring GetVerboseMessage() const;
-
-private:
-    unsigned long error_code_;
-};
-
-class Win32Exception : public std::runtime_error {
-public:
-    Win32Exception(unsigned long last_error, const std::string& message);
+    ~LastError() = default;
 
     unsigned long error_code() const;
 
+    // Since the description of the error is intended for programmers only, the
+    // function insists on using English as its dispalying language.
+    std::wstring GetDescriptiveMessage() const;
+
 private:
     unsigned long error_code_;
 };
 
-#define ThrowLastErrorIf(exp, msg)                                                \
-    kbase::ThrowLastErrorIfInternal(__FILE__, __LINE__, __FUNCTION__, exp, msg)
+std::ostream& operator<<(std::ostream& os, const LastError& last_error);
 
-// Throws a Win32Exception if |expression| is true.
-// This function internally displays description of the last error, which means that
-// ex.what() does return text like "user_message (descption_of_last_error)"
-void ThrowLastErrorIfInternal(const char* file, int line, const char* fn_name,
-                              bool expression, const std::string& user_message);
+class ExceptionWithMiniDump : public std::runtime_error {
+public:
+    explicit ExceptionWithMiniDump(const FilePath& dump_path, const std::string& message)
+        : runtime_error(message), dump_path_(dump_path)
+    {}
+
+    explicit ExceptionWithMiniDump(const FilePath& dump_path, const char* message)
+        : runtime_error(message), dump_path_(dump_path)
+    {}
+
+    ~ExceptionWithMiniDump() = default;
+
+    FilePath GetMiniDumpPath() const
+    {
+        return dump_path_;
+    }
+
+private:
+    FilePath dump_path_;
+};
 
 }   // namespace kbase
 

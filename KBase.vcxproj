@@ -116,6 +116,9 @@
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DisableSpecificWarnings>4127;4996;</DisableSpecificWarnings>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>build\pch\precompile.h</PrecompiledHeaderFile>
+      <ForcedIncludeFiles>build\pch\precompile.h</ForcedIncludeFiles>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -162,6 +165,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">build\pch\precompile.h</ForcedIncludeFiles>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">build\pch\precompile.h</PrecompiledHeaderFile>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="kbase\at_exit_manager.cpp" />
     <ClCompile Include="kbase\base64.cpp" />
@@ -177,10 +181,12 @@
     <ClCompile Include="kbase\guid.cpp" />
     <ClCompile Include="kbase\logging.cpp" />
     <ClCompile Include="kbase\md5.cpp" />
+    <ClCompile Include="kbase\minidump.cpp" />
     <ClCompile Include="kbase\path_service.cpp" />
     <ClCompile Include="kbase\pickle.cpp" />
     <ClCompile Include="kbase\registry.cpp" />
     <ClCompile Include="kbase\sha.cpp" />
+    <ClCompile Include="kbase\stack_walker.cpp" />
     <ClCompile Include="kbase\string_format.cpp" />
     <ClCompile Include="kbase\string_piece.cpp" />
     <ClCompile Include="kbase\string_util.cpp" />
@@ -209,6 +215,7 @@
     <ClInclude Include="kbase\lazy.h" />
     <ClInclude Include="kbase\logging.h" />
     <ClInclude Include="kbase\lru_cache.h" />
+    <ClInclude Include="kbase\minidump.h" />
     <ClInclude Include="kbase\scoped_handle.h" />
     <ClInclude Include="kbase\signals.h" />
     <ClInclude Include="kbase\singleton.h" />
@@ -217,6 +224,7 @@
     <ClInclude Include="kbase\registry.h" />
     <ClInclude Include="kbase\scope_guard.h" />
     <ClInclude Include="kbase\sha.h" />
+    <ClInclude Include="kbase\stack_walker.h" />
     <ClInclude Include="kbase\string_format.h" />
     <ClInclude Include="kbase\string_piece.h" />
     <ClInclude Include="kbase\string_util.h" />
