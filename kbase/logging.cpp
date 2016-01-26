@@ -4,12 +4,12 @@
 
 #include "kbase/logging.h"
 
-#include <Windows.h>
-
 #include <cstdio>
 #include <ctime>
 #include <iomanip>
-#include <stdexcept>
+#include <thread>
+
+#include <Windows.h>
 
 #include "kbase/scoped_handle.h"
 
@@ -42,6 +42,24 @@ template<typename E>
 constexpr auto ToUnderlying(E e)
 {
     return static_cast<std::underlying_type_t<E>>(e);
+}
+
+// Ouputs timestamp in the form like "20160126 09:14:38,456".
+void OutputNowTimestamp(std::ostream& stream)
+{
+    namespace chrono = std::chrono;
+
+    // Because c-style date&time utilities don't support microsecond precison,
+    // we have to handle it on our own.
+    auto time_now = chrono::system_clock::now();
+    auto duration_in_ms = chrono::duration_cast<chrono::milliseconds>(time_now.time_since_epoch());
+    auto ms_part = duration_in_ms - chrono::duration_cast<chrono::seconds>(duration_in_ms);
+
+    tm local_time_now;
+    time_t raw_time = chrono::system_clock::to_time_t(time_now);
+    _localtime64_s(&local_time_now, &raw_time);
+    stream << std::put_time(&local_time_now, "%Y%m%d %H:%M:%S,")
+           << std::setfill('0') << std::setw(3) << ms_part.count();
 }
 
 template<typename charT>
@@ -168,12 +186,8 @@ void ConfigureLoggingSettings(const LoggingSettings& settings)
 LogMessage::LogMessage(const char* file, int line, LogSeverity severity)
  : file_(file), line_(line), severity_(severity)
 {
-    Init(file, line);
+    InitMessageHeader();
 }
-
-LogMessage::LogMessage(const char* file, int line)
- : LogMessage(file, line, LogSeverity::LOG_INFO)
-{}
 
 LogMessage::~LogMessage()
 {
@@ -204,38 +218,25 @@ LogMessage::~LogMessage()
     }
 }
 
-void LogMessage::Init(const char* file, int line)
+void LogMessage::InitMessageHeader()
 {
     stream_ << "[";
 
+    if (g_log_item_options & LogItemOptions::ENABLE_TIMESTAMP) {
+        OutputNowTimestamp(stream_);
+    }
+
     if (g_log_item_options & LogItemOptions::ENABLE_PROCESS_ID) {
-        stream_ << GetCurrentProcessId() << ":";
+        stream_ << " " << GetCurrentProcessId();
     }
 
     if (g_log_item_options & LogItemOptions::ENABLE_THREAD_ID) {
-        stream_ << GetCurrentThreadId() << ":";
+        stream_ << " " << std::this_thread::get_id();
     }
 
-    if (g_log_item_options & LogItemOptions::ENABLE_TIMESTAMP) {
-        time_t time_now = time(nullptr);
-        struct tm local_time_now;
-        localtime_s(&local_time_now, &time_now);
-
-        stream_ << std::setfill('0')
-                << std::setw(2) << 1 + local_time_now.tm_mon
-                << std::setw(2) << local_time_now.tm_mday
-                << '/'
-                << std::setw(2) << local_time_now.tm_hour
-                << std::setw(2) << local_time_now.tm_min
-                << std::setw(2) << local_time_now.tm_sec
-                << ':';
-    }
-
-    stream_ << kLogSeverityNames[ToUnderlying(severity_)];
-
-    const char* file_name = ExtractFileName(file);
-
-    stream_ << ':' << file_name << '(' << line << ")]";
+    stream_ << " " << kLogSeverityNames[ToUnderlying(severity_)]
+            << " " << ExtractFileName(file_)
+            << " " << '(' << line_ << ")]";
 }
 
 }   // namespace kbase

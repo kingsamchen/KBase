@@ -113,8 +113,6 @@ void ConfigureLoggingSettings(const LoggingSettings& settings);
 
 class LogMessage {
 public:
-    LogMessage(const char* file, int line);
-
     LogMessage(const char* file, int line, LogSeverity severity);
 
     ~LogMessage();
@@ -129,12 +127,12 @@ public:
     }
 
 private:
-    // Writes the common info header into the stream.
-    // The info header is in the following format:
-    //   [pid:tid:mmdd/hhmmss:severity:filename(line)]
+    // Writes the common message header into the stream.
+    // The complete message header is in the following format:
+    //   [YYYYmmdd HHMMSS,ms-part pid tid severity filename(line)]
     // in which, pid, tid and timestamp are optional, though timestamp by default
     // is enabled.
-    void Init(const char* file, int line);
+    void InitMessageHeader();
 
 private:
     const char* file_;
