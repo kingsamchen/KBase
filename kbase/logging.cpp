@@ -11,7 +11,9 @@
 
 #include <Windows.h>
 
+#include "kbase/error_exception_util.h"
 #include "kbase/scoped_handle.h"
+#include "kbase/stack_walker.h"
 
 namespace {
 
@@ -179,8 +181,8 @@ void ConfigureLoggingSettings(const LoggingSettings& settings)
         g_log_file_path = settings.log_file_path;
     }
 
-    // TODO: consider assert the result value on DEBUG mode.
-    InitLogFile();
+    auto rv = InitLogFile();
+    ENSURE(CHECK, rv)(LastError()).Require();
 }
 
 LogMessage::LogMessage(const char* file, int line, LogSeverity severity)
@@ -192,7 +194,9 @@ LogMessage::LogMessage(const char* file, int line, LogSeverity severity)
 LogMessage::~LogMessage()
 {
     if (severity_ == LogSeverity::LOG_FATAL) {
-        // TODO: logging stack trace.
+        stream_ << "\n";
+        StackWalker walker;
+        walker.DumpCallStack(stream_);
     }
 
     stream_ << std::endl;
@@ -209,12 +213,10 @@ LogMessage::~LogMessage()
     }
 
     // If unfortunately, we failed to initialize the log file, just skip the writting.
-    if (g_logging_dest & LoggingDestination::LOG_TO_FILE) {
-        if (g_log_file) {
-            DWORD bytes_written = 0;
-            WriteFile(g_log_file, msg.data(), static_cast<DWORD>(msg.length() * sizeof(char)),
-                      &bytes_written, nullptr);
-        }
+    if ((g_logging_dest & LoggingDestination::LOG_TO_FILE) && g_log_file) {
+        DWORD bytes_written = 0;
+        WriteFile(g_log_file, msg.data(), static_cast<DWORD>(msg.length() * sizeof(char)),
+                  &bytes_written, nullptr);
     }
 }
 
@@ -235,8 +237,7 @@ void LogMessage::InitMessageHeader()
     }
 
     stream_ << " " << kLogSeverityNames[ToUnderlying(severity_)]
-            << " " << ExtractFileName(file_)
-            << " " << '(' << line_ << ")]";
+            << " " << ExtractFileName(file_) << '(' << line_ << ")]";
 }
 
 }   // namespace kbase
