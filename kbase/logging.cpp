@@ -99,6 +99,8 @@ PathString GetDefaultLogFilePath()
 // default path is not possible.
 PathString GetFallbackLogFilePath()
 {
+    ENSURE(CHECK, !g_log_file_path.empty()).Require();
+
     const size_t kMaxPath = MAX_PATH + 1;
     PathChar cur_path[kMaxPath];
     GetCurrentDirectoryW(kMaxPath, cur_path);
