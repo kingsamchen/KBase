@@ -73,3 +73,9 @@ TEST(LoggingTest, CustomLogFileName)
     LOG(INFO) << "testing customized log file name";
     ASSERT_TRUE(PathExists(FilePath(log_name)));
 }
+
+TEST(LoggingTest, FatalLevelCallStack)
+{
+    ConfigureLoggingSettings(LoggingSettings());
+    LOG(FATAL) << "simulate issuing a fatal error";
+}

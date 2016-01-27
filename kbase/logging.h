@@ -73,57 +73,46 @@ struct LoggingSettings {
 // is not safe.
 void ConfigureLoggingSettings(const LoggingSettings& settings);
 
+// Surprisingly, a macro `ERROR` is defined as 0 in file <wingdi.h>, which is
+// included by <windows.h>, so we add a special macro to handle this peculiar
+// chaos, in case the file was included.
+#define COMPACT_LOG_INFO \
+    kbase::LogMessage(__FILE__, __LINE__, kbase::LogSeverity::LOG_INFO)
+#define COMPACT_LOG_WARNING \
+    kbase::LogMessage(__FILE__, __LINE__, kbase::LogSeverity::LOG_WARNING)
+#define COMPACT_LOG_ERROR \
+    kbase::LogMessage(__FILE__, __LINE__, kbase::LogSeverity::LOG_ERROR)
+#define COMPACT_LOG_0 \
+    kbase::LogMessage(__FILE__, __LINE__, kbase::LogSeverity::LOG_ERROR)
+#define COMPACT_LOG_FATAL \
+    kbase::LogMessage(__FILE__, __LINE__, kbase::LogSeverity::LOG_FATAL)
+
 #define LOG_IS_ON(severity) \
-    ((kbase::LogSeverity::LOG_ ## severity) >= kbase::internal::GetMinSeverityLevel())
+    ((kbase::LogSeverity::LOG_##severity) >= kbase::internal::GetMinSeverityLevel())
 
 #if !defined(NDEBUG)
-#define ENABLE_DLOG 1
-#else
-#define ENABLE_DLOG 0
-#endif
-
-#if ENABLE_DLOG
 #define DLOG_IS_ON(severity) LOG_IS_ON(severity)
 #else
 #define DLOG_IS_ON(severity) false
 #endif
 
-#undef ENABLE_DLOG
-
-#define COMPACT_LOG_EX_INFO(ClassName) \
-    kbase::ClassName(__FILE__, __LINE__, kbase::LogSeverity::LOG_INFO)
-#define COMPACT_LOG_EX_WARNING(ClassName) \
-    kbase::ClassName(__FILE__, __LINE__, kbase::LogSeverity::LOG_WARNING)
-#define COMPACT_LOG_EX_ERROR(ClassName) \
-    kbase::ClassName(__FILE__, __LINE__, kbase::LogSeverity::LOG_ERROR)
-#define COMPACT_LOG_EX_FATAL(ClassName) \
-    kbase::ClassName(__FILE__, __LINE__, kbase::LogSeverity::LOG_FATAL)
-
-// Surprisingly, a macro `ERROR` is defined as 0 in file <wingdi.h>, which is
-// included by <windows.h>, so we add a special macro to handle this peculiar
-// chaos, in case the file was included.
-#define COMPACT_LOG_INFO    COMPACT_LOG_EX_INFO(LogMessage)
-#define COMPACT_LOG_WARNING COMPACT_LOG_EX_WARNING(LogMessage)
-#define COMPACT_LOG_ERROR   COMPACT_LOG_EX_ERROR(LogMessage)
-#define COMPACT_LOG_0       COMPACT_LOG_EX_ERROR(LogMessage)
-#define COMPACT_LOG_FATAL   COMPACT_LOG_EX_FATAL(LogMessage)
-
 #define LAZY_STREAM(stream, condition) \
     !(condition) ? (void)0 : kbase::LogMessageVoidfy() & (stream)
-#define LOG_STREAM(severity) COMPACT_LOG_ ## severity.stream()
+#define LOG_STREAM(severity) \
+    COMPACT_LOG_##severity.stream()
 
-#define LOG(severity) LAZY_STREAM(LOG_STREAM(severity), LOG_IS_ON(severity))
+#define LOG(severity) \
+    LAZY_STREAM(LOG_STREAM(severity), LOG_IS_ON(severity))
 #define LOG_IF(severity, condition) \
     LAZY_STREAM(LOG_STREAM(severity), LOG_IS_ON(severity) && (condition))
 
-#define DLOG(severity) LAZY_STREAM(LOG_STREAM(severity), DLOG_IS_ON(severity))
+#define DLOG(severity) \
+    LAZY_STREAM(LOG_STREAM(severity), DLOG_IS_ON(severity))
 #define DLOG_IF(severity, condition) \
     LAZY_STREAM(LOG_STREAM(severity), DLOG_IS_ON(severity) && (condition))
 
 class LogMessage {
 public:
-    LogMessage(const char* file, int line);
-
     LogMessage(const char* file, int line, LogSeverity severity);
 
     ~LogMessage();
@@ -138,12 +127,12 @@ public:
     }
 
 private:
-    // Writes the common info header into the stream.
-    // The info header is in the following format:
-    //   [pid:tid:mmdd/hhmmss:severity:filename(line)]
+    // Writes the common message header into the stream.
+    // The complete message header is in the following format:
+    //   [YYYYmmdd HHMMSS,ms-part pid tid severity filename(line)]
     // in which, pid, tid and timestamp are optional, though timestamp by default
     // is enabled.
-    void Init(const char* file, int line);
+    void InitMessageHeader();
 
 private:
     const char* file_;
@@ -152,13 +141,10 @@ private:
     std::ostringstream stream_;
 };
 
-// This class is used to suppress the compiler warning like "std::ostream object cannot
-// be copied" since conditional statement in macro |LAZY_STREAM| may return an
-// std::ostream object.
-class LogMessageVoidfy {
-public:
-    LogMessageVoidfy() {}
-    void operator&(std::ostream&) const {}
+// Used to suppress compiler warning or intellisense error.
+struct LogMessageVoidfy {
+    void operator&(const std::ostream&) const
+    {}
 };
 
 }   // namespace kbase

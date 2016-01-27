@@ -4,6 +4,8 @@
 
 #include "kbase/error_exception_util.h"
 
+#include <ctime>
+
 #include <Windows.h>
 
 #include "kbase/minidump.h"

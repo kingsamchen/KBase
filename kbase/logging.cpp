@@ -4,14 +4,16 @@
 
 #include "kbase/logging.h"
 
-#include <Windows.h>
-
 #include <cstdio>
 #include <ctime>
 #include <iomanip>
-#include <stdexcept>
+#include <thread>
 
+#include <Windows.h>
+
+#include "kbase/error_exception_util.h"
 #include "kbase/scoped_handle.h"
+#include "kbase/stack_walker.h"
 
 namespace {
 
@@ -24,7 +26,7 @@ using kbase::PathChar;
 using kbase::PathString;
 using kbase::ScopedSysHandle;
 
-const char* kLogSeverityNames[] {"INFO", "WARNING", "ERROR", "FATAL"};
+const char* kLogSeverityNames[] { "INFO", "WARNING", "ERROR", "FATAL" };
 
 const LogSeverity kAlwaysPrintErrorMinLevel = LogSeverity::LOG_ERROR;
 
@@ -42,6 +44,24 @@ template<typename E>
 constexpr auto ToUnderlying(E e)
 {
     return static_cast<std::underlying_type_t<E>>(e);
+}
+
+// Ouputs timestamp in the form like "20160126 09:14:38,456".
+void OutputNowTimestamp(std::ostream& stream)
+{
+    namespace chrono = std::chrono;
+
+    // Because c-style date&time utilities don't support microsecond precison,
+    // we have to handle it on our own.
+    auto time_now = chrono::system_clock::now();
+    auto duration_in_ms = chrono::duration_cast<chrono::milliseconds>(time_now.time_since_epoch());
+    auto ms_part = duration_in_ms - chrono::duration_cast<chrono::seconds>(duration_in_ms);
+
+    tm local_time_now;
+    time_t raw_time = chrono::system_clock::to_time_t(time_now);
+    _localtime64_s(&local_time_now, &raw_time);
+    stream << std::put_time(&local_time_now, "%Y%m%d %H:%M:%S,")
+           << std::setfill('0') << std::setw(3) << ms_part.count();
 }
 
 template<typename charT>
@@ -79,6 +99,8 @@ PathString GetDefaultLogFilePath()
 // default path is not possible.
 PathString GetFallbackLogFilePath()
 {
+    ENSURE(CHECK, !g_log_file_path.empty()).Require();
+
     const size_t kMaxPath = MAX_PATH + 1;
     PathChar cur_path[kMaxPath];
     GetCurrentDirectoryW(kMaxPath, cur_path);
@@ -93,6 +115,10 @@ PathString GetFallbackLogFilePath()
 // Returns true, if we initialized the log file successfully, false otherwise.
 bool InitLogFile()
 {
+    if (g_log_file) {
+        return true;
+    }
+
     if (g_log_file_path.empty()) {
         g_log_file_path = GetDefaultLogFilePath();
     }
@@ -161,24 +187,22 @@ void ConfigureLoggingSettings(const LoggingSettings& settings)
         g_log_file_path = settings.log_file_path;
     }
 
-    // TODO: consider assert the result value on DEBUG mode.
-    InitLogFile();
+    auto rv = InitLogFile();
+    ENSURE(CHECK, rv)(LastError()).Require();
 }
 
 LogMessage::LogMessage(const char* file, int line, LogSeverity severity)
  : file_(file), line_(line), severity_(severity)
 {
-    Init(file, line);
+    InitMessageHeader();
 }
-
-LogMessage::LogMessage(const char* file, int line)
- : LogMessage(file, line, LogSeverity::LOG_INFO)
-{}
 
 LogMessage::~LogMessage()
 {
     if (severity_ == LogSeverity::LOG_FATAL) {
-        // TODO: logging stack trace.
+        stream_ << "\n";
+        StackWalker walker;
+        walker.DumpCallStack(stream_);
     }
 
     stream_ << std::endl;
@@ -194,48 +218,35 @@ LogMessage::~LogMessage()
         fflush(stderr);
     }
 
-    // If unfortunately, we failed to initialize the log file, just skip the writting.
-    if (g_logging_dest & LoggingDestination::LOG_TO_FILE) {
-        if (g_log_file) {
-            DWORD bytes_written = 0;
-            WriteFile(g_log_file, msg.data(), static_cast<DWORD>(msg.length() * sizeof(char)),
-                      &bytes_written, nullptr);
-        }
+    // If `InitLogFile` wasn't called at the start of the program, do it on the spot.
+    // However, if we unfortunately failed to initialize the log file, just skip the writting.
+    // Note that, if more than one thread in here try to call `InitLogFile`, there will be a
+    // race condition. This is why you should call `ConfigureLoggingSettings` at start.
+    if ((g_logging_dest & LoggingDestination::LOG_TO_FILE) && InitLogFile()) {
+        DWORD bytes_written = 0;
+        WriteFile(g_log_file, msg.data(), static_cast<DWORD>(msg.length() * sizeof(char)),
+                  &bytes_written, nullptr);
     }
 }
 
-void LogMessage::Init(const char* file, int line)
+void LogMessage::InitMessageHeader()
 {
     stream_ << "[";
 
+    if (g_log_item_options & LogItemOptions::ENABLE_TIMESTAMP) {
+        OutputNowTimestamp(stream_);
+    }
+
     if (g_log_item_options & LogItemOptions::ENABLE_PROCESS_ID) {
-        stream_ << GetCurrentProcessId() << ":";
+        stream_ << " " << GetCurrentProcessId();
     }
 
     if (g_log_item_options & LogItemOptions::ENABLE_THREAD_ID) {
-        stream_ << GetCurrentThreadId() << ":";
+        stream_ << " " << std::this_thread::get_id();
     }
 
-    if (g_log_item_options & LogItemOptions::ENABLE_TIMESTAMP) {
-        time_t time_now = time(nullptr);
-        struct tm local_time_now;
-        localtime_s(&local_time_now, &time_now);
-
-        stream_ << std::setfill('0')
-                << std::setw(2) << 1 + local_time_now.tm_mon
-                << std::setw(2) << local_time_now.tm_mday
-                << '/'
-                << std::setw(2) << local_time_now.tm_hour
-                << std::setw(2) << local_time_now.tm_min
-                << std::setw(2) << local_time_now.tm_sec
-                << ':';
-    }
-
-    stream_ << kLogSeverityNames[ToUnderlying(severity_)];
-
-    const char* file_name = ExtractFileName(file);
-
-    stream_ << ':' << file_name << '(' << line << ")]";
+    stream_ << " " << kLogSeverityNames[ToUnderlying(severity_)]
+            << " " << ExtractFileName(file_) << '(' << line_ << ")]";
 }
 
 }   // namespace kbase
