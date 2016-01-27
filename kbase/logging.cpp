@@ -26,7 +26,7 @@ using kbase::PathChar;
 using kbase::PathString;
 using kbase::ScopedSysHandle;
 
-const char* kLogSeverityNames[] {"INFO", "WARNING", "ERROR", "FATAL"};
+const char* kLogSeverityNames[] { "INFO", "WARNING", "ERROR", "FATAL" };
 
 const LogSeverity kAlwaysPrintErrorMinLevel = LogSeverity::LOG_ERROR;
 
@@ -113,6 +113,10 @@ PathString GetFallbackLogFilePath()
 // Returns true, if we initialized the log file successfully, false otherwise.
 bool InitLogFile()
 {
+    if (g_log_file) {
+        return true;
+    }
+
     if (g_log_file_path.empty()) {
         g_log_file_path = GetDefaultLogFilePath();
     }
@@ -212,8 +216,11 @@ LogMessage::~LogMessage()
         fflush(stderr);
     }
 
-    // If unfortunately, we failed to initialize the log file, just skip the writting.
-    if ((g_logging_dest & LoggingDestination::LOG_TO_FILE) && g_log_file) {
+    // If `InitLogFile` wasn't called at the start of the program, do it on the spot.
+    // However, if we unfortunately failed to initialize the log file, just skip the writting.
+    // Note that, if more than one thread in here try to call `InitLogFile`, there will be a
+    // race condition. This is why you should call `ConfigureLoggingSettings` at start.
+    if ((g_logging_dest & LoggingDestination::LOG_TO_FILE) && InitLogFile()) {
         DWORD bytes_written = 0;
         WriteFile(g_log_file, msg.data(), static_cast<DWORD>(msg.length() * sizeof(char)),
                   &bytes_written, nullptr);
