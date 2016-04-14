@@ -15,7 +15,7 @@
 #include <string>
 #include <vector>
 
-#include "kbase/file_path.h"
+#include "kbase/path.h"
 #include "kbase/lazy.h"
 
 namespace kbase {
@@ -44,7 +44,7 @@ public:
         PREFIX_SLASH
     };
 
-    explicit CommandLine(const FilePath& program);
+    explicit CommandLine(const Path& program);
 
     CommandLine(int argc, const CharType* const* argv);
 
@@ -83,9 +83,9 @@ public:
 
     void SetDefaultSwitchPrefix(DefaultSwitchPrefix prefix_type);
 
-    FilePath GetProgram() const;
+    Path GetProgram() const;
 
-    void SetProgram(const FilePath& program);
+    void SetProgram(const Path& program);
 
     // |name| should not be preceded with a prefix.
     CommandLine& AppendSwitch(const StringType& name, const StringType& value = StringType());

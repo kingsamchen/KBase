@@ -100,7 +100,7 @@ Lazy<CommandLine> CommandLine::current_process_cmdline_([]() {
     return new CommandLine(GetCommandLineW());
 });
 
-CommandLine::CommandLine(const FilePath& program)
+CommandLine::CommandLine(const Path& program)
     : argv_(1), last_not_param_(argv_.begin()), default_switch_prefix_({L"-"})
 {
     SetProgram(program);
@@ -195,12 +195,12 @@ void CommandLine::SetDefaultSwitchPrefix(DefaultSwitchPrefix prefix_type)
              kSwitchPrefixes[index]);
 }
 
-FilePath CommandLine::GetProgram() const
+Path CommandLine::GetProgram() const
 {
-    return FilePath(argv_.front());
+    return Path(argv_.front());
 }
 
-void CommandLine::SetProgram(const FilePath& program)
+void CommandLine::SetProgram(const Path& program)
 {
     TrimString(program.value(), L" \t", &argv_.front());
 }
@@ -239,7 +239,7 @@ void CommandLine::ParseFromArgv(const ArgList& argv)
     last_not_param_ = argv_.begin();
     switches_.clear();
 
-    SetProgram(FilePath(argv[0]));
+    SetProgram(Path(argv[0]));
     AddArguments(this, argv);
 }
 

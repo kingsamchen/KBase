@@ -16,7 +16,7 @@
 
 namespace kbase {
 
-class FilePath;
+class Path;
 
 class SysInfo {
 public:
@@ -72,11 +72,11 @@ public:
 
     // Returns the total number of bytes on a disk that are available to the user,
     // i.e. quota related.
-    static uint64_t AmountOfTotalDiskSpace(const FilePath& path);
+    static uint64_t AmountOfTotalDiskSpace(const Path& path);
 
     // Returns the total number of free bytes on a disk that are available to the
     // user, i.e. quota related.
-    static uint64_t AmountOfFreeDiskSpace(const FilePath& path);
+    static uint64_t AmountOfFreeDiskSpace(const Path& path);
 };
 
 }   // namespace kbase

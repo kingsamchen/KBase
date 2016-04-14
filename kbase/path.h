@@ -16,10 +16,7 @@
 
 namespace kbase {
 
-class Pickle;
-class PickleIterator;
-
-class FilePath {
+class Path {
 public:
     // Separators in path hierarchy. supports both '/' and '\'.
     static const PathChar kSeparators[];
@@ -30,27 +27,27 @@ public:
     static const PathChar kExtensionSeparator;
     static const PathChar kStringTerminator;
 
-    FilePath() = default;
+    Path() = default;
 
-    FilePath(const FilePath& other);
+    Path(const Path& other);
 
-    FilePath(FilePath&& other);
+    Path(Path&& other);
 
-    explicit FilePath(const PathString& path);
+    explicit Path(const PathString& path);
 
-    FilePath& operator=(const FilePath& other);
+    Path& operator=(const Path& other);
 
-    FilePath& operator=(FilePath&& other);
+    Path& operator=(Path&& other);
 
-    ~FilePath() = default;
+    ~Path() = default;
 
-    // If two FilePath objects only differ in case, they are equal.
-    friend bool operator==(const FilePath& lhs, const FilePath& rhs);
+    // If two Path objects only differ in case, they are equal.
+    friend bool operator==(const Path& lhs, const Path& rhs);
 
-    friend bool operator!=(const FilePath& lhs, const FilePath& rhs);
+    friend bool operator!=(const Path& lhs, const Path& rhs);
 
     // Some STL contains require their elements have defined operator<.
-    friend bool operator<(const FilePath& lhs, const FilePath& rhs);
+    friend bool operator<(const Path& lhs, const Path& rhs);
 
     const PathString& value() const
     {
@@ -74,23 +71,23 @@ public:
     bool EndsWithSeparator() const;
 
     // Returns a copy of the file path that ends with a path separator.
-    // If the path is empty, returns an empty FilePath.
-    FilePath AsEndingWithSeparator() const;
+    // If the path is empty, returns an empty Path.
+    Path AsEndingWithSeparator() const;
 
     // This function internally calls StripTrailingSeparatorInternal, which returns
     // the path that has been stripped.
-    FilePath StripTrailingSeparators() const;
+    Path StripTrailingSeparators() const;
 
-    // Returns a FilePath corresponding to the dir that contains the path. If this
-    // object contains only one component, returns a FilePath identifying the current
-    // dir. If this object already refers to the root dir, returns a FilePath
+    // Returns a Path corresponding to the dir that contains the path. If this
+    // object contains only one component, returns a Path identifying the current
+    // dir. If this object already refers to the root dir, returns a Path
     // identifying the root dir.
-    FilePath DirName() const;
+    Path DirName() const;
 
-    // Returns a FilePath corresponding to the file component of the path. If this
-    // object already refers to the root, returns a FilePath identifying the root
+    // Returns a Path corresponding to the file component of the path. If this
+    // object already refers to the root, returns a Path identifying the root
     // dir.
-    FilePath BaseName() const;
+    Path BaseName() const;
 
     // Retrieves every components of the path, including the root slash.
     // Example: C:\foo\bar  ->  ["C:", "\\", "foo", "bar"]
@@ -104,15 +101,15 @@ public:
 
     void Append(const PathString& components);
 
-    void Append(const FilePath& components);
+    void Append(const Path& components);
 
-    FilePath AppendTo(const PathString& components) const;
+    Path AppendTo(const PathString& components) const;
 
-    FilePath AppendTo(const FilePath& components) const;
+    Path AppendTo(const Path& components) const;
 
     void AppendASCII(const std::string& components);
 
-    FilePath AppendASCIITo(const std::string& components) const;
+    Path AppendASCIITo(const std::string& components) const;
 
     // If current path is parent of the |child|, appends to |path| the relative
     // path to child, and returns true.
@@ -122,13 +119,13 @@ public:
     //          *path:        C:\user\kingsley chen\documents\
     // After the calling of this function, *path becomes
     // C:\user\kingsley chen\documents\app data\test
-    bool AppendRelativePath(const FilePath& child, FilePath* path) const;
+    bool AppendRelativePath(const Path& child, Path* path) const;
 
     // Returns true, if the path is the parent of the |child|.
     // Returns false, otherwise.
     // NOTE: This function may make a wrong judgement if paths that contain both '.'
     // '..' are involved.
-    bool IsParent(const FilePath& child) const;
+    bool IsParent(const Path& child) const;
 
     // Returns the extension of the path if there is any.
     // The extension starts with extension separator.
@@ -139,26 +136,26 @@ public:
     void RemoveExtension();
 
     // Same as above, but strips on a copy and leaves the original path intact.
-    FilePath StripExtention() const;
+    Path StripExtention() const;
 
     // Inserts |suffix| after the file name portion of the path, but before the
     // extension.
-    // Returns an empty FilePath if the BaseName() is '.' or '..'.
+    // Returns an empty Path if the BaseName() is '.' or '..'.
     // Example: path: c:\foo\bar\test.jpg suffix: (1) --> c:\foo\bar\test(1).jpg
-    FilePath InsertBeforeExtension(const PathString& suffix) const;
+    Path InsertBeforeExtension(const PathString& suffix) const;
 
     // Adds extension to the file name of the path.
     // If the file name of the path already has an extension, the |extension| will
     // be the sole extension recognized by Windows.
-    // Returns an empty FilePath if the BaseName() is '.' or '..'.
-    FilePath AddExtension(const PathString& extension) const;
+    // Returns an empty Path if the BaseName() is '.' or '..'.
+    Path AddExtension(const PathString& extension) const;
 
     // Replaces the extension of the file name with |extension|.
     // If |extension| is empty or only contains separator, the extension of the file
     // name is removed.
     // If the file name does not have an extension, then |extension| is added.
-    // Returns an empty FilePath if the BaseName() is '.' or '..'.
-    FilePath ReplaceExtension(const PathString& extension) const;
+    // Returns an empty Path if the BaseName() is '.' or '..'.
+    Path ReplaceExtension(const PathString& extension) const;
 
     // Returns true, if |extension| matches the extension of the file name.
     bool MatchExtension(const PathString& extension) const;
@@ -174,19 +171,15 @@ public:
     std::string AsUTF8() const;
 
     // If the |path_in_ascii| contains any non-ASCII character, the function returns
-    // an empty FilePath.
-    static FilePath FromASCII(const std::string& path_in_ascii);
+    // an empty Path.
+    static Path FromASCII(const std::string& path_in_ascii);
 
-    static FilePath FromUTF8(const std::string& path_in_utf8);
-
-    void WriteToPickle(Pickle* pickle) const;
-
-    bool ReadFromPickle(PickleIterator* iter);
+    static Path FromUTF8(const std::string& path_in_utf8);
 
     // We choose kSeparators[0] as our default path separator.
-    FilePath NormalizePathSeparator() const;
+    Path NormalizePathSeparator() const;
 
-    FilePath NormalizePathSeparatorTo(PathChar separator) const;
+    Path NormalizePathSeparatorTo(PathChar separator) const;
 
     // Case-insensitive comparison.
     // Returns -1, if str1 < str2;
@@ -213,8 +206,8 @@ private:
 namespace std {
 
 template<>
-struct std::hash<kbase::FilePath> {
-    size_t operator()(const kbase::FilePath& file_path) const
+struct std::hash<kbase::Path> {
+    size_t operator()(const kbase::Path& file_path) const
     {
         return std::hash<kbase::PathString>()(file_path.value());
     }

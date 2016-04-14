@@ -172,7 +172,7 @@
     <ClCompile Include="samples\date_time_unittest.cpp" />
     <ClCompile Include="samples\environment_unittest.cpp" />
     <ClCompile Include="samples\error_exception_util_unittest.cpp" />
-    <ClCompile Include="samples\file_path_unittest.cpp" />
+    <ClCompile Include="samples\path_unittest.cpp" />
     <ClCompile Include="samples\file_util_unittest.cpp" />
     <ClCompile Include="samples\file_version_info_unittest.cpp" />
     <ClCompile Include="samples\guid_unittest.cpp" />

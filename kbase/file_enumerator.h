@@ -18,7 +18,7 @@
 #include "kbase/basic_types.h"
 #include "kbase/date_time.h"
 #include "kbase/file_info.h"
-#include "kbase/file_path.h"
+#include "kbase/path.h"
 #include "kbase/scoped_handle.h"
 
 namespace kbase {
@@ -48,8 +48,8 @@ public:
 
     // If |recursive| is true, it will enumerate all matches in every subdirectories.
     // It employes BFS to enumerate matched entries.
-    FileEnumerator(const FilePath& root_path, bool recursive, int file_type);
-    FileEnumerator(const FilePath& root_path, bool recursive, int file_type,
+    FileEnumerator(const Path& root_path, bool recursive, int file_type);
+    FileEnumerator(const Path& root_path, bool recursive, int file_type,
                    const PathString& pattern);
 
     ~FileEnumerator() = default;
@@ -58,7 +58,7 @@ public:
 
     DISALLOW_MOVE(FileEnumerator);
 
-    FilePath Next();
+    Path Next();
 
     // Gets the information of the current file.
     // If there currently is no file, the function throws an exception.
@@ -69,17 +69,17 @@ private:
     // specified policies.
     // Returns false, otherwise.
     // This function skips '.' and '..'.
-    bool ShouldSkip(const FilePath& path);
+    bool ShouldSkip(const Path& path);
 
 private:
-    FilePath root_path_;
+    Path root_path_;
     bool recursive_;
     int file_type_;
     PathString pattern_;
     WIN32_FIND_DATA find_data_;
     internal::FileFindHandle find_handle_;
     bool has_find_data_;
-    std::stack<FilePath> pending_paths_;
+    std::stack<Path> pending_paths_;
 };
 
 }   // namespace kbase

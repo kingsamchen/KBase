@@ -18,34 +18,34 @@
 
 namespace kbase {
 
-FilePath MakeAbsoluteFilePath(const FilePath& path)
+Path MakeAbsoluteFilePath(const Path& path)
 {
     wchar_t buffer[_MAX_PATH];
     if (!_wfullpath(buffer, path.value().c_str(), _MAX_PATH)) {
-        return FilePath();
+        return Path();
     }
 
-    return FilePath(buffer);
+    return Path(buffer);
 }
 
-bool PathExists(const FilePath& path)
+bool PathExists(const Path& path)
 {
     return GetFileAttributesW(path.value().c_str()) != INVALID_FILE_ATTRIBUTES;
 }
 
-bool DirectoryExists(const FilePath& path)
+bool DirectoryExists(const Path& path)
 {
     DWORD attr = GetFileAttributesW(path.value().c_str());
     return attr != INVALID_FILE_ATTRIBUTES && (attr & FILE_ATTRIBUTE_DIRECTORY);
 }
 
-bool IsDirectoryEmpty(const FilePath& path)
+bool IsDirectoryEmpty(const Path& path)
 {
     FileEnumerator file_it(path, false, FileEnumerator::DIRS | FileEnumerator::FILES);
     return file_it.Next().empty();
 }
 
-FileInfo GetFileInfo(const FilePath& path)
+FileInfo GetFileInfo(const Path& path)
 {
     WIN32_FILE_ATTRIBUTE_DATA attr_data;
     BOOL ret = GetFileAttributesExW(path.value().c_str(), GetFileExInfoStandard,
@@ -64,7 +64,7 @@ FileInfo GetFileInfo(const FilePath& path)
                     DateTime(attr_data.ftLastAccessTime));
 }
 
-void RemoveFile(const FilePath& path, bool recursive)
+void RemoveFile(const Path& path, bool recursive)
 {
     if (!recursive) {
         if (GetFileInfo(path).is_directory()) {
@@ -84,7 +84,7 @@ void RemoveFile(const FilePath& path, bool recursive)
     // NOTE: both wcscpy_s and wcsncpy_s fill buffer after the first null-terminator
     // with dirty charater.
     wchar_t path_ends_double_null[MAX_PATH + 1] {0};
-    FilePath full_path = MakeAbsoluteFilePath(path);
+    Path full_path = MakeAbsoluteFilePath(path);
     std::copy_n(full_path.value().begin(), full_path.value().size(),
                 path_ends_double_null);
 
@@ -98,23 +98,23 @@ void RemoveFile(const FilePath& path, bool recursive)
     ENSURE(RAISE, !err)(LastError()).Require("Failed to remove files recursively");
 }
 
-void RemoveFileAfterReboot(const FilePath& path)
+void RemoveFileAfterReboot(const Path& path)
 {
     BOOL rv = MoveFileExW(path.value().c_str(), nullptr, MOVEFILE_DELAY_UNTIL_REBOOT);
     ENSURE(RAISE, rv != 0)(LastError()).Require("Failed to mark delay delete");
 }
 
-void DuplicateFile(const FilePath& src, const FilePath& dest)
+void DuplicateFile(const Path& src, const Path& dest)
 {
     BOOL rv = CopyFileW(src.value().c_str(), dest.value().c_str(), false);
     ENSURE(RAISE, rv != 0)(LastError()).Require("Failed to duplicate file");
 }
 
-void DuplicateDirectory(const FilePath& src, const FilePath& dest, bool recursive)
+void DuplicateDirectory(const Path& src, const Path& dest, bool recursive)
 {
-    FilePath full_src = MakeAbsoluteFilePath(src);
+    Path full_src = MakeAbsoluteFilePath(src);
     ENSURE(CHECK, !full_src.empty())(src.value()).Require();
-    FilePath full_dest = dest;
+    Path full_dest = dest;
     if (PathExists(full_dest)) {
         full_dest = MakeAbsoluteFilePath(full_dest);
         ENSURE(CHECK, !full_dest.empty())(dest.value()).Require();
@@ -146,7 +146,7 @@ void DuplicateDirectory(const FilePath& src, const FilePath& dest, bool recursiv
 
     FileEnumerator file_it(full_src, recursive, file_type);
     for (auto&& cur = file_it.Next(); !cur.empty(); cur = file_it.Next()) {
-        FilePath dest_for_cur = full_dest;
+        Path dest_for_cur = full_dest;
         bool rv = full_src.AppendRelativePath(cur, &dest_for_cur);
         ENSURE(CHECK, rv)(full_src.value())(cur.value())(dest_for_cur.value()).Require();
         if (file_it.GetInfo().is_directory() && !DirectoryExists(dest_for_cur)) {
@@ -158,7 +158,7 @@ void DuplicateDirectory(const FilePath& src, const FilePath& dest, bool recursiv
     }
 }
 
-void MakeFileMove(const FilePath& src, const FilePath& dest)
+void MakeFileMove(const Path& src, const Path& dest)
 {
     if (MoveFileExW(src.value().c_str(), dest.value().c_str(),
                     MOVEFILE_COPY_ALLOWED | MOVEFILE_REPLACE_EXISTING)) {
@@ -179,7 +179,7 @@ void MakeFileMove(const FilePath& src, const FilePath& dest)
     ENSURE(RAISE, NotReached())(LastError()).Require("Failed to move file");
 }
 
-void ReadFileToString(const FilePath& path, std::string* data)
+void ReadFileToString(const Path& path, std::string* data)
 {
     if (!data->empty()) {
         data->clear();
@@ -199,7 +199,7 @@ void ReadFileToString(const FilePath& path, std::string* data)
     in.read(&(*data)[0], data->size());
 }
 
-std::string ReadFileToString(const FilePath& path)
+std::string ReadFileToString(const Path& path)
 {
     std::string data;
     ReadFileToString(path, &data);
@@ -207,7 +207,7 @@ std::string ReadFileToString(const FilePath& path)
     return data;
 }
 
-void WriteStringToFile(const FilePath& path, const std::string& data)
+void WriteStringToFile(const Path& path, const std::string& data)
 {
     std::ofstream out(path.value());
     if (!out) {
@@ -218,7 +218,7 @@ void WriteStringToFile(const FilePath& path, const std::string& data)
     out.write(data.data(), data.size());
 }
 
-void AppendStringToFile(const FilePath& path, const std::string& data)
+void AppendStringToFile(const Path& path, const std::string& data)
 {
     std::ofstream out(path.value(), std::ios::app);
     if (!out) {

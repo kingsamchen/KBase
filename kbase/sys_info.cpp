@@ -9,7 +9,7 @@
 #include <tuple>
 
 #include "kbase/error_exception_util.h"
-#include "kbase/file_path.h"
+#include "kbase/path.h"
 #include "kbase/sys_string_encoding_conversions.h"
 #include "kbase/version_util.h"
 
@@ -28,7 +28,7 @@ uint64_t AmountOfMemory(DWORDLONG MEMORYSTATUSEX::* memory_field)
 
 typedef std::tuple<ULARGE_INTEGER*, ULARGE_INTEGER*, ULARGE_INTEGER*> SpaceType;
 
-void GetDiskSpace(const FilePath& path, const SpaceType& type)
+void GetDiskSpace(const Path& path, const SpaceType& type)
 {
     BOOL ret = GetDiskFreeSpaceEx(path.value().c_str(),
                                   std::get<0>(type),
@@ -167,7 +167,7 @@ uint64_t SysInfo::AmountOfAvailableVirtualMemory()
 }
 
 // static
-uint64_t SysInfo::AmountOfTotalDiskSpace(const FilePath& path)
+uint64_t SysInfo::AmountOfTotalDiskSpace(const Path& path)
 {
     ULARGE_INTEGER total;
     GetDiskSpace(path, std::make_tuple(nullptr, &total, nullptr));
@@ -176,7 +176,7 @@ uint64_t SysInfo::AmountOfTotalDiskSpace(const FilePath& path)
 }
 
 // static
-uint64_t SysInfo::AmountOfFreeDiskSpace(const FilePath& path)
+uint64_t SysInfo::AmountOfFreeDiskSpace(const Path& path)
 {
     ULARGE_INTEGER free;
     GetDiskSpace(path, std::make_tuple(&free, nullptr, nullptr));

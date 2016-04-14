@@ -2,7 +2,7 @@
  @ 0xCCCCCCCC
 */
 
-#include "kbase/file_path.h"
+#include "kbase/path.h"
 
 #include <cassert>
 #include <cstdlib>
@@ -13,24 +13,23 @@
 #include <stdexcept>
 
 #include "kbase/error_exception_util.h"
-#include "kbase/pickle.h"
 #include "kbase/string_util.h"
 #include "kbase/sys_string_encoding_conversions.h"
 
 namespace kbase {
 
-const PathChar FilePath::kSeparators[] = L"\\/";
-const size_t FilePath::kSeparatorsLength = _countof(FilePath::kSeparators);
-const PathChar FilePath::kCurrentDir[] = L".";
-const PathChar FilePath::kParentDir[] = L"..";
-const PathChar FilePath::kExtensionSeparator = L'.';
-const PathChar FilePath::kStringTerminator = L'\0';
+const PathChar Path::kSeparators[] = L"\\/";
+const size_t Path::kSeparatorsLength = _countof(Path::kSeparators);
+const PathChar Path::kCurrentDir[] = L".";
+const PathChar Path::kParentDir[] = L"..";
+const PathChar Path::kExtensionSeparator = L'.';
+const PathChar Path::kStringTerminator = L'\0';
 
 }   // namespace kbase
 
 namespace {
 
-using kbase::FilePath;
+using kbase::Path;
 
 typedef kbase::PathChar PathChar;
 typedef kbase::PathString PathString;
@@ -53,7 +52,7 @@ inline bool EqualPathString(const PathString& x, const PathString& y)
     return !kbase::SysStringCompareCaseInsensitive(x, y);
 }
 
-// This function adheres the equality stipulated for two FilePath objects:
+// This function adheres the equality stipulated for two Path objects:
 // They can differ in the case, which is permitted by Windows.
 bool EqualDriveLetterCaseInsensitive(const PathString& x, const PathString& y)
 {
@@ -84,27 +83,27 @@ bool IsPathAbsolute(const PathString& path)
     // Such as c:\foo or \\foo .etc
     if (drive_letter != PathString::npos) {
         return (drive_letter + 1 < path.length()) &&
-            (FilePath::IsSeparator(path[drive_letter + 1]));
+            (Path::IsSeparator(path[drive_letter + 1]));
     }
 
     return (path.length() > 1) &&
-        (FilePath::IsSeparator(path[0]) && FilePath::IsSeparator(path[1]));
+        (Path::IsSeparator(path[0]) && Path::IsSeparator(path[1]));
 }
 
 PathString::size_type ExtensionSeparatorPosition(const PathString& path)
 {
     // Special cases for which path contains '.' but does not follow with an extension.
-    if (path == FilePath::kCurrentDir || path == FilePath::kParentDir) {
+    if (path == Path::kCurrentDir || path == Path::kParentDir) {
         return PathString::npos;
     }
 
-    return path.rfind(FilePath::kExtensionSeparator);
+    return path.rfind(Path::kExtensionSeparator);
 }
 
 bool IsPathEmptyOrSpecialCase(const PathString& path)
 {
-    if (path.empty() || path == FilePath::kCurrentDir ||
-        path == FilePath::kParentDir) {
+    if (path.empty() || path == Path::kCurrentDir ||
+        path == Path::kParentDir) {
         return true;
     }
 
@@ -115,15 +114,15 @@ bool IsPathEmptyOrSpecialCase(const PathString& path)
 
 namespace kbase {
 
-FilePath::FilePath(const FilePath& other)
+Path::Path(const Path& other)
     : path_(other.path_)
 {}
 
-FilePath::FilePath(FilePath&& other)
+Path::Path(Path&& other)
     : path_(std::move(other.path_))
 {}
 
-FilePath::FilePath(const PathString& path)
+Path::Path(const PathString& path)
     : path_(path)
 {
     // The null-terminator '\0' indicates the end of a path.
@@ -133,35 +132,35 @@ FilePath::FilePath(const PathString& path)
     }
 }
 
-FilePath& FilePath::operator=(const FilePath& other)
+Path& Path::operator=(const Path& other)
 {
     path_ = other.path_;
     return *this;
 }
 
-FilePath& FilePath::operator=(FilePath&& other)
+Path& Path::operator=(Path&& other)
 {
     path_ = std::move(other.path_);
     return *this;
 }
 
-bool operator==(const FilePath& lhs, const FilePath& rhs)
+bool operator==(const Path& lhs, const Path& rhs)
 {
     return EqualDriveLetterCaseInsensitive(lhs.value(), rhs.value());
 }
 
-bool operator!=(const FilePath& lhs, const FilePath& rhs)
+bool operator!=(const Path& lhs, const Path& rhs)
 {
     return !EqualDriveLetterCaseInsensitive(lhs.value(), rhs.value());
 }
 
-bool operator<(const FilePath& lhs, const FilePath& rhs)
+bool operator<(const Path& lhs, const Path& rhs)
 {
     return (kbase::SysStringCompareCaseInsensitive(lhs.value(), rhs.value()) < 0);
 }
 
 // static
-bool FilePath::IsSeparator(PathChar ch)
+bool Path::IsSeparator(PathChar ch)
 {
     using std::placeholders::_1;
     using std::equal_to;
@@ -170,7 +169,7 @@ bool FilePath::IsSeparator(PathChar ch)
                        std::bind(equal_to<PathChar>(), ch, _1));
 }
 
-bool FilePath::EndsWithSeparator() const
+bool Path::EndsWithSeparator() const
 {
     if (empty()) {
         return false;
@@ -179,10 +178,10 @@ bool FilePath::EndsWithSeparator() const
     return IsSeparator(path_.back());
 }
 
-FilePath FilePath::AsEndingWithSeparator() const
+Path Path::AsEndingWithSeparator() const
 {
     if (empty() || EndsWithSeparator()) {
-        return FilePath(*this);
+        return Path(*this);
     }
 
     PathString new_path_str;
@@ -191,10 +190,10 @@ FilePath FilePath::AsEndingWithSeparator() const
     new_path_str = path_;
     new_path_str.append(1, kSeparators[0]);
 
-    return FilePath(new_path_str);
+    return Path(new_path_str);
 }
 
-void FilePath::StripTrailingSeparatorsInternal()
+void Path::StripTrailingSeparatorsInternal()
 {
     // start always points to the position one-offset past the leading separator
     PathString::size_type start = FindDriveLetter(path_) + 2;
@@ -214,17 +213,17 @@ void FilePath::StripTrailingSeparatorsInternal()
     path_.resize(pos);
 }
 
-FilePath FilePath::StripTrailingSeparators() const
+Path Path::StripTrailingSeparators() const
 {
-    FilePath new_path(path_);
+    Path new_path(path_);
     new_path.StripTrailingSeparatorsInternal();
 
     return new_path;
 }
 
-FilePath FilePath::DirName() const
+Path Path::DirName() const
 {
-    FilePath new_path(path_);
+    Path new_path(path_);
     new_path.StripTrailingSeparatorsInternal();
 
     auto letter = FindDriveLetter(new_path.path_);
@@ -254,9 +253,9 @@ FilePath FilePath::DirName() const
     return new_path;
 }
 
-FilePath FilePath::BaseName() const
+Path Path::BaseName() const
 {
-    FilePath new_path(path_);
+    Path new_path(path_);
     new_path.StripTrailingSeparatorsInternal();
 
     auto letter = FindDriveLetter(new_path.path_);
@@ -274,7 +273,7 @@ FilePath FilePath::BaseName() const
     return new_path;
 }
 
-void FilePath::GetComponents(std::vector<PathString>* components) const
+void Path::GetComponents(std::vector<PathString>* components) const
 {
     assert(components);
 #if defined(NDEBUG)
@@ -290,11 +289,11 @@ void FilePath::GetComponents(std::vector<PathString>* components) const
     }
 
     std::vector<PathString> parts;
-    FilePath current(path_);
-    FilePath base;
+    Path current(path_);
+    Path base;
 
     auto AreAllSeparators = [](const PathString& path) -> bool {
-        return std::all_of(path.cbegin(), path.cend(), FilePath::IsSeparator);
+        return std::all_of(path.cbegin(), path.cend(), Path::IsSeparator);
     };
 
     // main body
@@ -321,12 +320,12 @@ void FilePath::GetComponents(std::vector<PathString>* components) const
     std::copy(parts.crbegin(), parts.crend(), std::back_inserter(*components));
 }
 
-bool FilePath::IsAbsolute() const
+bool Path::IsAbsolute() const
 {
     return IsPathAbsolute(path_);
 }
 
-void FilePath::Append(const PathString& components)
+void Path::Append(const PathString& components)
 {
     const PathString* need_appended = &components;
     PathString without_null;
@@ -363,25 +362,25 @@ void FilePath::Append(const PathString& components)
     path_.append(*need_appended);
 }
 
-void FilePath::Append(const FilePath& components)
+void Path::Append(const Path& components)
 {
     Append(components.value());
 }
 
-FilePath FilePath::AppendTo(const PathString& components) const
+Path Path::AppendTo(const PathString& components) const
 {
-    FilePath new_path(*this);
+    Path new_path(*this);
     new_path.Append(components);
 
     return new_path;
 }
 
-FilePath FilePath::AppendTo(const FilePath& components) const
+Path Path::AppendTo(const Path& components) const
 {
     return AppendTo(components.value());
 }
 
-bool FilePath::AppendRelativePath(const FilePath& child, FilePath* path) const
+bool Path::AppendRelativePath(const Path& child, Path* path) const
 {
     std::vector<PathString> current_components;
     std::vector<PathString> child_components;
@@ -410,29 +409,29 @@ bool FilePath::AppendRelativePath(const FilePath& child, FilePath* path) const
     return true;
 }
 
-bool FilePath::IsParent(const FilePath& child) const
+bool Path::IsParent(const Path& child) const
 {
     return AppendRelativePath(child, nullptr);
 }
 
-void FilePath::AppendASCII(const std::string& components)
+void Path::AppendASCII(const std::string& components)
 {
     ENSURE(CHECK, IsStringASCII(components)).Require();
 
     Append(ASCIIToWide(components));
 }
 
-kbase::FilePath FilePath::AppendASCIITo(const std::string& components) const
+kbase::Path Path::AppendASCIITo(const std::string& components) const
 {
-    FilePath new_path(*this);
+    Path new_path(*this);
     new_path.AppendASCII(components);
 
     return new_path;
 }
 
-PathString FilePath::Extension() const
+PathString Path::Extension() const
 {
-    FilePath base(BaseName());
+    Path base(BaseName());
     PathString::size_type separator_pos = ExtensionSeparatorPosition(base.path_);
 
     if (separator_pos == PathString::npos) {
@@ -442,7 +441,7 @@ PathString FilePath::Extension() const
     return base.path_.substr(separator_pos);
 }
 
-void FilePath::RemoveExtension()
+void Path::RemoveExtension()
 {
     if (Extension().empty()) {
         return;
@@ -454,42 +453,42 @@ void FilePath::RemoveExtension()
     }
 }
 
-FilePath FilePath::StripExtention() const
+Path Path::StripExtention() const
 {
-    FilePath new_path(path_);
+    Path new_path(path_);
     new_path.RemoveExtension();
 
     return new_path;
 }
 
-FilePath FilePath::InsertBeforeExtension(const PathString& suffix) const
+Path Path::InsertBeforeExtension(const PathString& suffix) const
 {
     if (suffix.empty()) {
-        return FilePath(*this);
+        return Path(*this);
     }
 
     if (IsPathEmptyOrSpecialCase(BaseName().value())) {
-        return FilePath();
+        return Path();
     }
 
     PathString extension = Extension();
-    FilePath new_path = StripExtention();
+    Path new_path = StripExtention();
     new_path.path_.append(suffix).append(extension);
 
     return new_path;
 }
 
-FilePath FilePath::AddExtension(const PathString& extension) const
+Path Path::AddExtension(const PathString& extension) const
 {
     if (IsPathEmptyOrSpecialCase(BaseName().value())) {
-        return FilePath();
+        return Path();
     }
 
     if (extension.empty() || extension == PathString(1, kExtensionSeparator)) {
-        return FilePath(*this);
+        return Path(*this);
     }
 
-    FilePath new_path(path_);
+    Path new_path(path_);
 
     // If neither the path nor the extension contains the separator, adds
     // one manually.
@@ -503,13 +502,13 @@ FilePath FilePath::AddExtension(const PathString& extension) const
     return new_path;
 }
 
-FilePath FilePath::ReplaceExtension(const PathString& extension) const
+Path Path::ReplaceExtension(const PathString& extension) const
 {
     if (IsPathEmptyOrSpecialCase(BaseName().value())) {
-        return FilePath();
+        return Path();
     }
 
-    FilePath new_path = StripExtention();
+    Path new_path = StripExtention();
 
     if (extension.empty() || extension == PathString(1, kExtensionSeparator)) {
         return new_path;
@@ -524,13 +523,13 @@ FilePath FilePath::ReplaceExtension(const PathString& extension) const
     return new_path;
 }
 
-bool FilePath::MatchExtension(const PathString& extension) const
+bool Path::MatchExtension(const PathString& extension) const
 {
     PathString ext = Extension();
     return kbase::StringToLowerASCII(ext) == kbase::StringToLowerASCII(extension);
 }
 
-bool FilePath::ReferenceParent() const
+bool Path::ReferenceParent() const
 {
     std::vector<PathString> components;
     GetComponents(&components);
@@ -547,7 +546,7 @@ bool FilePath::ReferenceParent() const
     return false;
 }
 
-std::string FilePath::AsASCII() const
+std::string Path::AsASCII() const
 {
     if (!kbase::IsStringASCII(path_)) {
         return std::string();
@@ -556,46 +555,28 @@ std::string FilePath::AsASCII() const
     return kbase::WideToASCII(path_);
 }
 
-std::string FilePath::AsUTF8() const
+std::string Path::AsUTF8() const
 {
     return kbase::SysWideToUTF8(path_);
 }
 
 // static
-FilePath FilePath::FromASCII(const std::string& path_in_ascii)
+Path Path::FromASCII(const std::string& path_in_ascii)
 {
     if (!kbase::IsStringASCII(path_in_ascii)) {
-        return FilePath();
+        return Path();
     }
 
-    return FilePath(kbase::ASCIIToWide(path_in_ascii));
+    return Path(kbase::ASCIIToWide(path_in_ascii));
 }
 
 // static
-FilePath FilePath::FromUTF8(const std::string& path_in_utf8)
+Path Path::FromUTF8(const std::string& path_in_utf8)
 {
-    return FilePath(kbase::SysUTF8ToWide(path_in_utf8));
+    return Path(kbase::SysUTF8ToWide(path_in_utf8));
 }
 
-void FilePath::WriteToPickle(Pickle* pickle) const
-{
-    pickle->Write(path_);
-}
-
-bool FilePath::ReadFromPickle(PickleIterator* iter)
-{
-    if (!iter->Read(&path_)) {
-        return false;
-    }
-
-    if (path_.find(kStringTerminator) != PathString::npos) {
-        return false;
-    }
-
-    return true;
-}
-
-FilePath FilePath::NormalizePathSeparatorTo(PathChar separator) const
+Path Path::NormalizePathSeparatorTo(PathChar separator) const
 {
     PathString new_path_str = path_;
 
@@ -603,16 +584,16 @@ FilePath FilePath::NormalizePathSeparatorTo(PathChar separator) const
         std::replace(new_path_str.begin(), new_path_str.end(), sep, separator);
     }
 
-    return FilePath(new_path_str);
+    return Path(new_path_str);
 }
 
-FilePath FilePath::NormalizePathSeparator() const
+Path Path::NormalizePathSeparator() const
 {
     return NormalizePathSeparatorTo(kSeparators[0]);
 }
 
 // static
-int FilePath::CompareIgnoreCase(const PathString& str1, const PathString& str2)
+int Path::CompareIgnoreCase(const PathString& str1, const PathString& str2)
 {
     return kbase::SysStringCompareCaseInsensitive(str1, str2);
 }

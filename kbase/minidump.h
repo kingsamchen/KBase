@@ -11,13 +11,13 @@
 
 namespace kbase {
 
-class FilePath;
+class Path;
 
 // Creates a minidump at a given path.
 // Returns true if succeeded, returns false otherwise.
 // Note that, if creating the minidump failed, we log the error only in debug mode;
 // and do nothing in other mode.
-bool CreateMiniDump(const FilePath& dump_path);
+bool CreateMiniDump(const Path& dump_path);
 
 }   // namespace kbase
 

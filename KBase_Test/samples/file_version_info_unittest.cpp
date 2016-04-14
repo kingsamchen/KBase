@@ -9,11 +9,11 @@
 
 #include <iostream>
 
-#include "kbase\file_path.h"
+#include "kbase\path.h"
 
 namespace {
 
-const kbase::FilePath kTargetFile(L"C:\\windows\\notepad.exe");
+const kbase::Path kTargetFile(L"C:\\windows\\notepad.exe");
 
 }   // namespace
 

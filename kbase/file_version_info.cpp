@@ -7,7 +7,7 @@
 #include <utility>
 
 #include "kbase/error_exception_util.h"
-#include "kbase/file_path.h"
+#include "kbase/path.h"
 
 #pragma comment(lib, "version.lib")
 
@@ -25,7 +25,7 @@ struct LangCodePage {
 namespace kbase {
 
 // static
-std::unique_ptr<FileVersionInfo> FileVersionInfo::CreateForFile(const FilePath& file)
+std::unique_ptr<FileVersionInfo> FileVersionInfo::CreateForFile(const Path& file)
 {
     DWORD info_size = GetFileVersionInfoSizeW(file.value().c_str(), nullptr);
     ENSURE(RAISE, info_size != 0)(LastError()).Require("Failed to get file version info size.");
@@ -46,7 +46,7 @@ std::unique_ptr<FileVersionInfo> FileVersionInfo::CreateForModule(HMODULE module
     DWORD rv = GetModuleFileNameW(module, file_name, MAX_PATH);
     ENSURE(RAISE, rv != 0)(LastError()).Require("Failed to get file name for a module");
 
-    return CreateForFile(kbase::FilePath(file_name));
+    return CreateForFile(kbase::Path(file_name));
 }
 
 FileVersionInfo::FileVersionInfo(VersionData&& data)
