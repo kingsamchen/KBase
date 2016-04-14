@@ -18,14 +18,16 @@ namespace kbase {
 
 class Path {
 public:
-    // Separators in path hierarchy. supports both '/' and '\'.
-    static const PathChar kSeparators[];
-    static const size_t kSeparatorsLength;
+    using value_type = PathChar;
+    using string_type = std::basic_string<value_type>;
 
-    static const PathChar kCurrentDir[];
-    static const PathChar kParentDir[];
-    static const PathChar kExtensionSeparator;
-    static const PathChar kStringTerminator;
+    static constexpr value_type kPreferredSeparator = L'\\';
+    static constexpr const value_type kSeparators[] = L"\\/";
+    static constexpr size_t kSeparatorCount = _countof(kSeparators) - 1;
+    static constexpr value_type* kCurrentDir = L".";
+    static constexpr value_type* kParentDir = L"..";
+    static constexpr value_type kExtensionSeparator = L'.';
+    static constexpr value_type kStringTerminator = L'\0';
 
     Path() = default;
 
@@ -33,7 +35,7 @@ public:
 
     Path(Path&& other);
 
-    explicit Path(const PathString& path);
+    explicit Path(const string_type& path);
 
     Path& operator=(const Path& other);
 
@@ -49,7 +51,7 @@ public:
     // Some STL contains require their elements have defined operator<.
     friend bool operator<(const Path& lhs, const Path& rhs);
 
-    const PathString& value() const
+    const string_type& value() const
     {
         return path_;
     }
@@ -65,7 +67,7 @@ public:
     }
 
     // Checks whether |ch| is in kSeparators.
-    static bool IsSeparator(PathChar ch);
+    static bool IsSeparator(value_type ch);
 
     // Returns true, if the path ends with a path separator.
     bool EndsWithSeparator() const;
@@ -91,7 +93,7 @@ public:
 
     // Retrieves every components of the path, including the root slash.
     // Example: C:\foo\bar  ->  ["C:", "\\", "foo", "bar"]
-    void GetComponents(std::vector<PathString>* components) const;
+    void GetComponents(std::vector<string_type>* components) const;
 
     // Returns true if it is a absolute path.
     bool IsAbsolute() const;
@@ -99,11 +101,11 @@ public:
     // |components| must be a relative path. Otherwise, functions will throw an
     // exception.
 
-    void Append(const PathString& components);
+    void Append(const string_type& components);
 
     void Append(const Path& components);
 
-    Path AppendTo(const PathString& components) const;
+    Path AppendTo(const string_type& components) const;
 
     Path AppendTo(const Path& components) const;
 
@@ -130,7 +132,7 @@ public:
     // Returns the extension of the path if there is any.
     // The extension starts with extension separator.
     // If there are multiple extensions, Windows only recognizes the last one.
-    PathString Extension() const;
+    string_type Extension() const;
 
     // Removes the extension of the path if there is any.
     void RemoveExtension();
@@ -142,23 +144,23 @@ public:
     // extension.
     // Returns an empty Path if the BaseName() is '.' or '..'.
     // Example: path: c:\foo\bar\test.jpg suffix: (1) --> c:\foo\bar\test(1).jpg
-    Path InsertBeforeExtension(const PathString& suffix) const;
+    Path InsertBeforeExtension(const string_type& suffix) const;
 
     // Adds extension to the file name of the path.
     // If the file name of the path already has an extension, the |extension| will
     // be the sole extension recognized by Windows.
     // Returns an empty Path if the BaseName() is '.' or '..'.
-    Path AddExtension(const PathString& extension) const;
+    Path AddExtension(const string_type& extension) const;
 
     // Replaces the extension of the file name with |extension|.
     // If |extension| is empty or only contains separator, the extension of the file
     // name is removed.
     // If the file name does not have an extension, then |extension| is added.
     // Returns an empty Path if the BaseName() is '.' or '..'.
-    Path ReplaceExtension(const PathString& extension) const;
+    Path ReplaceExtension(const string_type& extension) const;
 
     // Returns true, if |extension| matches the extension of the file name.
-    bool MatchExtension(const PathString& extension) const;
+    bool MatchExtension(const string_type& extension) const;
 
     // Returns true if the path has a component that is '..'.
     bool ReferenceParent() const;
@@ -179,17 +181,17 @@ public:
     // We choose kSeparators[0] as our default path separator.
     Path NormalizePathSeparator() const;
 
-    Path NormalizePathSeparatorTo(PathChar separator) const;
+    Path NormalizePathSeparatorTo(value_type separator) const;
 
     // Case-insensitive comparison.
     // Returns -1, if str1 < str2;
     // Returns 0, if str1 == str2;
     // Returns 1, if str1 > str2.
-    static int CompareIgnoreCase(const PathString& str1,
-                                 const PathString& str2);
+    static int CompareIgnoreCase(const string_type& str1,
+                                 const string_type& str2);
 
-    static bool CompareEqualIgnoreCase(const PathString& str1,
-                                       const PathString& str2)
+    static bool CompareEqualIgnoreCase(const string_type& str1,
+                                       const string_type& str2)
     {
         return CompareIgnoreCase(str1, str2) == 0;
     }
@@ -198,7 +200,7 @@ private:
     void StripTrailingSeparatorsInternal();
 
 private:
-    PathString path_;
+    string_type path_;
 };
 
 }   // namespace kbase
@@ -209,7 +211,7 @@ template<>
 struct std::hash<kbase::Path> {
     size_t operator()(const kbase::Path& file_path) const
     {
-        return std::hash<kbase::PathString>()(file_path.value());
+        return std::hash<kbase::Path::string_type>()(file_path.value());
     }
 };
 

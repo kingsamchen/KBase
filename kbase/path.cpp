@@ -16,27 +16,16 @@
 #include "kbase/string_util.h"
 #include "kbase/sys_string_encoding_conversions.h"
 
-namespace kbase {
-
-const PathChar Path::kSeparators[] = L"\\/";
-const size_t Path::kSeparatorsLength = _countof(Path::kSeparators);
-const PathChar Path::kCurrentDir[] = L".";
-const PathChar Path::kParentDir[] = L"..";
-const PathChar Path::kExtensionSeparator = L'.';
-const PathChar Path::kStringTerminator = L'\0';
-
-}   // namespace kbase
-
 namespace {
 
 using kbase::Path;
 
-typedef kbase::PathChar PathChar;
-typedef kbase::PathString PathString;
+using value_type = Path::value_type;
+using string_type = Path::string_type;
 
 // If the |path| contains a drive letter specification, returns the position of the
 // last character of the specification; otherwise, return npos.
-PathString::size_type FindDriveLetter(const PathString& path)
+string_type::size_type FindDriveLetter(const string_type& path)
 {
     if (path.length() >= 2 && path[1] == L':' &&
         ((path[0] >= L'A' && path[0] <= L'Z') ||
@@ -44,44 +33,44 @@ PathString::size_type FindDriveLetter(const PathString& path)
         return 1;
     }
 
-    return PathString::npos;
+    return string_type::npos;
 }
 
-inline bool EqualPathString(const PathString& x, const PathString& y)
+inline bool EqualPathValue(const string_type& x, const string_type& y)
 {
     return !kbase::SysStringCompareCaseInsensitive(x, y);
 }
 
 // This function adheres the equality stipulated for two Path objects:
 // They can differ in the case, which is permitted by Windows.
-bool EqualDriveLetterCaseInsensitive(const PathString& x, const PathString& y)
+bool EqualDriveLetterCaseInsensitive(const string_type& x, const string_type& y)
 {
     auto letter_pos_x = FindDriveLetter(x);
     auto letter_pos_y = FindDriveLetter(y);
 
     // if only one contains a drive letter, the comparison result is same as
     // x == y
-    if (letter_pos_x == PathString::npos || letter_pos_y == PathString::npos) {
-        return EqualPathString(x, y);
+    if (letter_pos_x == string_type::npos || letter_pos_y == string_type::npos) {
+        return EqualPathValue(x, y);
     }
 
-    PathString&& letter_x = x.substr(0, letter_pos_x + 1);
-    PathString&& letter_y = y.substr(0, letter_pos_y + 1);
-    if (!EqualPathString(letter_x, letter_y)) {
+    string_type&& letter_x = x.substr(0, letter_pos_x + 1);
+    string_type&& letter_y = y.substr(0, letter_pos_y + 1);
+    if (!EqualPathValue(letter_x, letter_y)) {
         return false;
     }
 
-    PathString&& rest_x = x.substr(letter_pos_x + 1);
-    PathString&& rest_y = y.substr(letter_pos_y + 1);
-    return EqualPathString(rest_x, rest_y);
+    string_type&& rest_x = x.substr(letter_pos_x + 1);
+    string_type&& rest_y = y.substr(letter_pos_y + 1);
+    return EqualPathValue(rest_x, rest_y);
 }
 
-bool IsPathAbsolute(const PathString& path)
+bool IsPathAbsolute(const string_type& path)
 {
-    PathString::size_type drive_letter = FindDriveLetter(path);
+    string_type::size_type drive_letter = FindDriveLetter(path);
 
     // Such as c:\foo or \\foo .etc
-    if (drive_letter != PathString::npos) {
+    if (drive_letter != string_type::npos) {
         return (drive_letter + 1 < path.length()) &&
             (Path::IsSeparator(path[drive_letter + 1]));
     }
@@ -90,17 +79,17 @@ bool IsPathAbsolute(const PathString& path)
         (Path::IsSeparator(path[0]) && Path::IsSeparator(path[1]));
 }
 
-PathString::size_type ExtensionSeparatorPosition(const PathString& path)
+string_type::size_type ExtensionSeparatorPosition(const string_type& path)
 {
     // Special cases for which path contains '.' but does not follow with an extension.
     if (path == Path::kCurrentDir || path == Path::kParentDir) {
-        return PathString::npos;
+        return string_type::npos;
     }
 
     return path.rfind(Path::kExtensionSeparator);
 }
 
-bool IsPathEmptyOrSpecialCase(const PathString& path)
+bool IsPathEmptyOrSpecialCase(const string_type& path)
 {
     if (path.empty() || path == Path::kCurrentDir ||
         path == Path::kParentDir) {
@@ -122,12 +111,12 @@ Path::Path(Path&& other)
     : path_(std::move(other.path_))
 {}
 
-Path::Path(const PathString& path)
+Path::Path(const string_type& path)
     : path_(path)
 {
     // The null-terminator '\0' indicates the end of a path.
-    PathString::size_type null_pos = path_.find(kStringTerminator);
-    if (null_pos != PathString::npos) {
+    string_type::size_type null_pos = path_.find(kStringTerminator);
+    if (null_pos != string_type::npos) {
         path_ = path_.substr(0, null_pos);
     }
 }
@@ -160,13 +149,13 @@ bool operator<(const Path& lhs, const Path& rhs)
 }
 
 // static
-bool Path::IsSeparator(PathChar ch)
+bool Path::IsSeparator(value_type ch)
 {
     using std::placeholders::_1;
     using std::equal_to;
 
     return std::any_of(std::begin(kSeparators), std::end(kSeparators),
-                       std::bind(equal_to<PathChar>(), ch, _1));
+                       std::bind(equal_to<value_type>(), ch, _1));
 }
 
 bool Path::EndsWithSeparator() const
@@ -184,7 +173,7 @@ Path Path::AsEndingWithSeparator() const
         return Path(*this);
     }
 
-    PathString new_path_str;
+    string_type new_path_str;
     new_path_str.reserve(path_.length() + 1);
 
     new_path_str = path_;
@@ -196,14 +185,14 @@ Path Path::AsEndingWithSeparator() const
 void Path::StripTrailingSeparatorsInternal()
 {
     // start always points to the position one-offset past the leading separator
-    PathString::size_type start = FindDriveLetter(path_) + 2;
+    string_type::size_type start = FindDriveLetter(path_) + 2;
 
-    PathString::size_type last_stripped = PathString::npos;
-    PathString::size_type pos = path_.length();
+    string_type::size_type last_stripped = string_type::npos;
+    string_type::size_type pos = path_.length();
     for (; pos > start && IsSeparator(path_[pos-1]); --pos) {
         if (pos != start + 1 ||
             !IsSeparator(path_[start-1]) ||
-            last_stripped != PathString::npos) {
+            last_stripped != string_type::npos) {
             last_stripped = pos;
         } else {
             break;
@@ -227,11 +216,11 @@ Path Path::DirName() const
     new_path.StripTrailingSeparatorsInternal();
 
     auto letter = FindDriveLetter(new_path.path_);
-    auto last_separator = new_path.path_.find_last_of(kSeparators, PathString::npos,
-                                                      kSeparatorsLength - 1);
+    auto last_separator = new_path.path_.find_last_of(kSeparators, string_type::npos,
+                                                      kSeparatorCount);
 
     // there might be a drive letter in the path
-    if (last_separator == PathString::npos) {
+    if (last_separator == string_type::npos) {
         // in current dir
         new_path.path_.resize(letter + 1);
     } else if (last_separator == letter + 1) {
@@ -259,13 +248,13 @@ Path Path::BaseName() const
     new_path.StripTrailingSeparatorsInternal();
 
     auto letter = FindDriveLetter(new_path.path_);
-    if (letter != PathString::npos) {
+    if (letter != string_type::npos) {
         new_path.path_.erase(0, letter + 1);
     }
 
-    auto last_separator = new_path.path_.find_last_of(kSeparators, PathString::npos,
-                                                      kSeparatorsLength - 1);
-    if (last_separator != PathString::npos &&
+    auto last_separator = new_path.path_.find_last_of(kSeparators, string_type::npos,
+                                                      kSeparatorCount);
+    if (last_separator != string_type::npos &&
         last_separator < new_path.path_.length() - 1) {
         new_path.path_.erase(0, last_separator + 1);
     }
@@ -273,7 +262,7 @@ Path Path::BaseName() const
     return new_path;
 }
 
-void Path::GetComponents(std::vector<PathString>* components) const
+void Path::GetComponents(std::vector<string_type>* components) const
 {
     assert(components);
 #if defined(NDEBUG)
@@ -288,11 +277,11 @@ void Path::GetComponents(std::vector<PathString>* components) const
         return;
     }
 
-    std::vector<PathString> parts;
+    std::vector<string_type> parts;
     Path current(path_);
     Path base;
 
-    auto AreAllSeparators = [](const PathString& path) -> bool {
+    auto AreAllSeparators = [](const string_type& path) -> bool {
         return std::all_of(path.cbegin(), path.cend(), Path::IsSeparator);
     };
 
@@ -313,7 +302,7 @@ void Path::GetComponents(std::vector<PathString>* components) const
 
     // drive letter
     auto letter = FindDriveLetter(current.value());
-    if (letter != PathString::npos) {
+    if (letter != string_type::npos) {
         parts.push_back(current.value().substr(0, letter + 1));
     }
 
@@ -325,13 +314,13 @@ bool Path::IsAbsolute() const
     return IsPathAbsolute(path_);
 }
 
-void Path::Append(const PathString& components)
+void Path::Append(const string_type& components)
 {
-    const PathString* need_appended = &components;
-    PathString without_null;
+    const string_type* need_appended = &components;
+    string_type without_null;
 
-    PathString::size_type null_pos = need_appended->find(kStringTerminator);
-    if (null_pos != PathString::npos) {
+    string_type::size_type null_pos = need_appended->find(kStringTerminator);
+    if (null_pos != string_type::npos) {
         without_null = components.substr(0, null_pos);
         need_appended = &without_null;
     }
@@ -367,7 +356,7 @@ void Path::Append(const Path& components)
     Append(components.value());
 }
 
-Path Path::AppendTo(const PathString& components) const
+Path Path::AppendTo(const string_type& components) const
 {
     Path new_path(*this);
     new_path.Append(components);
@@ -382,8 +371,8 @@ Path Path::AppendTo(const Path& components) const
 
 bool Path::AppendRelativePath(const Path& child, Path* path) const
 {
-    std::vector<PathString> current_components;
-    std::vector<PathString> child_components;
+    std::vector<string_type> current_components;
+    std::vector<string_type> child_components;
     GetComponents(&current_components);
     child.GetComponents(&child_components);
 
@@ -395,7 +384,7 @@ bool Path::AppendRelativePath(const Path& child, Path* path) const
     auto current_iter = current_components.cbegin();
     auto child_iter = child_components.cbegin();
     for (; current_iter != current_components.cend(); ++current_iter, ++child_iter) {
-        if (!EqualPathString(*current_iter, *child_iter)) {
+        if (!EqualPathValue(*current_iter, *child_iter)) {
             return false;
         }
     }
@@ -429,13 +418,13 @@ kbase::Path Path::AppendASCIITo(const std::string& components) const
     return new_path;
 }
 
-PathString Path::Extension() const
+string_type Path::Extension() const
 {
     Path base(BaseName());
-    PathString::size_type separator_pos = ExtensionSeparatorPosition(base.path_);
+    string_type::size_type separator_pos = ExtensionSeparatorPosition(base.path_);
 
-    if (separator_pos == PathString::npos) {
-        return PathString();
+    if (separator_pos == string_type::npos) {
+        return string_type();
     }
 
     return base.path_.substr(separator_pos);
@@ -447,8 +436,8 @@ void Path::RemoveExtension()
         return;
     }
 
-    PathString::size_type separator_pos = ExtensionSeparatorPosition(path_);
-    if (separator_pos != PathString::npos) {
+    string_type::size_type separator_pos = ExtensionSeparatorPosition(path_);
+    if (separator_pos != string_type::npos) {
         path_ = path_.substr(0, separator_pos);
     }
 }
@@ -461,7 +450,7 @@ Path Path::StripExtention() const
     return new_path;
 }
 
-Path Path::InsertBeforeExtension(const PathString& suffix) const
+Path Path::InsertBeforeExtension(const string_type& suffix) const
 {
     if (suffix.empty()) {
         return Path(*this);
@@ -471,20 +460,20 @@ Path Path::InsertBeforeExtension(const PathString& suffix) const
         return Path();
     }
 
-    PathString extension = Extension();
+    string_type extension = Extension();
     Path new_path = StripExtention();
     new_path.path_.append(suffix).append(extension);
 
     return new_path;
 }
 
-Path Path::AddExtension(const PathString& extension) const
+Path Path::AddExtension(const string_type& extension) const
 {
     if (IsPathEmptyOrSpecialCase(BaseName().value())) {
         return Path();
     }
 
-    if (extension.empty() || extension == PathString(1, kExtensionSeparator)) {
+    if (extension.empty() || extension == string_type(1, kExtensionSeparator)) {
         return Path(*this);
     }
 
@@ -502,7 +491,7 @@ Path Path::AddExtension(const PathString& extension) const
     return new_path;
 }
 
-Path Path::ReplaceExtension(const PathString& extension) const
+Path Path::ReplaceExtension(const string_type& extension) const
 {
     if (IsPathEmptyOrSpecialCase(BaseName().value())) {
         return Path();
@@ -510,7 +499,7 @@ Path Path::ReplaceExtension(const PathString& extension) const
 
     Path new_path = StripExtention();
 
-    if (extension.empty() || extension == PathString(1, kExtensionSeparator)) {
+    if (extension.empty() || extension == string_type(1, kExtensionSeparator)) {
         return new_path;
     }
 
@@ -523,20 +512,20 @@ Path Path::ReplaceExtension(const PathString& extension) const
     return new_path;
 }
 
-bool Path::MatchExtension(const PathString& extension) const
+bool Path::MatchExtension(const string_type& extension) const
 {
-    PathString ext = Extension();
+    string_type ext = Extension();
     return kbase::StringToLowerASCII(ext) == kbase::StringToLowerASCII(extension);
 }
 
 bool Path::ReferenceParent() const
 {
-    std::vector<PathString> components;
+    std::vector<string_type> components;
     GetComponents(&components);
 
     // It seems redundant spaces at the tail of '..' can be ignored by Windows.
-    PathString trimed_component;
-    for (const PathString& component : components) {
+    string_type trimed_component;
+    for (const string_type& component : components) {
         kbase::TrimTailingStr(component, L" ", &trimed_component);
         if (trimed_component == kParentDir) {
             return true;
@@ -576,11 +565,11 @@ Path Path::FromUTF8(const std::string& path_in_utf8)
     return Path(kbase::SysUTF8ToWide(path_in_utf8));
 }
 
-Path Path::NormalizePathSeparatorTo(PathChar separator) const
+Path Path::NormalizePathSeparatorTo(value_type separator) const
 {
-    PathString new_path_str = path_;
+    string_type new_path_str = path_;
 
-    for (PathChar sep : kSeparators) {
+    for (value_type sep : kSeparators) {
         std::replace(new_path_str.begin(), new_path_str.end(), sep, separator);
     }
 
@@ -593,7 +582,7 @@ Path Path::NormalizePathSeparator() const
 }
 
 // static
-int Path::CompareIgnoreCase(const PathString& str1, const PathString& str2)
+int Path::CompareIgnoreCase(const string_type& str1, const string_type& str2)
 {
     return kbase::SysStringCompareCaseInsensitive(str1, str2);
 }
