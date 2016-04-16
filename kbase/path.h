@@ -132,35 +132,24 @@ public:
     // Returns the extension of the path if there is any.
     // The extension starts with extension separator.
     // If there are multiple extensions, Windows only recognizes the last one.
-    string_type Extension() const;
+    string_type extension() const;
+
+    // Returns true, if `extension` matches the extension of the file name.
+    bool MatchExtension(const string_type& extension) const;
 
     // Removes the extension of the path if there is any.
-    void RemoveExtension();
-
-    // Same as above, but strips on a copy and leaves the original path intact.
-    Path StripExtention() const;
-
-    // Inserts |suffix| after the file name portion of the path, but before the
-    // extension.
-    // Returns an empty Path if the BaseName() is '.' or '..'.
-    // Example: path: c:\foo\bar\test.jpg suffix: (1) --> c:\foo\bar\test(1).jpg
-    Path InsertBeforeExtension(const string_type& suffix) const;
+    Path& RemoveExtension();
 
     // Adds extension to the file name of the path.
-    // If the file name of the path already has an extension, the |extension| will
-    // be the sole extension recognized by Windows.
-    // Returns an empty Path if the BaseName() is '.' or '..'.
-    Path AddExtension(const string_type& extension) const;
+    // If the file name of the path already has an extension, then the `extension` will
+    // be the only extension recognized by Windows.
+    Path& AddExtension(const string_type& extension);
 
-    // Replaces the extension of the file name with |extension|.
-    // If |extension| is empty or only contains separator, the extension of the file
+    // Replaces the extension of the file name with `replacement`.
+    // If `replacement` is empty or only contains separator, the extension of the file
     // name is removed.
-    // If the file name does not have an extension, then |extension| is added.
-    // Returns an empty Path if the BaseName() is '.' or '..'.
-    Path ReplaceExtension(const string_type& extension) const;
-
-    // Returns true, if |extension| matches the extension of the file name.
-    bool MatchExtension(const string_type& extension) const;
+    // If the file name does not have an extension, then `replacement` is added.
+    Path& ReplaceExtension(const string_type& replacement);
 
     // Returns true if the path has a component that is '..'.
     bool ReferenceParent() const;
@@ -178,10 +167,10 @@ public:
 
     static Path FromUTF8(const std::string& path_in_utf8);
 
-    // We choose kSeparators[0] as our default path separator.
-    Path NormalizePathSeparator() const;
+    // Converts all directory separators in path to the preferred directory separator.
+    Path& MakePreferredSeparator();
 
-    Path NormalizePathSeparatorTo(value_type separator) const;
+    Path& MakePathSeparatorTo(value_type separator);
 
     // Case-insensitive comparison.
     // Returns -1, if str1 < str2;

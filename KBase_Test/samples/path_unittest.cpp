@@ -73,10 +73,16 @@ TEST(PathTest, PathSeparator)
     }
 
     {
+        const Path crit(L"C:/test/path");
         Path path(L"C:\\test\\path");
-        Path crit(L"C:/test/path");
-        EXPECT_EQ(crit, path.NormalizePathSeparatorTo(L'/'));
-        EXPECT_EQ(crit.NormalizePathSeparator(), path);
+        EXPECT_EQ(crit, path.MakePathSeparatorTo(L'/'));
+        EXPECT_NE(crit, path.MakePreferredSeparator());
+    }
+
+    {
+        const Path crit(L"test.txt");
+        Path path(L"test.txt");
+        EXPECT_EQ(crit, path.MakePreferredSeparator());
     }
 }
 
@@ -191,13 +197,17 @@ TEST(PathTest, PathAppend)
 TEST(PathTest, PathExtension)
 {
     Path path(L"C:\\abc\\def\\xxx.dat");
-    EXPECT_EQ(path.Extension(), std::wstring(L".dat"));
+    EXPECT_EQ(path.extension(), std::wstring(L".dat"));
     path.RemoveExtension();
-    EXPECT_EQ(path.Extension(), std::wstring());
+    EXPECT_EQ(path.extension(), std::wstring());
     EXPECT_EQ(path, Path(L"C:\\abc\\def\\xxx"));
-    path = path.AddExtension(L".txt");
-    EXPECT_EQ(path.Extension(), std::wstring(L".txt"));
-    path = path.ReplaceExtension(L".avi");
-    EXPECT_EQ(path.Extension(), std::wstring(L".avi"));
+    path.AddExtension(L".txt");
+    EXPECT_EQ(path.extension(), std::wstring(L".txt"));
+    path.ReplaceExtension(L".avi");
+    EXPECT_EQ(path.extension(), std::wstring(L".avi"));
     EXPECT_TRUE(path.MatchExtension(L".avi"));
+    path.AddExtension(L".td");
+    EXPECT_EQ(path.extension(), std::wstring(L".td"));
+    path.ReplaceExtension(L"");
+    EXPECT_EQ(path.extension(), std::wstring(L".avi"));
 }

@@ -5,7 +5,6 @@
 #include "kbase/path.h"
 
 #include <cassert>
-#include <cstdlib>
 
 #include <algorithm>
 #include <functional>
@@ -79,7 +78,7 @@ bool IsPathAbsolute(const string_type& path)
         (Path::IsSeparator(path[0]) && Path::IsSeparator(path[1]));
 }
 
-string_type::size_type ExtensionSeparatorPosition(const string_type& path)
+string_type::size_type GetExtensionSeparatorPosition(const string_type& path)
 {
     // Special cases for which path contains '.' but does not follow with an extension.
     if (path == Path::kCurrentDir || path == Path::kParentDir) {
@@ -89,14 +88,9 @@ string_type::size_type ExtensionSeparatorPosition(const string_type& path)
     return path.rfind(Path::kExtensionSeparator);
 }
 
-bool IsPathEmptyOrSpecialCase(const string_type& path)
+bool IsPathSpecialCase(const string_type& path)
 {
-    if (path.empty() || path == Path::kCurrentDir ||
-        path == Path::kParentDir) {
-        return true;
-    }
-
-    return false;
+    return (path == Path::kCurrentDir || path == Path::kParentDir);
 }
 
 }   // namespace
@@ -410,7 +404,7 @@ void Path::AppendASCII(const std::string& components)
     Append(ASCIIToWide(components));
 }
 
-kbase::Path Path::AppendASCIITo(const std::string& components) const
+Path Path::AppendASCIITo(const std::string& components) const
 {
     Path new_path(*this);
     new_path.AppendASCII(components);
@@ -418,11 +412,10 @@ kbase::Path Path::AppendASCIITo(const std::string& components) const
     return new_path;
 }
 
-string_type Path::Extension() const
+string_type Path::extension() const
 {
     Path base(BaseName());
-    string_type::size_type separator_pos = ExtensionSeparatorPosition(base.path_);
-
+    auto separator_pos = GetExtensionSeparatorPosition(base.path_);
     if (separator_pos == string_type::npos) {
         return string_type();
     }
@@ -430,92 +423,64 @@ string_type Path::Extension() const
     return base.path_.substr(separator_pos);
 }
 
-void Path::RemoveExtension()
+Path& Path::RemoveExtension()
 {
-    if (Extension().empty()) {
-        return;
+    if (!extension().empty()) {
+        auto separator_pos = GetExtensionSeparatorPosition(path_);
+        if (separator_pos != string_type::npos) {
+            path_.erase(separator_pos);
+        }
     }
 
-    string_type::size_type separator_pos = ExtensionSeparatorPosition(path_);
-    if (separator_pos != string_type::npos) {
-        path_ = path_.substr(0, separator_pos);
-    }
+    return *this;
 }
 
-Path Path::StripExtention() const
+Path& Path::AddExtension(const string_type& extension)
 {
-    Path new_path(path_);
-    new_path.RemoveExtension();
-
-    return new_path;
-}
-
-Path Path::InsertBeforeExtension(const string_type& suffix) const
-{
-    if (suffix.empty()) {
-        return Path(*this);
-    }
-
-    if (IsPathEmptyOrSpecialCase(BaseName().value())) {
-        return Path();
-    }
-
-    string_type extension = Extension();
-    Path new_path = StripExtention();
-    new_path.path_.append(suffix).append(extension);
-
-    return new_path;
-}
-
-Path Path::AddExtension(const string_type& extension) const
-{
-    if (IsPathEmptyOrSpecialCase(BaseName().value())) {
-        return Path();
-    }
-
     if (extension.empty() || extension == string_type(1, kExtensionSeparator)) {
-        return Path(*this);
+        return *this;
     }
 
-    Path new_path(path_);
+    if (IsPathSpecialCase(BaseName().value())) {
+        path_ += kPreferredSeparator;
+    }
 
-    // If neither the path nor the extension contains the separator, adds
+    // If neither the path nor the extension contains the extension separator, adds
     // one manually.
-    if (new_path.path_.back() != kExtensionSeparator &&
+    if (path_.back() != kExtensionSeparator &&
         extension.front() != kExtensionSeparator) {
-        new_path.path_.append(1, kExtensionSeparator);
+        path_ += kExtensionSeparator;
     }
 
-    new_path.path_.append(extension);
+    path_.append(extension);
 
-    return new_path;
+    return *this;
 }
 
-Path Path::ReplaceExtension(const string_type& extension) const
+Path& Path::ReplaceExtension(const string_type& extension)
 {
-    if (IsPathEmptyOrSpecialCase(BaseName().value())) {
-        return Path();
-    }
-
-    Path new_path = StripExtention();
+    RemoveExtension();
 
     if (extension.empty() || extension == string_type(1, kExtensionSeparator)) {
-        return new_path;
+        return *this;
+    }
+
+    if (IsPathSpecialCase(BaseName().value())) {
+        path_ += kPreferredSeparator;
     }
 
     if (extension[0] != kExtensionSeparator) {
-        new_path.path_.append(1, kExtensionSeparator);
+        path_ += kExtensionSeparator;
     }
 
-    new_path.path_.append(extension);
+    path_.append(extension);
 
-    return new_path;
+    return *this;
 }
 
-bool Path::MatchExtension(const string_type& extension) const
+bool Path::MatchExtension(const string_type& ext) const
 {
-    string_type ext = Extension();
-    return kbase::StringToLowerASCII(ext) == kbase::StringToLowerASCII(extension);
+    return kbase::StringToLowerASCII(extension()) == kbase::StringToLowerASCII(ext);
 }
 
 bool Path::ReferenceParent() const
@@ -565,20 +530,22 @@ Path Path::FromUTF8(const std::string& path_in_utf8)
     return Path(kbase::SysUTF8ToWide(path_in_utf8));
 }
 
-Path Path::NormalizePathSeparatorTo(value_type separator) const
+Path& Path::MakePathSeparatorTo(value_type separator)
 {
-    string_type new_path_str = path_;
-
-    for (value_type sep : kSeparators) {
-        std::replace(new_path_str.begin(), new_path_str.end(), sep, separator);
+    auto pos = path_.find_first_of(kSeparators);
+    if (pos != string_type::npos) {
+        value_type old_sep = path_[pos];
+        if (old_sep != separator) {
+            std::replace(path_.begin() + pos, path_.end(), old_sep, separator);
+        }
     }
 
-    return Path(new_path_str);
+    return *this;
 }
 
-Path Path::NormalizePathSeparator() const
+Path& Path::MakePreferredSeparator()
 {
-    return NormalizePathSeparatorTo(kSeparators[0]);
+    return MakePathSeparatorTo(kPreferredSeparator);
 }
 
 // static
