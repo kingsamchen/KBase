@@ -161,31 +161,16 @@ bool Path::EndsWithSeparator() const
     return IsSeparator(path_.back());
 }
 
-Path Path::AsEndingWithSeparator() const
-{
-    if (empty() || EndsWithSeparator()) {
-        return Path(*this);
-    }
-
-    string_type new_path_str;
-    new_path_str.reserve(path_.length() + 1);
-
-    new_path_str = path_;
-    new_path_str.append(1, kSeparators[0]);
-
-    return Path(new_path_str);
-}
-
-void Path::StripTrailingSeparatorsInternal()
+Path& Path::StripTrailingSeparators()
 {
     // start always points to the position one-offset past the leading separator
     string_type::size_type start = FindDriveLetter(path_) + 2;
 
     string_type::size_type last_stripped = string_type::npos;
     string_type::size_type pos = path_.length();
-    for (; pos > start && IsSeparator(path_[pos-1]); --pos) {
+    for (; pos > start && IsSeparator(path_[pos - 1]); --pos) {
         if (pos != start + 1 ||
-            !IsSeparator(path_[start-1]) ||
+            !IsSeparator(path_[start - 1]) ||
             last_stripped != string_type::npos) {
             last_stripped = pos;
         } else {
@@ -194,20 +179,14 @@ void Path::StripTrailingSeparatorsInternal()
     }
 
     path_.resize(pos);
-}
 
-Path Path::StripTrailingSeparators() const
-{
-    Path new_path(path_);
-    new_path.StripTrailingSeparatorsInternal();
-
-    return new_path;
+    return *this;
 }
 
 Path Path::DirName() const
 {
     Path new_path(path_);
-    new_path.StripTrailingSeparatorsInternal();
+    new_path.StripTrailingSeparators();
 
     auto letter = FindDriveLetter(new_path.path_);
     auto last_separator = new_path.path_.find_last_of(kSeparators, string_type::npos,
@@ -228,7 +207,7 @@ Path Path::DirName() const
         new_path.path_.resize(last_separator);
     }
 
-    new_path.StripTrailingSeparatorsInternal();
+    new_path.StripTrailingSeparators();
     if (new_path.path_.empty()) {
         new_path.path_ = kCurrentDir;
     }
@@ -239,7 +218,7 @@ Path Path::DirName() const
 Path Path::BaseName() const
 {
     Path new_path(path_);
-    new_path.StripTrailingSeparatorsInternal();
+    new_path.StripTrailingSeparators();
 
     auto letter = FindDriveLetter(new_path.path_);
     if (letter != string_type::npos) {
@@ -327,7 +306,7 @@ void Path::Append(const string_type& components)
         return;
     }
 
-    StripTrailingSeparatorsInternal();
+    StripTrailingSeparators();
 
     // If the path is empty, that indicates current directory.
     // If the path component is empty, that indicates nothing to append.

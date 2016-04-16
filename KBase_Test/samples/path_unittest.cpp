@@ -62,11 +62,8 @@ TEST(PathTest, PathSeparator)
 
     {
         EXPECT_FALSE(Path().EndsWithSeparator());
-        EXPECT_TRUE(Path().AsEndingWithSeparator().empty());
         Path path(L"C:\\test\\path");
         EXPECT_FALSE(path.EndsWithSeparator());
-        path = path.AsEndingWithSeparator();
-        EXPECT_TRUE(path.EndsWithSeparator());
         EXPECT_FALSE(path.StripTrailingSeparators().EndsWithSeparator());
         Path p(L"C:\\test\\path");
         EXPECT_EQ(p, p.StripTrailingSeparators());

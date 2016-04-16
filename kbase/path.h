@@ -66,21 +66,15 @@ public:
         path_.clear();
     }
 
-    // Checks whether |ch| is in kSeparators.
+    // Checks whether `ch` is in kSeparators.
     static bool IsSeparator(value_type ch);
 
     // Returns true, if the path ends with a path separator.
     bool EndsWithSeparator() const;
 
-    // Returns a copy of the file path that ends with a path separator.
-    // If the path is empty, returns an empty Path.
-    Path AsEndingWithSeparator() const;
+    Path& StripTrailingSeparators();
 
-    // This function internally calls StripTrailingSeparatorInternal, which returns
-    // the path that has been stripped.
-    Path StripTrailingSeparators() const;
-
-    // Returns a Path corresponding to the dir that contains the path. If this
+    // Returns the path to the parent directory. If this
     // object contains only one component, returns a Path identifying the current
     // dir. If this object already refers to the root dir, returns a Path
     // identifying the root dir.
@@ -184,9 +178,6 @@ public:
     {
         return CompareIgnoreCase(str1, str2) == 0;
     }
-
-private:
-    void StripTrailingSeparatorsInternal();
 
 private:
     string_type path_;
