@@ -120,7 +120,7 @@ void DuplicateDirectory(const Path& src, const Path& dest, bool recursive)
         ENSURE(CHECK, !full_dest.empty())(dest.value()).Require();
     } else {
         // Parent directory of the |dest| must exist.
-        auto&& dest_parent = MakeAbsoluteFilePath(full_dest.DirName());
+        auto&& dest_parent = MakeAbsoluteFilePath(full_dest.parent_path());
         ENSURE(CHECK, !dest_parent.empty())(dest.value()).Require();
     }
 

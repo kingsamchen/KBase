@@ -54,11 +54,11 @@ Path BasePathProvider(PathKey key)
         }
 
         case DIR_EXE:
-            path = PathService::Get(FILE_EXE).DirName();
+            path = PathService::Get(FILE_EXE).parent_path();
             break;
 
         case DIR_MODULE:
-            path = PathService::Get(FILE_MODULE).DirName();
+            path = PathService::Get(FILE_MODULE).parent_path();
             break;
 
         case DIR_CURRENT:

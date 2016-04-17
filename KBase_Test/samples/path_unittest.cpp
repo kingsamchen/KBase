@@ -67,6 +67,9 @@ TEST(PathTest, PathSeparator)
         EXPECT_FALSE(path.StripTrailingSeparators().EndsWithSeparator());
         Path p(L"C:\\test\\path");
         EXPECT_EQ(p, p.StripTrailingSeparators());
+        EXPECT_EQ(Path(L"C:\\"), Path(L"C:\\").StripTrailingSeparators());
+        EXPECT_EQ(Path(L"C:/"), Path(L"C:/").StripTrailingSeparators());
+        EXPECT_EQ(Path(L"/"), Path(L"/").StripTrailingSeparators());
     }
 
     {
@@ -83,25 +86,44 @@ TEST(PathTest, PathSeparator)
     }
 }
 
-TEST(PathTest, PathComponents)
+TEST(PathTest, ParentPath)
 {
-    const Path kCurrentPath(L".");
     const Path kRootDir(L"..");
 
-    Path cur_paths[] { Path(L""), Path(L"."), Path(L"abc"), Path(L"./abc") };
+    Path cur_paths[] { Path(L""), Path(L"."), Path(L"abc") };
     for (const auto& path : cur_paths) {
-        EXPECT_EQ(kCurrentPath, path.DirName());
+        EXPECT_EQ(Path(), path.parent_path());
     }
 
     Path root_paths[] { Path(L"../abc") };
     for (const auto& path : root_paths) {
-        EXPECT_EQ(kRootDir, path.DirName());
+        EXPECT_EQ(kRootDir, path.parent_path());
     }
 
     Path path(L"C:\\test\\path\\data.txt");
-    EXPECT_EQ(path.DirName(), Path(L"C:\\test\\path"));
-    EXPECT_EQ(Path(L"C:\\"), Path(L"C:\\").DirName());
+    EXPECT_EQ(Path(L"C:\\test\\path"), path.parent_path());
+    path = Path(L"/abc");
+    EXPECT_EQ(Path(L"/"), path.parent_path());
 
+    Path relative_root(L"C:tmp.txt");
+    EXPECT_EQ(Path(L"C:"), relative_root.parent_path());
+    EXPECT_EQ(Path(), relative_root.parent_path().parent_path());
+
+    Path preferred_root(L"C:\\tmp.txt");
+    EXPECT_EQ(Path(L"C:\\"), preferred_root.parent_path());
+    EXPECT_EQ(Path(), preferred_root.parent_path().parent_path());
+
+    Path nix_root(L"C:/tmp.txt");
+    EXPECT_EQ(Path(L"C:/"), nix_root.parent_path());
+    EXPECT_EQ(Path(), nix_root.parent_path().parent_path());
+
+    Path unc_root(LR"(\\server\)");
+    EXPECT_EQ(Path(LR"(\\)"), unc_root.parent_path());
+    EXPECT_EQ(Path(), unc_root.parent_path().parent_path());
+}
+
+TEST(PathTest, PathComponents)
+{
     PathTestPair base_dir_test[] {
         { Path(), Path() },
         { Path(L"."), Path(L".") },

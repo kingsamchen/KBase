@@ -72,13 +72,15 @@ public:
     // Returns true, if the path ends with a path separator.
     bool EndsWithSeparator() const;
 
+    // Removes redundant trailing separator.
+    // Note that, this function will not remove separator in path like: C:\,
+    // because the separator here is not redundant.
     Path& StripTrailingSeparators();
 
-    // Returns the path to the parent directory. If this
-    // object contains only one component, returns a Path identifying the current
-    // dir. If this object already refers to the root dir, returns a Path
-    // identifying the root dir.
-    Path DirName() const;
+    // Returns the path to the parent directory.
+    // Returns empty path if the path itself is empty or there is only a single
+    // element in the path.
+    Path parent_path() const;
 
     // Returns a Path corresponding to the file component of the path. If this
     // object already refers to the root, returns a Path identifying the root

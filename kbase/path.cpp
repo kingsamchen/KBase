@@ -164,10 +164,10 @@ bool Path::EndsWithSeparator() const
 Path& Path::StripTrailingSeparators()
 {
     // start always points to the position one-offset past the leading separator
-    string_type::size_type start = FindDriveLetter(path_) + 2;
+    size_t start = FindDriveLetter(path_) + 2;
 
-    string_type::size_type last_stripped = string_type::npos;
-    string_type::size_type pos = path_.length();
+    size_t last_stripped = string_type::npos;
+    size_t pos = path_.length();
     for (; pos > start && IsSeparator(path_[pos - 1]); --pos) {
         if (pos != start + 1 ||
             !IsSeparator(path_[start - 1]) ||
@@ -183,36 +183,45 @@ Path& Path::StripTrailingSeparators()
     return *this;
 }
 
-Path Path::DirName() const
+Path Path::parent_path() const
 {
-    Path new_path(path_);
-    new_path.StripTrailingSeparators();
+    Path parent(path_);
 
-    auto letter = FindDriveLetter(new_path.path_);
-    auto last_separator = new_path.path_.find_last_of(kSeparators, string_type::npos,
-                                                      kSeparatorCount);
+    parent.StripTrailingSeparators();
+    auto letter = FindDriveLetter(parent.path_);
+    auto last_separator = parent.path_.find_last_of(kSeparators, string_type::npos,
+                                                    kSeparatorCount);
 
-    // there might be a drive letter in the path
+    // Note that in special cases, where the current path is a single element,
+    // its parent path is an empty path.
     if (last_separator == string_type::npos) {
-        // in current dir
-        new_path.path_.resize(letter + 1);
+        // There might be a drive letter in the path, i.e. C:tmp.txt,
+        // meaning file tmp.txt in the current directory on drive C.
+        if (letter != string_type::npos && parent.path_.back() == L':') {
+            parent.path_ = L"";
+        } else {
+            parent.path_.resize(letter + 1);
+        }
     } else if (last_separator == letter + 1) {
         // in root dir
-        new_path.path_.resize(letter + 2);
+        if (IsSeparator(parent.path_.back())) {
+            parent.path_ = L"";
+        } else {
+            parent.path_.resize(letter + 2);
+        }
     } else if (last_separator == letter + 2 &&
-               IsSeparator(new_path.path_[letter+1])) {
+               IsSeparator(parent.path_[letter+1])) {
         // preserves the leading double-separator
-        new_path.path_.resize(letter + 3);
+        if (IsSeparator(parent.path_.back())) {
+            parent.path_ = L"";
+        } else {
+            parent.path_.resize(letter + 3);
+        }
     } else {
-        new_path.path_.resize(last_separator);
+        parent.path_.resize(last_separator);
     }
 
-    new_path.StripTrailingSeparators();
-    if (new_path.path_.empty()) {
-        new_path.path_ = kCurrentDir;
-    }
-
-    return new_path;
+    return parent;
 }
 
 Path Path::BaseName() const
@@ -235,6 +244,7 @@ Path Path::BaseName() const
     return new_path;
 }
 
+// TODO: need to be refactored.
 void Path::GetComponents(std::vector<string_type>* components) const
 {
     assert(components);
@@ -259,12 +269,12 @@ void Path::GetComponents(std::vector<string_type>* components) const
     };
 
     // main body
-    while (current != current.DirName()) {
+    while (current != current.parent_path()) {
         base = current.BaseName();
         if (!AreAllSeparators(base.value())) {
             parts.push_back(base.value());
         }
-        current = current.DirName();
+        current = current.parent_path();
     }
 
     // root
