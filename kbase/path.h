@@ -83,13 +83,12 @@ public:
     Path parent_path() const;
 
     // Returns a Path corresponding to the file component of the path. If this
-    // object already refers to the root, returns a Path identifying the root
-    // dir.
+    // object already refers to the root, returns the path directly.
     Path filename() const;
 
     // Retrieves every components of the path, including the root slash.
     // Example: C:\foo\bar  ->  ["C:", "\\", "foo", "bar"]
-    void GetComponents(std::vector<string_type>* components) const;
+    void GetComponents(std::vector<string_type>& components) const;
 
     // Returns true if it is a absolute path.
     bool IsAbsolute() const;
@@ -97,15 +96,15 @@ public:
     // |components| must be a relative path. Otherwise, functions will throw an
     // exception.
 
-    void Append(const string_type& components);
+    Path& Append(const string_type& components);
 
-    void Append(const Path& components);
+    Path& Append(const Path& components);
+
+    Path& AppendASCII(const std::string& components);
 
     Path AppendTo(const string_type& components) const;
 
     Path AppendTo(const Path& components) const;
-
-    void AppendASCII(const std::string& components);
 
     Path AppendASCIITo(const std::string& components) const;
 

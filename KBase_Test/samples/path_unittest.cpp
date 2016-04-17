@@ -4,15 +4,15 @@
 
 #include "stdafx.h"
 
-#include "gtest\gtest.h"
-#include "kbase\path.h"
+#include "gtest/gtest.h"
+#include "kbase/path.h"
 
 #include <algorithm>
 #include <functional>
 #include <tuple>
 #include <xutility>
 
-#include "kbase\basic_types.h"
+#include "kbase/basic_types.h"
 
 using std::placeholders::_1;
 using kbase::PathString;
@@ -90,7 +90,7 @@ TEST(PathTest, ParentPath)
 {
     const Path kRootDir(L"..");
 
-    Path cur_paths[] { Path(L""), Path(L"."), Path(L"abc") };
+    Path cur_paths[] { Path(L""), Path(L"."), Path(L".."), Path(L"abc") };
     for (const auto& path : cur_paths) {
         EXPECT_EQ(Path(), path.parent_path());
     }
@@ -127,11 +127,14 @@ TEST(PathTest, FileName)
     PathTestPair base_dir_test[] {
         { Path(), Path() },
         { Path(L"."), Path(L".") },
+        { Path(L".."), Path(L"..") },
         { Path(L"abc"), Path(L"abc") },
         { Path(L"abc"), Path(L"./abc") },
         { Path(L"abc"), Path(L"C:\\abc") },
         { Path(L"foo"), Path(L"C:\\foo\\") },
         { Path(L"C:\\"), Path(L"C:\\") },
+        { Path(L"C:"), Path(L"C:") },
+        { Path(L"tmp.txt"), Path(L"C:tmp.txt") },
         { Path(L"/"), Path(L"/") }
     };
 
@@ -144,14 +147,14 @@ TEST(PathTest, PathComponents)
 {
     typedef std::pair<Path, std::vector<std::wstring>> PathComponentPair;
     PathComponentPair componnet_test[] {
-        { Path(L"C:"), { L"C:" } },
-        { Path(L"C:\\"), { L"C:", L"\\" } },
+        { Path(L"C:tmp.txt"), { L"C:", L"tmp.txt" } },
+        { Path(L"C:\\tmp.txt"), { L"C:", L"\\", L"tmp.txt" } },
         { Path(L"C:\\foo\\bar"), { L"C:", L"\\", L"foo", L"bar"} }
     };
 
     std::vector<std::wstring> comp;
     for (const auto& p : componnet_test) {
-        p.first.GetComponents(&comp);
+        p.first.GetComponents(comp);
         EXPECT_EQ(comp, p.second);
     }
 }

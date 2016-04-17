@@ -4,11 +4,8 @@
 
 #include "kbase/path.h"
 
-#include <cassert>
-
 #include <algorithm>
 #include <functional>
-#include <iterator>
 #include <stdexcept>
 
 #include "kbase/error_exception_util.h"
@@ -246,52 +243,42 @@ Path Path::filename() const
     return filename;
 }
 
-// TODO: need to be refactored.
-void Path::GetComponents(std::vector<string_type>* components) const
+void Path::GetComponents(std::vector<string_type>& components) const
 {
-    assert(components);
-#if defined(NDEBUG)
-    if (!components) {
-        throw std::invalid_argument("components cannot be NULL!");
-    }
-#endif
-
-    components->clear();
-
     if (path_.empty()) {
         return;
     }
 
-    std::vector<string_type> parts;
+    components.clear();
     Path current(path_);
-    Path base;
 
     auto AreAllSeparators = [](const string_type& path) -> bool {
         return std::all_of(path.cbegin(), path.cend(), Path::IsSeparator);
     };
 
-    // main body
-    while (current != current.parent_path()) {
-        base = current.filename();
-        if (!AreAllSeparators(base.value())) {
-            parts.push_back(base.value());
+    // Extracts components in main path.
+    while (!current.parent_path().empty()) {
+        Path filename = current.filename();
+        if (!AreAllSeparators(filename.value())) {
+            components.push_back(filename.value());
         }
         current = current.parent_path();
     }
 
-    // root
-    base = current.filename();
-    if (!base.empty() && base.value() != kCurrentDir) {
-        parts.push_back(base.value());
+    // root or a single parent dir mark.
+    auto letter_pos = FindDriveLetter(current.value());
+    if (!current.empty() &&
+        current.value() != kCurrentDir &&
+        letter_pos < current.value().size() - 1) {
+        components.push_back(current.value().substr(letter_pos + 1));
     }
 
-    // drive letter
-    auto letter = FindDriveLetter(current.value());
-    if (letter != string_type::npos) {
-        parts.push_back(current.value().substr(0, letter + 1));
+    // drive part.
+    if (letter_pos != string_type::npos) {
+        components.push_back(current.value().substr(0, letter_pos + 1));
     }
 
-    std::copy(parts.crbegin(), parts.crend(), std::back_inserter(*components));
+    std::reverse(components.begin(), components.end());
 }
 
 bool Path::IsAbsolute() const
@@ -299,7 +286,7 @@ bool Path::IsAbsolute() const
     return IsPathAbsolute(path_);
 }
 
-void Path::Append(const string_type& components)
+Path& Path::Append(const string_type& components)
 {
     const string_type* need_appended = &components;
     string_type without_null;
@@ -315,7 +302,7 @@ void Path::Append(const string_type& components)
     // If appends to the current dir, just set the path as the components.
     if (path_ == kCurrentDir) {
         path_ = *need_appended;
-        return;
+        return *this;
     }
 
     StripTrailingSeparators();
@@ -334,11 +321,20 @@ void Path::Append(const string_type& components)
     }
 
     path_.append(*need_appended);
+
+    return *this;
 }
 
-void Path::Append(const Path& components)
+Path& Path::Append(const Path& components)
 {
-    Append(components.value());
+    return Append(components.value());
+}
+
+Path& Path::AppendASCII(const std::string& components)
+{
+    ENSURE(CHECK, IsStringASCII(components)).Require();
+
+    return Append(ASCIIToWide(components));
 }
 
 Path Path::AppendTo(const string_type& components) const
@@ -354,12 +350,20 @@ Path Path::AppendTo(const Path& components) const
     return AppendTo(components.value());
 }
 
+Path Path::AppendASCIITo(const std::string& components) const
+{
+    Path new_path(*this);
+    new_path.AppendASCII(components);
+
+    return new_path;
+}
+
 bool Path::AppendRelativePath(const Path& child, Path* path) const
 {
     std::vector<string_type> current_components;
     std::vector<string_type> child_components;
-    GetComponents(&current_components);
-    child.GetComponents(&child_components);
+    GetComponents(current_components);
+    child.GetComponents(child_components);
 
     if (current_components.empty() ||
         current_components.size() >= child_components.size()) {
@@ -386,21 +390,6 @@ bool Path::AppendRelativePath(const Path& child, Path* path) const
 bool Path::IsParent(const Path& child) const
 {
     return AppendRelativePath(child, nullptr);
-}
-
-void Path::AppendASCII(const std::string& components)
-{
-    ENSURE(CHECK, IsStringASCII(components)).Require();
-
-    Append(ASCIIToWide(components));
-}
-
-Path Path::AppendASCIITo(const std::string& components) const
-{
-    Path new_path(*this);
-    new_path.AppendASCII(components);
-
-    return new_path;
 }
 
 string_type Path::extension() const
@@ -477,7 +466,7 @@ bool Path::MatchExtension(const string_type& ext) const
 bool Path::ReferenceParent() const
 {
     std::vector<string_type> components;
-    GetComponents(&components);
+    GetComponents(components);
 
     // It seems redundant spaces at the tail of '..' can be ignored by Windows.
     string_type trimed_component;
