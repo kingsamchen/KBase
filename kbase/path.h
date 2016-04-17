@@ -85,7 +85,7 @@ public:
     // Returns a Path corresponding to the file component of the path. If this
     // object already refers to the root, returns a Path identifying the root
     // dir.
-    Path BaseName() const;
+    Path filename() const;
 
     // Retrieves every components of the path, including the root slash.
     // Example: C:\foo\bar  ->  ["C:", "\\", "foo", "bar"]

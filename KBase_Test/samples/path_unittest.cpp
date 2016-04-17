@@ -122,7 +122,7 @@ TEST(PathTest, ParentPath)
     EXPECT_EQ(Path(), unc_root.parent_path().parent_path());
 }
 
-TEST(PathTest, PathComponents)
+TEST(PathTest, FileName)
 {
     PathTestPair base_dir_test[] {
         { Path(), Path() },
@@ -130,13 +130,18 @@ TEST(PathTest, PathComponents)
         { Path(L"abc"), Path(L"abc") },
         { Path(L"abc"), Path(L"./abc") },
         { Path(L"abc"), Path(L"C:\\abc") },
-        { Path(L"\\"), Path(L"C:\\") }
+        { Path(L"foo"), Path(L"C:\\foo\\") },
+        { Path(L"C:\\"), Path(L"C:\\") },
+        { Path(L"/"), Path(L"/") }
     };
 
     for (const auto& p : base_dir_test) {
-        EXPECT_EQ(p.first, p.second.BaseName());
+        EXPECT_EQ(p.first, p.second.filename());
     }
+}
 
+TEST(PathTest, PathComponents)
+{
     typedef std::pair<Path, std::vector<std::wstring>> PathComponentPair;
     PathComponentPair componnet_test[] {
         { Path(L"C:"), { L"C:" } },

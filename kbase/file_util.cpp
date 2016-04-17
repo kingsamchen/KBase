@@ -56,7 +56,7 @@ FileInfo GetFileInfo(const Path& path)
     file_size.HighPart = attr_data.nFileSizeHigh;
     file_size.LowPart = attr_data.nFileSizeLow;
 
-    return FileInfo(path.BaseName().value(),
+    return FileInfo(path.filename().value(),
                     static_cast<int64_t>(file_size.QuadPart),
                     !!(attr_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY),
                     DateTime(attr_data.ftCreationTime),

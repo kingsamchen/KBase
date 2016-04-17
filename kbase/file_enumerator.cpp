@@ -106,7 +106,7 @@ FileInfo FileEnumerator::GetInfo() const
 
 bool FileEnumerator::ShouldSkip(const Path& path)
 {
-    PathString base_name = path.BaseName().value();
+    PathString base_name = path.filename().value();
     if (base_name == Path::kCurrentDir || base_name == Path::kParentDir) {
         return true;
     }

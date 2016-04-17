@@ -224,24 +224,26 @@ Path Path::parent_path() const
     return parent;
 }
 
-Path Path::BaseName() const
+Path Path::filename() const
 {
-    Path new_path(path_);
-    new_path.StripTrailingSeparators();
-
-    auto letter = FindDriveLetter(new_path.path_);
-    if (letter != string_type::npos) {
-        new_path.path_.erase(0, letter + 1);
-    }
-
-    auto last_separator = new_path.path_.find_last_of(kSeparators, string_type::npos,
+    Path filename(path_);
+    filename.StripTrailingSeparators();
+    auto last_separator = filename.path_.find_last_of(kSeparators, string_type::npos,
                                                       kSeparatorCount);
     if (last_separator != string_type::npos &&
-        last_separator < new_path.path_.length() - 1) {
-        new_path.path_.erase(0, last_separator + 1);
+        last_separator < filename.path_.length() - 1) {
+        filename.path_.erase(0, last_separator + 1);
     }
 
-    return new_path;
+    // Deal the case like C:tmp.txt.
+    auto letter_pos = FindDriveLetter(filename.path_);
+    if (letter_pos != string_type::npos &&
+        letter_pos + 1 < filename.path_.length() &&
+        !IsSeparator(filename.path_[letter_pos + 1])) {
+        filename.path_.erase(0, letter_pos + 1);
+    }
+
+    return filename;
 }
 
 // TODO: need to be refactored.
@@ -270,7 +272,7 @@ void Path::GetComponents(std::vector<string_type>* components) const
 
     // main body
     while (current != current.parent_path()) {
-        base = current.BaseName();
+        base = current.filename();
         if (!AreAllSeparators(base.value())) {
             parts.push_back(base.value());
         }
@@ -278,7 +280,7 @@ void Path::GetComponents(std::vector<string_type>* components) const
     }
 
     // root
-    base = current.BaseName();
+    base = current.filename();
     if (!base.empty() && base.value() != kCurrentDir) {
         parts.push_back(base.value());
     }
@@ -403,7 +405,7 @@ Path Path::AppendASCIITo(const std::string& components) const
 
 string_type Path::extension() const
 {
-    Path base(BaseName());
+    Path base(filename());
     auto separator_pos = GetExtensionSeparatorPosition(base.path_);
     if (separator_pos == string_type::npos) {
         return string_type();
@@ -430,7 +432,7 @@ Path& Path::AddExtension(const string_type& extension)
         return *this;
     }
 
-    if (IsPathSpecialCase(BaseName().value())) {
+    if (IsPathSpecialCase(filename().value())) {
         path_ += kPreferredSeparator;
     }
 
@@ -454,7 +456,7 @@ Path& Path::ReplaceExtension(const string_type& extension)
         return *this;
     }
 
-    if (IsPathSpecialCase(BaseName().value())) {
+    if (IsPathSpecialCase(filename().value())) {
         path_ += kPreferredSeparator;
     }
 
