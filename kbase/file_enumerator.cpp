@@ -8,12 +8,12 @@
 
 namespace kbase {
 
-FileEnumerator::FileEnumerator(const FilePath& root_path, bool recursive,
+FileEnumerator::FileEnumerator(const Path& root_path, bool recursive,
                                int file_type)
  : FileEnumerator(root_path, recursive, file_type, PathString())
 {}
 
-FileEnumerator::FileEnumerator(const FilePath& root_path,
+FileEnumerator::FileEnumerator(const Path& root_path,
                                bool recursive,
                                int file_type,
                                const PathString& pattern)
@@ -24,14 +24,14 @@ FileEnumerator::FileEnumerator(const FilePath& root_path,
     pending_paths_.push(root_path);
 }
 
-FilePath FileEnumerator::Next()
+Path FileEnumerator::Next()
 {
     while (!pending_paths_.empty() || has_find_data_) {
         if (!has_find_data_) {
             root_path_ = pending_paths_.top();
             pending_paths_.pop();
 
-            FilePath cur_root = root_path_;
+            Path cur_root = root_path_;
             if (pattern_.empty()) {
                 // If no pattern was specified, matches everything by default.
                 cur_root.Append(L"*");
@@ -59,7 +59,7 @@ FilePath FileEnumerator::Next()
             continue;
         }
 
-        FilePath cur_file(find_data_.cFileName);
+        Path cur_file(find_data_.cFileName);
         if (ShouldSkip(cur_file)) {
             continue;
         }
@@ -85,7 +85,7 @@ FilePath FileEnumerator::Next()
         }
     }
 
-    return FilePath();
+    return Path();
 }
 
 FileInfo FileEnumerator::GetInfo() const
@@ -104,10 +104,10 @@ FileInfo FileEnumerator::GetInfo() const
                     DateTime(find_data_.ftLastAccessTime));
 }
 
-bool FileEnumerator::ShouldSkip(const FilePath& path)
+bool FileEnumerator::ShouldSkip(const Path& path)
 {
-    PathString base_name = path.BaseName().value();
-    if (base_name == FilePath::kCurrentDir || base_name == FilePath::kParentDir) {
+    PathString base_name = path.filename().value();
+    if (base_name == Path::kCurrentDir || base_name == Path::kParentDir) {
         return true;
     }
 

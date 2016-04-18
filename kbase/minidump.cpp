@@ -10,7 +10,7 @@
 #include <DbgHelp.h>
 #pragma warning(pop)
 
-#include "kbase/file_path.h"
+#include "kbase/path.h"
 #include "kbase/scoped_handle.h"
 
 #if !defined(NDEBUG)
@@ -20,10 +20,10 @@
 
 namespace {
 
-using kbase::FilePath;
+using kbase::Path;
 using kbase::ScopedSysHandle;
 
-bool WriteMiniDumpFile(const FilePath& dump_path, EXCEPTION_POINTERS* ex_ptrs)
+bool WriteMiniDumpFile(const Path& dump_path, EXCEPTION_POINTERS* ex_ptrs)
 {
     ScopedSysHandle dump_file(CreateFileW(dump_path.value().c_str(),
                                           GENERIC_WRITE,
@@ -63,7 +63,7 @@ bool WriteMiniDumpFile(const FilePath& dump_path, EXCEPTION_POINTERS* ex_ptrs)
     return !!rv;
 }
 
-void HandleException(const FilePath& dump_path, EXCEPTION_POINTERS* ex_ptrs, bool* succeeded)
+void HandleException(const Path& dump_path, EXCEPTION_POINTERS* ex_ptrs, bool* succeeded)
 {
     *succeeded = WriteMiniDumpFile(dump_path, ex_ptrs);
 }
@@ -72,7 +72,7 @@ void HandleException(const FilePath& dump_path, EXCEPTION_POINTERS* ex_ptrs, boo
 
 namespace kbase {
 
-bool CreateMiniDump(const FilePath& dump_path)
+bool CreateMiniDump(const Path& dump_path)
 {
     bool succeeded = false;
     __try {

@@ -14,7 +14,7 @@
 #include <stdexcept>
 
 #include "kbase/basic_macros.h"
-#include "kbase/file_path.h"
+#include "kbase/path.h"
 #include "kbase/sys_string_encoding_conversions.h"
 
 namespace kbase {
@@ -114,7 +114,7 @@ private:
 void EnableAlwaysCheckForEnsureInDebug(bool always_check);
 
 // If `dump_dir` wasn't specified, current directory is used as storage location.
-void SetMiniDumpDirectory(const FilePath& dump_dir);
+void SetMiniDumpDirectory(const Path& dump_dir);
 
 // This class automatically retrieves the last error code of the calling thread when
 // constructing an instance, and stores the value internally.
@@ -138,23 +138,23 @@ std::ostream& operator<<(std::ostream& os, const LastError& last_error);
 
 class ExceptionWithMiniDump : public std::runtime_error {
 public:
-    explicit ExceptionWithMiniDump(const FilePath& dump_path, const std::string& message)
+    explicit ExceptionWithMiniDump(const Path& dump_path, const std::string& message)
         : runtime_error(message), dump_path_(dump_path)
     {}
 
-    explicit ExceptionWithMiniDump(const FilePath& dump_path, const char* message)
+    explicit ExceptionWithMiniDump(const Path& dump_path, const char* message)
         : runtime_error(message), dump_path_(dump_path)
     {}
 
     ~ExceptionWithMiniDump() = default;
 
-    FilePath GetMiniDumpPath() const
+    Path GetMiniDumpPath() const
     {
         return dump_path_;
     }
 
 private:
-    FilePath dump_path_;
+    Path dump_path_;
 };
 
 }   // namespace kbase

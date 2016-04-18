@@ -16,59 +16,59 @@ extern "C" IMAGE_DOS_HEADER __ImageBase;
 
 namespace {
 
-using kbase::FilePath;
+using kbase::Path;
 
-FilePath ShellGetFolderPath(const KNOWNFOLDERID& folder_id)
+Path ShellGetFolderPath(const KNOWNFOLDERID& folder_id)
 {
     wchar_t* folder_path = nullptr;
     HRESULT ret = SHGetKnownFolderPath(folder_id, 0, nullptr, &folder_path);
     ON_SCOPE_EXIT([&] { CoTaskMemFree(folder_path); });
     ENSURE(CHECK, ret == S_OK)(ret).Require();
 
-    return FilePath(folder_path);
+    return Path(folder_path);
 }
 
 }   // namespace
 
 namespace kbase {
 
-FilePath BasePathProvider(PathKey key)
+Path BasePathProvider(PathKey key)
 {
     // Though the system does have support for long file path, I decide to ignore
     // it here.
     const size_t kMaxPath = MAX_PATH + 1;
     wchar_t buffer[kMaxPath] {0};
-    FilePath path;
+    Path path;
 
     switch (key) {
         case FILE_EXE:
             GetModuleFileName(nullptr, buffer, kMaxPath);
-            path = FilePath(buffer);
+            path = Path(buffer);
             break;
 
         case FILE_MODULE: {
             HMODULE module = reinterpret_cast<HMODULE>(&__ImageBase);
             GetModuleFileName(module, buffer, kMaxPath);
-            path = FilePath(buffer);
+            path = Path(buffer);
             break;
         }
 
         case DIR_EXE:
-            path = PathService::Get(FILE_EXE).DirName();
+            path = PathService::Get(FILE_EXE).parent_path();
             break;
 
         case DIR_MODULE:
-            path = PathService::Get(FILE_MODULE).DirName();
+            path = PathService::Get(FILE_MODULE).parent_path();
             break;
 
         case DIR_CURRENT:
             GetCurrentDirectory(kMaxPath, buffer);
-            path = FilePath(buffer);
+            path = Path(buffer);
             break;
 
         case DIR_TEMP:
             GetTempPath(kMaxPath, buffer);
-            path = FilePath(buffer);
+            path = Path(buffer);
             break;
 
         case DIR_USER_DESKTOP:
@@ -81,12 +81,12 @@ FilePath BasePathProvider(PathKey key)
 
         case DIR_WINDOWS:
             GetWindowsDirectory(buffer, kMaxPath);
-            path = FilePath(buffer);
+            path = Path(buffer);
             break;
 
         case DIR_SYSTEM:
             GetSystemDirectory(buffer, kMaxPath);
-            path = FilePath(buffer);
+            path = Path(buffer);
             break;
 
         case DIR_PROGRAM_FILES:

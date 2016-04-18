@@ -15,20 +15,20 @@
 #include "kbase/lazy.h"
 #include "kbase/sys_string_encoding_conversions.h"
 
-using kbase::FilePath;
+using kbase::Path;
 using kbase::PathKey;
 using kbase::Lazy;
 
 namespace kbase {
 
-FilePath BasePathProvider(PathKey);
+Path BasePathProvider(PathKey);
 
 }   // namespace kbase
 
 namespace {
 
 typedef kbase::PathService::ProviderFunc ProviderFunc;
-typedef std::unordered_map<PathKey, FilePath> PathMap;
+typedef std::unordered_map<PathKey, Path> PathMap;
 
 // Both |start| and |end| are used to prevent path keys claimed by different
 // providers being overlapped.
@@ -64,10 +64,10 @@ PathData& GetPathData()
 
 // Returns the path corresponding to the key, or an empty path if no cache was found.
 // The caller takes responsibility for thread safety.
-FilePath GetPathFromCache(PathKey key, const PathData& path_data)
+Path GetPathFromCache(PathKey key, const PathData& path_data)
 {
     if (path_data.cache_disabled || key == kbase::DIR_CURRENT) {
-        return FilePath();
+        return Path();
     }
 
     auto it = path_data.cached_path_table.find(key);
@@ -75,7 +75,7 @@ FilePath GetPathFromCache(PathKey key, const PathData& path_data)
         return it->second;
     }
 
-    return FilePath();
+    return Path();
 }
 
 // The caller takes responsibility for thread safety.
@@ -92,7 +92,7 @@ void EnsureNoPathKeyOverlapped(PathKey start, PathKey end, const PathData& path_
 namespace kbase {
 
 // static
-FilePath PathService::Get(PathKey key)
+Path PathService::Get(PathKey key)
 {
     PathData& path_data = GetPathData();
     ENSURE(CHECK, key >= BASE_PATH_START)(key).Require();
@@ -101,7 +101,7 @@ FilePath PathService::Get(PathKey key)
     ProviderChain::const_iterator provider;
     {
         std::lock_guard<std::mutex> scoped_lock(path_data.lock);
-        FilePath&& path = GetPathFromCache(key, path_data);
+        Path&& path = GetPathFromCache(key, path_data);
         if (!path.empty()) {
             return path;
         }
@@ -111,7 +111,7 @@ FilePath PathService::Get(PathKey key)
         provider = path_data.providers.begin();
     }
 
-    FilePath path;
+    Path path;
     for (; provider != path_data.providers.end(); ++provider) {
         path = provider->fn(key);
         if (!path.empty()) {
@@ -126,7 +126,7 @@ FilePath PathService::Get(PathKey key)
 
     // Ensure that the returned path never contains '..'.
     if (!path.IsAbsolute()) {
-        FilePath&& full_path = MakeAbsoluteFilePath(path);
+        Path&& full_path = MakeAbsoluteFilePath(path);
         ENSURE(CHECK, !full_path.empty())(SysWideToNativeMB(path.value())).Require();
         path = std::move(full_path);
     }

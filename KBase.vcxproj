@@ -175,7 +175,7 @@
     <ClCompile Include="kbase\environment.cpp" />
     <ClCompile Include="kbase\error_exception_util.cpp" />
     <ClCompile Include="kbase\file_enumerator.cpp" />
-    <ClCompile Include="kbase\file_path.cpp" />
+    <ClCompile Include="kbase\path.cpp" />
     <ClCompile Include="kbase\file_util.cpp" />
     <ClCompile Include="kbase\file_version_info.cpp" />
     <ClCompile Include="kbase\guid.cpp" />
@@ -207,7 +207,7 @@
     <ClInclude Include="kbase\error_exception_util.h" />
     <ClInclude Include="kbase\file_enumerator.h" />
     <ClInclude Include="kbase\file_info.h" />
-    <ClInclude Include="kbase\file_path.h" />
+    <ClInclude Include="kbase\path.h" />
     <ClInclude Include="kbase\file_util.h" />
     <ClInclude Include="kbase\file_version_info.h" />
     <ClInclude Include="kbase\guid.h" />

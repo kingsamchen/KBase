@@ -71,7 +71,7 @@ TEST(LoggingTest, CustomLogFileName)
     logging_settings.log_file_path = log_name;
     ConfigureLoggingSettings(logging_settings);
     LOG(INFO) << "testing customized log file name";
-    ASSERT_TRUE(PathExists(FilePath(log_name)));
+    ASSERT_TRUE(PathExists(Path(log_name)));
 }
 
 TEST(LoggingTest, FatalLevelCallStack)

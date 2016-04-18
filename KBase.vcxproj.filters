@@ -42,9 +42,6 @@
     <ClCompile Include="kbase\file_enumerator.cpp">
       <Filter>kbase</Filter>
     </ClCompile>
-    <ClCompile Include="kbase\file_path.cpp">
-      <Filter>kbase</Filter>
-    </ClCompile>
     <ClCompile Include="kbase\file_util.cpp">
       <Filter>kbase</Filter>
     </ClCompile>
@@ -96,6 +93,9 @@
     <ClCompile Include="kbase\minidump.cpp">
       <Filter>kbase</Filter>
     </ClCompile>
+    <ClCompile Include="kbase\path.cpp">
+      <Filter>kbase</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="kbase\at_exit_manager.h">
@@ -129,9 +129,6 @@
       <Filter>kbase</Filter>
     </ClInclude>
     <ClInclude Include="kbase\file_info.h">
-      <Filter>kbase</Filter>
-    </ClInclude>
-    <ClInclude Include="kbase\file_path.h">
       <Filter>kbase</Filter>
     </ClInclude>
     <ClInclude Include="kbase\file_util.h">
@@ -204,6 +201,9 @@
       <Filter>kbase</Filter>
     </ClInclude>
     <ClInclude Include="kbase\minidump.h">
+      <Filter>kbase</Filter>
+    </ClInclude>
+    <ClInclude Include="kbase\path.h">
       <Filter>kbase</Filter>
     </ClInclude>
   </ItemGroup>

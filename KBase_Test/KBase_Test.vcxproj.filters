@@ -53,9 +53,6 @@
     <ClCompile Include="samples\path_service_unittest.cpp">
       <Filter>samples</Filter>
     </ClCompile>
-    <ClCompile Include="samples\file_path_unittest.cpp">
-      <Filter>samples</Filter>
-    </ClCompile>
     <ClCompile Include="samples\file_util_unittest.cpp">
       <Filter>samples</Filter>
     </ClCompile>
@@ -111,6 +108,9 @@
       <Filter>samples</Filter>
     </ClCompile>
     <ClCompile Include="samples\signals_unittest.cpp">
+      <Filter>samples</Filter>
+    </ClCompile>
+    <ClCompile Include="samples\path_unittest.cpp">
       <Filter>samples</Filter>
     </ClCompile>
   </ItemGroup>

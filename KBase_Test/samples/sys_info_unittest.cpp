@@ -6,7 +6,7 @@
 
 #include <iostream>
 
-#include "kbase\file_path.h"
+#include "kbase\path.h"
 #include "kbase\error_exception_util.h"
 #include "kbase\sys_info.h"
 
@@ -56,10 +56,10 @@ TEST_F(SysInfoTest, MemoryInfo)
 
 TEST_F(SysInfoTest, DiskspaceInfo)
 {
-    EXPECT_LT(0, kbase::SysInfo::AmountOfFreeDiskSpace(kbase::FilePath(L"C:")) >> 20);
-    EXPECT_LT(0, kbase::SysInfo::AmountOfTotalDiskSpace(kbase::FilePath(L"C:")) >> 20);
+    EXPECT_LT(0, kbase::SysInfo::AmountOfFreeDiskSpace(kbase::Path(L"C:")) >> 20);
+    EXPECT_LT(0, kbase::SysInfo::AmountOfTotalDiskSpace(kbase::Path(L"C:")) >> 20);
 
     // F: does not exist, and hence the following invocations would throw an exception.
-    EXPECT_ANY_THROW(kbase::SysInfo::AmountOfFreeDiskSpace(kbase::FilePath(L"F:")));
-    EXPECT_ANY_THROW(kbase::SysInfo::AmountOfTotalDiskSpace(kbase::FilePath(L"F:")));
+    EXPECT_ANY_THROW(kbase::SysInfo::AmountOfFreeDiskSpace(kbase::Path(L"F:")));
+    EXPECT_ANY_THROW(kbase::SysInfo::AmountOfTotalDiskSpace(kbase::Path(L"F:")));
 }

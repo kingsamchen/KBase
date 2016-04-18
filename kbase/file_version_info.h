@@ -26,7 +26,7 @@ using VersionData = std::vector<kbase::byte>;
 
 }   // namespace internal
 
-class FilePath;
+class Path;
 
 class FileVersionInfo {
 public:
@@ -36,7 +36,7 @@ public:
 
     DISALLOW_MOVE(FileVersionInfo);
 
-    static std::unique_ptr<FileVersionInfo> CreateForFile(const FilePath& file);
+    static std::unique_ptr<FileVersionInfo> CreateForFile(const Path& file);
 
     static std::unique_ptr<FileVersionInfo> CreateForModule(HMODULE module);
 

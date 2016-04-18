@@ -14,11 +14,11 @@
 
 namespace {
 
-using kbase::FilePath;
+using kbase::Path;
 using kbase::PathString;
 
 bool g_always_enable_check_in_debug = true;
-FilePath g_minidump_dir_path;
+Path g_minidump_dir_path;
 
 inline bool ShouldCheckFirst()
 {
@@ -101,7 +101,7 @@ void EnableAlwaysCheckForEnsureInDebug(bool always_check)
     g_always_enable_check_in_debug = always_check;
 }
 
-void SetMiniDumpDirectory(const FilePath& dump_dir)
+void SetMiniDumpDirectory(const Path& dump_dir)
 {
     g_minidump_dir_path = dump_dir;
 }
