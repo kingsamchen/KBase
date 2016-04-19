@@ -119,7 +119,7 @@ void DuplicateDirectory(const Path& src, const Path& dest, bool recursive)
         full_dest = MakeAbsoluteFilePath(full_dest);
         ENSURE(CHECK, !full_dest.empty())(dest.value()).Require();
     } else {
-        // Parent directory of the |dest| must exist.
+        // Parent directory of the `dest` must exist.
         auto&& dest_parent = MakeAbsoluteFilePath(full_dest.parent_path());
         ENSURE(CHECK, !dest_parent.empty())(dest.value()).Require();
     }
@@ -179,10 +179,10 @@ void MakeFileMove(const Path& src, const Path& dest)
     ENSURE(RAISE, NotReached())(LastError()).Require("Failed to move file");
 }
 
-void ReadFileToString(const Path& path, std::string* data)
+void ReadFileToString(const Path& path, std::string& data)
 {
-    if (!data->empty()) {
-        data->clear();
+    if (!data.empty()) {
+        data.clear();
     }
 
     // It seems the constructor of ifstream in MSVC has an overload function for
@@ -194,15 +194,15 @@ void ReadFileToString(const Path& path, std::string* data)
     }
 
     in.seekg(0, std::ios::end);
-    data->resize(static_cast<size_t>(in.tellg()));
+    data.resize(static_cast<size_t>(in.tellg()));
     in.seekg(0);
-    in.read(&(*data)[0], data->size());
+    in.read(&data[0], data.size());
 }
 
 std::string ReadFileToString(const Path& path)
 {
     std::string data;
-    ReadFileToString(path, &data);
+    ReadFileToString(path, data);
 
     return data;
 }

@@ -16,7 +16,7 @@
 
 namespace kbase {
 
-// Returns an absolute or full path name of the relative |path|.
+// Returns an absolute or full path name of the relative `path`.
 // Returns an empty path on error.
 Path MakeAbsoluteFilePath(const Path& path);
 
@@ -34,45 +34,45 @@ bool IsDirectoryEmpty(const Path& path);
 
 // Retrieves the information of a given file or directory.
 // Throws an exception when error occurs.
-// Be wary of that the size-field of the |FileInfo| is valid if and only if the
-// |path| indicates a file.
+// Be wary of that the size-field of the `FileInfo` is valid if and only if the
+// `path` indicates a file.
 FileInfo GetFileInfo(const Path& path);
 
-// Removes a file or a directory indicated by the given |path|.
+// Removes a file or a directory indicated by the given `path`.
 // If want to remove a directory non-recursively, the directory must be empty.
 // Throws an exception when failed.
 void RemoveFile(const Path& path, bool recursive);
 
-// If the |path| refers to a directory, the system removes the directory only if the
+// If the `path` refers to a directory, the system removes the directory only if the
 // directory is empty.
 // This function only marks the file or directory as should-be-deleted, it doesn't
 // guarantee the deletion will be enforced.
 // Throws an exception when failed to mark.
 void RemoveFileAfterReboot(const Path& path);
 
-// Copies a single file from |src| to |dest|.
-// If |dest| already exists, has it overwritten.
+// Copies a single file from `src` to `dest`.
+// If `dest` already exists, has it overwritten.
 // The file copied retains file attribute from the source.
 void DuplicateFile(const Path& src, const Path& dest);
 
-// Copies all files in |src| to |dest| if recursive is false.
-// Copies all content, including subfolders in |src| to |dest| if recursive is true.
+// Copies all files in `src` to `dest` if recursive is false.
+// Copies all content, including subfolders in `src` to `dest` if recursive is true.
 // Overwrites files that already exist.
 void DuplicateDirectory(const Path& src, const Path& dest, bool recursive);
 
-// Moves a file or a directory along with its subfolders from |src| to |dest|.
+// Moves a file or a directory along with its subfolders from `src` to `dest`.
 // Overwrites any that already exists.
 void MakeFileMove(const Path& src, const Path& dest);
 
-// Reads contents of whole file at |path| into a string.
+// Reads contents of whole file at `path` into a string.
 // Data is read in binary mode, therefore no CRLF conversion involved.
 // If failed to read from file, the string is empty.
 
 std::string ReadFileToString(const Path& path);
 
-void ReadFileToString(const Path& path, std::string* data);
+void ReadFileToString(const Path& path, std::string& data);
 
-// Writes |data| to a file at |path|.
+// Writes `data` to a file at `path`.
 // Be wary of that in this function, the data is written in text-mode.
 // If failed to create/open the file to write, the function does nothing.
 void WriteStringToFile(const Path& path, const std::string& data);
