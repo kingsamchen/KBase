@@ -9,8 +9,8 @@
 #include <map>
 #include <vector>
 
-#include "gtest\gtest.h"
-#include "kbase\error_exception_util.h"
+#include "gtest/gtest.h"
+#include "kbase/error_exception_util.h"
 
 using namespace kbase;
 
@@ -40,6 +40,13 @@ void EnsureMacroTestIntermediate(const std::vector<int>& vec)
     // Must explicitly call the function to throw exception.
     ENSURE(RAISE, vec.size() >= 0 && vec.size() <= 5)(vec.size()).Require();
 }
+
+class MyException : public std::exception {
+public:
+    explicit MyException(const std::string& msg)
+        : exception(msg.c_str())
+    {}
+};
 
 }   // namespace
 
@@ -76,4 +83,13 @@ TEST_F(ErrorExceptionUtilTest, EnsureMacro)
 {
     std::vector<int> v {1, 2, 3, 4, 5, 6, 7, 8, 9};
     EXPECT_ANY_THROW(EnsureMacroTestIntermediate(v));
+}
+
+TEST_F(ErrorExceptionUtilTest, RaiseWithCustomizedException)
+{
+    std::vector<int> v;
+    auto fn = [&v]() {
+        ENSURE(RAISE, !v.empty()).Require<MyException>();
+    };
+    EXPECT_THROW(fn(), MyException);
 }

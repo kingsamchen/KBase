@@ -55,7 +55,7 @@ void Guarantor::Require()
     }
 }
 
-void Guarantor::Require(const std::string msg)
+void Guarantor::Require(const std::string& msg)
 {
     exception_desc_ << "Extra Message: " << msg << "\n";
     Require();

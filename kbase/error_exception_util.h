@@ -93,7 +93,19 @@ public:
 
     void Require();
 
-    void Require(const std::string msg);
+    void Require(const std::string& msg);
+
+    // Added to throw a specific exception that you know how to handle it when the
+    // condition is violated.
+    template<typename E>
+    void Require()
+    {
+        static_assert(std::is_base_of<std::exception, E>::value,
+                      "E must be a subclass of std::exception");
+        if (action_required_ == EnsureAction::RAISE) {
+            throw E(exception_desc_.str());
+        }
+    }
 
     // Access stubs for infinite variable capture.
     Guarantor& GUARANTOR_A = *this;
