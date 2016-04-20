@@ -17,9 +17,9 @@
 
 namespace kbase {
 
-// Removes any characters specified by |remove_chars| in string |in|.
+// Removes any characters specified by `remove_chars` in string `in`.
 // Returns true, if any characters are removed; return false, otherwise.
-// It is safe to make |in| and |out| both refer to a same object.
+// It is safe to make `in` and `out` both refer to a same object.
 
 bool RemoveChars(const std::string& in,
                  const StringPiece& remove_chars,
@@ -28,9 +28,9 @@ bool RemoveChars(const std::wstring& in,
                  const WStringPiece& remove_chars,
                  std::wstring* out);
 
-// Replace |find_with| with |replace_with| in |str|.
-// |pos| indicates the search beginning. if |pos| equals to |npos| or is greater
-// than the length of |str|, these functions do nothing.
+// Replace `find_with` with `replace_with` in `str`.
+// `pos` indicates the search beginning. if `pos` equals to `npos` or is greater
+// than the length of `str`, these functions do nothing.
 
 void ReplaceSubstring(std::string* str,
                       const StringPiece& find_with,
@@ -50,8 +50,8 @@ void ReplaceFirstSubstring(std::wstring* str,
                            const WStringPiece& replace_with,
                            std::wstring::size_type pos = 0);
 
-// Removes characters in |trim_chars| in a certain range of |in|.
-// |trim_chars| indicates characters that need to be removed from |in|.
+// Removes characters in `trim_chars` in a certain range of `in`.
+// `trim_chars` indicates characters that need to be removed from `in`.
 // Returns true if having trimed; otherwise returns false.
 
 bool TrimString(const std::string& in,
@@ -75,7 +75,7 @@ bool TrimTailingStr(const std::wstring& in,
                     const WStringPiece& trim_chars,
                     std::wstring* out);
 
-// Returns true, if the |in| is empty or contains only characters in |chars|;
+// Returns true, if the `in` is empty or contains only characters in `chars`;
 // returns false, otherwise.
 
 bool ContainsOnlyChars(const std::string& in, const StringPiece& chars);
@@ -149,7 +149,7 @@ int StringCompareCaseInsensitive(const std::wstring& x, const std::wstring& y);
 // Not local sensitive
 int SysStringCompareCaseInsensitive(const std::wstring& x, const std::wstring& y);
 
-// Returns true, if |str| starts with |token|.
+// Returns true, if `str` starts with `token`.
 // Returns false, otherwise.
 
 bool StartsWith(const std::string& str,
@@ -159,7 +159,7 @@ bool StartsWith(const std::wstring& str,
                 const std::wstring& token,
                 bool case_sensitive = true);
 
-// Returns true, if |str| ends with |token|.
+// Returns true, if `str` ends with `token`.
 // Returns false, otherwise.
 
 bool EndsWith(const std::string& str,
@@ -169,8 +169,8 @@ bool EndsWith(const std::wstring& str,
               const std::wstring& token,
               bool case_sensitive = true);
 
-// Set up enough memory in |str| to accomodate a c-style string with length
-// of | length_including_null | .be wary of that real size of the string data
+// Set up enough memory in `str` to accomodate a c-style string with length
+// of `length_including_null`. be wary of that real size of the string data
 // does not count the null - terminate character. this function is useful when
 // interaction between a string object and a legacy API is required.
 // Returns pointer to the underlying data of the string object.
@@ -188,7 +188,7 @@ inline typename strT::value_type* WriteInto(strT* str,
 }
 
 // Split a string into fields delimieted by any of the characters in
-// |delimiters| .fields are added into |tokens|.
+// `delimiters` .fields are added into `tokens`.
 // Returns the number of tokens found.
 
 size_t Tokenize(const std::string& str,
@@ -198,7 +198,7 @@ size_t Tokenize(const std::wstring& str,
                 const std::wstring& delimiters,
                 std::vector<std::wstring>* tokens);
 
-// Combines string parts in |tokens| by using |sep| as separator.
+// Combines string parts in `tokens` by using `sep` as separator.
 // Returns combined string.
 
 std::string JoinString(const std::vector<std::string>& tokens,
@@ -211,8 +211,8 @@ std::wstring JoinString(const std::vector<std::wstring>& tokens,
                         const std::wstring& sep);
 
 // Pattern matching algorithm, also supports wildcards, in case-sensitive mode.
-// metacharacter |?| matches exactly one character unless the character is a |.|
-// metacharacter |*| matches any sequence of zero or more characters.
+// metacharacter `?` matches exactly one character unless the character is a `.`
+// metacharacter `*` matches any sequence of zero or more characters.
 bool MatchPattern(const std::string& str, const std::string& pat);
 bool MatchPattern(const std::wstring& str, const std::wstring& pat);
 

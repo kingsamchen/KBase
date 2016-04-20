@@ -145,7 +145,7 @@ static TrimPosition TrimStringHelper(const strT& in,
     typename strT::size_type not_matched_last = (pos & TrimPosition::TRIM_TAILING) ?
         in.find_last_not_of(trim_chars.data(), strT::npos, trim_chars.size()) : last;
 
-    // in any case, we should clear |out|
+    // in any case, we should clear `out`
     if (in.empty() ||
         not_matched_first == strT::npos || not_matched_last == strT::npos) {
         out->clear();
