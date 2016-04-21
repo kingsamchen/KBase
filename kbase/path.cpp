@@ -269,7 +269,7 @@ void Path::GetComponents(std::vector<string_type>& components) const
     auto letter_pos = FindDriveLetter(current.value());
     if (!current.empty() &&
         current.value() != kCurrentDir &&
-        letter_pos < current.value().size() - 1) {
+        letter_pos + 1 < current.value().size()) {
         components.push_back(current.value().substr(letter_pos + 1));
     }
 

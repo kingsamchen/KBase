@@ -149,13 +149,14 @@ TEST(PathTest, PathComponents)
     PathComponentPair componnet_test[] {
         { Path(L"C:tmp.txt"), { L"C:", L"tmp.txt" } },
         { Path(L"C:\\tmp.txt"), { L"C:", L"\\", L"tmp.txt" } },
-        { Path(L"C:\\foo\\bar"), { L"C:", L"\\", L"foo", L"bar"} }
+        { Path(L"C:\\foo\\bar"), { L"C:", L"\\", L"foo", L"bar"} },
+        { Path(L"..\\abc"), { L"..", L"abc" } }
     };
 
     std::vector<std::wstring> comp;
     for (const auto& p : componnet_test) {
         p.first.GetComponents(comp);
-        EXPECT_EQ(comp, p.second);
+        EXPECT_EQ(p.second, comp);
     }
 }
 
