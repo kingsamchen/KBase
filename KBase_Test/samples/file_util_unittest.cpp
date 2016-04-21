@@ -148,7 +148,7 @@ TEST(FileUtilTest, ReadOrWriteFile)
     ASSERT_TRUE(PathExists(file_path));
     std::string contents = ReadFileToString(file_path);
     EXPECT_NE(original_contents, contents);
-    kbase::RemoveChars(contents, "\r", &contents);
+    kbase::RemoveChars(contents, "\r");
     EXPECT_EQ(original_contents, contents);
     RemoveFile(file_path, false);
 }

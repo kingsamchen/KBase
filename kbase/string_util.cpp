@@ -9,11 +9,13 @@
 #include <algorithm>
 #include <cassert>
 #include <cctype>
-#include <functional>
 
 #include "kbase/error_exception_util.h"
 
 namespace {
+
+using kbase::BasicStringPiece;
+using kbase::ToUnsigned;
 
 inline int ToLower(char ch)
 {
@@ -35,291 +37,329 @@ inline int ToUpper(wchar_t ch)
     return towupper(ch);
 }
 
-enum TrimPosition {
+enum TrimPosition : unsigned int {
     TRIM_NONE = 0,
     TRIM_LEADING = 1 << 0,
     TRIM_TAILING = 1 << 1,
     TRIM_ALL = TRIM_LEADING | TRIM_TAILING
 };
 
-}   // namespace
-
-namespace kbase {
-
 template<typename strT>
-static bool RemoveCharsT(const strT& in,
-                         const BasicStringPiece<strT>& remove_chars, strT* out)
+void RemoveCharsT(strT& str, BasicStringPiece<strT> remove_chars)
 {
-    strT tmp(in.size(), 0);
-
-    auto char_in = [=](typename strT::value_type ch) -> bool {
-        return std::find(remove_chars.cbegin(), remove_chars.cend(), ch)
-            != remove_chars.cend();
+    auto char_in = [remove_chars](typename strT::value_type ch) -> bool {
+        return std::find(remove_chars.cbegin(), remove_chars.cend(), ch) != remove_chars.cend();
     };
 
-    auto new_end = std::remove_copy_if(in.cbegin(), in.cend(), tmp.begin(), char_in);
-    tmp.erase(new_end, tmp.end());
-    bool did_remove = tmp.size() != in.size();
-    using std::swap;
-    swap(tmp, *out);
-
-    return did_remove;
-}
-
-bool RemoveChars(const std::string& in,
-                 const StringPiece& remove_chars,
-                 std::string* out)
-{
-    return RemoveCharsT<std::string>(in, remove_chars, out);
-}
-
-bool RemoveChars(const std::wstring& in,
-                 const WStringPiece& remove_chars,
-                 std::wstring* out)
-{
-    return RemoveCharsT<std::wstring>(in, remove_chars, out);
+    auto new_end = std::remove_if(str.begin(), str.end(), char_in);
+    str.erase(new_end, str.end());
 }
 
 template<typename strT>
-static void ReplaceSubstrHelper(strT* str,
-                                const BasicStringPiece<strT>& find_with,
-                                const BasicStringPiece<strT>& replace_with,
-                                typename strT::size_type pos,
-                                bool replace_all)
+void ReplaceSubstringT(strT& str,
+                       BasicStringPiece<strT> find_with,
+                       BasicStringPiece<strT> replace_with,
+                       typename strT::size_type pos,
+                       bool replace_all)
 {
-    if (pos == strT::npos || pos + find_with.length() > str->length()) {
+    if (pos == strT::npos || pos + find_with.length() > str.length()) {
         return;
     }
 
     typename strT::size_type offset = pos;
-    while ((offset = str->find(find_with.data(), offset, find_with.length()))
-           != strT::npos) {
-        str->replace(offset, find_with.length(),
-                     replace_with.data(), replace_with.length());
+    while ((offset = str.find(find_with.data(), offset, find_with.length())) != strT::npos) {
+        str.replace(offset, find_with.length(), replace_with.data(), replace_with.length());
         offset += replace_with.length();
-
-        if (!replace_all) break;
+        if (!replace_all) {
+            break;
+        }
     }
 }
 
-void ReplaceSubstring(std::string* str,
-                      const StringPiece& find_with,
-                      const StringPiece& replace_with,
-                      std::string::size_type pos)
-{
-    ReplaceSubstrHelper(str, find_with, replace_with, pos, true);
-}
-
-void ReplaceSubstring(std::wstring* str,
-                      const WStringPiece& find_with,
-                      const WStringPiece& replace_with,
-                      std::wstring::size_type pos)
-{
-    ReplaceSubstrHelper(str, find_with, replace_with, pos, true);
-}
-
-void ReplaceFirstSubstring(std::string* str,
-                           const StringPiece& find_with,
-                           const StringPiece& replace_with,
-                           std::string::size_type pos)
-{
-    ReplaceSubstrHelper(str, find_with, replace_with, pos, false);
-}
-
-void ReplaceFirstSubstring(std::wstring* str,
-                           const WStringPiece& find_with,
-                           const WStringPiece& replace_with,
-                           std::wstring::size_type pos)
-{
-    ReplaceSubstrHelper(str, find_with, replace_with, pos, false);
-}
-
 template<typename strT>
-static TrimPosition TrimStringHelper(const strT& in,
-                                     const BasicStringPiece<strT> trim_chars,
-                                     TrimPosition pos, strT* out)
+void TrimStringT(strT& str, BasicStringPiece<strT> trim_chars, TrimPosition pos)
 {
-    typename strT::size_type last = in.length() - 1;
-    typename strT::size_type not_matched_first = (pos & TrimPosition::TRIM_LEADING) ?
-        in.find_first_not_of(trim_chars.data(), 0, trim_chars.length()) : 0;
-    typename strT::size_type not_matched_last = (pos & TrimPosition::TRIM_TAILING) ?
-        in.find_last_not_of(trim_chars.data(), strT::npos, trim_chars.size()) : last;
+    using size_type = typename strT::size_type;
 
-    // in any case, we should clear `out`
-    if (in.empty() ||
-        not_matched_first == strT::npos || not_matched_last == strT::npos) {
-        out->clear();
-        return in.empty() ? TrimPosition::TRIM_NONE : pos;
+    size_type last = str.length() - 1;
+    size_type not_matched_first = (pos & TrimPosition::TRIM_LEADING) ?
+        str.find_first_not_of(trim_chars.data(), 0, trim_chars.length()) : 0;
+    size_type not_matched_last = (pos & TrimPosition::TRIM_TAILING) ?
+        str.find_last_not_of(trim_chars.data(), strT::npos, trim_chars.size()) : last;
+
+    if (str.empty() || not_matched_first == strT::npos || not_matched_last == strT::npos) {
+        str.clear();
+        return;
     }
 
-    *out = in.substr(not_matched_first, not_matched_last - not_matched_first + 1);
-
-    unsigned leading_case = not_matched_first != 0 ?
-        TrimPosition::TRIM_LEADING : TrimPosition::TRIM_NONE;
-    unsigned tailing_case = not_matched_last != last ?
-        TrimPosition::TRIM_TAILING : TrimPosition::TRIM_NONE;
-
-    return static_cast<TrimPosition>(leading_case | tailing_case);
-}
-
-bool TrimString(const std::string& in,
-                const StringPiece& trim_chars,
-                std::string* out)
-{
-    return TrimStringHelper(in, trim_chars, TrimPosition::TRIM_ALL, out) !=
-        TrimPosition::TRIM_NONE;
-}
-
-bool TrimString(const std::wstring& in,
-                const WStringPiece& trim_chars,
-                std::wstring* out)
-{
-    return TrimStringHelper(in, trim_chars, TrimPosition::TRIM_ALL, out) !=
-        TrimPosition::TRIM_NONE;
-}
-
-bool TrimLeadingStr(const std::string& in,
-                    const StringPiece& trim_chars,
-                    std::string* out)
-{
-    return TrimStringHelper(in, trim_chars, TrimPosition::TRIM_LEADING, out) ==
-        TrimPosition::TRIM_LEADING;
-}
-
-bool TrimLeadingStr(const std::wstring& in,
-                    const WStringPiece& trim_chars,
-                    std::wstring* out)
-{
-    return TrimStringHelper(in, trim_chars, TrimPosition::TRIM_LEADING, out) ==
-        TrimPosition::TRIM_LEADING;
-}
-
-bool TrimTailingStr(const std::string& in,
-                    const StringPiece& trim_chars,
-                    std::string* out)
-{
-    return TrimStringHelper(in, trim_chars, TrimPosition::TRIM_TAILING, out) ==
-        TrimPosition::TRIM_TAILING;
-}
-
-bool TrimTailingStr(const std::wstring& in,
-                    const WStringPiece& trim_chars,
-                    std::wstring* out)
-{
-    return TrimStringHelper(in, trim_chars, TrimPosition::TRIM_TAILING, out) ==
-        TrimPosition::TRIM_TAILING;
+    str = str.substr(not_matched_first, not_matched_last - not_matched_first + 1);
 }
 
 template<typename strT>
-static bool ContainsOnlyCharsT(const strT& in, const BasicStringPiece<strT>& chars)
+bool ContainsOnlyCharsT(const strT& str, BasicStringPiece<strT> chars)
 {
-    return in.find_first_not_of(chars.data(), 0, chars.size()) == strT::npos;
+    return str.find_first_not_of(chars.data(), 0, chars.size()) == strT::npos;
 }
 
-bool ContainsOnlyChars(const std::string& in, const StringPiece& chars)
+template<typename strT>
+bool StartsWithT(const strT& str, BasicStringPiece<strT> token, bool case_sensitive)
 {
-    return ContainsOnlyCharsT(in, chars);
+    if (str.length() < token.length()) {
+        return false;
+    }
+
+    if (case_sensitive) {
+        return str.compare(0, token.length(), token.data()) == 0;
+    }
+
+    auto icmp = [](typename strT::value_type lhs, typename strT::value_type rhs) {
+        return ToLower(lhs) == ToLower(rhs);
+    };
+
+    return std::equal(token.cbegin(), token.cend(), str.cbegin(), icmp);
 }
 
-bool ContainsOnlyChars(const std::wstring& in, const WStringPiece& chars)
+template<typename strT>
+bool EndsWithT(const strT& str, BasicStringPiece<strT> token, bool case_sensitive)
 {
-    return ContainsOnlyCharsT(in, chars);
+    if (str.length() < token.length()) {
+        return false;
+    }
+
+    typename strT::size_type offset = str.length() - token.length();
+    if (case_sensitive) {
+        return str.compare(offset, token.length(), token.data()) == 0;
+    }
+
+    auto icmp = [](typename strT::value_type lhs, typename strT::value_type rhs) {
+        return ToLower(lhs) == ToLower(rhs);
+    };
+
+    return std::equal(token.cbegin(), token.cend(), str.cbegin() + offset, icmp);
 }
 
-void StringToLower(std::string* str)
+template<typename strT>
+size_t SplitStringT(const strT& str, BasicStringPiece<strT>delimiters, std::vector<strT>& tokens)
 {
-    if (str->empty()) {
+    tokens.clear();
+
+    typename strT::size_type begin = 0, end;
+    while ((begin = str.find_first_not_of(delimiters.data(), begin, delimiters.length()))
+           != strT::npos) {
+        end = str.find_first_of(delimiters.data(), begin, delimiters.length());
+        if (end == strT::npos) {
+            end = str.length();
+        }
+        tokens.push_back(str.substr(begin, end - begin));
+        begin = end + 1;
+    }
+
+    return tokens.size();
+}
+
+template<typename strT>
+strT JoinStringT(const std::vector<strT>& tokens, BasicStringPiece<strT> sep)
+{
+    if (tokens.empty()) {
+        return strT();
+    }
+
+    strT str(tokens[0]);
+    for (auto it = tokens.cbegin() + 1; it != tokens.cend(); ++it) {
+        str.append(sep.data(), sep.length()).append(*it);
+    }
+
+    return str;
+}
+
+template<typename charT>
+bool MatchPatternT(const charT* str, const charT* pat)
+{
+    bool on_star = false;
+    const charT* s;
+    const charT* p;
+
+LoopStart:
+    for (s = str, p = pat; *s; ++s, ++p) {
+        switch (*p) {
+            case '?':
+                if (*s == '.')
+                    goto StarCheck;
+                break;
+            case '*':
+                on_star = true;
+                str = s, pat = p;
+                do {
+                    ++pat;
+                } while (*pat == '*');
+                if (!*pat) return true;
+                goto LoopStart;
+                break;
+            default:
+                if (*s != *p)
+                    goto StarCheck;
+                break;
+        }
+    }
+
+    while (*p == '*')
+        ++p;
+
+    return !*p;
+
+StarCheck:
+    if (!on_star) return false;
+    ++str;
+    goto LoopStart;
+}
+
+template<typename viewT>
+bool StringASCIICheck(viewT str)
+{
+    for (size_t i = 0; i < str.length(); ++i) {
+        typename ToUnsigned<typename viewT::value_type>::Unsigned c = str[i];
+        if (c > 0x7F) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+}   // namespace
+
+namespace kbase {
+
+void RemoveChars(std::string& str, StringPiece remove_chars)
+{
+    RemoveCharsT(str, remove_chars);
+}
+
+void RemoveChars(std::wstring& str, WStringPiece remove_chars)
+{
+    RemoveCharsT(str, remove_chars);
+}
+
+void ReplaceSubstring(std::string& str,
+                      StringPiece find_with,
+                      StringPiece replace_with,
+                      std::string::size_type pos,
+                      bool replace_all)
+{
+    ReplaceSubstringT(str, find_with, replace_with, pos, replace_all);
+}
+
+void ReplaceSubstring(std::wstring& str,
+                      WStringPiece find_with,
+                      WStringPiece replace_with,
+                      std::wstring::size_type pos,
+                      bool replace_all)
+{
+    ReplaceSubstringT(str, find_with, replace_with, pos, replace_all);
+}
+
+void TrimString(std::string& str, StringPiece trim_chars)
+{
+    TrimStringT(str, trim_chars, TrimPosition::TRIM_ALL);
+}
+
+void TrimString(std::wstring& str, WStringPiece trim_chars)
+{
+    TrimStringT(str, trim_chars, TrimPosition::TRIM_ALL);
+}
+
+void TrimLeadingString(std::string& str, StringPiece trim_chars)
+{
+    TrimStringT(str, trim_chars, TrimPosition::TRIM_LEADING);
+}
+
+void TrimLeadingString(std::wstring& str, WStringPiece trim_chars)
+{
+    TrimStringT(str, trim_chars, TrimPosition::TRIM_LEADING);
+}
+
+void TrimTailingString(std::string& str, StringPiece trim_chars)
+{
+    TrimStringT(str, trim_chars, TrimPosition::TRIM_TAILING);
+}
+
+void TrimTailingString(std::wstring& str, WStringPiece trim_chars)
+{
+    TrimStringT(str, trim_chars, TrimPosition::TRIM_TAILING);
+}
+
+bool ContainsOnlyChars(const std::string& str, StringPiece chars)
+{
+    return ContainsOnlyCharsT(str, chars);
+}
+
+bool ContainsOnlyChars(const std::wstring& str, WStringPiece chars)
+{
+    return ContainsOnlyCharsT(str, chars);
+}
+
+void StringToLower(std::string& str)
+{
+    if (str.empty()) {
         return;
     }
 
 #if !defined(_M_X64)
-    auto buff = WriteInto(str, str->length() + 1);
-    CharLowerBuffA(buff, str->length());
+    auto buff = WriteInto(str, str.length() + 1);
+    CharLowerBuffA(buff, str.length());
 #else
-    std::for_each(str->begin(), str->end(), [](char& ch) {
+    std::for_each(str.begin(), str.end(), [](char& ch) {
         CharLowerA(&ch);
     });
 #endif
 }
 
-std::string StringToLower(const std::string& str)
+void StringToLower(std::wstring& str)
 {
-    std::string tmp(str);
-    StringToLower(&tmp);
-
-    return tmp;
-}
-
-void StringToLower(std::wstring* str)
-{
-    if (str->empty()) {
+    if (str.empty()) {
         return;
     }
 
 #if !defined(_M_X64)
-    auto buff = WriteInto(str, str->length() + 1);
-    CharLowerBuffW(buff, str->length());
+    auto buff = WriteInto(str, str.length() + 1);
+    CharLowerBuffW(buff, str.length());
 #else
-    std::for_each(str->begin(), str->end(), [](wchar_t& ch) {
+    std::for_each(str.begin(), str.end(), [](wchar_t& ch) {
         CharLowerW(&ch);
     });
 #endif
 }
 
-std::wstring StringToLower(const std::wstring& str)
+void StringToUpper(std::string& str)
 {
-    std::wstring tmp(str);
-    StringToLower(&tmp);
-
-    return tmp;
-}
-
-void StringToUpper(std::string* str)
-{
-    if (str->empty()) {
+    if (str.empty()) {
         return;
     }
 
 #if !defined(_M_X64)
-    auto buff = WriteInto(str, str->length() + 1);
-    CharUpperBuffA(buff, str->length());
+    auto buff = WriteInto(str, str.length() + 1);
+    CharUpperBuffA(buff, str.length());
 #else
-    std::for_each(str->begin(), str->end(), [](char& ch) {
+    std::for_each(str.begin(), str.end(), [](char& ch) {
         CharUpperA(&ch);
     });
 #endif
 }
 
-std::string StringToUpper(const std::string& str)
+void StringToUpper(std::wstring& str)
 {
-    std::string tmp(str);
-    StringToUpper(&tmp);
-
-    return tmp;
-}
-
-void StringToUpper(std::wstring* str)
-{
-    if (str->empty()) {
+    if (str.empty()) {
         return;
     }
 
 #if !defined(_M_X64)
-    auto buff = WriteInto(str, str->length() + 1);
-    CharUpperBuffW(buff, str->length());
+    auto buff = WriteInto(str, str.length() + 1);
+    CharUpperBuffW(buff, str.length());
 #else
-    std::for_each(str->begin(), str->end(), [](wchar_t& ch) {
+    std::for_each(str.begin(), str.end(), [](wchar_t& ch) {
         CharUpperW(&ch);
     });
 #endif
-}
-
-std::wstring StringToUpper(const std::wstring& str)
-{
-    std::wstring tmp(str);
-    StringToUpper(&tmp);
-
-    return tmp;
 }
 
 int StringCompareCaseInsensitive(const std::string& x, const std::string& y)
@@ -341,175 +381,47 @@ int SysStringCompareCaseInsensitive(const std::wstring& x, const std::wstring& y
     return ret - CSTR_EQUAL;
 }
 
-template<typename strT>
-static bool StartsWithT(const strT& str, const strT& token, bool case_sensitive)
-{
-    if (str.length() < token.length())
-        return false;
-
-    if (case_sensitive) {
-        return str.compare(0, token.length(), token) == 0;
-    } else {
-        auto icmp = [](typename strT::value_type lhs, typename strT::value_type rhs) {
-            return ToLower(lhs) == ToLower(rhs);
-        };
-
-        return std::equal(token.cbegin(), token.cend(), str.cbegin(), icmp);
-    }
-}
-
-bool StartsWith(const std::string& str,
-                const std::string& token,
-                bool case_sensitive)
+bool StartsWith(const std::string& str, StringPiece token, bool case_sensitive)
 {
     return StartsWithT(str, token, case_sensitive);
 }
 
-bool StartsWith(const std::wstring& str,
-                const std::wstring& token,
-                bool case_sensitive)
+bool StartsWith(const std::wstring& str, WStringPiece token, bool case_sensitive)
 {
     return StartsWithT(str, token, case_sensitive);
 }
 
-template<typename strT>
-static bool EndsWithT(const strT& str, const strT& token, bool case_sensitive)
-{
-    if (str.length() < token.length())
-        return false;
-
-    typename strT::size_type offset = str.length() - token.length();
-    if (case_sensitive) {
-        return str.compare(offset, token.length(), token)
-            == 0;
-    } else {
-        auto icmp = [](typename strT::value_type lhs, typename strT::value_type rhs) {
-            return ToLower(lhs) == ToLower(rhs);
-        };
-
-        return std::equal(token.cbegin(), token.cend(), str.cbegin() + offset, icmp);
-    }
-}
-
-bool EndsWith(const std::string& str,
-              const std::string& token,
-              bool case_sensitive)
+bool EndsWith(const std::string& str, StringPiece token, bool case_sensitive)
 {
     return EndsWithT(str, token, case_sensitive);
 }
 
-bool EndsWith(const std::wstring& str,
-              const std::wstring& token,
-              bool case_sensitive)
+bool EndsWith(const std::wstring& str, WStringPiece token, bool case_sensitive)
 {
     return EndsWithT(str, token, case_sensitive);
 }
 
-template<typename strT>
-static size_t TokenizeT(const strT& str, const strT& delimiters,
-                        std::vector<strT>* tokens)
+size_t SplitString(const std::string& str, StringPiece delimiters,
+                   std::vector<std::string>& tokens)
 {
-    tokens->clear();
-
-    typename strT::size_type begin = 0, end;
-    while ((begin = str.find_first_not_of(delimiters, begin)) != strT::npos) {
-        end = str.find_first_of(delimiters, begin);
-        if (end == strT::npos)
-            end = str.length();
-        tokens->push_back(str.substr(begin, end - begin));
-        begin = end + 1;
-    }
-
-    return tokens->size();
+    return SplitStringT(str, delimiters, tokens);
 }
 
-size_t Tokenize(const std::string& str, const std::string& delimiters,
-                std::vector<std::string>* tokens)
+size_t SplitString(const std::wstring& str, WStringPiece delimiters,
+                   std::vector<std::wstring>& tokens)
 {
-    return TokenizeT(str, delimiters, tokens);
+    return SplitStringT(str, delimiters, tokens);
 }
 
-size_t Tokenize(const std::wstring& str, const std::wstring& delimiters,
-                std::vector<std::wstring>* tokens)
-{
-    return TokenizeT(str, delimiters, tokens);
-}
-
-template<typename strT>
-static strT JoinStringT(const std::vector<strT>& tokens, const strT& sep)
-{
-    if (tokens.empty())
-        return strT();
-
-    strT str(tokens[0]);
-    for (auto it = tokens.cbegin() + 1; it != tokens.cend(); ++it) {
-        str.append(sep);
-        str.append(*it);
-    }
-
-    return str;
-}
-
-std::string JoinString(const std::vector<std::string>& tokens, char sep)
-{
-    return JoinStringT(tokens, std::string(sep, 1));
-}
-
-std::wstring JoinString(const std::vector<std::wstring>& tokens, wchar_t sep)
-{
-    return JoinStringT(tokens, std::wstring(sep, 1));
-}
-
-std::string JoinString(const std::vector<std::string>& tokens, const std::string& sep)
+std::string JoinString(const std::vector<std::string>& tokens, StringPiece sep)
 {
     return JoinStringT(tokens, sep);
 }
 
 std::wstring JoinString(const std::vector<std::wstring>& tokens,
-                        const std::wstring& sep)
+                        WStringPiece sep)
 {
     return JoinStringT(tokens, sep);
-}
-
-template<typename charT>
-static bool MatchPatternT(const charT* str, const charT* pat)
-{
-    bool on_star = false;
-    const charT* s;
-    const charT* p;
-
-LoopStart:
-    for (s = str, p = pat; *s; ++s, ++p) {
-        switch (*p) {
-        case '?':
-            if (*s == '.')
-                goto StarCheck;
-            break;
-        case '*':
-            on_star = true;
-            str = s, pat = p;
-            do {
-                ++pat;
-            } while (*pat == '*');
-            if (!*pat) return true;
-            goto LoopStart;
-            break;
-        default:
-            if (*s != *p)
-                goto StarCheck;
-            break;
-        }
-    }
-
-    while (*p == '*')
-        ++p;
-
-    return !*p;
-
-StarCheck:
-    if (!on_star) return false;
-    ++str;
-    goto LoopStart;
 }
 
 bool MatchPattern(const std::string& str, const std::string& pat)
@@ -522,25 +434,12 @@ bool MatchPattern(const std::wstring& str, const std::wstring& pat)
     return MatchPatternT(str.c_str(), pat.c_str());
 }
 
-template<typename strT>
-static bool StringASCIICheck(const strT& str)
-{
-    for (size_t i = 0; i < str.length(); ++i) {
-        typename ToUnsigned<typename strT::value_type>::Unsigned c = str[i];
-        if (c > 0x7F) {
-            return false;
-        }
-    }
-
-    return true;
-}
-
-bool IsStringASCII(const StringPiece& str)
+bool IsStringASCII(StringPiece str)
 {
     return StringASCIICheck(str);
 }
 
-bool IsStringASCII(const WStringPiece& str)
+bool IsStringASCII(WStringPiece str)
 {
     return StringASCIICheck(str);
 }

@@ -13,73 +13,49 @@
 #include <string>
 #include <vector>
 
+#include "kbase/error_exception_util.h"
 #include "kbase/string_piece.h"
 
 namespace kbase {
 
-// Removes any characters specified by `remove_chars` in string `in`.
-// Returns true, if any characters are removed; return false, otherwise.
-// It is safe to make `in` and `out` both refer to a same object.
+// Removes any characters specified by `remove_chars` from string `str`.
 
-bool RemoveChars(const std::string& in,
-                 const StringPiece& remove_chars,
-                 std::string* out);
-bool RemoveChars(const std::wstring& in,
-                 const WStringPiece& remove_chars,
-                 std::wstring* out);
+void RemoveChars(std::string& str, StringPiece remove_chars);
+void RemoveChars(std::wstring& str, WStringPiece remove_chars);
 
 // Replace `find_with` with `replace_with` in `str`.
-// `pos` indicates the search beginning. if `pos` equals to `npos` or is greater
+// `pos` indicates where the search begins. if `pos` equals to `npos` or is greater
 // than the length of `str`, these functions do nothing.
+// If `relace_all` is not true, then only the first occurrence would be replaced.
 
-void ReplaceSubstring(std::string* str,
-                      const StringPiece& find_with,
-                      const StringPiece& replace_with,
-                      std::string::size_type pos = 0);
-void ReplaceSubstring(std::wstring* str,
-                      const WStringPiece& find_with,
-                      const WStringPiece& replace_with,
-                      std::wstring::size_type pos = 0);
-
-void ReplaceFirstSubstring(std::string* str,
-                           const StringPiece& find_with,
-                           const StringPiece& replace_with,
-                           std::string::size_type pos = 0);
-void ReplaceFirstSubstring(std::wstring* str,
-                           const WStringPiece& find_with,
-                           const WStringPiece& replace_with,
-                           std::wstring::size_type pos = 0);
+void ReplaceSubstring(std::string& str,
+                      StringPiece find_with,
+                      StringPiece replace_with,
+                      std::string::size_type pos = 0,
+                      bool replace_all = true);
+void ReplaceSubstring(std::wstring& str,
+                      WStringPiece find_with,
+                      WStringPiece replace_with,
+                      std::wstring::size_type pos = 0,
+                      bool replace_all = true);
 
 // Removes characters in `trim_chars` in a certain range of `in`.
 // `trim_chars` indicates characters that need to be removed from `in`.
-// Returns true if having trimed; otherwise returns false.
 
-bool TrimString(const std::string& in,
-                const StringPiece& trim_chars,
-                std::string* out);
-bool TrimString(const std::wstring& in,
-                const WStringPiece& trim_chars,
-                std::wstring* out);
+void TrimString(std::string& str, StringPiece trim_chars);
+void TrimString(std::wstring& str, WStringPiece trim_chars);
 
-bool TrimLeadingStr(const std::string& in,
-                    const StringPiece& trim_chars,
-                    std::string* out);
-bool TrimLeadingStr(const std::wstring& in,
-                    const WStringPiece& trim_chars,
-                    std::wstring* out);
+void TrimLeadingString(std::string& str, StringPiece trim_chars);
+void TrimLeadingString(std::wstring& str, WStringPiece trim_chars);
 
-bool TrimTailingStr(const std::string& in,
-                    const StringPiece& trim_chars,
-                    std::string* out);
-bool TrimTailingStr(const std::wstring& in,
-                    const WStringPiece& trim_chars,
-                    std::wstring* out);
+void TrimTailingString(std::string& str, StringPiece trim_chars);
+void TrimTailingString(std::wstring& str, WStringPiece trim_chars);
 
-// Returns true, if the `in` is empty or contains only characters in `chars`;
+// Returns true, if the `str` is empty or contains only characters in `chars`;
 // returns false, otherwise.
 
-bool ContainsOnlyChars(const std::string& in, const StringPiece& chars);
-bool ContainsOnlyChars(const std::wstring& in, const WStringPiece& chars);
+bool ContainsOnlyChars(const std::string& str, StringPiece chars);
+bool ContainsOnlyChars(const std::wstring& str, WStringPiece chars);
 
 // tolower and toupper are local sensitive, we might don't want to use them in some
 // situations.
@@ -87,57 +63,41 @@ bool ContainsOnlyChars(const std::wstring& in, const WStringPiece& chars);
 // following functions toggle case only for ascii-characters.
 
 template<typename charT>
-inline charT ToLowerASCII(charT ch)
+charT ToLowerASCII(charT ch)
 {
     return (ch >= 'A' && ch <= 'Z') ? ch + 'a' - 'A' : ch;
 }
 
 template<typename charT>
-inline charT ToUpperASCII(charT ch)
+charT ToUpperASCII(charT ch)
 {
     return (ch >= 'a' && ch <= 'z') ? ch - 'a' + 'A' : ch;
 }
 
 template<typename strT>
-void StringToLowerASCII(strT* str)
+void StringToLowerASCII(strT& str)
 {
-    for (auto it = str->begin(); it != str->end(); ++it) {
+    for (auto it = str.begin(); it != str.end(); ++it) {
         *it = ToLowerASCII(*it);
     }
 }
 
 template<typename strT>
-strT StringToLowerASCII(const strT& str)
+void StringToUpperASCII(strT& str)
 {
-    strT tmp(str);
-    StringToLowerASCII(&tmp);
-    return tmp;
-}
-
-template<typename strT>
-void StringToUpperASCII(strT* str)
-{
-    for (auto it = str->begin(); it != str->end(); ++it) {
+    for (auto it = str.begin(); it != str.end(); ++it) {
         *it = ToUpperASCII(*it);
     }
-}
-
-template<typename strT>
-strT StringToUpperASCII(const strT& str)
-{
-    strT tmp(str);
-    StringToUpperASCII(&tmp);
-    return tmp;
 }
 
 // Converts the string to lower-case or upper-case.
 // These functions support non-ASCII characters.
 
-void StringToLower(std::string* str);
-std::string StringToLower(const std::string& str);
+void StringToLower(std::string& str);
+void StringToLower(std::wstring& str);
 
-void StringToLower(std::wstring* str);
-std::wstring StringToLower(const std::wstring& str);
+void StringToUpper(std::string& str);
+void StringToUpper(std::wstring& str);
 
 // Compares two strings in case-insensitive mode.
 // These functions support non-ASCII characters, and are local sensitive.
@@ -153,20 +113,20 @@ int SysStringCompareCaseInsensitive(const std::wstring& x, const std::wstring& y
 // Returns false, otherwise.
 
 bool StartsWith(const std::string& str,
-                const std::string& token,
+                StringPiece token,
                 bool case_sensitive = true);
 bool StartsWith(const std::wstring& str,
-                const std::wstring& token,
+                WStringPiece token,
                 bool case_sensitive = true);
 
 // Returns true, if `str` ends with `token`.
 // Returns false, otherwise.
 
 bool EndsWith(const std::string& str,
-              const std::string& token,
+              StringPiece token,
               bool case_sensitive = true);
 bool EndsWith(const std::wstring& str,
-              const std::wstring& token,
+              WStringPiece token,
               bool case_sensitive = true);
 
 // Set up enough memory in `str` to accomodate a c-style string with length
@@ -175,40 +135,35 @@ bool EndsWith(const std::wstring& str,
 // interaction between a string object and a legacy API is required.
 // Returns pointer to the underlying data of the string object.
 template<typename strT>
-inline typename strT::value_type* WriteInto(strT* str,
-                                            size_t length_including_null)
+typename strT::value_type* WriteInto(strT& str, size_t length_including_null)
 {
-    // if the length is equal to 1, the underlying string size is 0,
+    // If the length is equal to 1, the underlying string size is 0,
     // operator[] may then result in an undefined behavior in this situation.
-    assert(length_including_null > 1U);
-    str->reserve(length_including_null);
-    str->resize(length_including_null - 1);
+    ENSURE(CHECK, length_including_null > 1U).Require();
+    str.reserve(length_including_null);
+    str.resize(length_including_null - 1);
 
-    return (&(*str)[0]);
+    return &str[0];
 }
 
-// Split a string into fields delimieted by any of the characters in
-// `delimiters` .fields are added into `tokens`.
+// Split a string into fields delimieted by any of the characters in `delimiters`.
+// Fields are added into `tokens`.
 // Returns the number of tokens found.
 
-size_t Tokenize(const std::string& str,
-                const std::string& delimiters,
-                std::vector<std::string>* tokens);
-size_t Tokenize(const std::wstring& str,
-                const std::wstring& delimiters,
-                std::vector<std::wstring>* tokens);
+size_t SplitString(const std::string& str,
+                   StringPiece delimiters,
+                   std::vector<std::string>& tokens);
+size_t SplitString(const std::wstring& str,
+                   WStringPiece delimiters,
+                   std::vector<std::wstring>& tokens);
 
 // Combines string parts in `tokens` by using `sep` as separator.
 // Returns combined string.
 
 std::string JoinString(const std::vector<std::string>& tokens,
-                       char sep);
+                       StringPiece sep);
 std::wstring JoinString(const std::vector<std::wstring>& tokens,
-                        wchar_t sep);
-std::string JoinString(const std::vector<std::string>& tokens,
-                       const std::string& sep);
-std::wstring JoinString(const std::vector<std::wstring>& tokens,
-                        const std::wstring& sep);
+                        WStringPiece sep);
 
 // Pattern matching algorithm, also supports wildcards, in case-sensitive mode.
 // metacharacter `?` matches exactly one character unless the character is a `.`
@@ -217,27 +172,27 @@ bool MatchPattern(const std::string& str, const std::string& pat);
 bool MatchPattern(const std::wstring& str, const std::wstring& pat);
 
 // Determines if all characters in string are defined in ASCII code page.
-bool IsStringASCII(const StringPiece& str);
-bool IsStringASCII(const WStringPiece& str);
+bool IsStringASCII(StringPiece str);
+bool IsStringASCII(WStringPiece str);
 
 template<typename T>
 struct ToUnsigned {
-    typedef T Unsigned;
+    using Unsigned = T;
 };
 
 template<>
 struct ToUnsigned<char> {
-    typedef unsigned char Unsigned;
+    using Unsigned = unsigned char;
 };
 
 template<>
 struct ToUnsigned<signed char> {
-    typedef unsigned char Unsigned;
+    using Unsigned = unsigned char;
 };
 
 template<>
 struct ToUnsigned<wchar_t> {
-    typedef unsigned short Unsigned;
+    using Unsigned = unsigned short;
 };
 
 }   // namespace kbase

@@ -34,9 +34,9 @@ bool IsArgumentSwitch(const StringType& arg)
 
 SwitchPair UnstickSwitch(StringType* switch_token)
 {
-    kbase::TrimLeadingStr(*switch_token, L"-/", switch_token);
+    kbase::TrimLeadingString(*switch_token, L"-/");
     std::vector<StringType> members;
-    kbase::Tokenize(*switch_token, kSwitchValueDelimiter, &members);
+    kbase::SplitString(*switch_token, kSwitchValueDelimiter, members);
     // Note that the switch may not carry a value.
     members.resize(2);
 
@@ -46,8 +46,8 @@ SwitchPair UnstickSwitch(StringType* switch_token)
 void AddArguments(CommandLine* cmdline, const ArgList& argv)
 {
     for (auto arg = argv.cbegin() + 1; arg != argv.cend(); ++arg) {
-        StringType sanitized_arg;
-        kbase::TrimString(*arg, L" \t", &sanitized_arg);
+        StringType sanitized_arg = *arg;
+        kbase::TrimString(sanitized_arg, L" \t");
         if (IsArgumentSwitch(sanitized_arg)) {
             auto switch_member = UnstickSwitch(&sanitized_arg);
             cmdline->AppendSwitch(switch_member.first, switch_member.second);
@@ -202,13 +202,14 @@ Path CommandLine::GetProgram() const
 
 void CommandLine::SetProgram(const Path& program)
 {
-    TrimString(program.value(), L" \t", &argv_.front());
+    argv_.front() = program.value();
+    TrimString(argv_.front(), L" \t");
 }
 
 void CommandLine::ParseFromString(const StringType& cmdline)
 {
-    StringType sanitized_cmdline_str;
-    TrimString(cmdline, L" \t", &sanitized_cmdline_str);
+    StringType sanitized_cmdline_str = cmdline;
+    TrimString(sanitized_cmdline_str, L" \t");
     if (sanitized_cmdline_str.empty()) {
         return;
     }

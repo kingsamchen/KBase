@@ -460,7 +460,7 @@ Path& Path::ReplaceExtension(const string_type& extension)
 
 bool Path::MatchExtension(const string_type& ext) const
 {
-    return kbase::StringToLowerASCII(extension()) == kbase::StringToLowerASCII(ext);
+    return EqualPathValue(extension(), ext);
 }
 
 bool Path::ReferenceParent() const
@@ -469,9 +469,9 @@ bool Path::ReferenceParent() const
     GetComponents(components);
 
     // It seems redundant spaces at the tail of '..' can be ignored by Windows.
-    string_type trimed_component;
     for (const string_type& component : components) {
-        kbase::TrimTailingStr(component, L" ", &trimed_component);
+        string_type trimed_component = component;
+        kbase::TrimTailingString(trimed_component, L" ");
         if (trimed_component == kParentDir) {
             return true;
         }

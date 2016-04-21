@@ -176,7 +176,7 @@ TEST(PathTest, PathProperty)
     };
 
     for (const auto& p : abs_path) {
-        EXPECT_EQ(p.first.IsAbsolute(), p.second);
+        EXPECT_EQ(p.second, p.first.IsAbsolute());
     }
 
     // ReferenceParent
@@ -187,7 +187,8 @@ TEST(PathTest, PathProperty)
     };
 
     for (const auto& p : refer_parent_path) {
-      EXPECT_EQ(p.first.ReferenceParent(), p.second);
+        std::cout << p.first.AsASCII() << std::endl;
+        EXPECT_EQ(p.second, p.first.ReferenceParent());
     }
 
     typedef std::tuple<Path, Path, bool> PathPropertyTuple;

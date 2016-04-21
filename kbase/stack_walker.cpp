@@ -28,7 +28,7 @@ using kbase::Singleton;
 std::wstring GetExeDir()
 {
     std::wstring exe_path;
-    wchar_t* data = kbase::WriteInto(&exe_path, MAX_PATH);
+    wchar_t* data = kbase::WriteInto(exe_path, MAX_PATH);
     GetModuleFileNameW(nullptr, data, MAX_PATH);
     auto slash_pos = exe_path.rfind(L'\\');
     exe_path.resize(slash_pos);

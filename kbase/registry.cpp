@@ -240,7 +240,7 @@ bool RegKey::ReadValue(const wchar_t* value_name, std::wstring* value) const
 
     long result = 0;
     do {
-        wchar_t* data_ptr = WriteInto(&raw_data, str_length);
+        wchar_t* data_ptr = WriteInto(raw_data, str_length);
         data_size = str_length * kCharSize;
         result = RegGetValue(key_, nullptr, value_name, restricted_type, &data_type,
                              data_ptr, &data_size);
@@ -251,7 +251,7 @@ bool RegKey::ReadValue(const wchar_t* value_name, std::wstring* value) const
                 return true;
             } else if (data_type == REG_EXPAND_SZ) {
                 std::wstring expanded;
-                wchar_t* ptr = WriteInto(&expanded, str_length);
+                wchar_t* ptr = WriteInto(expanded, str_length);
                 DWORD size = ExpandEnvironmentStrings(data_ptr, ptr, str_length);
                 if (size == 0) {
                     // functions fails, and it internally sets the last error.
@@ -287,13 +287,13 @@ bool RegKey::ReadValue(const wchar_t* value_name,
     }
 
     std::wstring raw_data;
-    wchar_t* data_ptr = WriteInto(&raw_data, data_size / kCharSize);
+    wchar_t* data_ptr = WriteInto(raw_data, data_size / kCharSize);
     result = ReadValue(value_name, restricted_type, data_ptr, &data_size);
     if (!result) {
         return false;
     }
 
-    Tokenize(raw_data, std::wstring(1, 0), values);
+    SplitString(raw_data, std::wstring(1, 0), *values);
 
     return true;
 }
@@ -526,7 +526,7 @@ bool RegValueIterator::Read()
     if (Valid()) {
         DWORD value_size = INITIAL_VALUE_SIZE;
         DWORD name_length = INITIAL_NAME_SIZE;
-        wchar_t* name = WriteInto(&value_name_, name_length);
+        wchar_t* name = WriteInto(value_name_, name_length);
         long result = RegEnumValue(key_, index_, name, &name_length, nullptr, &type_,
                                    reinterpret_cast<BYTE*>(&value_[0]), &value_size);
         // Current size is too small.
@@ -536,7 +536,7 @@ bool RegValueIterator::Read()
 
             value_size = max_value_length_;
             name_length = max_value_name_length_;
-            name = WriteInto(&value_name_, name_length);
+            name = WriteInto(value_name_, name_length);
             value_.resize(value_size, 0);
 
             result = RegEnumValue(key_, index_, name, &name_length, nullptr, &type_,
