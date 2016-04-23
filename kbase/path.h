@@ -6,8 +6,8 @@
 #pragma once
 #endif
 
-#ifndef KBASE_FILE_PATH_H_
-#define KBASE_FILE_PATH_H_
+#ifndef KBASE_PATH_H_
+#define KBASE_PATH_H_
 
 #include <string>
 #include <vector>
@@ -198,4 +198,4 @@ struct std::hash<kbase::Path> {
 
 }   // namespace std
 
-#endif  // KBASE_FILE_PATH_H_
+#endif  // KBASE_PATH_H_
