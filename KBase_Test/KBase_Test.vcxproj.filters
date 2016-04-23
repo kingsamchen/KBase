@@ -113,5 +113,8 @@
     <ClCompile Include="samples\path_unittest.cpp">
       <Filter>samples</Filter>
     </ClCompile>
+    <ClCompile Include="samples\string_view_unittest.cpp">
+      <Filter>samples</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

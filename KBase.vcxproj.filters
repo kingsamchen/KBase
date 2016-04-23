@@ -206,5 +206,8 @@
     <ClInclude Include="kbase\path.h">
       <Filter>kbase</Filter>
     </ClInclude>
+    <ClInclude Include="kbase\string_view.h">
+      <Filter>kbase</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

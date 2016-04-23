@@ -228,6 +228,7 @@
     <ClInclude Include="kbase\string_format.h" />
     <ClInclude Include="kbase\string_piece.h" />
     <ClInclude Include="kbase\string_util.h" />
+    <ClInclude Include="kbase\string_view.h" />
     <ClInclude Include="kbase\sys_info.h" />
     <ClInclude Include="kbase\sys_string_encoding_conversions.h" />
     <ClInclude Include="kbase\version_util.h" />
