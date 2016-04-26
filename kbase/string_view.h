@@ -13,7 +13,32 @@
 
 namespace kbase {
 
-//TODO: add proper comments.
+namespace internal {
+
+// FNV-1a hash function. Shamelessly stolen from STL.
+inline size_t HashByteSequence(const unsigned char* data, size_t length)
+{
+#if defined(_WIN64)
+	static_assert(sizeof(size_t) == 8, "This code is for 64-bit size_t.");
+	const size_t kFNVOffsetBasis = 14695981039346656037ULL;
+	const size_t kFNVPrime = 1099511628211ULL;
+#else /* defined(_WIN64) */
+	static_assert(sizeof(size_t) == 4, "This code is for 32-bit size_t.");
+	const size_t kFNVOffsetBasis = 2166136261U;
+	const size_t kFNVPrime = 16777619U;
+#endif /* defined(_WIN64) */
+
+	size_t val = kFNVOffsetBasis;
+	for (size_t next = 0; next < length; ++next) {
+		// fold in another byte
+		val ^= static_cast<size_t>(data[next]);
+		val *= kFNVPrime;
+	}
+
+	return (val);
+}
+
+}	// namespace internal
 
 template<typename CharT, typename Traits = std::char_traits<CharT>>
 class BasicStringView {
@@ -440,9 +465,87 @@ private:
 	size_type length_;
 };
 
+template<typename CharT, typename Traits>
+constexpr bool operator==(BasicStringView<CharT, Traits> lhs,
+						  BasicStringView<CharT, Traits> rhs) noexcept
+{
+	return lhs.length() == rhs.length() && lhs.compare(rhs) == 0;
+}
+
+template<typename CharT, typename Traits>
+constexpr bool operator!=(BasicStringView<CharT, Traits> lhs,
+						  BasicStringView<CharT, Traits> rhs) noexcept
+{
+	return lhs.length() != rhs.length() || lhs.compare(rhs) != 0;
+}
+
+template<typename CharT, typename Traits>
+constexpr bool operator<(BasicStringView<CharT, Traits> lhs,
+						 BasicStringView<CharT, Traits> rhs) noexcept
+{
+	return lhs.compare(rhs) < 0;
+}
+
+template<typename CharT, typename Traits>
+constexpr bool operator<=(BasicStringView<CharT, Traits> lhs,
+						  BasicStringView<CharT, Traits> rhs) noexcept
+{
+	return lhs.compare(rhs) <= 0;
+}
+
+template<typename CharT, typename Traits>
+constexpr bool operator>(BasicStringView<CharT, Traits> lhs,
+						 BasicStringView<CharT, Traits> rhs) noexcept
+{
+	return lhs.compare(rhs) > 0;
+}
+
+template<typename CharT, typename Traits>
+constexpr bool operator>=(BasicStringView<CharT, Traits> lhs,
+						  BasicStringView<CharT, Traits> rhs) noexcept
+{
+	return lhs.compare(rhs) >= 0;
+}
+
+template<typename CharT, typename Traits>
+std::basic_ostream<CharT, Traits>& operator<<(std::basic_ostream<CharT, Traits>& os,
+											  BasicStringView<CharT, Traits> view)
+{
+	os.write(view.data(), view.length());
+	return os;
+}
+
 using StringView = BasicStringView<char>;
 using WStringView = BasicStringView<wchar_t>;
 
 }	// namespace kbase
+
+// Specializations of std::hash.
+
+namespace std {
+
+template<>
+struct std::hash<kbase::StringView> {
+	size_t operator()(kbase::StringView view) const
+	{
+		auto src = reinterpret_cast<const unsigned char*>(view.data());
+		auto length = view.length() * sizeof(decltype(view)::value_type);
+
+		return kbase::internal::HashByteSequence(src, length);
+	}
+};
+
+template<>
+struct std::hash<kbase::WStringView> {
+	size_t operator()(kbase::WStringView view) const
+	{
+		auto src = reinterpret_cast<const unsigned char*>(view.data());
+		auto length = view.length() * sizeof(decltype(view)::value_type);
+
+		return kbase::internal::HashByteSequence(src, length);
+	}
+};
+
+}   // namespace std
 
 #endif	// KBASE_STRING_VIEW_H_

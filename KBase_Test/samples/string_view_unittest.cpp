@@ -282,3 +282,27 @@ TEST(StringViewTest, FindNotOf)
 		EXPECT_EQ(10, view_4.find_last_not_of("12"));
 	}
 }
+
+TEST(StringViewTest, OperatorComparison)
+{
+	kbase::StringView view_1 = "abc";
+	kbase::StringView view_2 = "adc";
+	EXPECT_FALSE(view_1 == view_2);
+	EXPECT_TRUE(view_1 != view_2);
+}
+
+TEST(StringViewTest, Output)
+{
+	kbase::StringView v = "hello world";
+	kbase::WStringView w = L"test text";
+	std::cout << v << std::endl;
+	std::wcout << w << std::endl;
+}
+
+TEST(StringViewTest, Hash)
+{
+	kbase::StringView v = "hello world";
+	kbase::WStringView w = L"hello world";
+	EXPECT_EQ(std::hash<std::string>()(v.ToString()), std::hash<decltype(v)>()(v));
+	EXPECT_EQ(std::hash<std::wstring>()(w.ToString()), std::hash<decltype(w)>()(w));
+}
