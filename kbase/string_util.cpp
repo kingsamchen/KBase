@@ -14,7 +14,7 @@
 
 namespace {
 
-using kbase::BasicStringPiece;
+using kbase::BasicStringView;
 using kbase::ToUnsigned;
 
 inline int ToLower(char ch)
@@ -45,7 +45,7 @@ enum TrimPosition : unsigned int {
 };
 
 template<typename strT>
-void RemoveCharsT(strT& str, BasicStringPiece<strT> remove_chars)
+void RemoveCharsT(strT& str, BasicStringView<typename strT::value_type> remove_chars)
 {
     auto char_in = [remove_chars](typename strT::value_type ch) -> bool {
         return std::find(remove_chars.cbegin(), remove_chars.cend(), ch) != remove_chars.cend();
@@ -57,8 +57,8 @@ void RemoveCharsT(strT& str, BasicStringPiece<strT> remove_chars)
 
 template<typename strT>
 void ReplaceSubstringT(strT& str,
-                       BasicStringPiece<strT> find_with,
-                       BasicStringPiece<strT> replace_with,
+					   BasicStringView<typename strT::value_type> find_with,
+					   BasicStringView<typename strT::value_type> replace_with,
                        typename strT::size_type pos,
                        bool replace_all)
 {
@@ -77,7 +77,7 @@ void ReplaceSubstringT(strT& str,
 }
 
 template<typename strT>
-void TrimStringT(strT& str, BasicStringPiece<strT> trim_chars, TrimPosition pos)
+void TrimStringT(strT& str, BasicStringView<typename strT::value_type> trim_chars, TrimPosition pos)
 {
     using size_type = typename strT::size_type;
 
@@ -96,13 +96,15 @@ void TrimStringT(strT& str, BasicStringPiece<strT> trim_chars, TrimPosition pos)
 }
 
 template<typename strT>
-bool ContainsOnlyCharsT(const strT& str, BasicStringPiece<strT> chars)
+bool ContainsOnlyCharsT(const strT& str, BasicStringView<typename strT::value_type> chars)
 {
     return str.find_first_not_of(chars.data(), 0, chars.size()) == strT::npos;
 }
 
 template<typename strT>
-bool StartsWithT(const strT& str, BasicStringPiece<strT> token, bool case_sensitive)
+bool StartsWithT(BasicStringView<typename strT::value_type> str,
+				 BasicStringView<typename strT::value_type> token,
+				 bool case_sensitive)
 {
     if (str.length() < token.length()) {
         return false;
@@ -120,7 +122,9 @@ bool StartsWithT(const strT& str, BasicStringPiece<strT> token, bool case_sensit
 }
 
 template<typename strT>
-bool EndsWithT(const strT& str, BasicStringPiece<strT> token, bool case_sensitive)
+bool EndsWithT(BasicStringView<typename strT::value_type> str,
+			   BasicStringView<typename strT::value_type> token,
+			   bool case_sensitive)
 {
     if (str.length() < token.length()) {
         return false;
@@ -139,7 +143,8 @@ bool EndsWithT(const strT& str, BasicStringPiece<strT> token, bool case_sensitiv
 }
 
 template<typename strT>
-size_t SplitStringT(const strT& str, BasicStringPiece<strT>delimiters, std::vector<strT>& tokens)
+size_t SplitStringT(const strT& str, BasicStringView<typename strT::value_type> delimiters,
+					std::vector<strT>& tokens)
 {
     tokens.clear();
 
@@ -158,7 +163,7 @@ size_t SplitStringT(const strT& str, BasicStringPiece<strT>delimiters, std::vect
 }
 
 template<typename strT>
-strT JoinStringT(const std::vector<strT>& tokens, BasicStringPiece<strT> sep)
+strT JoinStringT(const std::vector<strT>& tokens, BasicStringView<typename strT::value_type> sep)
 {
     if (tokens.empty()) {
         return strT();
@@ -230,19 +235,19 @@ bool StringASCIICheck(viewT str)
 
 namespace kbase {
 
-void RemoveChars(std::string& str, StringPiece remove_chars)
+void RemoveChars(std::string& str, StringView remove_chars)
 {
     RemoveCharsT(str, remove_chars);
 }
 
-void RemoveChars(std::wstring& str, WStringPiece remove_chars)
+void RemoveChars(std::wstring& str, WStringView remove_chars)
 {
     RemoveCharsT(str, remove_chars);
 }
 
 void ReplaceSubstring(std::string& str,
-                      StringPiece find_with,
-                      StringPiece replace_with,
+                      StringView find_with,
+                      StringView replace_with,
                       std::string::size_type pos,
                       bool replace_all)
 {
@@ -250,50 +255,50 @@ void ReplaceSubstring(std::string& str,
 }
 
 void ReplaceSubstring(std::wstring& str,
-                      WStringPiece find_with,
-                      WStringPiece replace_with,
+                      WStringView find_with,
+                      WStringView replace_with,
                       std::wstring::size_type pos,
                       bool replace_all)
 {
     ReplaceSubstringT(str, find_with, replace_with, pos, replace_all);
 }
 
-void TrimString(std::string& str, StringPiece trim_chars)
+void TrimString(std::string& str, StringView trim_chars)
 {
     TrimStringT(str, trim_chars, TrimPosition::TRIM_ALL);
 }
 
-void TrimString(std::wstring& str, WStringPiece trim_chars)
+void TrimString(std::wstring& str, WStringView trim_chars)
 {
     TrimStringT(str, trim_chars, TrimPosition::TRIM_ALL);
 }
 
-void TrimLeadingString(std::string& str, StringPiece trim_chars)
+void TrimLeadingString(std::string& str, StringView trim_chars)
 {
     TrimStringT(str, trim_chars, TrimPosition::TRIM_LEADING);
 }
 
-void TrimLeadingString(std::wstring& str, WStringPiece trim_chars)
+void TrimLeadingString(std::wstring& str, WStringView trim_chars)
 {
     TrimStringT(str, trim_chars, TrimPosition::TRIM_LEADING);
 }
 
-void TrimTailingString(std::string& str, StringPiece trim_chars)
+void TrimTailingString(std::string& str, StringView trim_chars)
 {
     TrimStringT(str, trim_chars, TrimPosition::TRIM_TAILING);
 }
 
-void TrimTailingString(std::wstring& str, WStringPiece trim_chars)
+void TrimTailingString(std::wstring& str, WStringView trim_chars)
 {
     TrimStringT(str, trim_chars, TrimPosition::TRIM_TAILING);
 }
 
-bool ContainsOnlyChars(const std::string& str, StringPiece chars)
+bool ContainsOnlyChars(const std::string& str, StringView chars)
 {
     return ContainsOnlyCharsT(str, chars);
 }
 
-bool ContainsOnlyChars(const std::wstring& str, WStringPiece chars)
+bool ContainsOnlyChars(const std::wstring& str, WStringView chars)
 {
     return ContainsOnlyCharsT(str, chars);
 }
@@ -381,45 +386,45 @@ int SysStringCompareCaseInsensitive(const std::wstring& x, const std::wstring& y
     return ret - CSTR_EQUAL;
 }
 
-bool StartsWith(const std::string& str, StringPiece token, bool case_sensitive)
+bool StartsWith(StringView str, StringView token, bool case_sensitive)
 {
-    return StartsWithT(str, token, case_sensitive);
+    return StartsWithT<std::string>(str, token, case_sensitive);
 }
 
-bool StartsWith(const std::wstring& str, WStringPiece token, bool case_sensitive)
+bool StartsWith(WStringView str, WStringView token, bool case_sensitive)
 {
-    return StartsWithT(str, token, case_sensitive);
+    return StartsWithT<std::wstring>(str, token, case_sensitive);
 }
 
-bool EndsWith(const std::string& str, StringPiece token, bool case_sensitive)
+bool EndsWith(StringView str, StringView token, bool case_sensitive)
 {
-    return EndsWithT(str, token, case_sensitive);
+    return EndsWithT<std::string>(str, token, case_sensitive);
 }
 
-bool EndsWith(const std::wstring& str, WStringPiece token, bool case_sensitive)
+bool EndsWith(WStringView str, WStringView token, bool case_sensitive)
 {
-    return EndsWithT(str, token, case_sensitive);
+    return EndsWithT<std::wstring>(str, token, case_sensitive);
 }
 
-size_t SplitString(const std::string& str, StringPiece delimiters,
-                   std::vector<std::string>& tokens)
-{
-    return SplitStringT(str, delimiters, tokens);
-}
-
-size_t SplitString(const std::wstring& str, WStringPiece delimiters,
-                   std::vector<std::wstring>& tokens)
+size_t SplitString(const std::string& str, StringView delimiters,
+				   std::vector<std::string>& tokens)
 {
     return SplitStringT(str, delimiters, tokens);
 }
 
-std::string JoinString(const std::vector<std::string>& tokens, StringPiece sep)
+size_t SplitString(const std::wstring& str, WStringView delimiters,
+				   std::vector<std::wstring>& tokens)
+{
+    return SplitStringT(str, delimiters, tokens);
+}
+
+std::string JoinString(const std::vector<std::string>& tokens, StringView sep)
 {
     return JoinStringT(tokens, sep);
 }
 
 std::wstring JoinString(const std::vector<std::wstring>& tokens,
-                        WStringPiece sep)
+                        WStringView sep)
 {
     return JoinStringT(tokens, sep);
 }
@@ -434,12 +439,12 @@ bool MatchPattern(const std::wstring& str, const std::wstring& pat)
     return MatchPatternT(str.c_str(), pat.c_str());
 }
 
-bool IsStringASCII(StringPiece str)
+bool IsStringASCII(StringView str)
 {
     return StringASCIICheck(str);
 }
 
-bool IsStringASCII(WStringPiece str)
+bool IsStringASCII(WStringView str)
 {
     return StringASCIICheck(str);
 }

@@ -117,6 +117,7 @@ TEST(StringUtilTest, WriteIntoTest)
     EXPECT_TRUE(buffer.empty());
     size_t written_size = 12;
     auto ptr = WriteInto(buffer, written_size + 1);
+	UNREFED_VAR(ptr);
     EXPECT_EQ(written_size, buffer.size());
 }
 

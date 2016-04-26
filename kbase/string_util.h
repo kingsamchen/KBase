@@ -9,19 +9,17 @@
 #ifndef KBASE_STRING_UTIL_H_
 #define KBASE_STRING_UTIL_H_
 
-#include <cassert>
-#include <string>
 #include <vector>
 
 #include "kbase/error_exception_util.h"
-#include "kbase/string_piece.h"
+#include "kbase/string_view.h"
 
 namespace kbase {
 
 // Removes any characters specified by `remove_chars` from string `str`.
 
-void RemoveChars(std::string& str, StringPiece remove_chars);
-void RemoveChars(std::wstring& str, WStringPiece remove_chars);
+void RemoveChars(std::string& str, StringView remove_chars);
+void RemoveChars(std::wstring& str, WStringView remove_chars);
 
 // Replace `find_with` with `replace_with` in `str`.
 // `pos` indicates where the search begins. if `pos` equals to `npos` or is greater
@@ -29,33 +27,33 @@ void RemoveChars(std::wstring& str, WStringPiece remove_chars);
 // If `relace_all` is not true, then only the first occurrence would be replaced.
 
 void ReplaceSubstring(std::string& str,
-                      StringPiece find_with,
-                      StringPiece replace_with,
+                      StringView find_with,
+                      StringView replace_with,
                       std::string::size_type pos = 0,
                       bool replace_all = true);
 void ReplaceSubstring(std::wstring& str,
-                      WStringPiece find_with,
-                      WStringPiece replace_with,
+                      WStringView find_with,
+                      WStringView replace_with,
                       std::wstring::size_type pos = 0,
                       bool replace_all = true);
 
 // Removes characters in `trim_chars` in a certain range of `in`.
 // `trim_chars` indicates characters that need to be removed from `in`.
 
-void TrimString(std::string& str, StringPiece trim_chars);
-void TrimString(std::wstring& str, WStringPiece trim_chars);
+void TrimString(std::string& str, StringView trim_chars);
+void TrimString(std::wstring& str, WStringView trim_chars);
 
-void TrimLeadingString(std::string& str, StringPiece trim_chars);
-void TrimLeadingString(std::wstring& str, WStringPiece trim_chars);
+void TrimLeadingString(std::string& str, StringView trim_chars);
+void TrimLeadingString(std::wstring& str, WStringView trim_chars);
 
-void TrimTailingString(std::string& str, StringPiece trim_chars);
-void TrimTailingString(std::wstring& str, WStringPiece trim_chars);
+void TrimTailingString(std::string& str, StringView trim_chars);
+void TrimTailingString(std::wstring& str, WStringView trim_chars);
 
 // Returns true, if the `str` is empty or contains only characters in `chars`;
 // returns false, otherwise.
 
-bool ContainsOnlyChars(const std::string& str, StringPiece chars);
-bool ContainsOnlyChars(const std::wstring& str, WStringPiece chars);
+bool ContainsOnlyChars(const std::string& str, StringView chars);
+bool ContainsOnlyChars(const std::wstring& str, WStringView chars);
 
 // tolower and toupper are local sensitive, we might don't want to use them in some
 // situations.
@@ -112,21 +110,21 @@ int SysStringCompareCaseInsensitive(const std::wstring& x, const std::wstring& y
 // Returns true, if `str` starts with `token`.
 // Returns false, otherwise.
 
-bool StartsWith(const std::string& str,
-                StringPiece token,
+bool StartsWith(StringView str,
+                StringView token,
                 bool case_sensitive = true);
-bool StartsWith(const std::wstring& str,
-                WStringPiece token,
+bool StartsWith(WStringView str,
+                WStringView token,
                 bool case_sensitive = true);
 
 // Returns true, if `str` ends with `token`.
 // Returns false, otherwise.
 
-bool EndsWith(const std::string& str,
-              StringPiece token,
+bool EndsWith(StringView str,
+              StringView token,
               bool case_sensitive = true);
-bool EndsWith(const std::wstring& str,
-              WStringPiece token,
+bool EndsWith(WStringView str,
+              WStringView token,
               bool case_sensitive = true);
 
 // Set up enough memory in `str` to accomodate a c-style string with length
@@ -151,19 +149,19 @@ typename strT::value_type* WriteInto(strT& str, size_t length_including_null)
 // Returns the number of tokens found.
 
 size_t SplitString(const std::string& str,
-                   StringPiece delimiters,
+                   StringView delimiters,
                    std::vector<std::string>& tokens);
 size_t SplitString(const std::wstring& str,
-                   WStringPiece delimiters,
+                   WStringView delimiters,
                    std::vector<std::wstring>& tokens);
 
 // Combines string parts in `tokens` by using `sep` as separator.
 // Returns combined string.
 
 std::string JoinString(const std::vector<std::string>& tokens,
-                       StringPiece sep);
+                       StringView sep);
 std::wstring JoinString(const std::vector<std::wstring>& tokens,
-                        WStringPiece sep);
+                        WStringView sep);
 
 // Pattern matching algorithm, also supports wildcards, in case-sensitive mode.
 // metacharacter `?` matches exactly one character unless the character is a `.`
@@ -172,8 +170,8 @@ bool MatchPattern(const std::string& str, const std::string& pat);
 bool MatchPattern(const std::wstring& str, const std::wstring& pat);
 
 // Determines if all characters in string are defined in ASCII code page.
-bool IsStringASCII(StringPiece str);
-bool IsStringASCII(WStringPiece str);
+bool IsStringASCII(StringView str);
+bool IsStringASCII(WStringView str);
 
 template<typename T>
 struct ToUnsigned {

@@ -72,9 +72,6 @@
     <ClCompile Include="kbase\string_format.cpp">
       <Filter>kbase</Filter>
     </ClCompile>
-    <ClCompile Include="kbase\string_piece.cpp">
-      <Filter>kbase</Filter>
-    </ClCompile>
     <ClCompile Include="kbase\string_util.cpp">
       <Filter>kbase</Filter>
     </ClCompile>
@@ -174,9 +171,6 @@
       <Filter>kbase</Filter>
     </ClInclude>
     <ClInclude Include="kbase\string_format.h">
-      <Filter>kbase</Filter>
-    </ClInclude>
-    <ClInclude Include="kbase\string_piece.h">
       <Filter>kbase</Filter>
     </ClInclude>
     <ClInclude Include="kbase\string_util.h">

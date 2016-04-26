@@ -10,7 +10,7 @@
 #include <cassert>
 #include <xutility>
 
-#include "kbase/string_piece.h"
+#include "kbase/string_view.h"
 #include "kbase/sys_string_encoding_conversions.h"
 
 namespace kbase {
@@ -31,7 +31,7 @@ std::string GenerateGUID()
     // Since GUID contains ASCII-only characters, it is safe to do this conversion.
     // Strips off { and }.
     return count_written ?
-        WideToASCII(WStringPiece(guid_str.data() + 1, count_written - 3)) :
+        WideToASCII(WStringView(guid_str.data() + 1, count_written - 3)) :
         std::string();
 }
 

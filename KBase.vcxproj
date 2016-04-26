@@ -188,7 +188,6 @@
     <ClCompile Include="kbase\sha.cpp" />
     <ClCompile Include="kbase\stack_walker.cpp" />
     <ClCompile Include="kbase\string_format.cpp" />
-    <ClCompile Include="kbase\string_piece.cpp" />
     <ClCompile Include="kbase\string_util.cpp" />
     <ClCompile Include="kbase\sys_info.cpp" />
     <ClCompile Include="kbase\sys_string_encoding_conversions.cpp" />
@@ -226,7 +225,6 @@
     <ClInclude Include="kbase\sha.h" />
     <ClInclude Include="kbase\stack_walker.h" />
     <ClInclude Include="kbase\string_format.h" />
-    <ClInclude Include="kbase\string_piece.h" />
     <ClInclude Include="kbase\string_util.h" />
     <ClInclude Include="kbase\string_view.h" />
     <ClInclude Include="kbase\sys_info.h" />

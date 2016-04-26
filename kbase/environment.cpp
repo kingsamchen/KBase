@@ -9,7 +9,7 @@
 #include <vector>
 
 #include "kbase/error_exception_util.h"
-#include "kbase/string_piece.h"
+#include "kbase/string_view.h"
 
 namespace {
 
@@ -22,16 +22,16 @@ void ParseEnvironmentBlock(const wchar_t* block_string, kbase::EnvTable* env_tab
 
     auto* cur = block_string;
     auto* field_begin = cur;
-    kbase::WStringPiece key, value;
+    kbase::WStringView key, value;
 
     while (*cur != L'\0' || *(cur - 1) != L'\0') {
         if (*cur == L'=') {
-            key.set(field_begin, cur);
+			key = kbase::WStringView(field_begin, cur - field_begin);
             field_begin = cur + 1;
         } else if (*cur == L'\0') {
-            value.set(field_begin, cur);
+			value = kbase::WStringView(field_begin, cur - field_begin);
             field_begin = cur + 1;
-            env_table->emplace(std::make_pair(key.as_string(), value.as_string()));
+            env_table->emplace(std::make_pair(key.ToString(), value.ToString()));
         }
 
         ++cur;
