@@ -229,6 +229,7 @@
     <ClInclude Include="kbase\string_view.h" />
     <ClInclude Include="kbase\sys_info.h" />
     <ClInclude Include="kbase\sys_string_encoding_conversions.h" />
+    <ClInclude Include="kbase\tokenizer.h" />
     <ClInclude Include="kbase\version_util.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

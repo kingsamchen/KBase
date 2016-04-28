@@ -203,5 +203,8 @@
     <ClInclude Include="kbase\string_view.h">
       <Filter>kbase</Filter>
     </ClInclude>
+    <ClInclude Include="kbase\tokenizer.h">
+      <Filter>kbase</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
