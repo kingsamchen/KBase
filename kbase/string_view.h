@@ -260,6 +260,18 @@ public:
 		return substr(pos_1, count_1).compare(BasicStringView(str, count_2));
 	}
 
+    // Make these two operators friend to force appling cast during template deduction.
+
+    friend constexpr bool operator==(BasicStringView lhs, BasicStringView rhs) noexcept
+    {
+        return lhs.length() == rhs.length() && lhs.compare(rhs) == 0;
+    }
+
+    friend constexpr bool operator!=(BasicStringView lhs, BasicStringView rhs) noexcept
+    {
+        return lhs.length() != rhs.length() || lhs.compare(rhs) != 0;
+    }
+
 	size_type find(BasicStringView view, size_type pos = 0) const noexcept
 	{
 		if (length() < view.length() + pos) {
@@ -464,20 +476,6 @@ private:
 	const value_type* data_;
 	size_type length_;
 };
-
-template<typename CharT, typename Traits>
-constexpr bool operator==(BasicStringView<CharT, Traits> lhs,
-						  BasicStringView<CharT, Traits> rhs) noexcept
-{
-	return lhs.length() == rhs.length() && lhs.compare(rhs) == 0;
-}
-
-template<typename CharT, typename Traits>
-constexpr bool operator!=(BasicStringView<CharT, Traits> lhs,
-						  BasicStringView<CharT, Traits> rhs) noexcept
-{
-	return lhs.length() != rhs.length() || lhs.compare(rhs) != 0;
-}
 
 template<typename CharT, typename Traits>
 constexpr bool operator<(BasicStringView<CharT, Traits> lhs,

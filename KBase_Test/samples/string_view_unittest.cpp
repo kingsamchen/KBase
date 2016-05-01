@@ -289,6 +289,11 @@ TEST(StringViewTest, OperatorComparison)
 	kbase::StringView view_2 = "adc";
 	EXPECT_FALSE(view_1 == view_2);
 	EXPECT_TRUE(view_1 != view_2);
+
+    std::string str_1 = "abc";
+    const char kStr[] = "def";
+    EXPECT_TRUE(view_1 == str_1);
+    EXPECT_TRUE(view_2 != kStr);
 }
 
 TEST(StringViewTest, Output)
