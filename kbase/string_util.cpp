@@ -235,6 +235,50 @@ bool StringASCIICheck(viewT str)
 
 namespace kbase {
 
+void StringToLowerASCII(std::string& str)
+{
+    std::transform(str.begin(), str.end(), str.begin(), ToLowerASCII<char>);
+}
+
+void StringToLowerASCII(std::wstring& str)
+{
+    std::transform(str.begin(), str.end(), str.begin(), ToLowerASCII<wchar_t>);
+}
+
+std::string&& StringToLowerASCII(std::string&& str)
+{
+    StringToLowerASCII(str);
+    return std::move(str);
+}
+
+std::wstring&& StringToLowerASCII(std::wstring&& str)
+{
+    StringToLowerASCII(str);
+    return std::move(str);
+}
+
+void StringToUpperASCII(std::string& str)
+{
+    std::transform(str.begin(), str.end(), str.begin(), ToUpperASCII<char>);
+}
+
+void StringToUpperASCII(std::wstring& str)
+{
+    std::transform(str.begin(), str.end(), str.begin(), ToUpperASCII<wchar_t>);
+}
+
+std::string&& StringToUpperASCII(std::string&& str)
+{
+    StringToUpperASCII(str);
+    return std::move(str);
+}
+
+std::wstring&& StringToUpperASCII(std::wstring&& str)
+{
+    StringToUpperASCII(str);
+    return std::move(str);
+}
+
 void RemoveChars(std::string& str, StringView remove_chars)
 {
     RemoveCharsT(str, remove_chars);

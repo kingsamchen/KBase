@@ -72,21 +72,19 @@ charT ToUpperASCII(charT ch)
     return (ch >= 'a' && ch <= 'z') ? ch - 'a' + 'A' : ch;
 }
 
-template<typename strT>
-void StringToLowerASCII(strT& str)
-{
-    for (auto it = str.begin(); it != str.end(); ++it) {
-        *it = ToLowerASCII(*it);
-    }
-}
+// Converts the ASCII characters in a string to lower-case or upper-case.
 
-template<typename strT>
-void StringToUpperASCII(strT& str)
-{
-    for (auto it = str.begin(); it != str.end(); ++it) {
-        *it = ToUpperASCII(*it);
-    }
-}
+void StringToLowerASCII(std::string& str);
+void StringToLowerASCII(std::wstring& str);
+
+std::string&& StringToLowerASCII(std::string&& str);
+std::wstring&& StringToLowerASCII(std::wstring&& str);
+
+void StringToUpperASCII(std::string& str);
+void StringToUpperASCII(std::wstring& str);
+
+std::string&& StringToUpperASCII(std::string&& str);
+std::wstring&& StringToUpperASCII(std::wstring&& str);
 
 // Converts the string to lower-case or upper-case.
 // These functions support non-ASCII characters.

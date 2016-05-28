@@ -155,3 +155,10 @@ TEST(StringUtilTest, MatchPatter)
     EXPECT_TRUE(MatchPattern(str, "hello*"));
     EXPECT_TRUE(MatchPattern(str, "hello?world"));
 }
+
+TEST(StringUtilTest, StringToLowerASCII)
+{
+    std::string org_str = "HELLO, world";
+    std::string turned = StringToLowerASCII(std::move(org_str));
+    EXPECT_EQ(turned, std::string("hello, world"));
+}
