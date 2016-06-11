@@ -18,43 +18,7 @@ namespace kbase {
 // That is, they just visit the source.
 
 template<typename CharT>
-class BasicTokenizer {
-public:
-    using token_type = BasicStringView<CharT>;
-    class iterator;
-    using const_iterator = iterator;
-
-    explicit constexpr BasicTokenizer(BasicStringView<CharT> str, BasicStringView<CharT> delim)
-        : data_(str), delim_(delim)
-    {}
-
-    BasicTokenizer(const BasicTokenizer&) noexcept = default;
-
-    BasicTokenizer(BasicTokenizer&&) noexcept = default;
-
-    BasicTokenizer& operator=(const BasicTokenizer&) noexcept = default;
-
-    BasicTokenizer& operator=(BasicTokenizer&&) noexcept = default;
-
-    ~BasicTokenizer() = default;
-
-    iterator begin() const
-    {
-        return iterator(data_, 0, delim_);
-    }
-
-    iterator end() const
-    {
-        return iterator(data_, data_.length(), delim_);
-    }
-
-private:
-    token_type data_;
-    token_type delim_;
-};
-
-template<typename CharT>
-class BasicTokenizer<CharT>::iterator {
+class TokenIterator {
 public:
     using iterator_category = std::forward_iterator_tag;
     using token_type = BasicStringView<CharT>;
@@ -63,23 +27,23 @@ public:
     using pointer = const value_type*;
     using reference = const value_type&;
 
-    iterator(token_type data, size_t offset, token_type delim)
+    TokenIterator(token_type data, size_t offset, token_type delim)
         : data_(data), delim_(delim), offset_(offset)
     {
         GetToken();
     }
 
-    iterator(const iterator&) noexcept = default;
+    TokenIterator(const TokenIterator&) noexcept = default;
 
-    iterator(iterator&&) noexcept = default;
+    TokenIterator(TokenIterator&&) noexcept = default;
 
-    iterator& operator=(const iterator&) noexcept = default ;
+    TokenIterator& operator=(const TokenIterator&) noexcept = default;
 
-    iterator& operator=(iterator&&) noexcept = default;
+    TokenIterator& operator=(TokenIterator&&) noexcept = default;
 
-    ~iterator() = default;
+    ~TokenIterator() = default;
 
-    iterator& operator++()
+    TokenIterator& operator++()
     {
         ENSURE(CHECK, offset_ != data_.length()).Require("iterator now is not incrementable");
         offset_ = next_offset_;
@@ -87,9 +51,9 @@ public:
         return *this;
     }
 
-    iterator operator++(int)
+    TokenIterator operator++(int)
     {
-        iterator tmp = *this;
+        TokenIterator tmp = *this;
         ++(*this);
         return tmp;
     }
@@ -104,14 +68,14 @@ public:
         return &current_token_;
     }
 
-    friend bool operator==(const iterator& lhs, const iterator& rhs)
+    friend bool operator==(const TokenIterator& lhs, const TokenIterator& rhs)
     {
         return lhs.data_.data() == rhs.data_.data() &&
-               lhs.data_.length() == rhs.data_.length() &&
-               lhs.offset_ == rhs.offset_;
+            lhs.data_.length() == rhs.data_.length() &&
+            lhs.offset_ == rhs.offset_;
     }
 
-    friend bool operator!=(const iterator& lhs, const iterator& rhs)
+    friend bool operator!=(const TokenIterator& lhs, const TokenIterator& rhs)
     {
         return !(lhs == rhs);
     }
@@ -147,6 +111,42 @@ private:
     size_t offset_;
     token_type current_token_;
     size_t next_offset_ = 0ULL;
+};
+
+template<typename CharT>
+class BasicTokenizer {
+public:
+    using token_type = BasicStringView<CharT>;
+    using iterator = TokenIterator<CharT>;
+    using const_iterator = iterator;
+
+    explicit constexpr BasicTokenizer(BasicStringView<CharT> str, BasicStringView<CharT> delim)
+        : data_(str), delim_(delim)
+    {}
+
+    BasicTokenizer(const BasicTokenizer&) noexcept = default;
+
+    BasicTokenizer(BasicTokenizer&&) noexcept = default;
+
+    BasicTokenizer& operator=(const BasicTokenizer&) noexcept = default;
+
+    BasicTokenizer& operator=(BasicTokenizer&&) noexcept = default;
+
+    ~BasicTokenizer() = default;
+
+    iterator begin() const
+    {
+        return iterator(data_, 0, delim_);
+    }
+
+    iterator end() const
+    {
+        return iterator(data_, data_.length(), delim_);
+    }
+
+private:
+    token_type data_;
+    token_type delim_;
 };
 
 using Tokenizer = BasicTokenizer<char>;
