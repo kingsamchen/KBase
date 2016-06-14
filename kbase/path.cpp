@@ -528,10 +528,4 @@ Path& Path::MakePreferredSeparator()
     return MakePathSeparatorTo(kPreferredSeparator);
 }
 
-// static
-int Path::CompareIgnoreCase(const string_type& str1, const string_type& str2)
-{
-    return kbase::SysStringCompareCaseInsensitive(str1, str2);
-}
-
 }   // namespace kbase

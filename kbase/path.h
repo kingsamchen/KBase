@@ -167,19 +167,6 @@ public:
 
     Path& MakePathSeparatorTo(value_type separator);
 
-    // Case-insensitive comparison.
-    // Returns -1, if str1 < str2;
-    // Returns 0, if str1 == str2;
-    // Returns 1, if str1 > str2.
-    static int CompareIgnoreCase(const string_type& str1,
-                                 const string_type& str2);
-
-    static bool CompareEqualIgnoreCase(const string_type& str1,
-                                       const string_type& str2)
-    {
-        return CompareIgnoreCase(str1, str2) == 0;
-    }
-
 private:
     string_type path_;
 };
