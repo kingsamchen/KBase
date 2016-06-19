@@ -4,14 +4,14 @@
 
 #include "stdafx.h"
 
-#include "gtest\gtest.h"
-#include "kbase\pickle.h"
+#include "gtest/gtest.h"
+#include "kbase/pickle.h"
 
 #include <tuple>
 #include <vector>
 
 using kbase::Pickle;
-using kbase::PickleIterator;
+using kbase::PickleReader;
 
 namespace {
 
@@ -51,7 +51,7 @@ void MarshalDataToPickle(Pickle* pk)
 
 auto UnMarshalDataFromPickle(const Pickle& pk)->decltype(data_list)
 {
-    PickleIterator it(pk);
+    PickleReader it(pk);
     bool b_data;
     it.Read(&b_data);
     bool b_data2;

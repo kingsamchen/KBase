@@ -16,9 +16,9 @@ namespace kbase {
 
 class Pickle;
 
-class PickleIterator {
+class PickleReader {
 public:
-    explicit PickleIterator(const Pickle& pickle);
+    explicit PickleReader(const Pickle& pickle);
 
     bool Read(bool* result);
 
@@ -163,7 +163,7 @@ private:
     Header* header_;
     size_t capacity_;
 
-    friend class PickleIterator;
+    friend class PickleReader;
 };
 
 inline size_t Pickle::size() const

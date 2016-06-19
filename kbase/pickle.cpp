@@ -5,9 +5,6 @@
 #include "kbase/pickle.h"
 
 #include <algorithm>
-#include <cassert>
-#include <cstdlib>
-#include <cstring>
 
 #include "kbase/error_exception_util.h"
 
@@ -17,46 +14,46 @@ namespace kbase {
 const int Pickle::kPayloadUnit = 64;
 static const size_t kCapacityReadOnly = static_cast<size_t>(-1);
 
-PickleIterator::PickleIterator(const Pickle& pickle)
+PickleReader::PickleReader(const Pickle& pickle)
     : read_ptr_(pickle.payload()), read_end_ptr_(pickle.end_of_payload())
 {}
 
-bool PickleIterator::Read(bool* result)
+bool PickleReader::Read(bool* result)
 {
     return ReadBuiltIninType(result);
 }
 
-bool PickleIterator::Read(int* result)
+bool PickleReader::Read(int* result)
 {
     return ReadBuiltIninType(result);
 }
 
-bool PickleIterator::Read(uint32_t* result)
+bool PickleReader::Read(uint32_t* result)
 {
     return ReadBuiltIninType(result);
 }
 
-bool PickleIterator::Read(int64_t* result)
+bool PickleReader::Read(int64_t* result)
 {
     return ReadBuiltIninType(result);
 }
 
-bool PickleIterator::Read(uint64_t* result)
+bool PickleReader::Read(uint64_t* result)
 {
     return ReadBuiltIninType(result);
 }
 
-bool PickleIterator::Read(float* result)
+bool PickleReader::Read(float* result)
 {
     return ReadBuiltIninType(result);
 }
 
-bool PickleIterator::Read(double* result)
+bool PickleReader::Read(double* result)
 {
     return ReadBuiltIninType(result);
 }
 
-bool PickleIterator::Read(std::string* result)
+bool PickleReader::Read(std::string* result)
 {
     int str_length;
     if (!Read(&str_length)) {
@@ -72,7 +69,7 @@ bool PickleIterator::Read(std::string* result)
     return true;
 }
 
-bool PickleIterator::Read(std::wstring* result)
+bool PickleReader::Read(std::wstring* result)
 {
     int str_length;
     if (!Read(&str_length)) {
@@ -88,7 +85,7 @@ bool PickleIterator::Read(std::wstring* result)
     return true;
 }
 
-bool PickleIterator::ReadBytes(const char** data, int length)
+bool PickleReader::ReadBytes(const char** data, int length)
 {
     const char* read_from = GetReadPointerAndAdvance(length);
     if (!read_from) {
@@ -100,7 +97,7 @@ bool PickleIterator::ReadBytes(const char** data, int length)
     return true;
 }
 
-bool PickleIterator::ReadData(const char** data, int* read_length)
+bool PickleReader::ReadData(const char** data, int* read_length)
 {
     if (!Read(read_length)) {
         *data = nullptr;
@@ -111,7 +108,7 @@ bool PickleIterator::ReadData(const char** data, int* read_length)
     return ReadBytes(data, *read_length);
 }
 
-bool PickleIterator::SkipBytes(int num_bytes)
+bool PickleReader::SkipBytes(int num_bytes)
 {
     return !!GetReadPointerAndAdvance(num_bytes);
 }
@@ -122,7 +119,7 @@ bool PickleIterator::SkipBytes(int num_bytes)
 #pragma warning(disable:4127)
 
 template<typename T>
-inline bool PickleIterator::ReadBuiltIninType(T* result)
+inline bool PickleReader::ReadBuiltIninType(T* result)
 {
     const char* read_from = GetReadPointerAndAdvance<T>();
 
@@ -140,7 +137,7 @@ inline bool PickleIterator::ReadBuiltIninType(T* result)
 }
 
 template<typename T>
-inline const char* PickleIterator::GetReadPointerAndAdvance()
+inline const char* PickleReader::GetReadPointerAndAdvance()
 {
     const char* curr_read_ptr = read_ptr_;
 
@@ -160,7 +157,7 @@ inline const char* PickleIterator::GetReadPointerAndAdvance()
 
 #pragma warning(pop)
 
-const char* PickleIterator::GetReadPointerAndAdvance(int num_bytes)
+const char* PickleReader::GetReadPointerAndAdvance(int num_bytes)
 {
     const char* curr_read_ptr = read_ptr_;
 
@@ -173,7 +170,7 @@ const char* PickleIterator::GetReadPointerAndAdvance(int num_bytes)
     return curr_read_ptr;
 }
 
-const char* PickleIterator::GetReadPointerAndAdvance(int num_elements,
+const char* PickleReader::GetReadPointerAndAdvance(int num_elements,
                                                      size_t element_size)
 {
     int64_t num_bytes = static_cast<int64_t>(num_elements) * element_size;
