@@ -63,13 +63,14 @@ private:
 };
 
 
-// Note: every segment in payload is uint32 aligned, thus there might be a gap
-// between two logically consective segments.
-// <------------capacity----------->
-// +------+----+----+---+----+-----+
-// |header|seg1|seg2|...|segn|     |
-// +------+----+----+---+----+-----+
-//        <-----payload------>
+// Underlying memory layout:
+// <---------------- capacity -------------->
+// +------+-----+-----+-+-----+---+-----+---+
+// |header|seg_1|seg_2|#|seg_3|...|seg_n|   |
+// +------+-----+-----+-+-----+---+-----+---+
+//        <---------- payload ---------->
+// Note that, every segment in payload is uint32 aligned, thus there might be
+// a padding between two logically consecutive segments.
 
 class Pickle {
 private:
@@ -80,9 +81,9 @@ private:
 public:
     Pickle();
 
-    // Results in a Pickle object that has weak-reference to a serialized buffer.
+    // Creates a Pickle object that has weak-reference to a serialized buffer.
     // The Pickle object cannot call any modifiable methods, and caller must ensure
-    // the referee is in a valid state, when PickleIterator is applied.
+    // the referee is in a valid state, when PickleReader is applied.
     Pickle(const char* data, int data_len);
 
     // Makes a deep copy of the Pickle object.
@@ -135,14 +136,16 @@ public:
 
     inline size_t payload_size() const;
 
-private:
-    // Resizes the capacity of internal buffer. This function internally rounds the
-    // |new_capacity| up to the next multiple of predefined alignment.
-    // Be wary of that, the |new_capacity| actually includes internal header size.
-    // e.g. new_capacity = header_size + your_desired_payload_size
-    bool Resize(size_t new_capacity);
+    // Returns true, if this object is weakly bound to a serialized buffer.
+    bool readonly() const
+    {
+        return capacity_ == kCapacityReadOnly;
+    }
 
-    static size_t AlignInt(size_t i, int alignment);
+private:
+    // Resizes the capacity of the internal buffer. This function internally rounds the
+    // `new_capacity` up to the nearest multiple of predefined storage unit.
+    void Resize(size_t new_capacity);
 
     // Locates to the next uint32-aligned offset, and resize internal buffer if
     // necessary.
@@ -159,7 +162,8 @@ private:
     inline const char* end_of_payload() const;
 
 private:
-    static const int kPayloadUnit;
+    static constexpr const size_t kCapacityReadOnly = static_cast<size_t>(-1);
+    static constexpr const size_t kCapacityUnit = 64U;
     Header* header_;
     size_t capacity_;
 
