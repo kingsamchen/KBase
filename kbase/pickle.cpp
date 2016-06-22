@@ -190,8 +190,6 @@ const char* PickleReader::GetReadPointerAndAdvance(int num_elements,
 
 // --* Pickle *--
 
-// Payload is uint32 aligned.
-
 Pickle::Pickle()
     : header_(nullptr), capacity_(0)
 {
@@ -199,69 +197,68 @@ Pickle::Pickle()
     header_->payload_size = 0;
 }
 
-Pickle::Pickle(const char* data, int)
-    : header_(reinterpret_cast<Header*>(const_cast<char*>(data))),
-      capacity_(kCapacityReadOnly)
-{}
+Pickle::Pickle(const void* data, size_t size_in_bytes)
+    : header_(nullptr), capacity_(0)
+{
+    ENSURE(CHECK, data != nullptr && size_in_bytes > 0).Require();
+    Resize(size_in_bytes);
+    memcpy_s(header_, capacity_, data, size_in_bytes);
+}
 
 Pickle::Pickle(const Pickle& other)
     : header_(nullptr), capacity_(0)
 {
-    // If |other| is constructed from a const buffer, its capacity value is
-    // kCapacityReadOnly. therefore, calculate its capacity on hand.
-    size_t capacity = sizeof(Header) + other.header_->payload_size;
-    Resize(capacity);
-
-    memcpy_s(header_, capacity_, other.header_, capacity);
+    Resize(other.size());
+    memcpy_s(header_, capacity_, other.header_, other.size());
 }
 
-Pickle::Pickle(Pickle&& other)
+Pickle::Pickle(Pickle&& other) noexcept
+    : header_(other.header_), capacity_(other.capacity_)
 {
-    *this = std::move(other);
-}
-
-Pickle& Pickle::operator=(const Pickle& rhs)
-{
-    if (this == &rhs) {
-        return *this;
-    }
-
-    if (capacity_ == kCapacityReadOnly) {
-        header_ = nullptr;
-        capacity_ = 0;
-    }
-
-    size_t capacity = sizeof(Header) + rhs.header_->payload_size;
-    Resize(capacity);
-
-    memcpy_s(header_, capacity_, rhs.header_, capacity);
-
-    return *this;
-}
-
-Pickle& Pickle::operator=(Pickle&& rhs)
-{
-    if (this != &rhs) {
-        header_ = rhs.header_;
-        capacity_ = rhs.capacity_;
-        // Let it die peacefully.
-        rhs.capacity_ = kCapacityReadOnly;
-        rhs.header_ = nullptr;
-    }
-
-    return *this;
+    other.header_ = nullptr;
+    other.capacity_ = 0;
 }
 
 Pickle::~Pickle()
 {
-    if (capacity_ != kCapacityReadOnly) {
+    // Technically, only pickles having been moved have null header.
+    if (header_ != nullptr) {
         free(header_);
     }
 }
 
+Pickle& Pickle::operator=(const Pickle& rhs)
+{
+    if (this != &rhs) {
+        if (capacity_ < rhs.size()) {
+            Resize(rhs.size());
+        }
+
+        memcpy_s(header_, capacity_, rhs.header_, rhs.size());
+    }
+
+    return *this;
+}
+
+Pickle& Pickle::operator=(Pickle&& rhs) noexcept
+{
+    if (this != &rhs) {
+        Header* old_header = header_;
+
+        header_ = rhs.header_;
+        capacity_ = rhs.capacity_;
+        rhs.header_ = nullptr;
+        rhs.capacity_ = 0;
+
+        free(old_header);
+    }
+
+    return *this;
+}
+
 void Pickle::Resize(size_t new_capacity)
 {
-    ENSURE(CHECK, !readonly() && new_capacity > capacity_).Require();
+    ENSURE(CHECK, new_capacity > capacity_).Require();
 
     new_capacity = RoundToMultiple(new_capacity, kCapacityUnit);
     void* ptr = realloc(header_, new_capacity);
@@ -291,11 +288,6 @@ bool Pickle::Write(const std::wstring& value)
 
 bool Pickle::WriteByte(const void* data, int data_len)
 {
-    if (capacity_ == kCapacityReadOnly) {
-        ENSURE(CHECK, NotReached()).Require();
-        return false;
-    }
-
     char* dest = BeginWrite(data_len);
     if (!dest) {
         return false;

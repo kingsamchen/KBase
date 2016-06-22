@@ -33,20 +33,18 @@ auto data_list = std::make_tuple(true,
                                  std::string("hello"),
                                  std::wstring(L"world"));
 
-void MarshalDataToPickle(Pickle* pk)
+void MarshalDataToPickle(Pickle& pk)
 {
-    ASSERT_TRUE(pk->empty());
-
-    ASSERT_TRUE(pk->Write(std::get<0>(data_list)));
-    ASSERT_TRUE(pk->Write(std::get<1>(data_list)));
-    ASSERT_TRUE(pk->Write(std::get<2>(data_list)));
-    ASSERT_TRUE(pk->Write(std::get<3>(data_list)));
-    ASSERT_TRUE(pk->Write(std::get<4>(data_list)));
-    ASSERT_TRUE(pk->Write(std::get<5>(data_list)));
-    ASSERT_TRUE(pk->Write(std::get<6>(data_list)));
-    ASSERT_TRUE(pk->Write(std::get<7>(data_list)));
-    ASSERT_TRUE(pk->Write(std::get<8>(data_list)));
-    ASSERT_TRUE(pk->Write(std::get<9>(data_list)));
+    ASSERT_TRUE(pk.Write(std::get<0>(data_list)));
+    ASSERT_TRUE(pk.Write(std::get<1>(data_list)));
+    ASSERT_TRUE(pk.Write(std::get<2>(data_list)));
+    ASSERT_TRUE(pk.Write(std::get<3>(data_list)));
+    ASSERT_TRUE(pk.Write(std::get<4>(data_list)));
+    ASSERT_TRUE(pk.Write(std::get<5>(data_list)));
+    ASSERT_TRUE(pk.Write(std::get<6>(data_list)));
+    ASSERT_TRUE(pk.Write(std::get<7>(data_list)));
+    ASSERT_TRUE(pk.Write(std::get<8>(data_list)));
+    ASSERT_TRUE(pk.Write(std::get<9>(data_list)));
 }
 
 auto UnMarshalDataFromPickle(const Pickle& pk)->decltype(data_list)
@@ -79,12 +77,72 @@ auto UnMarshalDataFromPickle(const Pickle& pk)->decltype(data_list)
 
 }   // namespace
 
+TEST(PickleTest, Construction)
+{
+    Pickle pk;
+    EXPECT_TRUE(pk.empty());
+    MarshalDataToPickle(pk);
+
+    // from serialized buffer.
+    std::vector<char> buf;
+    buf.resize(pk.size());
+    memcpy_s(buf.data(), buf.size(), pk.data(), pk.size());
+    Pickle copy_pk(buf.data(), buf.size());
+    auto ret_from_const_pk = UnMarshalDataFromPickle(copy_pk);
+    EXPECT_EQ(data_list, ret_from_const_pk);
+    EXPECT_TRUE(pk.size() == copy_pk.size());
+
+    // copy-ctor
+    Pickle copy_pickle(pk);
+    auto ret_from_copy_ctor = UnMarshalDataFromPickle(copy_pickle);
+    EXPECT_EQ(data_list, ret_from_copy_ctor);
+    EXPECT_TRUE(pk.size() == copy_pickle.size());
+
+    // move-ctor
+    Pickle move_pickle(std::move(copy_pickle));
+    auto ret_from_move_ctor = UnMarshalDataFromPickle(move_pickle);
+    EXPECT_EQ(data_list, ret_from_move_ctor);
+}
+
+TEST(PickleTest, Assignments)
+{
+    Pickle pickle;
+    MarshalDataToPickle(pickle);
+    ASSERT_TRUE(pickle.size() > 64);
+
+    // copy-assignment
+    {
+        // larger to smaller.
+        Pickle cp_pickle;
+        cp_pickle = pickle;
+        EXPECT_TRUE(cp_pickle.size() == pickle.size());
+        auto ret_from_copy = UnMarshalDataFromPickle(cp_pickle);
+        EXPECT_EQ(data_list, ret_from_copy);
+
+        // smaller to larger.
+        Pickle unused_pickle;
+        cp_pickle = unused_pickle;
+        EXPECT_TRUE(cp_pickle.empty());
+    }
+
+    // move-assignment
+    {
+        Pickle another_pickle(pickle);
+        EXPECT_FALSE(another_pickle.empty());
+        Pickle brand_new_pickle;
+        EXPECT_TRUE(brand_new_pickle.empty());
+        brand_new_pickle = std::move(another_pickle);
+        EXPECT_FALSE(brand_new_pickle.empty());
+        auto ret_from_move = UnMarshalDataFromPickle(brand_new_pickle);
+        EXPECT_EQ(data_list, ret_from_move);
+    }
+}
+
 TEST(PickleTest, WriteBytesAndDataSize)
 {
     Pickle pickle;
     EXPECT_EQ(sizeof(PickleHeader), pickle.size());
     EXPECT_TRUE(pickle.empty());
-    
     ASSERT_TRUE(pickle.WriteByte(kChaosData, kChaosDataSize));
     EXPECT_EQ(sizeof(PickleHeader) + kChaosDataSize, pickle.size());
     EXPECT_FALSE(pickle.empty());
@@ -94,49 +152,7 @@ TEST(PickleTest, WriteBytesAndDataSize)
 TEST(PickleTest, SerializeAndDeserialize)
 {
     Pickle pickle;
-    MarshalDataToPickle(&pickle);
+    MarshalDataToPickle(pickle);
     auto unmarshalled_data_list = UnMarshalDataFromPickle(pickle);
     EXPECT_EQ(unmarshalled_data_list, data_list);
-}
-
-TEST(PickleTest, Construction)
-{
-    Pickle pk;
-    MarshalDataToPickle(&pk);
-
-    // holds in buffer.
-    std::vector<char> buf;
-    buf.resize(pk.size());
-    memcpy_s(buf.data(), buf.size(), pk.data(), pk.size());
-
-    // const pickle
-    Pickle const_pk(buf.data(), buf.size());
-    auto ret_from_const_pk = UnMarshalDataFromPickle(const_pk);
-    EXPECT_EQ(data_list, ret_from_const_pk);
-
-    // deep-copy from copy-ctor
-    Pickle copy_pickle = pk;
-    auto ret_from_copy_ctor = UnMarshalDataFromPickle(copy_pickle);
-    EXPECT_EQ(data_list, ret_from_copy_ctor);
-
-    // deep-copy from copy-assignment
-    Pickle assigned_pickle;
-    assigned_pickle = const_pk;
-    auto ret_from_assigned = UnMarshalDataFromPickle(assigned_pickle);
-    EXPECT_EQ(data_list, ret_from_assigned);
-}
-
-TEST(PickleTest, Move)
-{
-    auto fn = []()->Pickle {
-        Pickle tmp;
-        MarshalDataToPickle(&tmp);
-        EXPECT_FALSE(tmp.empty());
-
-        return tmp;
-    };
-
-    Pickle pk = fn();
-    auto ret_from_move = UnMarshalDataFromPickle(pk);
-    ASSERT_EQ(data_list, ret_from_move);
 }

@@ -69,8 +69,8 @@ private:
 // |header|seg_1|seg_2|#|seg_3|...|seg_n|   |
 // +------+-----+-----+-+-----+---+-----+---+
 //        <---------- payload ---------->
-// Note that, every segment in payload is uint32 aligned, thus there might be
-// a padding between two logically consecutive segments.
+// Note that, every segment starts on the address that is 4-byte aligned, thus
+// there might be a padding between two logically consecutive segments.
 
 class Pickle {
 private:
@@ -81,20 +81,16 @@ private:
 public:
     Pickle();
 
-    // Creates a Pickle object that has weak-reference to a serialized buffer.
-    // The Pickle object cannot call any modifiable methods, and caller must ensure
-    // the referee is in a valid state, when PickleReader is applied.
-    Pickle(const char* data, int data_len);
+    // Creates from a given serialized buffer.
+    Pickle(const void* data, size_t size_in_bytes);
 
-    // Makes a deep copy of the Pickle object.
     Pickle(const Pickle& other);
 
-    Pickle(Pickle&& other);
+    Pickle(Pickle&& other) noexcept;
 
-    // Makes a deep copy of the Pickle object.
     Pickle& operator=(const Pickle& rhs);
 
-    Pickle& operator=(Pickle&& rhs);
+    Pickle& operator=(Pickle&& rhs) noexcept;
 
     ~Pickle();
 
@@ -136,12 +132,6 @@ public:
 
     inline size_t payload_size() const;
 
-    // Returns true, if this object is weakly bound to a serialized buffer.
-    bool readonly() const
-    {
-        return capacity_ == kCapacityReadOnly;
-    }
-
 private:
     // Resizes the capacity of the internal buffer. This function internally rounds the
     // `new_capacity` up to the nearest multiple of predefined storage unit.
@@ -162,7 +152,6 @@ private:
     inline const char* end_of_payload() const;
 
 private:
-    static constexpr const size_t kCapacityReadOnly = static_cast<size_t>(-1);
     static constexpr const size_t kCapacityUnit = 64U;
     Header* header_;
     size_t capacity_;
