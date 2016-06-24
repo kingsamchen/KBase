@@ -6,8 +6,6 @@
 
 #include <algorithm>
 
-#include "kbase/error_exception_util.h"
-
 namespace {
 
 // Rounds up `num` to the nearest multiple of `factor`.
@@ -16,12 +14,20 @@ constexpr size_t RoundToMultiple(size_t num, size_t factor)
     return factor == 0 ? 0 : (num - 1 - (num - 1) % factor + factor);
 }
 
+// Zeros padding memory; otherwise some memory detectors may complain about
+// uninitialized memory.
+void SanitizePadding(byte* padding_begin, size_t padding_size)
+{
+    memset(padding_begin, 0, padding_size);
+}
+
 }   // namespace
 
 namespace kbase {
 
 PickleReader::PickleReader(const Pickle& pickle)
-    : read_ptr_(pickle.payload()), read_end_ptr_(pickle.end_of_payload())
+    : read_ptr_(static_cast<const char*>(pickle.payload())),
+      read_end_ptr_(static_cast<const char*>(pickle.end_of_payload()))
 {}
 
 bool PickleReader::Read(bool* result)
@@ -193,7 +199,7 @@ const char* PickleReader::GetReadPointerAndAdvance(int num_elements,
 Pickle::Pickle()
     : header_(nullptr), capacity_(0)
 {
-    Resize(kCapacityUnit);
+    ResizeCapacity(kCapacityUnit);
     header_->payload_size = 0;
 }
 
@@ -201,14 +207,14 @@ Pickle::Pickle(const void* data, size_t size_in_bytes)
     : header_(nullptr), capacity_(0)
 {
     ENSURE(CHECK, data != nullptr && size_in_bytes > 0).Require();
-    Resize(size_in_bytes);
+    ResizeCapacity(size_in_bytes);
     memcpy_s(header_, capacity_, data, size_in_bytes);
 }
 
 Pickle::Pickle(const Pickle& other)
     : header_(nullptr), capacity_(0)
 {
-    Resize(other.size());
+    ResizeCapacity(other.size());
     memcpy_s(header_, capacity_, other.header_, other.size());
 }
 
@@ -231,7 +237,7 @@ Pickle& Pickle::operator=(const Pickle& rhs)
 {
     if (this != &rhs) {
         if (capacity_ < rhs.size()) {
-            Resize(rhs.size());
+            ResizeCapacity(rhs.size());
         }
 
         memcpy_s(header_, capacity_, rhs.header_, rhs.size());
@@ -256,7 +262,7 @@ Pickle& Pickle::operator=(Pickle&& rhs) noexcept
     return *this;
 }
 
-void Pickle::Resize(size_t new_capacity)
+void Pickle::ResizeCapacity(size_t new_capacity)
 {
     ENSURE(CHECK, new_capacity > capacity_).Require();
 
@@ -268,64 +274,43 @@ void Pickle::Resize(size_t new_capacity)
     capacity_ = new_capacity;
 }
 
-bool Pickle::Write(const std::string& value)
+void Pickle::Write(const std::string& value)
 {
-    if (!Write(static_cast<int>(value.size()))) {
-        return false;
-    }
-
-    return WriteByte(value.data(), static_cast<int>(value.size()));
+    Write(static_cast<int>(value.size()));
+    Write(value.data(), static_cast<int>(value.size()));
 }
 
-bool Pickle::Write(const std::wstring& value)
+void Pickle::Write(const std::wstring& value)
 {
-    if (!Write(static_cast<int>(value.size()))) {
-        return false;
-    }
-
-    return WriteByte(value.data(), static_cast<int>(value.size() * sizeof(wchar_t)));
+    Write(static_cast<int>(value.size()));
+    Write(value.data(), static_cast<int>(value.size() * sizeof(wchar_t)));
 }
 
-bool Pickle::WriteByte(const void* data, int data_len)
+void Pickle::Write(const void* data, size_t size_in_bytes)
 {
-    char* dest = BeginWrite(data_len);
-    if (!dest) {
-        return false;
-    }
-
-    size_t extra_size = capacity_ - (dest - reinterpret_cast<char*>(header_));
-    memcpy_s(dest, extra_size, data, data_len);
-    EndWrite(dest, data_len);
-
-    return true;
+    size_t last_payload_size = payload_size();
+    byte* dest = SeekWritePosition(size_in_bytes);
+    size_t free_buf_size = capacity_ - (dest - reinterpret_cast<byte*>(header_));
+    memcpy_s(dest, free_buf_size, data, size_in_bytes);
+    size_t padding_size = payload_size() - last_payload_size - size_in_bytes;
+    SanitizePadding(dest - padding_size, padding_size);
 }
 
-bool Pickle::WriteData(const char* data, int length)
+byte* Pickle::SeekWritePosition(size_t length)
 {
-    return length >= 0 && Write(length) && WriteByte(data, length);
-}
-
-char* Pickle::BeginWrite(size_t length)
-{
-    // Write at a uint32-aligned offset from the begining of head.
+    // Writing starts at a uint32-aligned offset.
     size_t offset = RoundToMultiple(header_->payload_size, sizeof(uint32_t));
     size_t required_size = offset + length;
-    size_t total_required_size = required_size + sizeof(Header);
+    size_t required_total_size = required_size + sizeof(Header);
 
-    if (total_required_size > capacity_) {
-        Resize(std::max(capacity_ << 1, total_required_size));
+    if (required_total_size > capacity_) {
+        ResizeCapacity(std::max(capacity_ << 1, required_total_size));
     }
 
+    ENSURE(CHECK, required_size <= std::numeric_limits<uint32_t>::max())(required_size).Require();
     header_->payload_size = static_cast<uint32_t>(required_size);
 
     return mutable_payload() + offset;
-}
-
-void Pickle::EndWrite(char* dest, size_t length)
-{
-    if (length % sizeof(uint32_t)) {
-        memset(dest + length, 0, sizeof(uint32_t) - (length % sizeof(uint32_t)));
-    }
 }
 
 }   // namespace kbase

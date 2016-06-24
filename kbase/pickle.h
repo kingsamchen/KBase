@@ -10,7 +10,9 @@
 #define KBASE_PICKLE_H_
 
 #include <cstdint>
-#include <string>
+
+#include "kbase/basic_types.h"
+#include "kbase/error_exception_util.h"
 
 namespace kbase {
 
@@ -94,62 +96,75 @@ public:
 
     ~Pickle();
 
-    // Returns the size of internal data, including header.
-    inline size_t size() const;
+    const void* data() const noexcept
+    {
+        return header_;
+    }
 
-    // Returns true, if no payload there, i.e. payload_size == 0.
+    // Returns the size of internal data, including header, in bytes.
+    size_t size() const noexcept
+    {
+        ENSURE(CHECK, header_ != nullptr).Require();
+        return sizeof(Header) + header_->payload_size;
+    }
+
+    const void* payload() const noexcept
+    {
+        return header_ + 1;
+    }
+
+    size_t payload_size() const noexcept
+    {
+        ENSURE(CHECK, header_ != nullptr).Require();
+        return header_->payload_size;
+    }
+
+    // Returns true, if no payload.
     // Returns false, otherwise.
-    inline bool empty() const;
+    bool payload_empty() const noexcept
+    {
+        return payload_size() == 0;
+    }
 
-    inline const void* data() const;
+    inline void Write(bool value);
 
-    inline bool Write(bool value);
+    inline void Write(int value);
 
-    inline bool Write(int value);
+    inline void Write(uint32_t value);
 
-    inline bool Write(uint32_t value);
+    inline void Write(int64_t value);
 
-    inline bool Write(int64_t value);
+    inline void Write(uint64_t value);
 
-    inline bool Write(uint64_t value);
+    inline void Write(float value);
 
-    inline bool Write(float value);
+    inline void Write(double value);
 
-    inline bool Write(double value);
+    void Write(const std::string& value);
 
-    bool Write(const std::string& value);
+    void Write(const std::wstring& value);
 
-    bool Write(const std::wstring& value);
-
-    // Serializes data in byte with specified length. PoD types only.
-    // These functions guarantee that the internal data remains unchanged if the
-    // funtion fails.
-    bool WriteByte(const void* data, int data_len);
-
-    bool WriteData(const char* data, int length);
-
-    inline const char* payload() const;
-
-    inline size_t payload_size() const;
+    // Serializes data in byte with specified length.
+    void Write(const void* data, size_t size_in_bytes);
 
 private:
     // Resizes the capacity of the internal buffer. This function internally rounds the
     // `new_capacity` up to the nearest multiple of predefined storage unit.
-    void Resize(size_t new_capacity);
+    void ResizeCapacity(size_t new_capacity);
 
-    // Locates to the next uint32-aligned offset, and resize internal buffer if
-    // necessary.
-    // Returns the location that the data should be written at, or nullptr if
-    // an error occured.
-    char* BeginWrite(size_t length);
+    // Locates to an uint32-aligned offset as the starting position, and resizes
+    // the internal buffer if free space is less than demand(padding plus `length`).
+    byte* SeekWritePosition(size_t length);
 
-    // Zeros pading memory; otherwise some memory detectors may complain about
-    // uninitialized memory.
-    void EndWrite(char* dest, size_t length);
+    byte* mutable_payload() const noexcept
+    {
+        return const_cast<byte*>(static_cast<const byte*>(payload()));
+    }
 
-    inline char* mutable_payload() const;
-
-    inline const char* end_of_payload() const;
+    const void* end_of_payload() const noexcept
+    {
+        return static_cast<const byte*>(payload()) + payload_size();
+    }
 
 private:
     static constexpr const size_t kCapacityUnit = 64U;
@@ -159,70 +174,35 @@ private:
     friend class PickleReader;
 };
 
-inline size_t Pickle::size() const
+inline void Pickle::Write(bool value)
 {
-    return sizeof(Header) + header_->payload_size;
+    Write(value ? 1 : 0);
 }
 
-inline bool Pickle::empty() const
+inline void Pickle::Write(int value)
 {
-    return payload_size() == 0;
+    Write(&value, sizeof(value));
 }
 
-inline const void* Pickle::data() const
+inline void Pickle::Write(uint32_t value)
 {
-    return header_;
+    Write(&value, sizeof(value));
 }
-
-inline size_t Pickle::payload_size() const
+inline void Pickle::Write(int64_t value)
 {
-    return header_->payload_size;
+    Write(&value, sizeof(value));
 }
-
-inline char* Pickle::mutable_payload() const
+inline void Pickle::Write(uint64_t value)
 {
-    return const_cast<char*>(payload());
+    Write(&value, sizeof(value));
 }
-
-inline const char* Pickle::payload() const
+inline void Pickle::Write(float value)
 {
-    return reinterpret_cast<const char*>(header_) + sizeof(Header);
+    Write(&value, sizeof(value));
 }
-
-inline const char* Pickle::end_of_payload() const
+inline void Pickle::Write(double value)
 {
-    return payload() + payload_size();
-}
-
-inline bool Pickle::Write(bool value)
-{
-    return Write(value ? 1 : 0);
-}
-
-inline bool Pickle::Write(int value)
-{
-    return WriteByte(&value, sizeof(value));
-}
-
-inline bool Pickle::Write(uint32_t value)
-{
-    return WriteByte(&value, sizeof(value));
-}
-inline bool Pickle::Write(int64_t value)
-{
-    return WriteByte(&value, sizeof(value));
-}
-inline bool Pickle::Write(uint64_t value)
-{
-    return WriteByte(&value, sizeof(value));
-}
-inline bool Pickle::Write(float value)
-{
-    return WriteByte(&value, sizeof(value));
-}
-inline bool Pickle::Write(double value)
-{
-    return WriteByte(&value, sizeof(value));
+    Write(&value, sizeof(value));
 }
 
 }   // namespace kbase

@@ -35,16 +35,16 @@ auto data_list = std::make_tuple(true,
 
 void MarshalDataToPickle(Pickle& pk)
 {
-    ASSERT_TRUE(pk.Write(std::get<0>(data_list)));
-    ASSERT_TRUE(pk.Write(std::get<1>(data_list)));
-    ASSERT_TRUE(pk.Write(std::get<2>(data_list)));
-    ASSERT_TRUE(pk.Write(std::get<3>(data_list)));
-    ASSERT_TRUE(pk.Write(std::get<4>(data_list)));
-    ASSERT_TRUE(pk.Write(std::get<5>(data_list)));
-    ASSERT_TRUE(pk.Write(std::get<6>(data_list)));
-    ASSERT_TRUE(pk.Write(std::get<7>(data_list)));
-    ASSERT_TRUE(pk.Write(std::get<8>(data_list)));
-    ASSERT_TRUE(pk.Write(std::get<9>(data_list)));
+    pk.Write(std::get<0>(data_list));
+    pk.Write(std::get<1>(data_list));
+    pk.Write(std::get<2>(data_list));
+    pk.Write(std::get<3>(data_list));
+    pk.Write(std::get<4>(data_list));
+    pk.Write(std::get<5>(data_list));
+    pk.Write(std::get<6>(data_list));
+    pk.Write(std::get<7>(data_list));
+    pk.Write(std::get<8>(data_list));
+    pk.Write(std::get<9>(data_list));
 }
 
 auto UnMarshalDataFromPickle(const Pickle& pk)->decltype(data_list)
@@ -80,7 +80,7 @@ auto UnMarshalDataFromPickle(const Pickle& pk)->decltype(data_list)
 TEST(PickleTest, Construction)
 {
     Pickle pk;
-    EXPECT_TRUE(pk.empty());
+    EXPECT_TRUE(pk.payload_empty());
     MarshalDataToPickle(pk);
 
     // from serialized buffer.
@@ -122,17 +122,17 @@ TEST(PickleTest, Assignments)
         // smaller to larger.
         Pickle unused_pickle;
         cp_pickle = unused_pickle;
-        EXPECT_TRUE(cp_pickle.empty());
+        EXPECT_TRUE(cp_pickle.payload_empty());
     }
 
     // move-assignment
     {
         Pickle another_pickle(pickle);
-        EXPECT_FALSE(another_pickle.empty());
+        EXPECT_FALSE(another_pickle.payload_empty());
         Pickle brand_new_pickle;
-        EXPECT_TRUE(brand_new_pickle.empty());
+        EXPECT_TRUE(brand_new_pickle.payload_empty());
         brand_new_pickle = std::move(another_pickle);
-        EXPECT_FALSE(brand_new_pickle.empty());
+        EXPECT_FALSE(brand_new_pickle.payload_empty());
         auto ret_from_move = UnMarshalDataFromPickle(brand_new_pickle);
         EXPECT_EQ(data_list, ret_from_move);
     }
@@ -142,10 +142,10 @@ TEST(PickleTest, WriteBytesAndDataSize)
 {
     Pickle pickle;
     EXPECT_EQ(sizeof(PickleHeader), pickle.size());
-    EXPECT_TRUE(pickle.empty());
-    ASSERT_TRUE(pickle.WriteByte(kChaosData, kChaosDataSize));
+    EXPECT_TRUE(pickle.payload_empty());
+    pickle.Write(kChaosData, kChaosDataSize);
     EXPECT_EQ(sizeof(PickleHeader) + kChaosDataSize, pickle.size());
-    EXPECT_FALSE(pickle.empty());
+    EXPECT_FALSE(pickle.payload_empty());
     EXPECT_EQ(kChaosDataSize, pickle.payload_size());
 }
 
