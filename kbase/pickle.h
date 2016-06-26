@@ -126,23 +126,63 @@ public:
         return payload_size() == 0;
     }
 
-    inline void Write(bool value);
+    Pickle& operator<<(short value)
+    {
+        Write(&value, sizeof(value));
+        return *this;
+    }
 
-    inline void Write(int value);
+    Pickle& operator<<(unsigned short value)
+    {
+        Write(&value, sizeof(value));
+        return *this;
+    }
 
-    inline void Write(uint32_t value);
+    Pickle& operator<<(bool value)
+    {
+        Write(&value, sizeof(value));
+        return *this;
+    }
 
-    inline void Write(int64_t value);
+    Pickle& operator<<(int value)
+    {
+        Write(&value, sizeof(value));
+        return *this;
+    }
 
-    inline void Write(uint64_t value);
+    Pickle& operator<<(unsigned int value)
+    {
+        Write(&value, sizeof(value));
+        return *this;
+    }
 
-    inline void Write(float value);
+    Pickle& operator<<(int64_t value)
+    {
+        Write(&value, sizeof(value));
+        return *this;
+    }
 
-    inline void Write(double value);
+    Pickle& operator<<(uint64_t value)
+    {
+        Write(&value, sizeof(value));
+        return *this;
+    }
 
-    void Write(const std::string& value);
+    Pickle& operator<<(float value)
+    {
+        Write(&value, sizeof(value));
+        return *this;
+    }
 
-    void Write(const std::wstring& value);
+    Pickle& operator<<(double value)
+    {
+        Write(&value, sizeof(value));
+        return *this;
+    }
+
+    Pickle& operator<<(const std::string& value);
+
+    Pickle& operator<<(const std::wstring& value);
 
     // Serializes data in byte with specified length.
     void Write(const void* data, size_t size_in_bytes);
@@ -173,37 +213,6 @@ private:
 
     friend class PickleReader;
 };
-
-inline void Pickle::Write(bool value)
-{
-    Write(value ? 1 : 0);
-}
-
-inline void Pickle::Write(int value)
-{
-    Write(&value, sizeof(value));
-}
-
-inline void Pickle::Write(uint32_t value)
-{
-    Write(&value, sizeof(value));
-}
-inline void Pickle::Write(int64_t value)
-{
-    Write(&value, sizeof(value));
-}
-inline void Pickle::Write(uint64_t value)
-{
-    Write(&value, sizeof(value));
-}
-inline void Pickle::Write(float value)
-{
-    Write(&value, sizeof(value));
-}
-inline void Pickle::Write(double value)
-{
-    Write(&value, sizeof(value));
-}
 
 }   // namespace kbase
 

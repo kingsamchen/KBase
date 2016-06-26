@@ -19,7 +19,7 @@ typedef struct {
     uint32_t payload_size;
 } PickleHeader;
 
-const wchar_t kChaosData[] = L"helloworld\u1234\u4321\u9876\u5678";
+const wchar_t kChaosData[] = L"1234";
 const size_t kChaosDataSize = sizeof(kChaosData);
 
 auto data_list = std::make_tuple(true,
@@ -35,16 +35,16 @@ auto data_list = std::make_tuple(true,
 
 void MarshalDataToPickle(Pickle& pk)
 {
-    pk.Write(std::get<0>(data_list));
-    pk.Write(std::get<1>(data_list));
-    pk.Write(std::get<2>(data_list));
-    pk.Write(std::get<3>(data_list));
-    pk.Write(std::get<4>(data_list));
-    pk.Write(std::get<5>(data_list));
-    pk.Write(std::get<6>(data_list));
-    pk.Write(std::get<7>(data_list));
-    pk.Write(std::get<8>(data_list));
-    pk.Write(std::get<9>(data_list));
+    pk << (std::get<0>(data_list));
+    pk << (std::get<1>(data_list));
+    pk << (std::get<2>(data_list));
+    pk << (std::get<3>(data_list));
+    pk << (std::get<4>(data_list));
+    pk << (std::get<5>(data_list));
+    pk << (std::get<6>(data_list));
+    pk << (std::get<7>(data_list));
+    pk << (std::get<8>(data_list));
+    pk << (std::get<9>(data_list));
 }
 
 auto UnMarshalDataFromPickle(const Pickle& pk)->decltype(data_list)
@@ -75,6 +75,15 @@ auto UnMarshalDataFromPickle(const Pickle& pk)->decltype(data_list)
                     d_data, s_data, ws_data);
 }
 
+bool EqualsPickle(const Pickle& lhs, const Pickle& rhs)
+{
+    if (lhs.size() != rhs.size()) {
+        return false;
+    }
+
+    return memcmp(lhs.data(), rhs.data(), lhs.size()) == 0;
+}
+
 }   // namespace
 
 TEST(PickleTest, Construction)
@@ -88,20 +97,15 @@ TEST(PickleTest, Construction)
     buf.resize(pk.size());
     memcpy_s(buf.data(), buf.size(), pk.data(), pk.size());
     Pickle copy_pk(buf.data(), buf.size());
-    auto ret_from_const_pk = UnMarshalDataFromPickle(copy_pk);
-    EXPECT_EQ(data_list, ret_from_const_pk);
-    EXPECT_TRUE(pk.size() == copy_pk.size());
+    EXPECT_TRUE(EqualsPickle(pk, copy_pk));
 
     // copy-ctor
     Pickle copy_pickle(pk);
-    auto ret_from_copy_ctor = UnMarshalDataFromPickle(copy_pickle);
-    EXPECT_EQ(data_list, ret_from_copy_ctor);
-    EXPECT_TRUE(pk.size() == copy_pickle.size());
+    EXPECT_TRUE(EqualsPickle(pk, copy_pickle));
 
     // move-ctor
     Pickle move_pickle(std::move(copy_pickle));
-    auto ret_from_move_ctor = UnMarshalDataFromPickle(move_pickle);
-    EXPECT_EQ(data_list, ret_from_move_ctor);
+    EXPECT_TRUE(EqualsPickle(pk, move_pickle));
 }
 
 TEST(PickleTest, Assignments)
@@ -115,14 +119,12 @@ TEST(PickleTest, Assignments)
         // larger to smaller.
         Pickle cp_pickle;
         cp_pickle = pickle;
-        EXPECT_TRUE(cp_pickle.size() == pickle.size());
-        auto ret_from_copy = UnMarshalDataFromPickle(cp_pickle);
-        EXPECT_EQ(data_list, ret_from_copy);
+        EXPECT_TRUE(EqualsPickle(pickle, cp_pickle));
 
         // smaller to larger.
         Pickle unused_pickle;
         cp_pickle = unused_pickle;
-        EXPECT_TRUE(cp_pickle.payload_empty());
+        EXPECT_TRUE(EqualsPickle(unused_pickle, cp_pickle));
     }
 
     // move-assignment
@@ -133,20 +135,46 @@ TEST(PickleTest, Assignments)
         EXPECT_TRUE(brand_new_pickle.payload_empty());
         brand_new_pickle = std::move(another_pickle);
         EXPECT_FALSE(brand_new_pickle.payload_empty());
-        auto ret_from_move = UnMarshalDataFromPickle(brand_new_pickle);
-        EXPECT_EQ(data_list, ret_from_move);
+        EXPECT_TRUE(EqualsPickle(pickle, brand_new_pickle));
     }
 }
 
-TEST(PickleTest, WriteBytesAndDataSize)
+TEST(PickleTest, FundamentalWrite)
 {
     Pickle pickle;
     EXPECT_EQ(sizeof(PickleHeader), pickle.size());
     EXPECT_TRUE(pickle.payload_empty());
+
+    uint8_t byte_value = 127;
+    pickle.Write(&byte_value, sizeof(uint8_t));
+    // No padding for this write.
+    EXPECT_EQ(1, pickle.payload_size());
+    const auto* byte_probe = static_cast<const uint8_t*>(pickle.payload());
+    EXPECT_EQ(byte_value, *byte_probe);
+
+    short short_value = 32767;
+    pickle.Write(&short_value, sizeof(short_value));
+    EXPECT_EQ(6, pickle.payload_size());
+    const auto* int_probe = static_cast<const int*>(pickle.payload());
+    EXPECT_EQ(0x7F, *int_probe);
+
     pickle.Write(kChaosData, kChaosDataSize);
-    EXPECT_EQ(sizeof(PickleHeader) + kChaosDataSize, pickle.size());
-    EXPECT_FALSE(pickle.payload_empty());
-    EXPECT_EQ(kChaosDataSize, pickle.payload_size());
+    EXPECT_EQ(18, pickle.payload_size());
+    const auto* char_probe = static_cast<const char*>(pickle.payload()) + 8;
+    EXPECT_EQ('1', *char_probe);
+}
+
+TEST(PickleTest, SerializeString)
+{
+    Pickle pickle;
+    std::wstring str = L"abcde";
+    pickle << str;
+    EXPECT_EQ(18, pickle.payload_size());
+    const size_t* size_probe = static_cast<const size_t*>(pickle.payload());
+    EXPECT_EQ(5, *size_probe);
+    const wchar_t* str_probe = reinterpret_cast<const wchar_t*>(size_probe + 1);
+    std::wstring saved_str(str_probe, 5);
+    EXPECT_EQ(str, saved_str);
 }
 
 TEST(PickleTest, SerializeAndDeserialize)

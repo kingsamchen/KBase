@@ -18,7 +18,9 @@ constexpr size_t RoundToMultiple(size_t num, size_t factor)
 // uninitialized memory.
 void SanitizePadding(byte* padding_begin, size_t padding_size)
 {
-    memset(padding_begin, 0, padding_size);
+    if (padding_size != 0) {
+        memset(padding_begin, 0, padding_size);
+    }
 }
 
 }   // namespace
@@ -67,7 +69,7 @@ bool PickleReader::Read(double* result)
 
 bool PickleReader::Read(std::string* result)
 {
-    int str_length;
+    size_t str_length;
     if (!Read(&str_length)) {
         return false;
     }
@@ -83,7 +85,7 @@ bool PickleReader::Read(std::string* result)
 
 bool PickleReader::Read(std::wstring* result)
 {
-    int str_length;
+    size_t str_length;
     if (!Read(&str_length)) {
         return false;
     }
@@ -194,7 +196,7 @@ const char* PickleReader::GetReadPointerAndAdvance(int num_elements,
     return GetReadPointerAndAdvance(num_bytes32);
 }
 
-// --* Pickle *--
+// -*- Pickle -*-
 
 Pickle::Pickle()
     : header_(nullptr), capacity_(0)
@@ -274,16 +276,22 @@ void Pickle::ResizeCapacity(size_t new_capacity)
     capacity_ = new_capacity;
 }
 
-void Pickle::Write(const std::string& value)
+Pickle& Pickle::operator<<(const std::string& value)
 {
-    Write(static_cast<int>(value.size()));
-    Write(value.data(), static_cast<int>(value.size()));
+    Pickle& pickle = *this;
+    auto length = value.length();
+    pickle << length;
+    Write(value.data(), length * sizeof(char));
+    return pickle;
 }
 
-void Pickle::Write(const std::wstring& value)
+Pickle& Pickle::operator<<(const std::wstring& value)
 {
-    Write(static_cast<int>(value.size()));
-    Write(value.data(), static_cast<int>(value.size() * sizeof(wchar_t)));
+    Pickle& pickle = *this;
+    auto length = value.length();
+    pickle << length;
+    Write(value.data(), length * sizeof(wchar_t));
+    return pickle;
 }
 
 void Pickle::Write(const void* data, size_t size_in_bytes)
