@@ -6,6 +6,8 @@
 
 #include <algorithm>
 
+#include "kbase/string_util.h"
+
 namespace {
 
 // Rounds up `num` to the nearest multiple of `factor`.
@@ -27,173 +29,56 @@ void SanitizePadding(byte* padding_begin, size_t padding_size)
 
 namespace kbase {
 
-PickleReader::PickleReader(const Pickle& pickle)
-    : read_ptr_(static_cast<const char*>(pickle.payload())),
-      read_end_ptr_(static_cast<const char*>(pickle.end_of_payload()))
+PickleReader::PickleReader(const void* pickled_data, size_t size_in_bytes)
+    : read_ptr_(static_cast<const byte*>(pickled_data) + sizeof(Pickle::Header)),
+      data_end_(read_ptr_ + size_in_bytes - sizeof(Pickle::Header))
 {}
 
-bool PickleReader::Read(bool* result)
+PickleReader::PickleReader(const Pickle& pickle)
+    : read_ptr_(pickle.payload()),
+      data_end_(pickle.end_of_payload())
+{}
+
+PickleReader& PickleReader::operator>>(std::string& value)
 {
-    return ReadBuiltIninType(result);
+    PickleReader& reader = *this;
+    size_t length;
+    reader >> length;
+    auto* dest = WriteInto(value, length + 1);
+    Read(dest, sizeof(std::string::value_type) * length);
+    return reader;
 }
 
-bool PickleReader::Read(int* result)
+PickleReader& PickleReader::operator>>(std::wstring& value)
 {
-    return ReadBuiltIninType(result);
+    PickleReader& reader = *this;
+    size_t length;
+    reader >> length;
+    auto* dest = WriteInto(value, length + 1);
+    Read(dest, sizeof(std::wstring::value_type) * length);
+    return reader;
 }
 
-bool PickleReader::Read(uint32_t* result)
+void PickleReader::Read(void* dest, size_t size_in_bytes)
 {
-    return ReadBuiltIninType(result);
+    ENSURE(CHECK, !!*this).Require();
+    memcpy_s(dest, size_in_bytes, read_ptr_, size_in_bytes);
+    SeekReadPosition(size_in_bytes);
 }
 
-bool PickleReader::Read(int64_t* result)
+void PickleReader::SeekReadPosition(size_t data_size) noexcept
 {
-    return ReadBuiltIninType(result);
-}
-
-bool PickleReader::Read(uint64_t* result)
-{
-    return ReadBuiltIninType(result);
-}
-
-bool PickleReader::Read(float* result)
-{
-    return ReadBuiltIninType(result);
-}
-
-bool PickleReader::Read(double* result)
-{
-    return ReadBuiltIninType(result);
-}
-
-bool PickleReader::Read(std::string* result)
-{
-    size_t str_length;
-    if (!Read(&str_length)) {
-        return false;
-    }
-
-    const char* read_from = GetReadPointerAndAdvance(str_length);
-    if (!read_from) {
-        return false;
-    }
-
-    result->assign(read_from, str_length);
-    return true;
-}
-
-bool PickleReader::Read(std::wstring* result)
-{
-    size_t str_length;
-    if (!Read(&str_length)) {
-        return false;
-    }
-
-    const char* read_from = GetReadPointerAndAdvance(str_length, sizeof(wchar_t));
-    if (!read_from) {
-        return false;
-    }
-
-    result->assign(reinterpret_cast<const wchar_t*>(read_from), str_length);
-    return true;
-}
-
-bool PickleReader::ReadBytes(const char** data, int length)
-{
-    const char* read_from = GetReadPointerAndAdvance(length);
-    if (!read_from) {
-        *data = nullptr;
-        return false;
-    }
-
-    *data = read_from;
-    return true;
-}
-
-bool PickleReader::ReadData(const char** data, int* read_length)
-{
-    if (!Read(read_length)) {
-        *data = nullptr;
-        *read_length = 0;
-        return false;
-    }
-
-    return ReadBytes(data, *read_length);
-}
-
-bool PickleReader::SkipBytes(int num_bytes)
-{
-    return !!GetReadPointerAndAdvance(num_bytes);
-}
-
-// sizeof comparison in if statement causes constant expression warning
-// disable the warning temporarily
-#pragma warning(push)
-#pragma warning(disable:4127)
-
-template<typename T>
-inline bool PickleReader::ReadBuiltIninType(T* result)
-{
-    const char* read_from = GetReadPointerAndAdvance<T>();
-
-    if (!read_from) {
-        return false;
-    }
-
-    if (sizeof(T) > sizeof(uint32_t)) {
-        memcpy_s(result, sizeof(*result), read_from, sizeof(*result));
+    size_t rounded_size = RoundToMultiple(data_size, sizeof(uint32_t));
+    if (read_ptr_ + rounded_size > data_end_) {
+        read_ptr_ += data_size;
     } else {
-        *result = *reinterpret_cast<const T*>(read_from);
+        read_ptr_ += rounded_size;
     }
-
-    return true;
 }
 
-template<typename T>
-inline const char* PickleReader::GetReadPointerAndAdvance()
+void PickleReader::SkipData(size_t data_size) noexcept
 {
-    const char* curr_read_ptr = read_ptr_;
-
-    if (read_ptr_ + sizeof(T) > read_end_ptr_) {
-        return nullptr;
-    }
-
-    // skip the memory hole if size of the type is less than uint32
-    if (sizeof(T) < sizeof(uint32_t)) {
-        read_ptr_ += RoundToMultiple(sizeof(T), sizeof(uint32_t));
-    } else {
-        read_ptr_ += sizeof(T);
-    }
-
-    return curr_read_ptr;
-}
-
-#pragma warning(pop)
-
-const char* PickleReader::GetReadPointerAndAdvance(int num_bytes)
-{
-    const char* curr_read_ptr = read_ptr_;
-
-    if (num_bytes < 0 || read_ptr_ + num_bytes > read_end_ptr_) {
-        return nullptr;
-    }
-
-    read_ptr_ += RoundToMultiple(num_bytes, sizeof(uint32_t));
-
-    return curr_read_ptr;
-}
-
-const char* PickleReader::GetReadPointerAndAdvance(int num_elements,
-                                                     size_t element_size)
-{
-    int64_t num_bytes = static_cast<int64_t>(num_elements) * element_size;
-    int num_bytes32 = static_cast<int>(num_bytes);
-    if (num_bytes != static_cast<int64_t>(num_bytes32)) {
-        return nullptr;
-    }
-
-    return GetReadPointerAndAdvance(num_bytes32);
+    SeekReadPosition(data_size);
 }
 
 // -*- Pickle -*-

@@ -11,6 +11,7 @@
 
 #include <cstdint>
 
+#include "kbase/basic_macros.h"
 #include "kbase/basic_types.h"
 #include "kbase/error_exception_util.h"
 
@@ -20,50 +21,94 @@ class Pickle;
 
 class PickleReader {
 public:
+    PickleReader(const void* pickled_data, size_t size_in_bytes);
+
     explicit PickleReader(const Pickle& pickle);
 
-    bool Read(bool* result);
+    DEFAULT_COPY(PickleReader)
 
-    bool Read(int* result);
+    DEFAULT_MOVE(PickleReader)
 
-    bool Read(uint32_t* result);
+    ~PickleReader() = default;
 
-    bool Read(int64_t* result);
+    explicit operator bool() const
+    {
+        return read_ptr_ < data_end_;
+    }
 
-    bool Read(uint64_t* result);
+    PickleReader& operator>>(bool& value)
+    {
+        Read(&value, sizeof(value));
+        return *this;
+    }
 
-    bool Read(float* result);
+    PickleReader& operator>>(short& value)
+    {
+        Read(&value, sizeof(value));
+        return *this;
+    }
 
-    bool Read(double* result);
+    PickleReader& operator>>(unsigned short& value)
+    {
+        Read(&value, sizeof(value));
+        return *this;
+    }
 
-    bool Read(std::string* result);
+    PickleReader& operator>>(int& value)
+    {
+        Read(&value, sizeof(value));
+        return *this;
+    }
 
-    bool Read(std::wstring* result);
+    PickleReader& operator>>(unsigned int& value)
+    {
+        Read(&value, sizeof(value));
+        return *this;
+    }
 
-    bool ReadBytes(const char** data, int length);
+    PickleReader& operator>>(int64_t& value)
+    {
+        Read(&value, sizeof(value));
+        return *this;
+    }
 
-    bool ReadData(const char** data, int* read_length);
+    PickleReader& operator>>(uint64_t& value)
+    {
+        Read(&value, sizeof(value));
+        return *this;
+    }
 
-    bool SkipBytes(int num_bytes);
+    PickleReader& operator>>(float& value)
+    {
+        Read(&value, sizeof(value));
+        return *this;
+    }
+
+    PickleReader& operator>>(double& value)
+    {
+        Read(&value, sizeof(value));
+        return *this;
+    }
+
+    PickleReader& operator>>(std::string& value);
+
+    PickleReader& operator>>(std::wstring& value);
+
+    // Deserializes data in the size of `size_in_bytes`.
+    void Read(void* dest, size_t size_in_bytes);
+
+    // Skips read pointer by at least `data_size` bytes.
+    void SkipData(size_t data_size) noexcept;
 
 private:
-    template<typename T>
-    inline bool ReadBuiltIninType(T* result);
-
-    template<typename T>
-    inline const char* GetReadPointerAndAdvance();
-
-    const char* GetReadPointerAndAdvance(int num_bytes);
-
-    // When the size of element doesn't equal to sizeof(char), use this function
-    // for safety consieration. this function runs overflow check on int32 num_bytes.
-    const char* GetReadPointerAndAdvance(int num_elements, size_t element_size);
+    // Seeks to the next position by advancing at least `data_szie` bytes.
+    // Any interpolated paddings would be skipped.
+    void SeekReadPosition(size_t data_size) noexcept;
 
 private:
-    const char* read_ptr_;
-    const char* read_end_ptr_;
+    const byte* read_ptr_;
+    const byte* data_end_;
 };
-
 
 // Underlying memory layout:
 // <---------------- capacity -------------->
@@ -108,9 +153,9 @@ public:
         return sizeof(Header) + header_->payload_size;
     }
 
-    const void* payload() const noexcept
+    const byte* payload() const noexcept
     {
-        return header_ + 1;
+        return static_cast<const byte*>(static_cast<const void*>(header_ + 1));
     }
 
     size_t payload_size() const noexcept
@@ -198,12 +243,12 @@ private:
 
     byte* mutable_payload() const noexcept
     {
-        return const_cast<byte*>(static_cast<const byte*>(payload()));
+        return const_cast<byte*>(payload());
     }
 
-    const void* end_of_payload() const noexcept
+    const byte* end_of_payload() const noexcept
     {
-        return static_cast<const byte*>(payload()) + payload_size();
+        return payload() + payload_size();
     }
 
 private:
