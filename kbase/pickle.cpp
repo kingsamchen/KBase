@@ -67,7 +67,7 @@ PickleReader& PickleReader::operator>>(std::wstring& value)
 
 void PickleReader::Read(void* dest, size_t size_in_bytes)
 {
-    ENSURE(CHECK, !!*this).Require();
+    ENSURE(CHECK, !!*this && size_in_bytes != 0).Require();
     memcpy_s(dest, size_in_bytes, read_ptr_, size_in_bytes);
     SeekReadPosition(size_in_bytes);
 }
@@ -172,7 +172,10 @@ Pickle& Pickle::operator<<(const std::string& value)
     Pickle& pickle = *this;
     auto length = value.length();
     pickle << length;
-    Write(value.data(), length * sizeof(char));
+    if (length != 0) {
+        Write(value.data(), length * sizeof(char));
+    }
+
     return pickle;
 }
 
@@ -181,12 +184,16 @@ Pickle& Pickle::operator<<(const std::wstring& value)
     Pickle& pickle = *this;
     auto length = value.length();
     pickle << length;
-    Write(value.data(), length * sizeof(wchar_t));
+    if (length != 0) {
+        Write(value.data(), length * sizeof(wchar_t));
+    }
+
     return pickle;
 }
 
 void Pickle::Write(const void* data, size_t size_in_bytes)
 {
+    ENSURE(CHECK, size_in_bytes != 0).Require();
     size_t last_payload_size = payload_size();
     byte* dest = SeekWritePosition(size_in_bytes);
     size_t free_buf_size = capacity_ - (dest - reinterpret_cast<byte*>(header_));
