@@ -7,6 +7,9 @@
 #include "gtest/gtest.h"
 #include "kbase/pickle.h"
 
+#include <functional>
+#include <list>
+#include <map>
 #include <tuple>
 #include <vector>
 
@@ -225,18 +228,105 @@ TEST(PickleTest, ReaderRead)
     }
 }
 
+TEST(PickleTest, EmptyString)
+{
+    std::string s;
+    Pickle pickle;
+    pickle << s;
+    EXPECT_EQ(8, pickle.payload_size());
+    PickleReader reader(pickle);
+    std::string ss;
+    reader >> ss;
+    EXPECT_EQ(s, ss);
+}
+
 TEST(PickleTest, ContainerVector)
 {
+    {
+	    Pickle pickle;
+	    std::vector<int> vi {1, 3, 5};
+	    std::vector<std::string> vs { "hello", "world" };
+	    pickle << vi << vs;
+	    PickleReader reader(pickle);
+	    std::vector<int> vv;
+	    std::vector<std::string> vvs;
+	    reader >> vv >> vvs;
+	    EXPECT_EQ(vi, vv);
+	    EXPECT_EQ(vs, vvs);
+    }
+    {
+        std::vector<std::string> vs;
+        Pickle pickle;
+        pickle << vs;
+        std::vector<std::string> cvs;
+        PickleReader reader(pickle);
+        reader >> cvs;
+        EXPECT_EQ(vs, cvs);
+    }
+}
+
+TEST(PickleTest, ContainerList)
+{
+	{
+		Pickle pickle;
+		std::list<int> il { 1, 3, 5, 7 };
+		pickle << il;
+		std::list<int> cil;
+		PickleReader reader(pickle);
+		reader >> cil;
+		EXPECT_EQ(il, cil);
+	}
+	{
+		Pickle pickle;
+		std::list<std::vector<std::string>> lies {
+			{"hello", "world"},
+			{"kc", "is", "a genius"}
+		};
+		pickle << lies;
+		PickleReader reader(pickle);
+		decltype(lies) truth;
+		reader >> truth;
+		EXPECT_EQ(lies, truth);
+	}
+}
+
+TEST(PickleTest, ContainerPair)
+{
 	Pickle pickle;
-	std::vector<int> vi {1, 3, 5};
-	std::vector<std::string> vs { "hello", "world" };
-	pickle << vi << vs;
+	auto p1 = std::make_pair(3.14, 127);
+	auto p2 = std::make_pair(std::string("vala"), 111);
+	pickle << p1 << p2;
 	PickleReader reader(pickle);
-	std::vector<int> vv;
-	std::vector<std::string> vvs;
-	reader >> vv >> vvs;
-	EXPECT_EQ(vi, vv);
-	EXPECT_EQ(vs, vvs);
+	decltype(p1) cp1;
+	reader >> cp1;
+	EXPECT_EQ(p1, cp1);
+	decltype(p2) cp2;
+	reader >> cp2;
+	EXPECT_EQ(p2, cp2);
+}
+
+TEST(PickleTest, ContainerSet)
+{
+	Pickle pickle;
+	std::set<std::string, std::greater<std::string>> ss { "hello", "world", "pickle", "test" };
+	pickle << ss;
+	PickleReader reader(pickle);
+	decltype(ss) css;
+	reader >> css;
+	EXPECT_EQ(ss, css);
+}
+
+TEST(PickleTest, ContainerMap)
+{
+	Pickle pickle;
+	std::map<std::string, int> table {
+		{"hello", 5}, {"world", 5}, {"test", 4}
+	};
+	pickle << table;
+	PickleReader reader(pickle);
+	decltype(table) ct;
+	reader >> ct;
+	EXPECT_EQ(table, ct);
 }
 
 TEST(PickleTest, SerializeAndDeserialize)

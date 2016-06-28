@@ -10,6 +10,10 @@
 #define KBASE_PICKLE_H_
 
 #include <cstdint>
+#include <list>
+#include <map>
+#include <vector>
+#include <set>
 
 #include "kbase/basic_macros.h"
 #include "kbase/basic_types.h"
@@ -93,21 +97,6 @@ public:
     PickleReader& operator>>(std::string& value);
 
     PickleReader& operator>>(std::wstring& value);
-
-	template<typename T>
-	PickleReader& operator>>(std::vector<T>& value)
-	{
-		PickleReader& reader = *this;
-		size_t length;
-		reader >> length;
-		for (size_t i = 0; i < length; ++i) {
-			T ele;
-			reader >> ele;
-			value.push_back(std::move(ele));
-		}
-
-		return reader;
-	}
 
     // Deserializes data in the size of `size_in_bytes`.
     void Read(void* dest, size_t size_in_bytes);
@@ -244,18 +233,6 @@ public:
 
     Pickle& operator<<(const std::wstring& value);
 
-    template<typename T>
-	Pickle& operator<<(const std::vector<T>& value)
-	{
-		Pickle& pickle = *this;
-		pickle << value.size();
-		for (const auto& ele : value) {
-			pickle << ele;
-		}
-
-		return pickle;
-	}
-
     // Serializes data in byte with specified length.
     void Write(const void* data, size_t size_in_bytes);
 
@@ -285,6 +262,122 @@ private:
 
     friend class PickleReader;
 };
+
+// Support for usual containers
+
+template<typename T>
+Pickle& operator<<(Pickle& pickle, const std::vector<T>& value)
+{
+	pickle << value.size();
+	for (const auto& ele : value) {
+		pickle << ele;
+	}
+
+	return pickle;
+}
+
+template<typename T>
+Pickle& operator<<(Pickle& pickle, const std::list<T>& value)
+{
+    pickle << value.size();
+    for (const auto& ele : value) {
+        pickle << ele;
+    }
+
+    return pickle;
+}
+
+template<typename T1, typename T2>
+Pickle& operator<<(Pickle& pickle, const std::pair<T1, T2>& value)
+{
+	pickle << value.first << value.second;
+	return pickle;
+}
+
+template<typename Key, typename Compare=std::less<Key>>
+Pickle& operator<<(Pickle& pickle, const std::set<Key, Compare>& value)
+{
+	pickle << value.size();
+	for (const auto& ele : value) {
+		pickle << ele;
+	}
+
+	return pickle;
+}
+
+template<typename Key, typename T, typename Compare=std::less<Key>>
+Pickle& operator<<(Pickle& pickle, const std::map<Key, T, Compare>& value)
+{
+	pickle << value.size();
+	for (const auto& pair : value) {
+		pickle << pair;
+	}
+
+	return pickle;
+}
+
+template<typename T>
+PickleReader& operator>>(PickleReader& reader, std::vector<T>& value)
+{
+	size_t size;
+	reader >> size;
+	for (size_t i = 0; i < size; ++i) {
+		T ele;
+		reader >> ele;
+		value.push_back(std::move(ele));
+	}
+
+	return reader;
+}
+
+template<typename T>
+PickleReader& operator>>(PickleReader& reader, std::list<T>& value)
+{
+    size_t size;
+    reader >> size;
+    for (size_t i = 0; i < size; ++i) {
+        T ele;
+        reader >> ele;
+        value.push_back(std::move(ele));
+    }
+
+    return reader;
+}
+
+template<typename T1, typename T2>
+PickleReader& operator>>(PickleReader& reader, std::pair<T1, T2>& value)
+{
+	reader >> value.first >> value.second;
+	return reader;
+}
+
+template<typename Key, typename Compare = std::less<Key>>
+PickleReader& operator>>(PickleReader& reader, std::set<Key, Compare>& value)
+{
+	size_t size;
+	reader >> size;
+	for (size_t i = 0; i < size; ++i) {
+		Key ele;
+		reader >> ele;
+		value.insert(std::move(ele));
+	}
+
+	return reader;
+}
+
+template<typename Key, typename T, typename Compare = std::less<Key>>
+PickleReader& operator>>(PickleReader& reader, std::map<Key, T, Compare>& value)
+{
+	size_t size;
+	reader >> size;
+	for (size_t i = 0; i < size; ++i) {
+		std::pair<Key, T> ele;
+		reader >> ele;
+		value.emplace(std::move(ele));
+	}
+
+	return reader;
+}
 
 }   // namespace kbase
 
