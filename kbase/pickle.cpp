@@ -44,8 +44,11 @@ PickleReader& PickleReader::operator>>(std::string& value)
     PickleReader& reader = *this;
     size_t length;
     reader >> length;
-    auto* dest = WriteInto(value, length + 1);
-    Read(dest, sizeof(std::string::value_type) * length);
+	if (length != 0) {
+		auto* dest = WriteInto(value, length + 1);
+		Read(dest, sizeof(std::string::value_type) * length);
+	}
+
     return reader;
 }
 
@@ -54,8 +57,11 @@ PickleReader& PickleReader::operator>>(std::wstring& value)
     PickleReader& reader = *this;
     size_t length;
     reader >> length;
-    auto* dest = WriteInto(value, length + 1);
-    Read(dest, sizeof(std::wstring::value_type) * length);
+	if (length != 0) {
+		auto* dest = WriteInto(value, length + 1);
+		Read(dest, sizeof(std::wstring::value_type) * length);
+	}
+
     return reader;
 }
 
