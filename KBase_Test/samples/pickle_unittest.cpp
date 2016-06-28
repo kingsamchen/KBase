@@ -225,6 +225,20 @@ TEST(PickleTest, ReaderRead)
     }
 }
 
+TEST(PickleTest, ContainerVector)
+{
+	Pickle pickle;
+	std::vector<int> vi {1, 3, 5};
+	std::vector<std::string> vs { "hello", "world" };
+	pickle << vi << vs;
+	PickleReader reader(pickle);
+	std::vector<int> vv;
+	std::vector<std::string> vvs;
+	reader >> vv >> vvs;
+	EXPECT_EQ(vi, vv);
+	EXPECT_EQ(vs, vvs);
+}
+
 TEST(PickleTest, SerializeAndDeserialize)
 {
     Pickle pickle;

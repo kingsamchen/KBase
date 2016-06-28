@@ -94,6 +94,21 @@ public:
 
     PickleReader& operator>>(std::wstring& value);
 
+	template<typename T>
+	PickleReader& operator>>(std::vector<T>& value)
+	{
+		PickleReader& reader = *this;
+		size_t length;
+		reader >> length;
+		for (size_t i = 0; i < length; ++i) {
+			T ele;
+			reader >> ele;
+			value.push_back(std::move(ele));
+		}
+
+		return reader;
+	}
+
     // Deserializes data in the size of `size_in_bytes`.
     void Read(void* dest, size_t size_in_bytes);
 
@@ -228,6 +243,18 @@ public:
     Pickle& operator<<(const std::string& value);
 
     Pickle& operator<<(const std::wstring& value);
+
+    template<typename T>
+	Pickle& operator<<(const std::vector<T>& value)
+	{
+		Pickle& pickle = *this;
+		pickle << value.size();
+		for (const auto& ele : value) {
+			pickle << ele;
+		}
+
+		return pickle;
+	}
 
     // Serializes data in byte with specified length.
     void Write(const void* data, size_t size_in_bytes);
