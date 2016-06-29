@@ -12,8 +12,10 @@
 #include <cstdint>
 #include <list>
 #include <map>
-#include <vector>
 #include <set>
+#include <unordered_set>
+#include <unordered_map>
+#include <vector>
 
 #include "kbase/basic_macros.h"
 #include "kbase/basic_types.h"
@@ -294,7 +296,7 @@ Pickle& operator<<(Pickle& pickle, const std::pair<T1, T2>& value)
 	return pickle;
 }
 
-template<typename Key, typename Compare=std::less<Key>>
+template<typename Key, typename Compare = std::less<Key>>
 Pickle& operator<<(Pickle& pickle, const std::set<Key, Compare>& value)
 {
 	pickle << value.size();
@@ -305,7 +307,7 @@ Pickle& operator<<(Pickle& pickle, const std::set<Key, Compare>& value)
 	return pickle;
 }
 
-template<typename Key, typename T, typename Compare=std::less<Key>>
+template<typename Key, typename T, typename Compare = std::less<Key>>
 Pickle& operator<<(Pickle& pickle, const std::map<Key, T, Compare>& value)
 {
 	pickle << value.size();
@@ -314,6 +316,32 @@ Pickle& operator<<(Pickle& pickle, const std::map<Key, T, Compare>& value)
 	}
 
 	return pickle;
+}
+
+template<typename Key, typename Hash = std::hash<Key>, typename KeyEqual = std::equal_to<Key>>
+Pickle& operator<<(Pickle& pickle ,const std::unordered_set<Key, Hash, KeyEqual>& value)
+{
+    pickle << value.size();
+    for (const auto& ele : value) {
+        pickle << ele;
+    }
+
+    return pickle;
+}
+
+template<
+    typename Key,
+    typename T,
+    typename Hash = std::hash<Key>,
+    typename KeyEqual = std::equal_to<Key>>
+Pickle& operator<<(Pickle& pickle, const std::unordered_map<Key, T, Hash, KeyEqual>& value)
+{
+    pickle << value.size();
+    for (const auto& pair : value) {
+        pickle << pair;
+    }
+
+    return pickle;
 }
 
 template<typename T>
@@ -377,6 +405,38 @@ PickleReader& operator>>(PickleReader& reader, std::map<Key, T, Compare>& value)
 	}
 
 	return reader;
+}
+
+template<typename Key, typename Hash = std::hash<Key>, typename KeyEqual = std::equal_to<Key>>
+PickleReader& operator>>(PickleReader& reader, std::unordered_set<Key, Hash, KeyEqual>& value)
+{
+    size_t size;
+    reader >> size;
+    for (size_t i = 0; i < size; ++i) {
+        Key ele;
+        reader >> ele;
+        value.insert(std::move(ele));
+    }
+
+    return reader;
+}
+
+template<
+    typename Key,
+    typename T,
+    typename Hash = std::hash<Key>,
+    typename KeyEqual = std::equal_to<Key>>
+PickleReader& operator>>(PickleReader& reader, std::unordered_map<Key, T, Hash, KeyEqual>& value)
+{
+    size_t size;
+    reader >> size;
+    for (size_t i = 0; i < size; ++i) {
+        std::pair<Key, T> ele;
+        reader >> ele;
+        value.emplace(std::move(ele));
+    }
+
+    return reader;
 }
 
 }   // namespace kbase

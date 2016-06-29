@@ -303,6 +303,7 @@ TEST(PickleTest, ContainerPair)
 	decltype(p2) cp2;
 	reader >> cp2;
 	EXPECT_EQ(p2, cp2);
+    EXPECT_FALSE(!!reader);
 }
 
 TEST(PickleTest, ContainerSet)
@@ -314,6 +315,7 @@ TEST(PickleTest, ContainerSet)
 	decltype(ss) css;
 	reader >> css;
 	EXPECT_EQ(ss, css);
+    EXPECT_FALSE(!!reader);
 }
 
 TEST(PickleTest, ContainerMap)
@@ -327,6 +329,33 @@ TEST(PickleTest, ContainerMap)
 	decltype(table) ct;
 	reader >> ct;
 	EXPECT_EQ(table, ct);
+    EXPECT_FALSE(!!reader);
+}
+
+TEST(PickleTest, ContainerUnorderedSet)
+{
+    Pickle pickle;
+    std::unordered_set<std::string> uss { "hello", "world", "pickle", "test" };
+    pickle << uss;
+    PickleReader reader(pickle);
+    decltype(uss) cuss;
+    reader >> cuss;
+    EXPECT_EQ(uss, cuss);
+    EXPECT_FALSE(!!reader);
+}
+
+TEST(PickleTest, ContainerUnorderedMap)
+{
+    Pickle pickle;
+    std::unordered_map<std::string, int> utable {
+        {"hello", 5}, {"world", 5}, {"test", 4}
+    };
+    pickle << utable;
+    PickleReader reader(pickle);
+    decltype(utable) cut;
+    reader >> cut;
+    EXPECT_EQ(utable, cut);
+    EXPECT_FALSE(!!reader);
 }
 
 TEST(PickleTest, SerializeAndDeserialize)
