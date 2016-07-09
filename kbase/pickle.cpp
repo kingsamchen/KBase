@@ -202,6 +202,18 @@ void Pickle::Write(const void* data, size_t size_in_bytes)
     SanitizePadding(dest - padding_size, padding_size);
 }
 
+template<typename T>
+void Pickle::WriteBuiltIn(T value)
+{
+    static_assert(std::is_fundamental<T>::value, "T is not built-in type");
+    size_t last_payload_size = payload_size();
+    constexpr size_t size_in_bytes = sizeof(T);
+    byte* dest = SeekWritePosition(size_in_bytes);
+    *reinterpret_cast<T*>(dest) = value;
+    size_t padding_size = payload_size() - last_payload_size - size_in_bytes;
+    SanitizePadding(dest - padding_size, padding_size);
+}
+
 byte* Pickle::SeekWritePosition(size_t length)
 {
     // Writing starts at a uint32-aligned offset.
@@ -218,5 +230,19 @@ byte* Pickle::SeekWritePosition(size_t length)
 
     return mutable_payload() + offset;
 }
+
+// Explicit instantiation.
+
+template void Pickle::WriteBuiltIn(bool);
+template void Pickle::WriteBuiltIn(int8_t);
+template void Pickle::WriteBuiltIn(uint8_t);
+template void Pickle::WriteBuiltIn(short);
+template void Pickle::WriteBuiltIn(unsigned short);
+template void Pickle::WriteBuiltIn(int);
+template void Pickle::WriteBuiltIn(unsigned int);
+template void Pickle::WriteBuiltIn(int64_t);
+template void Pickle::WriteBuiltIn(uint64_t);
+template void Pickle::WriteBuiltIn(float);
+template void Pickle::WriteBuiltIn(double);
 
 }   // namespace kbase

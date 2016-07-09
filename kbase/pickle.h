@@ -177,57 +177,69 @@ public:
         return payload_size() == 0;
     }
 
+    Pickle& operator<<(bool value)
+    {
+        WriteBuiltIn(value);
+        return *this;
+    }
+
+    Pickle& operator<<(int8_t value)
+    {
+        WriteBuiltIn(value);
+        return *this;
+    }
+
+    Pickle& operator<<(uint8_t value)
+    {
+        WriteBuiltIn(value);
+        return *this;
+    }
+
     Pickle& operator<<(short value)
     {
-        Write(&value, sizeof(value));
+        WriteBuiltIn(value);
         return *this;
     }
 
     Pickle& operator<<(unsigned short value)
     {
-        Write(&value, sizeof(value));
-        return *this;
-    }
-
-    Pickle& operator<<(bool value)
-    {
-        Write(&value, sizeof(value));
+        WriteBuiltIn(value);
         return *this;
     }
 
     Pickle& operator<<(int value)
     {
-        Write(&value, sizeof(value));
+        WriteBuiltIn(value);
         return *this;
     }
 
     Pickle& operator<<(unsigned int value)
     {
-        Write(&value, sizeof(value));
+        WriteBuiltIn(value);
         return *this;
     }
 
     Pickle& operator<<(int64_t value)
     {
-        Write(&value, sizeof(value));
+        WriteBuiltIn(value);
         return *this;
     }
 
     Pickle& operator<<(uint64_t value)
     {
-        Write(&value, sizeof(value));
+        WriteBuiltIn(value);
         return *this;
     }
 
     Pickle& operator<<(float value)
     {
-        Write(&value, sizeof(value));
+        WriteBuiltIn(value);
         return *this;
     }
 
     Pickle& operator<<(double value)
     {
-        Write(&value, sizeof(value));
+        WriteBuiltIn(value);
         return *this;
     }
 
@@ -235,7 +247,7 @@ public:
 
     Pickle& operator<<(const std::wstring& value);
 
-    // Serializes data in byte with specified length.
+    // Serializes data in bytes with specified length.
     void Write(const void* data, size_t size_in_bytes);
 
 private:
@@ -246,6 +258,10 @@ private:
     // Locates to an uint32-aligned offset as the starting position, and resizes
     // the internal buffer if free space is less than demand(padding plus `length`).
     byte* SeekWritePosition(size_t length);
+
+    // Serializes data in built-in type.
+    template<typename T>
+    void WriteBuiltIn(T value);
 
     byte* mutable_payload() const noexcept
     {
