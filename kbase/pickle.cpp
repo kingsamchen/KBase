@@ -72,6 +72,14 @@ void PickleReader::Read(void* dest, size_t size_in_bytes)
     SeekReadPosition(size_in_bytes);
 }
 
+template<typename T>
+void PickleReader::ReadBuiltIn(T& value)
+{
+    static_assert(std::is_fundamental<T>::value, "T is not built-in type");
+    value = *reinterpret_cast<const T*>(read_ptr_);
+    SeekReadPosition(sizeof(T));
+}
+
 void PickleReader::SeekReadPosition(size_t data_size) noexcept
 {
     size_t rounded_size = RoundToMultiple(data_size, sizeof(uint32_t));
@@ -232,6 +240,18 @@ byte* Pickle::SeekWritePosition(size_t length)
 }
 
 // Explicit instantiation.
+
+template void PickleReader::ReadBuiltIn(bool&);
+template void PickleReader::ReadBuiltIn(int8_t&);
+template void PickleReader::ReadBuiltIn(uint8_t&);
+template void PickleReader::ReadBuiltIn(short&);
+template void PickleReader::ReadBuiltIn(unsigned short&);
+template void PickleReader::ReadBuiltIn(int&);
+template void PickleReader::ReadBuiltIn(unsigned int&);
+template void PickleReader::ReadBuiltIn(int64_t&);
+template void PickleReader::ReadBuiltIn(uint64_t&);
+template void PickleReader::ReadBuiltIn(float&);
+template void PickleReader::ReadBuiltIn(double&);
 
 template void Pickle::WriteBuiltIn(bool);
 template void Pickle::WriteBuiltIn(int8_t);

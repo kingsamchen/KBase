@@ -44,55 +44,67 @@ public:
 
     PickleReader& operator>>(bool& value)
     {
-        Read(&value, sizeof(value));
+        ReadBuiltIn(value);
+        return *this;
+    }
+
+    PickleReader& operator>>(int8_t& value)
+    {
+        ReadBuiltIn(value);
+        return *this;
+    }
+
+    PickleReader& operator>>(uint8_t& value)
+    {
+        ReadBuiltIn(value);
         return *this;
     }
 
     PickleReader& operator>>(short& value)
     {
-        Read(&value, sizeof(value));
+        ReadBuiltIn(value);
         return *this;
     }
 
     PickleReader& operator>>(unsigned short& value)
     {
-        Read(&value, sizeof(value));
+        ReadBuiltIn(value);
         return *this;
     }
 
     PickleReader& operator>>(int& value)
     {
-        Read(&value, sizeof(value));
+        ReadBuiltIn(value);
         return *this;
     }
 
     PickleReader& operator>>(unsigned int& value)
     {
-        Read(&value, sizeof(value));
+        ReadBuiltIn(value);
         return *this;
     }
 
     PickleReader& operator>>(int64_t& value)
     {
-        Read(&value, sizeof(value));
+        ReadBuiltIn(value);
         return *this;
     }
 
     PickleReader& operator>>(uint64_t& value)
     {
-        Read(&value, sizeof(value));
+        ReadBuiltIn(value);
         return *this;
     }
 
     PickleReader& operator>>(float& value)
     {
-        Read(&value, sizeof(value));
+        ReadBuiltIn(value);
         return *this;
     }
 
     PickleReader& operator>>(double& value)
     {
-        Read(&value, sizeof(value));
+        ReadBuiltIn(value);
         return *this;
     }
 
@@ -110,6 +122,10 @@ private:
     // Seeks to the next position by advancing at least `data_szie` bytes.
     // Any interpolated paddings would be skipped.
     void SeekReadPosition(size_t data_size) noexcept;
+
+    // Deserializes data in built-in type.
+    template<typename T>
+    void ReadBuiltIn(T& value);
 
 private:
     const byte* read_ptr_;
