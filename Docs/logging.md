@@ -16,7 +16,7 @@ The general syntax for using this facility is
 ``` c++
 #include "kbase/logging.h"
 
-// Configurate logging settings.
+// Configurate logging with default settings.
 kbase::ConfigureLoggingSettings(kbase::LoggingSettings());
 
 LOG(INFO) << "something happend";
@@ -42,35 +42,35 @@ Doing that by calling `ConfigureLoggingSettings`. See next section.
 
 ### Configure Logging Settings
 
-For being flexible, `logging` allows you to configure its settings to meet your need.
+For being flexible, `logging` allows you to configure its settings to meet your needs.
 
 Configurable settings include:
 
 - minimum severity level
-  
+
 - message header parameters
-  
+
 - logging destination
-  
-- how to dispose(replace or append) the old file if logging to it
 
-- specify logging file
+- how to dispose(replace or append) an old file if logging to it
 
-Generally, you should configurate these settings at the start of the program, because function is **not thread-safe**.
+- specify logging file name/path
+
+Generally, you should configurate these settings at the start of the program, because calling the configuration function is **not thread-safe**.
 
 class `LoggingSettings` contains setting information, and its default constructor uses default settings too.
 
 Note that, if you didn't call `ConfigureLoggingSettings()` at the start, default settings are employed; However, if you also want logging to file, there will be a race condition in creation of the file.
 
-Therefore, again, you are supposed to call `ConfigureLoggingSettings()` at the start of the program.
+Therefore, again, **you are supposed to call `ConfigureLoggingSettings()` at the start of the program**.
 
 
 ### Some Details About Logging To File
 
 If it being the case, it's better for you to know some details.
 
-Logging to the file is not only thread-safe but also process-safe. Thanks to Windows kernel.
+Logging to the file is **not only thread-safe but also process-safe**. Thanks to Windows kernel.
 
-As for the file name, if you didn't specify one, `logging` first tries to use the name like `[your-exe-name]_debug_message.log`, and put the file in the same folder that contains the executable; If this fails, then tries to put the file in the current working directory.
+As for the file name, if you didn't specify one, `logging` first tries to use the name like `[your-exe-name]_debug_message.log`, and put the file in the same folder that contains the executable; If this fails, it then tries to put the file in the current working directory.
 
 If both trials failed, `logging` automatically skips file writting.
