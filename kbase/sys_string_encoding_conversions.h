@@ -22,14 +22,14 @@ enum class CodePage {
     UTF8 = 65001
 };
 
-std::string SysWideToUTF8(const std::wstring& wide_str);
-std::wstring SysUTF8ToWide(const std::string& utf8_str);
+std::string SysWideToUTF8(WStringView wide_str);
+std::wstring SysUTF8ToWide(StringView utf8_str);
 
-std::string SysWideToNativeMB(const std::wstring& wide_str);
-std::wstring SysNativeMBToWide(const std::string& mb_str);
+std::string SysWideToNativeMB(WStringView wide_str);
+std::wstring SysNativeMBToWide(StringView mb_str);
 
-std::wstring SysMultiByteToWide(const std::string& mb_str, CodePage code_page);
-std::string SysWideToMultiByte(const std::wstring& wide_str, CodePage code_page);
+std::wstring SysMultiByteToWide(StringView mb_str, CodePage code_page);
+std::string SysWideToMultiByte(WStringView wide_str, CodePage code_page);
 
 // If the string being converted contains non-ASCII characters, functions throw
 // an invalid_argument exception.

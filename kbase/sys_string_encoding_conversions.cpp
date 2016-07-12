@@ -13,27 +13,27 @@
 
 namespace kbase {
 
-std::string SysWideToUTF8(const std::wstring& wide_str)
+std::string SysWideToUTF8(WStringView wide_str)
 {
     return SysWideToMultiByte(wide_str, CodePage::UTF8);
 }
 
-std::wstring SysUTF8ToWide(const std::string& utf8_str)
+std::wstring SysUTF8ToWide(StringView utf8_str)
 {
     return SysMultiByteToWide(utf8_str, CodePage::UTF8);
 }
 
-std::string SysWideToNativeMB(const std::wstring& wide_str)
+std::string SysWideToNativeMB(WStringView wide_str)
 {
     return SysWideToMultiByte(wide_str, CodePage::Default_Code_Page);
 }
 
-std::wstring SysNativeMBToWide(const std::string& mb_str)
+std::wstring SysNativeMBToWide(StringView mb_str)
 {
     return SysMultiByteToWide(mb_str, CodePage::Default_Code_Page);
 }
 
-std::wstring SysMultiByteToWide(const std::string& mb_str, CodePage code_page)
+std::wstring SysMultiByteToWide(StringView mb_str, CodePage code_page)
 {
     if (mb_str.empty())
         return std::wstring();
@@ -53,7 +53,7 @@ std::wstring SysMultiByteToWide(const std::string& mb_str, CodePage code_page)
     return wide_str;
 }
 
-std::string SysWideToMultiByte(const std::wstring& wide_str, CodePage code_page)
+std::string SysWideToMultiByte(WStringView wide_str, CodePage code_page)
 {
     if (wide_str.empty())
         return std::string();
