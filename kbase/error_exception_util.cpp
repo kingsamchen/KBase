@@ -20,7 +20,7 @@ using kbase::PathString;
 bool g_always_enable_check_in_debug = true;
 Path g_minidump_dir_path;
 
-inline bool ShouldCheckFirst()
+bool ShouldCheckFirst()
 {
     return ACTION_IS_ON(CHECK) && g_always_enable_check_in_debug;
 }
@@ -55,7 +55,7 @@ void Guarantor::Require()
     }
 }
 
-void Guarantor::Require(const std::string& msg)
+void Guarantor::Require(StringView msg)
 {
     exception_desc_ << "Extra Message: " << msg << "\n";
     Require();
@@ -76,6 +76,8 @@ void Guarantor::Raise()
         Check();
     }
 
+    StackWalker callstack;
+    callstack.DumpCallStack(exception_desc_);
     throw std::runtime_error(exception_desc_.str());
 }
 
@@ -96,7 +98,7 @@ void Guarantor::RaiseWithDump()
     throw std::runtime_error(exception_desc_.str());
 }
 
-void EnableAlwaysCheckForEnsureInDebug(bool always_check)
+void AlwaysCheckForEnsureInDebug(bool always_check)
 {
     g_always_enable_check_in_debug = always_check;
 }

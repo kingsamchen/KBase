@@ -19,7 +19,7 @@
 
 namespace kbase {
 
-enum class EnsureAction : int {
+enum class EnsureAction {
     CHECK,
     RAISE,
     RAISE_WITH_DUMP
@@ -61,7 +61,7 @@ public:
         // which might overwrite last-error code we need, even when they succeed.
         exception_desc_ << "Failed: " << msg
                         << "\nFile: " << file_name << " Line: " << line
-                        << "\nCaptured Variables:\n";
+                        << "\nChecked Variables:\n";
     }
 
     ~Guarantor() = default;
@@ -73,7 +73,7 @@ public:
     // Capture diagnostic variables.
 
     template<typename T>
-    Guarantor& CaptureValue(const char* name, T&& value)
+    Guarantor& CaptureValue(const char* name, const T& value)
     {
         exception_desc_ << "    " << name << " = " << value << "\n";
         return *this;
@@ -93,7 +93,7 @@ public:
 
     void Require();
 
-    void Require(const std::string& msg);
+    void Require(StringView msg);
 
     // Added to throw a specific exception that you know how to handle it when the
     // condition is violated.
@@ -105,6 +105,13 @@ public:
         if (action_required_ == EnsureAction::RAISE) {
             throw E(exception_desc_.str());
         }
+    }
+
+    template<typename E>
+    void Require(StringView msg)
+    {
+        exception_desc_ << "Extra Message: " << msg << "\n";
+        Require<E>();
     }
 
     // Access stubs for infinite variable capture.
@@ -123,7 +130,7 @@ private:
     std::ostringstream exception_desc_;
 };
 
-void EnableAlwaysCheckForEnsureInDebug(bool always_check);
+void AlwaysCheckForEnsureInDebug(bool always_check);
 
 // If `dump_dir` wasn't specified, current directory is used as storage location.
 void SetMiniDumpDirectory(const Path& dump_dir);
