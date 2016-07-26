@@ -6,7 +6,7 @@
 
 #include <thread>
 
-#include "kbase\version_util.h"
+#include "kbase\os_info.h"
 
 #include "gtest\gtest.h"
 

@@ -198,7 +198,7 @@
     <ClCompile Include="kbase\string_util.cpp" />
     <ClCompile Include="kbase\sys_info.cpp" />
     <ClCompile Include="kbase\sys_string_encoding_conversions.cpp" />
-    <ClCompile Include="kbase\version_util.cpp" />
+    <ClCompile Include="kbase\os_info.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="kbase\at_exit_manager.h" />
@@ -237,7 +237,7 @@
     <ClInclude Include="kbase\sys_info.h" />
     <ClInclude Include="kbase\sys_string_encoding_conversions.h" />
     <ClInclude Include="kbase\tokenizer.h" />
-    <ClInclude Include="kbase\version_util.h" />
+    <ClInclude Include="kbase\os_info.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

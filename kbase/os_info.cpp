@@ -2,7 +2,7 @@
  @ 0xCCCCCCCC
 */
 
-#include "kbase/version_util.h"
+#include "kbase/os_info.h"
 
 #include <map>
 #include <memory>

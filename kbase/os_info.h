@@ -6,8 +6,8 @@
 #pragma once
 #endif
 
-#ifndef KBASE_VERSION_UTIL_H_
-#define KBASE_VERSION_UTIL_H_
+#ifndef KBASE_OS_INFO_H_
+#define KBASE_OS_INFO_H_
 
 #include <string>
 
@@ -127,4 +127,4 @@ private:
 
 }   // namespace kbase
 
-#endif  // KBASE_VERSION_UTIL_H_
+#endif  // KBASE_OS_INFO_H_

@@ -11,7 +11,7 @@
 #include "kbase/error_exception_util.h"
 #include "kbase/path.h"
 #include "kbase/sys_string_encoding_conversions.h"
-#include "kbase/version_util.h"
+#include "kbase/os_info.h"
 
 namespace kbase {
 

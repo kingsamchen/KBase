@@ -81,9 +81,6 @@
     <ClCompile Include="kbase\sys_string_encoding_conversions.cpp">
       <Filter>kbase</Filter>
     </ClCompile>
-    <ClCompile Include="kbase\version_util.cpp">
-      <Filter>kbase</Filter>
-    </ClCompile>
     <ClCompile Include="kbase\stack_walker.cpp">
       <Filter>kbase</Filter>
     </ClCompile>
@@ -91,6 +88,9 @@
       <Filter>kbase</Filter>
     </ClCompile>
     <ClCompile Include="kbase\path.cpp">
+      <Filter>kbase</Filter>
+    </ClCompile>
+    <ClCompile Include="kbase\os_info.cpp">
       <Filter>kbase</Filter>
     </ClCompile>
   </ItemGroup>
@@ -182,9 +182,6 @@
     <ClInclude Include="kbase\sys_string_encoding_conversions.h">
       <Filter>kbase</Filter>
     </ClInclude>
-    <ClInclude Include="kbase\version_util.h">
-      <Filter>kbase</Filter>
-    </ClInclude>
     <ClInclude Include="kbase\basic_macros.h">
       <Filter>kbase</Filter>
     </ClInclude>
@@ -204,6 +201,9 @@
       <Filter>kbase</Filter>
     </ClInclude>
     <ClInclude Include="kbase\tokenizer.h">
+      <Filter>kbase</Filter>
+    </ClInclude>
+    <ClInclude Include="kbase\os_info.h">
       <Filter>kbase</Filter>
     </ClInclude>
   </ItemGroup>
