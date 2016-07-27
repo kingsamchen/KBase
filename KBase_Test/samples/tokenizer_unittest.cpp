@@ -19,8 +19,8 @@ TEST(TokenizerTest, Ctor)
     auto end = tokenizer.end();
     auto begin_copy = begin;
     auto end_move = std::move(end);
-    UNREFED_VAR(begin_copy);
-    UNREFED_VAR(end_move);
+    UNUSED_VAR(begin_copy);
+    UNUSED_VAR(end_move);
 }
 
 TEST(TokenizerTest, Iterate)

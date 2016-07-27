@@ -25,8 +25,11 @@
     classname(classname&&) = default;                   \
     classname& operator=(classname&&) = default;
 
-#define UNREFED_VAR(x) \
+#define UNUSED_VAR(x) \
     ::kbase::internal::SilenceUnusedVariableWarning(x)
+
+#define DECLARE_DLL_FUNCTION(fn, type, dll) \
+    auto fn = reinterpret_cast<type>(GetProcAddress(GetModuleHandleW(L##dll), #fn))
 
 // Put complicated implementation below.
 

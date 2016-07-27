@@ -36,7 +36,7 @@ TEST(StringUtilTest, ReplaceString)
 
     {
         AutoReset<std::string> guard(&str);
-        UNREFED_VAR(guard);
+        UNUSED_VAR(guard);
 
         ReplaceSubstring(str, "test", "t-e-s-t");
         EXPECT_EQ(str, std::string("This is a t-e-s-t text for string replacing unitt-e-s-t"));
@@ -117,7 +117,7 @@ TEST(StringUtilTest, WriteIntoTest)
     EXPECT_TRUE(buffer.empty());
     size_t written_size = 12;
     auto ptr = WriteInto(buffer, written_size + 1);
-	UNREFED_VAR(ptr);
+	UNUSED_VAR(ptr);
     EXPECT_EQ(written_size, buffer.size());
 }
 
