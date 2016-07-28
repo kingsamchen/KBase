@@ -42,13 +42,13 @@ void GetDiskSpace(const Path& path, const SpaceType& type)
 // static
 unsigned long SysInfo::NumberOfProcessors()
 {
-    return OSInfo::GetInstance()->processors();
+    return OSInfo::GetInstance()->NumberOfProcessors();
 }
 
 // static
 unsigned long SysInfo::AllocationGranularity()
 {
-    return OSInfo::GetInstance()->allocation_granularity();
+    return OSInfo::GetInstance()->AllocationGranularity();
 }
 
 // static
@@ -57,13 +57,13 @@ std::string SysInfo::SystemArchitecture()
     std::string str;
     auto architecture = OSInfo::GetInstance()->architecture();
     switch (architecture) {
-        case OSInfo::X86_ARCHITECTURE:
+        case SystemArchitecture::X86_ARCHITECTURE:
             str = "X86";
             break;
-        case OSInfo::X64_ARCHITECTURE:
+        case SystemArchitecture::X64_ARCHITECTURE:
             str = "X86_64";
             break;
-        case OSInfo::IA64_ARCHITECTURE:
+        case SystemArchitecture::IA64_ARCHITECTURE:
             str = "IA64";
             break;
         default:

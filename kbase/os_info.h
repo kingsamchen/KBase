@@ -14,41 +14,46 @@
 #include "kbase/basic_macros.h"
 #include "kbase/singleton.h"
 
-typedef void* HANDLE;
-typedef unsigned short WORD;
+using HANDLE = void*;
 
 namespace kbase {
+
+enum class SystemArchitecture {
+    X86_ARCHITECTURE,
+    X64_ARCHITECTURE,
+    IA64_ARCHITECTURE,
+    UNKNOWN_ARCHITECTURE
+};
+
+enum class WOW64Status {
+    WOW64_DISABLED,
+    WOW64_ENABLED,
+    WOW64_UNKNOWN
+};
+
+// Doesn't support versions prior to Windows Vista.
+enum class SystemVersion {
+    WIN_VISTA,      // Also includes Server 2008.
+    WIN_7,          // Also includes Server 2008 R2.
+    WIN_8,          // Also includes Server 2012.
+    WIN_8_1,        // Also includes Server 2012 R2.
+    WIN_10,
+};
 
 // It is a singleton.
 class OSInfo {
 public:
-    enum SystemArchitecture {
-        X86_ARCHITECTURE,
-        X64_ARCHITECTURE,
-        IA64_ARCHITECTURE,
-        UNKNOWN_ARCHITECTURE
-    };
-
-    enum WOW64Status {
-        WOW64_DISABLED,
-        WOW64_ENABLED,
-        WOW64_UNKNOWN
-    };
-
-    enum Version {
-        WIN_XP,
-        WIN_XP_SP3,
-        WIN_SERVER_2003,
-        WIN_VISTA,      // Also includes Server 2008.
-        WIN_7,
-        WIN_8,          // Also includes Server 2012.
-        WIN_8_1,        // Also includes Server 2012 R2.
-    };
-
     struct VersionNumber {
-        WORD major_version;
-        WORD minor_version;
-        WORD service_pack_major;
+        VersionNumber() noexcept
+            : major_version(0), minor_version(0)
+        {}
+
+        VersionNumber(unsigned long major, unsigned long minor) noexcept
+            : major_version(major), minor_version(minor)
+        {}
+
+        unsigned long major_version;
+        unsigned long minor_version;
     };
 
     DISALLOW_COPY(OSInfo);
@@ -62,68 +67,63 @@ public:
     // is running on 32-bit system.
     // Returns WOW64_UNKNOWN, if an error occurs.
     // The handle to a process must have PROCESS_QUERY_INFORMATION access right.
-    static WOW64Status GetWOW64StatusForProcess(HANDLE process);
+    static WOW64Status GetWOW64StatusForProcess(HANDLE process) noexcept;
 
-    // This function can be made static, but in order to be consistent with is_server
-    // in syntax, I choose to leave it as a member function.
-    bool IsVersionOrGreater(Version version) const;
+    bool IsVersionOrGreater(SystemVersion version) const noexcept;
 
-    std::wstring processor_model_name() const
+    const std::wstring& processor_model_name() const noexcept
     {
         return processor_model_name_;
     }
 
-    bool is_server() const
+    bool is_server() const noexcept
     {
         return is_server_;
     }
 
-    SystemArchitecture architecture() const
+    SystemArchitecture architecture() const noexcept
     {
         return architecture_;
     }
 
-    WOW64Status wow64_status() const
+    WOW64Status wow64_status() const noexcept
     {
         return wow64_status_;
     }
 
-    VersionNumber version_number() const
+    VersionNumber version_number() const noexcept
     {
         return version_number_;
     }
 
-    unsigned long processors() const
+    unsigned long NumberOfProcessors() const noexcept
     {
         return processors_;
     }
 
-    unsigned long allocation_granularity() const
+    unsigned long AllocationGranularity() const noexcept
     {
         return allocation_granularity_;
     }
 
-    void DestroyInstance()
-    {
-        delete this;
-    }
-
 private:
-    friend DefaultSingletonTraits<OSInfo>;
     OSInfo();
+
     ~OSInfo();
 
-    std::wstring GetProcessorModelName() const;
+    friend DefaultSingletonTraits<OSInfo>;
 
 private:
     SystemArchitecture architecture_;
     WOW64Status wow64_status_;
-    VersionNumber version_number_;
     bool is_server_;
+    std::wstring processor_model_name_;
+    VersionNumber version_number_;
     unsigned long processors_;
     unsigned long allocation_granularity_;
-    std::wstring processor_model_name_;
 };
+
+bool operator<(const OSInfo::VersionNumber& lhs, const OSInfo::VersionNumber& rhs) noexcept;
 
 }   // namespace kbase
 

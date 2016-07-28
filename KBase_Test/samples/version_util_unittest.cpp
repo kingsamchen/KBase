@@ -35,7 +35,7 @@ namespace {
 
 bool CompareVersionNumber(const OSInfo::VersionNumber& lhs, const OSInfo::VersionNumber& rhs)
 {
-    return lhs.major_version == rhs.major_version &&
+    return lhs.major == rhs.major &&
            lhs.minor_version == rhs.minor_version;
 }
 
@@ -78,7 +78,7 @@ TEST_F(OSInfoTest, SysArchitecture)
 
     EXPECT_EQ(OSInfo::X64_ARCHITECTURE, instance()->architecture());
 
-    EXPECT_NE(0, instance()->processors());
+    EXPECT_NE(0, instance()->NumberOfProcessors());
 
-    EXPECT_EQ(65536, instance()->allocation_granularity());
+    EXPECT_EQ(65536, instance()->AllocationGranularity());
 }
