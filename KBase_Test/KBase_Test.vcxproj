@@ -190,7 +190,6 @@
     <ClCompile Include="samples\string_format_unittest.cpp" />
     <ClCompile Include="samples\string_util_unittest.cpp" />
     <ClCompile Include="samples\string_view_unittest.cpp" />
-    <ClCompile Include="samples\sys_info_unittest.cpp" />
     <ClCompile Include="samples\tokenizer_unittest.cpp" />
     <ClCompile Include="samples\version_util_unittest.cpp" />
     <ClCompile Include="stdafx.cpp">

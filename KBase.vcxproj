@@ -196,7 +196,6 @@
     <ClCompile Include="kbase\stack_walker.cpp" />
     <ClCompile Include="kbase\string_format.cpp" />
     <ClCompile Include="kbase\string_util.cpp" />
-    <ClCompile Include="kbase\sys_info.cpp" />
     <ClCompile Include="kbase\sys_string_encoding_conversions.cpp" />
     <ClCompile Include="kbase\os_info.cpp" />
   </ItemGroup>
@@ -234,7 +233,6 @@
     <ClInclude Include="kbase\string_format.h" />
     <ClInclude Include="kbase\string_util.h" />
     <ClInclude Include="kbase\string_view.h" />
-    <ClInclude Include="kbase\sys_info.h" />
     <ClInclude Include="kbase\sys_string_encoding_conversions.h" />
     <ClInclude Include="kbase\tokenizer.h" />
     <ClInclude Include="kbase\os_info.h" />

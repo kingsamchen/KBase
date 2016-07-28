@@ -75,9 +75,6 @@
     <ClCompile Include="kbase\string_util.cpp">
       <Filter>kbase</Filter>
     </ClCompile>
-    <ClCompile Include="kbase\sys_info.cpp">
-      <Filter>kbase</Filter>
-    </ClCompile>
     <ClCompile Include="kbase\sys_string_encoding_conversions.cpp">
       <Filter>kbase</Filter>
     </ClCompile>
@@ -174,9 +171,6 @@
       <Filter>kbase</Filter>
     </ClInclude>
     <ClInclude Include="kbase\string_util.h">
-      <Filter>kbase</Filter>
-    </ClInclude>
-    <ClInclude Include="kbase\sys_info.h">
       <Filter>kbase</Filter>
     </ClInclude>
     <ClInclude Include="kbase\sys_string_encoding_conversions.h">

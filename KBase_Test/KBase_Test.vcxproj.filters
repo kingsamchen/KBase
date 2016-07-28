@@ -35,9 +35,6 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="samples\sys_info_unittest.cpp">
-      <Filter>samples</Filter>
-    </ClCompile>
     <ClCompile Include="samples\version_util_unittest.cpp">
       <Filter>samples</Filter>
     </ClCompile>
