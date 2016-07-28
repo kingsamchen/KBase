@@ -32,7 +32,7 @@ enum class WOW64Status {
 };
 
 // Doesn't support versions prior to Windows Vista.
-enum class SystemVersion {
+enum class SystemVersion : unsigned int {
     WIN_VISTA,      // Also includes Server 2008.
     WIN_7,          // Also includes Server 2008 R2.
     WIN_8,          // Also includes Server 2012.
@@ -56,11 +56,18 @@ public:
         unsigned long minor_version;
     };
 
+    ~OSInfo() = default;
+
     DISALLOW_COPY(OSInfo);
 
     DISALLOW_MOVE(OSInfo);
 
     static OSInfo* GetInstance();
+
+    // Returns the uptime of the system.
+    // This duration is in microseconds, and does not include time the system
+    // spends in sleep or hibernation.
+    static uint64_t UpTime() noexcept;
 
     // Returns WOW64_ENABLED, if the process is running under WOW64.
     // Returns WOW64_DISABLED, if the process is 64-bit application, or the process
@@ -69,31 +76,22 @@ public:
     // The handle to a process must have PROCESS_QUERY_INFORMATION access right.
     static WOW64Status GetWOW64StatusForProcess(HANDLE process) noexcept;
 
+    // Returns true, if the host system is 64-bit system.
+    // Return false, if not or an error occured.
+    bool RunningOn64BitSystem() const noexcept;
+
     bool IsVersionOrGreater(SystemVersion version) const noexcept;
 
-    const std::wstring& processor_model_name() const noexcept
+    std::string SystemVersionName() const;
+
+    const std::wstring& ProcessorModelName() const noexcept
     {
         return processor_model_name_;
     }
 
-    bool is_server() const noexcept
+    bool IsServerSystem() const noexcept
     {
         return is_server_;
-    }
-
-    SystemArchitecture architecture() const noexcept
-    {
-        return architecture_;
-    }
-
-    WOW64Status wow64_status() const noexcept
-    {
-        return wow64_status_;
-    }
-
-    VersionNumber version_number() const noexcept
-    {
-        return version_number_;
     }
 
     unsigned long NumberOfProcessors() const noexcept
@@ -106,10 +104,23 @@ public:
         return allocation_granularity_;
     }
 
+    SystemArchitecture architecture() const noexcept
+    {
+        return architecture_;
+    }
+
+    VersionNumber version_number() const noexcept
+    {
+        return version_number_;
+    }
+
 private:
     OSInfo();
 
-    ~OSInfo();
+    WOW64Status wow64_status() const noexcept
+    {
+        return wow64_status_;
+    }
 
     friend DefaultSingletonTraits<OSInfo>;
 
@@ -123,7 +134,16 @@ private:
     unsigned long allocation_granularity_;
 };
 
-bool operator<(const OSInfo::VersionNumber& lhs, const OSInfo::VersionNumber& rhs) noexcept;
+inline bool operator==(const OSInfo::VersionNumber& lhs, const OSInfo::VersionNumber& rhs) noexcept
+{
+    return lhs.major_version == rhs.major_version && lhs.minor_version == rhs.minor_version;
+}
+
+inline bool operator<(const OSInfo::VersionNumber& lhs, const OSInfo::VersionNumber& rhs) noexcept
+{
+    return (lhs.major_version < rhs.major_version) ||
+           (lhs.major_version == rhs.major_version && lhs.minor_version < rhs.minor_version);
+}
 
 }   // namespace kbase
 

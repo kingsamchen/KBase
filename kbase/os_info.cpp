@@ -4,11 +4,10 @@
 
 #include "kbase/os_info.h"
 
-#include <map>
-
 #include <Windows.h>
 #include <VersionHelpers.h>
 
+#include "kbase/basic_types.h"
 #include "kbase/registry.h"
 
 namespace {
@@ -18,12 +17,12 @@ using kbase::WOW64Status;
 
 using VersionNumber = kbase::OSInfo::VersionNumber;
 
-const std::map<SystemVersion, VersionNumber> version_name_to_number = {
-    { SystemVersion::WIN_VISTA, { 6, 0 } },
-    { SystemVersion::WIN_7, { 6, 1 } },
-    { SystemVersion::WIN_8, { 6, 2 } },
-    { SystemVersion::WIN_8_1, { 6, 3 } },
-    { SystemVersion::WIN_10, { 10, 0 } }
+const VersionNumber kVersionTable[] {
+    { 6, 0 },   // SystemVersion::WIN_VISTA
+    { 6, 1 },   // SystemVersion::WIN_7
+    { 6, 2 },   // SystemVersion::WIN_8
+    { 6, 3 },   // SystemVersion::WIN_8_1
+    { 10, 0 },  // SystemVersion::WIN_10
 };
 
 std::wstring GetProcessorModelName()
@@ -92,13 +91,28 @@ OSInfo::OSInfo()
     allocation_granularity_ = system_info.dwAllocationGranularity;
 }
 
-OSInfo::~OSInfo()
-{}
-
 bool OSInfo::IsVersionOrGreater(SystemVersion version) const noexcept
 {
-    const VersionNumber& test_version_number = version_name_to_number.at(version);
+    const auto& test_version_number = kVersionTable[enum_cast(version)];
     return !(version_number_ < test_version_number);
+}
+
+std::string OSInfo::SystemVersionName() const
+{
+    std::string version_literal = "Unknown";
+    if (kVersionTable[enum_cast(SystemVersion::WIN_VISTA)] == version_number()) {
+        version_literal = "Windows Vista";
+    } else if (kVersionTable[enum_cast(SystemVersion::WIN_7)] == version_number()) {
+        version_literal = "Windows 7";
+    } else if (kVersionTable[enum_cast(SystemVersion::WIN_8)] == version_number()) {
+        version_literal = "Windows 8";
+    } else if (kVersionTable[enum_cast(SystemVersion::WIN_8_1)] == version_number()) {
+        version_literal = "Windows 8.1";
+    } else if (kVersionTable[enum_cast(SystemVersion::WIN_10)] == version_number()) {
+        version_literal = "Windows 10";
+    }
+
+    return version_literal;
 }
 
 // static
@@ -117,10 +131,33 @@ WOW64Status OSInfo::GetWOW64StatusForProcess(HANDLE process) noexcept
     return is_wow64 ? WOW64Status::WOW64_ENABLED : WOW64Status::WOW64_DISABLED;
 }
 
-bool operator<(const OSInfo::VersionNumber& lhs, const OSInfo::VersionNumber& rhs) noexcept
+bool OSInfo::RunningOn64BitSystem() const noexcept
 {
-    return (lhs.major_version < rhs.major_version) ||
-           (lhs.major_version == rhs.major_version && lhs.minor_version < rhs.minor_version);
+#if defined(_WIN64)
+    UNUSED_VAR(wow64_status());
+    return true;
+#elif defined(_WIN32)
+    auto wow = wow64_status();
+    switch (wow) {
+        case OSInfo::WOW64_ENABLED:
+            return true;
+            break;
+        case OSInfo::WOW64_DISABLED:
+            return false;
+            break;
+        default:
+            return false;
+            break;
+    }
+#endif
+}
+
+// static
+uint64_t OSInfo::UpTime() noexcept
+{
+    unsigned long long unbiased_interrupt_time = 0;
+    QueryUnbiasedInterruptTime(&unbiased_interrupt_time);
+    return unbiased_interrupt_time / 10;
 }
 
 }   // namespace kbase

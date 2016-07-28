@@ -35,9 +35,6 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="samples\version_util_unittest.cpp">
-      <Filter>samples</Filter>
-    </ClCompile>
     <ClCompile Include="samples\error_exception_util_unittest.cpp">
       <Filter>samples</Filter>
     </ClCompile>
@@ -114,6 +111,9 @@
       <Filter>samples</Filter>
     </ClCompile>
     <ClCompile Include="samples\tokenizer_unittest.cpp">
+      <Filter>samples</Filter>
+    </ClCompile>
+    <ClCompile Include="samples\os_info_unittest.cpp">
       <Filter>samples</Filter>
     </ClCompile>
   </ItemGroup>
