@@ -23,6 +23,13 @@ using PathString = std::basic_string<PathChar>;
 
 using byte = uint8_t;
 
+// Casts an enum value into an equivalent integer.
+template<typename E>
+constexpr auto enum_cast(E e)
+{
+    return static_cast<std::underlying_type_t<E>>(e);
+}
+
 }   // namespace kbase
 
 #endif  // KBASE_BASIC_TYPES_H_
