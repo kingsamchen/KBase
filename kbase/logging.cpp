@@ -5,7 +5,6 @@
 #include "kbase/logging.h"
 
 #include <cstdio>
-#include <ctime>
 #include <iomanip>
 #include <thread>
 
@@ -39,12 +38,6 @@ PathString g_log_file_path;
 ScopedSysHandle g_log_file;
 
 const PathChar kLogFileName[] = L"_debug_message.log";
-
-template<typename E>
-constexpr auto ToUnderlying(E e)
-{
-    return static_cast<std::underlying_type_t<E>>(e);
-}
 
 // Ouputs timestamp in the form like "20160126 09:14:38,456".
 void OutputNowTimestamp(std::ostream& stream)
@@ -245,7 +238,7 @@ void LogMessage::InitMessageHeader()
         stream_ << " " << std::this_thread::get_id();
     }
 
-    stream_ << " " << kLogSeverityNames[ToUnderlying(severity_)]
+    stream_ << " " << kLogSeverityNames[enum_cast(severity_)]
             << " " << ExtractFileName(file_) << '(' << line_ << ")]";
 }
 
