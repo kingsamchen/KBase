@@ -7,6 +7,7 @@
 #include <Windows.h>
 #include <VersionHelpers.h>
 
+#include "kbase/basic_macros.h"
 #include "kbase/basic_types.h"
 #include "kbase/registry.h"
 
@@ -134,7 +135,7 @@ WOW64Status OSInfo::GetWOW64StatusForProcess(HANDLE process) noexcept
 bool OSInfo::RunningOn64BitSystem() const noexcept
 {
 #if defined(_WIN64)
-    UNUSED_VAR(wow64_status());
+    FORCE_AS_MEMBER_FUNCTION();
     return true;
 #elif defined(_WIN32)
     auto wow = wow64_status();

@@ -31,6 +31,9 @@
 #define DECLARE_DLL_FUNCTION(fn, type, dll) \
     auto fn = reinterpret_cast<type>(GetProcAddress(GetModuleHandleW(L##dll), #fn))
 
+#define FORCE_AS_MEMBER_FUNCTION()                         \
+    UNUSED_VAR(this)
+
 // Put complicated implementation below.
 
 namespace kbase {
