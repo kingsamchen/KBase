@@ -48,7 +48,7 @@ public:
             : major_version(0), minor_version(0)
         {}
 
-        VersionNumber(unsigned long major, unsigned long minor) noexcept
+        constexpr VersionNumber(unsigned long major, unsigned long minor) noexcept
             : major_version(major), minor_version(minor)
         {}
 

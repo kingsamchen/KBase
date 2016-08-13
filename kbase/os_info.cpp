@@ -17,12 +17,12 @@ using kbase::WOW64Status;
 
 using VersionNumber = kbase::OSInfo::VersionNumber;
 
-const VersionNumber kVersionTable[] {
-    { 6, 0 },   // SystemVersion::WIN_VISTA
-    { 6, 1 },   // SystemVersion::WIN_7
-    { 6, 2 },   // SystemVersion::WIN_8
-    { 6, 3 },   // SystemVersion::WIN_8_1
-    { 10, 0 },  // SystemVersion::WIN_10
+constexpr VersionNumber kVersionTable[] {
+    {6, 0},     // SystemVersion::WIN_VISTA
+    {6, 1},     // SystemVersion::WIN_7
+    {6, 2},     // SystemVersion::WIN_8
+    {6, 3},     // SystemVersion::WIN_8_1
+    {10, 0},    // SystemVersion::WIN_10
 };
 
 std::wstring GetProcessorModelName()
