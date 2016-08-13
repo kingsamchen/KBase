@@ -11,21 +11,23 @@
 
 #include <algorithm>
 
+#include "kbase/basic_macros.h"
+
 namespace kbase {
 
 namespace internal {
 
 // FNV-1a hash function. Shamelessly stolen from STL.
-inline size_t HashByteSequence(const unsigned char* data, size_t length)
+inline size_t HashByteSequence(const unsigned char* data, size_t length) noexcept
 {
 #if defined(_WIN64)
     static_assert(sizeof(size_t) == 8, "This code is for 64-bit size_t.");
-    const size_t kFNVOffsetBasis = 14695981039346656037ULL;
-    const size_t kFNVPrime = 1099511628211ULL;
+    constexpr size_t kFNVOffsetBasis = 14695981039346656037ULL;
+    constexpr size_t kFNVPrime = 1099511628211ULL;
 #else /* defined(_WIN64) */
     static_assert(sizeof(size_t) == 4, "This code is for 32-bit size_t.");
-    const size_t kFNVOffsetBasis = 2166136261U;
-    const size_t kFNVPrime = 16777619U;
+    constexpr size_t kFNVOffsetBasis = 2166136261U;
+    constexpr size_t kFNVPrime = 16777619U;
 #endif /* defined(_WIN64) */
 
     size_t val = kFNVOffsetBasis;
@@ -69,7 +71,7 @@ public:
         : data_(str.data()), length_(str.length())
     {}
 
-    constexpr BasicStringView(const CharT* str, size_type count)
+    constexpr BasicStringView(const CharT* str, size_type count) noexcept
         : data_(str), length_(count)
     {}
 
@@ -172,6 +174,7 @@ public:
 
     constexpr size_type max_size() const noexcept
     {
+        FORCE_AS_MEMBER_FUNCTION();
         return std::numeric_limits<size_type>::max();
     }
 
@@ -233,28 +236,28 @@ public:
         return rv;
     }
 
-    constexpr int compare(size_type pos, size_type count, BasicStringView view) const
+    int compare(size_type pos, size_type count, BasicStringView view) const
     {
         return substr(pos, count).compare(view);
     }
 
-    constexpr int compare(size_type pos_1, size_type count_1, BasicStringView view,
+    int compare(size_type pos_1, size_type count_1, BasicStringView view,
                           size_type pos_2, size_type count_2) const
     {
         return substr(pos_1, count_1).compare(view.substr(pos_2, count_2));
     }
 
-    constexpr int compare(const CharT* str) const
+    int compare(const CharT* str) const
     {
         return compare(BasicStringView(str));
     }
 
-    constexpr int compare(size_type pos, size_type count, const CharT* str) const
+    int compare(size_type pos, size_type count, const CharT* str) const
     {
         return substr(pos, count).compare(str);
     }
 
-    constexpr int compare(size_type pos_1, size_type count_1, const CharT* str,
+    int compare(size_type pos_1, size_type count_1, const CharT* str,
                           size_type count_2) const
     {
         return substr(pos_1, count_1).compare(BasicStringView(str, count_2));
@@ -286,17 +289,17 @@ public:
         return static_cast<size_type>(std::distance(begin(), it));
     }
 
-    constexpr size_type find(CharT ch, size_type pos = 0) const noexcept
+    size_type find(CharT ch, size_type pos = 0) const noexcept
     {
         return find(BasicStringView(&ch, 1), pos);
     }
 
-    constexpr size_type find(const CharT* str, size_type pos, size_type count) const
+    size_type find(const CharT* str, size_type pos, size_type count) const
     {
         return find(BasicStringView(str, count), pos);
     }
 
-    constexpr size_type find(const CharT* str, size_type pos = 0) const
+    size_type find(const CharT* str, size_type pos = 0) const
     {
         return find(BasicStringView(str), pos);
     }
@@ -322,17 +325,17 @@ public:
         return static_cast<size_type>(std::distance(begin(), it));
     }
 
-    constexpr size_type rfind(CharT ch, size_type pos = npos) const noexcept
+    size_type rfind(CharT ch, size_type pos = npos) const noexcept
     {
         return rfind(BasicStringView(&ch, 1), pos);
     }
 
-    constexpr size_type rfind(const CharT* str, size_type pos, size_type count) const
+    size_type rfind(const CharT* str, size_type pos, size_type count) const
     {
         return rfind(BasicStringView(str, count), pos);
     }
 
-    constexpr size_type rfind(const CharT* str, size_type pos = npos) const
+    size_type rfind(const CharT* str, size_type pos = npos) const
     {
         return rfind(BasicStringView(str), pos);
     }
@@ -351,17 +354,17 @@ public:
         return static_cast<size_type>(std::distance(begin(), it));
     }
 
-    constexpr size_type find_first_of(CharT ch, size_type pos = 0) const noexcept
+    size_type find_first_of(CharT ch, size_type pos = 0) const noexcept
     {
         return find_first_of(BasicStringView(&ch, 1), 0);
     }
 
-    constexpr size_type find_first_of(const CharT* str, size_type pos, size_type count) const
+    size_type find_first_of(const CharT* str, size_type pos, size_type count) const
     {
         return find_first_of(BasicStringView(str, count), pos);
     }
 
-    constexpr size_type find_first_of(const CharT* str, size_type pos = 0) const
+    size_type find_first_of(const CharT* str, size_type pos = 0) const
     {
         return find_first_of(BasicStringView(str), pos);
     }
@@ -388,17 +391,17 @@ public:
         return npos;
     }
 
-    constexpr size_type find_last_of(CharT ch, size_type pos = npos) const noexcept
+    size_type find_last_of(CharT ch, size_type pos = npos) const noexcept
     {
         return find_last_of(BasicStringView(&ch, 1), pos);
     }
 
-    constexpr size_type find_last_of(const CharT* str, size_type pos, size_type count) const
+    size_type find_last_of(const CharT* str, size_type pos, size_type count) const
     {
         return find_last_of(BasicStringView(str, count), pos);
     }
 
-    constexpr size_type find_last_of(const CharT* str, size_type pos = npos) const
+    size_type find_last_of(const CharT* str, size_type pos = npos) const
     {
         return find_last_of(BasicStringView(str), pos);
     }
@@ -420,17 +423,17 @@ public:
         return npos;
     }
 
-    constexpr size_type find_first_not_of(CharT ch, size_type pos = 0) const noexcept
+    size_type find_first_not_of(CharT ch, size_type pos = 0) const noexcept
     {
         return find_fisrt_not_of(BasicStringView(&ch, 1), pos);
     }
 
-    constexpr size_type find_first_not_of(const CharT* str, size_type pos, size_type count) const
+    size_type find_first_not_of(const CharT* str, size_type pos, size_type count) const
     {
         return find_first_not_of(BasicStringView(str, count), pos);
     }
 
-    constexpr size_type find_first_not_of(const CharT* str, size_type pos = 0) const
+    size_type find_first_not_of(const CharT* str, size_type pos = 0) const
     {
         return find_first_not_of(BasicStringView(str), pos);
     }
@@ -457,17 +460,17 @@ public:
         return npos;
     }
 
-    constexpr size_type find_last_not_of(CharT ch, size_type pos = npos) const noexcept
+    size_type find_last_not_of(CharT ch, size_type pos = npos) const noexcept
     {
         return find_last_not_of(BasicStringView(&ch, 1), pos);
     }
 
-    constexpr size_type find_last_not_of(const CharT* str, size_type pos, size_type count) const
+    size_type find_last_not_of(const CharT* str, size_type pos, size_type count) const
     {
         return find_last_not_of(BasicStringView(str, count), pos);
     }
 
-    constexpr size_type find_last_not_of(const CharT* str, size_type pos = npos) const
+    size_type find_last_not_of(const CharT* str, size_type pos = npos) const
     {
         return find_last_not_of(BasicStringView(str), pos);
     }
@@ -478,28 +481,28 @@ private:
 };
 
 template<typename CharT, typename Traits>
-constexpr bool operator<(BasicStringView<CharT, Traits> lhs,
+bool operator<(BasicStringView<CharT, Traits> lhs,
                          BasicStringView<CharT, Traits> rhs) noexcept
 {
     return lhs.compare(rhs) < 0;
 }
 
 template<typename CharT, typename Traits>
-constexpr bool operator<=(BasicStringView<CharT, Traits> lhs,
+bool operator<=(BasicStringView<CharT, Traits> lhs,
                           BasicStringView<CharT, Traits> rhs) noexcept
 {
     return lhs.compare(rhs) <= 0;
 }
 
 template<typename CharT, typename Traits>
-constexpr bool operator>(BasicStringView<CharT, Traits> lhs,
+bool operator>(BasicStringView<CharT, Traits> lhs,
                          BasicStringView<CharT, Traits> rhs) noexcept
 {
     return lhs.compare(rhs) > 0;
 }
 
 template<typename CharT, typename Traits>
-constexpr bool operator>=(BasicStringView<CharT, Traits> lhs,
+bool operator>=(BasicStringView<CharT, Traits> lhs,
                           BasicStringView<CharT, Traits> rhs) noexcept
 {
     return lhs.compare(rhs) >= 0;
