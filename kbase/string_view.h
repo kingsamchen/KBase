@@ -40,6 +40,13 @@ inline size_t HashByteSequence(const unsigned char* data, size_t length) noexcep
     return (val);
 }
 
+// Tries to compute the length of a string constant at compile time.
+template<typename CharT>
+constexpr size_t StringLength(const CharT* str)
+{
+    return *str ? StringLength(str + 1) + 1 : 0;
+}
+
 }   // namespace internal
 
 template<typename CharT, typename Traits = std::char_traits<CharT>>
@@ -77,7 +84,7 @@ public:
 
     // Supports implicit conversion.
     constexpr BasicStringView(const CharT* str)
-        : data_(str), length_(Traits::length(str))
+        : data_(str), length_(internal::StringLength(str))
     {}
 
     ~BasicStringView() = default;

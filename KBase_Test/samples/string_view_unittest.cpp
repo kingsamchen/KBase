@@ -60,6 +60,21 @@ TEST(StringViewTest, Ctor)
         EXPECT_EQ(str.data(), s_v.data());
         EXPECT_EQ(str.length(), s_v.length());
     }
+
+    // compile-time evaluations.
+    {
+        constexpr kbase::StringView s1;
+        constexpr bool empty = s1.empty();
+        EXPECT_TRUE(empty);
+
+        constexpr kbase::StringView s2 = "this is a test text";
+        constexpr bool not_empty = s2.empty();
+        EXPECT_TRUE(not_empty);
+        constexpr char ft = s2.front();
+        constexpr char bk = s2.back();
+        constexpr auto sub = s2.substr(5);
+        constexpr const char* ss = sub.data();
+    }
 }
 
 TEST(StringViewTest, AssignOperator)
