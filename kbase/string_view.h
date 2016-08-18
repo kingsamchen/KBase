@@ -488,29 +488,25 @@ private:
 };
 
 template<typename CharT, typename Traits>
-bool operator<(BasicStringView<CharT, Traits> lhs,
-                         BasicStringView<CharT, Traits> rhs) noexcept
+bool operator<(BasicStringView<CharT, Traits> lhs, BasicStringView<CharT, Traits> rhs) noexcept
 {
     return lhs.compare(rhs) < 0;
 }
 
 template<typename CharT, typename Traits>
-bool operator<=(BasicStringView<CharT, Traits> lhs,
-                          BasicStringView<CharT, Traits> rhs) noexcept
+bool operator<=(BasicStringView<CharT, Traits> lhs, BasicStringView<CharT, Traits> rhs) noexcept
 {
     return lhs.compare(rhs) <= 0;
 }
 
 template<typename CharT, typename Traits>
-bool operator>(BasicStringView<CharT, Traits> lhs,
-                         BasicStringView<CharT, Traits> rhs) noexcept
+bool operator>(BasicStringView<CharT, Traits> lhs, BasicStringView<CharT, Traits> rhs) noexcept
 {
     return lhs.compare(rhs) > 0;
 }
 
 template<typename CharT, typename Traits>
-bool operator>=(BasicStringView<CharT, Traits> lhs,
-                          BasicStringView<CharT, Traits> rhs) noexcept
+bool operator>=(BasicStringView<CharT, Traits> lhs, BasicStringView<CharT, Traits> rhs) noexcept
 {
     return lhs.compare(rhs) >= 0;
 }
