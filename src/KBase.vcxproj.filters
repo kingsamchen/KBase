@@ -15,9 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="build\pch\precompile.cpp">
-      <Filter>..\build\pch</Filter>
-    </ClCompile>
     <ClCompile Include="kbase\at_exit_manager.cpp">
       <Filter>kbase</Filter>
     </ClCompile>
@@ -89,6 +86,9 @@
     </ClCompile>
     <ClCompile Include="kbase\os_info.cpp">
       <Filter>kbase</Filter>
+    </ClCompile>
+    <ClCompile Include="..\build\pch\precompile.cpp">
+      <Filter>..\build\pch</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

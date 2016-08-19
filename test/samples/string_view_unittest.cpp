@@ -69,7 +69,7 @@ TEST(StringViewTest, Ctor)
 
         constexpr kbase::StringView s2 = "this is a test text";
         constexpr bool not_empty = s2.empty();
-        EXPECT_TRUE(not_empty);
+        EXPECT_FALSE(not_empty);
         constexpr char ft = s2.front();
         constexpr char bk = s2.back();
         constexpr auto sub = s2.substr(5);
