@@ -301,7 +301,7 @@ public:
         return find(BasicStringView(&ch, 1), pos);
     }
 
-    size_type find(const CharT* str, size_type pos, size_type count) const
+    size_type find(const CharT* str, size_type pos, size_type count) const noexcept
     {
         return find(BasicStringView(str, count), pos);
     }
@@ -337,7 +337,7 @@ public:
         return rfind(BasicStringView(&ch, 1), pos);
     }
 
-    size_type rfind(const CharT* str, size_type pos, size_type count) const
+    size_type rfind(const CharT* str, size_type pos, size_type count) const noexcept
     {
         return rfind(BasicStringView(str, count), pos);
     }
@@ -366,7 +366,7 @@ public:
         return find_first_of(BasicStringView(&ch, 1), 0);
     }
 
-    size_type find_first_of(const CharT* str, size_type pos, size_type count) const
+    size_type find_first_of(const CharT* str, size_type pos, size_type count) const noexcept
     {
         return find_first_of(BasicStringView(str, count), pos);
     }
@@ -403,7 +403,7 @@ public:
         return find_last_of(BasicStringView(&ch, 1), pos);
     }
 
-    size_type find_last_of(const CharT* str, size_type pos, size_type count) const
+    size_type find_last_of(const CharT* str, size_type pos, size_type count) const noexcept
     {
         return find_last_of(BasicStringView(str, count), pos);
     }
@@ -435,7 +435,7 @@ public:
         return find_fisrt_not_of(BasicStringView(&ch, 1), pos);
     }
 
-    size_type find_first_not_of(const CharT* str, size_type pos, size_type count) const
+    size_type find_first_not_of(const CharT* str, size_type pos, size_type count) const noexcept
     {
         return find_first_not_of(BasicStringView(str, count), pos);
     }
@@ -472,7 +472,7 @@ public:
         return find_last_not_of(BasicStringView(&ch, 1), pos);
     }
 
-    size_type find_last_not_of(const CharT* str, size_type pos, size_type count) const
+    size_type find_last_not_of(const CharT* str, size_type pos, size_type count) const noexcept
     {
         return find_last_not_of(BasicStringView(str, count), pos);
     }

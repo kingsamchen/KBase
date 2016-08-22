@@ -15,7 +15,7 @@
 namespace kbase {
 
 // Both `BasicTokenizer` and its `iterator` access source data via `BasicStringView` objects.
-// That is, they just visit the source.
+// That is, they are just views to the source.
 
 template<typename CharT>
 class TokenIterator {
@@ -27,10 +27,10 @@ public:
     using pointer = const value_type*;
     using reference = const value_type&;
 
-    TokenIterator(token_type data, size_t offset, token_type delim)
-        : data_(data), delim_(delim), offset_(offset)
+    TokenIterator(token_type data, size_t offset, token_type delim) noexcept
+        : data_(data), delim_(delim), offset_(offset), next_offset_(offset)
     {
-        GetToken();
+        SeekToken();
     }
 
     TokenIterator(const TokenIterator&) noexcept = default;
@@ -45,9 +45,9 @@ public:
 
     TokenIterator& operator++()
     {
-        ENSURE(CHECK, offset_ != data_.length()).Require("iterator now is not incrementable");
+        ENSURE(CHECK, offset_ < data_.length()).Require("iterator now is not incrementable");
         offset_ = next_offset_;
-        GetToken();
+        SeekToken();
         return *this;
     }
 
@@ -58,32 +58,32 @@ public:
         return tmp;
     }
 
-    reference operator*() const
+    reference operator*() const noexcept
     {
         return current_token_;
     }
 
-    pointer operator->() const
+    pointer operator->() const noexcept
     {
         return &current_token_;
     }
 
-    friend bool operator==(const TokenIterator& lhs, const TokenIterator& rhs)
+    friend bool operator==(const TokenIterator& lhs, const TokenIterator& rhs) noexcept
     {
         return lhs.data_.data() == rhs.data_.data() &&
-            lhs.data_.length() == rhs.data_.length() &&
-            lhs.offset_ == rhs.offset_;
+               lhs.data_.length() == rhs.data_.length() &&
+               lhs.offset_ == rhs.offset_;
     }
 
-    friend bool operator!=(const TokenIterator& lhs, const TokenIterator& rhs)
+    friend bool operator!=(const TokenIterator& lhs, const TokenIterator& rhs) noexcept
     {
         return !(lhs == rhs);
     }
 
 private:
-    void GetToken()
+    void SeekToken() noexcept
     {
-        if (offset_ == data_.length()) {
+        if (offset_ >= data_.length()) {
             current_token_ = token_type();
             next_offset_ = data_.length();
             return;
@@ -108,9 +108,9 @@ private:
 private:
     token_type data_;
     token_type delim_;
-    size_t offset_;
     token_type current_token_;
-    size_t next_offset_ = 0ULL;
+    size_t offset_;
+    size_t next_offset_;
 };
 
 template<typename CharT>
@@ -120,7 +120,7 @@ public:
     using iterator = TokenIterator<CharT>;
     using const_iterator = iterator;
 
-    explicit constexpr BasicTokenizer(BasicStringView<CharT> str, BasicStringView<CharT> delim)
+    BasicTokenizer(BasicStringView<CharT> str, BasicStringView<CharT> delim) noexcept
         : data_(str), delim_(delim)
     {}
 
@@ -128,18 +128,18 @@ public:
 
     BasicTokenizer(BasicTokenizer&&) noexcept = default;
 
+    ~BasicTokenizer() = default;
+
     BasicTokenizer& operator=(const BasicTokenizer&) noexcept = default;
 
     BasicTokenizer& operator=(BasicTokenizer&&) noexcept = default;
 
-    ~BasicTokenizer() = default;
-
-    iterator begin() const
+    iterator begin() const noexcept
     {
         return iterator(data_, 0, delim_);
     }
 
-    iterator end() const
+    iterator end() const noexcept
     {
         return iterator(data_, data_.length(), delim_);
     }

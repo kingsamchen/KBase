@@ -10,6 +10,14 @@
 
 using kbase::Tokenizer;
 using kbase::WTokenizer;
+using kbase::TokenIterator;
+
+TEST(TokenizerTest, TokenIterator)
+{
+    std::string str = "hello, world";
+    TokenIterator<char> it(str, str.length() + 2, ", ");
+    EXPECT_TRUE(it->empty());
+}
 
 TEST(TokenizerTest, Ctor)
 {
