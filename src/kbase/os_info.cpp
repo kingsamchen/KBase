@@ -86,6 +86,8 @@ OSInfo::OSInfo()
         case PROCESSOR_ARCHITECTURE_IA64:
             architecture_ = SystemArchitecture::IA64_ARCHITECTURE;
             break;
+        default:
+            break;
     }
 
     processors_ = system_info.dwNumberOfProcessors;

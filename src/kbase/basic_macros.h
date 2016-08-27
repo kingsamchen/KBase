@@ -28,10 +28,13 @@
 #define UNUSED_VAR(x) \
     ::kbase::internal::SilenceUnusedVariableWarning(x)
 
-#define DECLARE_DLL_FUNCTION(fn, type, dll) \
-    auto fn = reinterpret_cast<type>(GetProcAddress(GetModuleHandleW(L##dll), #fn))
+#define NAME_CAT(prefix, tag) prefix##tag
+#define MODULE_VAR(tag) NAME_CAT(_module_, tag)
+#define DECLARE_DLL_FUNCTION(fn, type, dll)                 \
+    auto MODULE_VAR(__LINE__) = GetModuleHandleW(L##dll);   \
+    auto fn = MODULE_VAR(__LINE__) ? reinterpret_cast<type>(GetProcAddress(MODULE_VAR(__LINE__), #fn)) : nullptr
 
-#define FORCE_AS_MEMBER_FUNCTION()                         \
+#define FORCE_AS_MEMBER_FUNCTION()                          \
     UNUSED_VAR(this)
 
 // Put complicated implementation below.
