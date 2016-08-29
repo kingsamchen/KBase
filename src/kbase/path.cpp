@@ -10,7 +10,7 @@
 
 #include "kbase/error_exception_util.h"
 #include "kbase/string_util.h"
-#include "kbase/sys_string_encoding_conversions.h"
+#include "kbase/string_encoding_conversions.h"
 
 namespace {
 
@@ -491,7 +491,7 @@ std::string Path::AsASCII() const
 
 std::string Path::AsUTF8() const
 {
-    return kbase::SysWideToUTF8(path_);
+    return kbase::WideToUTF8(path_);
 }
 
 // static
@@ -507,7 +507,7 @@ Path Path::FromASCII(const std::string& path_in_ascii)
 // static
 Path Path::FromUTF8(const std::string& path_in_utf8)
 {
-    return Path(kbase::SysUTF8ToWide(path_in_utf8));
+    return Path(kbase::UTF8ToWide(path_in_utf8));
 }
 
 Path& Path::MakePathSeparatorTo(value_type separator)

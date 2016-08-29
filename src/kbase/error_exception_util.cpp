@@ -22,7 +22,7 @@ Path g_minidump_dir_path;
 
 bool ShouldCheckFirst()
 {
-    return ACTION_IS_ON(CHECK) && g_always_enable_check_in_debug;
+    return g_always_enable_check_in_debug && ACTION_IS_ON(CHECK);
 }
 
 PathString GenerateMiniDumpFileName()
@@ -52,6 +52,9 @@ void Guarantor::Require()
         case EnsureAction::RAISE_WITH_DUMP:
             RaiseWithDump();
             break;
+
+        default:
+            break;
     }
 }
 
@@ -65,7 +68,7 @@ void Guarantor::Check()
 {
     StackWalker callstack;
     callstack.DumpCallStack(exception_desc_);
-    std::wstring message = SysUTF8ToWide(exception_desc_.str());
+    std::wstring message = UTF8ToWide(exception_desc_.str());
     MessageBoxW(nullptr, message.c_str(), L"Checking Failed", MB_OK | MB_TOPMOST | MB_ICONHAND);
     __debugbreak();
 }

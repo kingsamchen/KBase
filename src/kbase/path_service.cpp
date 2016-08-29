@@ -4,7 +4,6 @@
 
 #include "kbase/path_service.h"
 
-#include <algorithm>
 #include <forward_list>
 #include <mutex>
 #include <unordered_map>
@@ -13,7 +12,6 @@
 #include "kbase/error_exception_util.h"
 #include "kbase/file_util.h"
 #include "kbase/lazy.h"
-#include "kbase/sys_string_encoding_conversions.h"
 
 using kbase::Path;
 using kbase::PathKey;
@@ -127,7 +125,7 @@ Path PathService::Get(PathKey key)
     // Ensure that the returned path never contains '..'.
     if (!path.IsAbsolute()) {
         Path&& full_path = MakeAbsoluteFilePath(path);
-        ENSURE(CHECK, !full_path.empty())(SysWideToNativeMB(path.value())).Require();
+        ENSURE(CHECK, !full_path.empty())(path.value()).Require();
         path = std::move(full_path);
     }
 

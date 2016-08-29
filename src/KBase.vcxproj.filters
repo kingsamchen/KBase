@@ -72,9 +72,6 @@
     <ClCompile Include="kbase\string_util.cpp">
       <Filter>kbase</Filter>
     </ClCompile>
-    <ClCompile Include="kbase\sys_string_encoding_conversions.cpp">
-      <Filter>kbase</Filter>
-    </ClCompile>
     <ClCompile Include="kbase\stack_walker.cpp">
       <Filter>kbase</Filter>
     </ClCompile>
@@ -89,6 +86,9 @@
     </ClCompile>
     <ClCompile Include="..\build\pch\precompile.cpp">
       <Filter>..\build\pch</Filter>
+    </ClCompile>
+    <ClCompile Include="kbase\string_encoding_conversions.cpp">
+      <Filter>kbase</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -173,9 +173,6 @@
     <ClInclude Include="kbase\string_util.h">
       <Filter>kbase</Filter>
     </ClInclude>
-    <ClInclude Include="kbase\sys_string_encoding_conversions.h">
-      <Filter>kbase</Filter>
-    </ClInclude>
     <ClInclude Include="kbase\basic_macros.h">
       <Filter>kbase</Filter>
     </ClInclude>
@@ -198,6 +195,9 @@
       <Filter>kbase</Filter>
     </ClInclude>
     <ClInclude Include="kbase\os_info.h">
+      <Filter>kbase</Filter>
+    </ClInclude>
+    <ClInclude Include="kbase\string_encoding_conversions.h">
       <Filter>kbase</Filter>
     </ClInclude>
   </ItemGroup>

@@ -15,7 +15,7 @@
 
 #include "kbase/basic_macros.h"
 #include "kbase/path.h"
-#include "kbase/sys_string_encoding_conversions.h"
+#include "kbase/string_encoding_conversions.h"
 
 namespace kbase {
 
@@ -81,13 +81,13 @@ public:
 
     Guarantor& CaptureValue(const char* name, const std::wstring& value)
     {
-        std::string converted = SysWideToUTF8(value);
+        std::string converted = WideToUTF8(value);
         return CaptureValue(name, converted);
     }
 
     Guarantor& CaptureValue(const char* name, const wchar_t* value)
     {
-        std::string converted = SysWideToUTF8(value);
+        std::string converted = WideToUTF8(value);
         return CaptureValue(name, converted);
     }
 

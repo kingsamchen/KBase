@@ -9,7 +9,7 @@
 #include "gtest/gtest.h"
 
 #include "kbase/os_info.h"
-#include "kbase/sys_string_encoding_conversions.h"
+#include "kbase/string_encoding_conversions.h"
 
 using kbase::OSInfo;
 using kbase::SystemVersion;
