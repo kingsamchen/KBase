@@ -25,13 +25,13 @@ std::wstring UTF8ToWide(StringView utf_str)
 
 std::wstring ASCIIToWide(StringView ascii_str)
 {
-    ENSURE(CHECK, IsStringASCII(ascii_str)).Require();
+    ENSURE(CHECK, IsStringASCIIOnly(ascii_str)).Require();
     return std::wstring(ascii_str.begin(), ascii_str.end());
 }
 
 std::string WideToASCII(WStringView wide_str)
 {
-    ENSURE(CHECK, IsStringASCII(wide_str)).Require();
+    ENSURE(CHECK, IsStringASCIIOnly(wide_str)).Require();
     return std::string(wide_str.begin(), wide_str.end());
 }
 

@@ -12,22 +12,27 @@
 
 using namespace kbase;
 
-TEST(StringUtilTest, RemoveChars)
+TEST(StringUtilTest, EraseAndRemove)
 {
     const std::string str = "hello world";
     std::string new_str;
 
     new_str = str;
-    RemoveChars(new_str, "ol");
+    EraseChars(new_str, "ol");
     EXPECT_EQ(new_str, std::string("he wrd"));
 
     new_str = str;
-    RemoveChars(new_str, "tx");
+    EraseChars(new_str, "tx");
     EXPECT_EQ(str, new_str);
 
     new_str = str;
-    RemoveChars(new_str, "");
+    EraseChars(new_str, "");
     EXPECT_EQ(str, new_str);
+
+    std::wstring ws = L"hello $%^& world";
+    std::wstring nws = RemoveChars(ws, L"$%^&");
+    EXPECT_EQ(ws, L"hello $%^& world");
+    EXPECT_EQ(nws, L"hello  world");
 }
 
 TEST(StringUtilTest, ReplaceString)
@@ -38,15 +43,15 @@ TEST(StringUtilTest, ReplaceString)
         AutoReset<std::string> guard(&str);
         UNUSED_VAR(guard);
 
-        ReplaceSubstring(str, "test", "t-e-s-t");
+        ReplaceString(str, "test", "t-e-s-t");
         EXPECT_EQ(str, std::string("This is a t-e-s-t text for string replacing unitt-e-s-t"));
-        ReplaceSubstring(str, "t-e-s-t", "");
+        ReplaceString(str, "t-e-s-t", "");
         EXPECT_EQ(str, std::string("This is a  text for string replacing unit"));
-        ReplaceSubstring(str, "is", "was", 4);
+        ReplaceString(str, "is", "was", 4);
         EXPECT_EQ(str, std::string("This was a  text for string replacing unit"));
     }
 
-    ReplaceSubstring(str, "is", "ere", 0, false);
+    ReplaceString(str, "is", "ere", 0, false);
     EXPECT_EQ(str, std::string("There is a test text for string replacing unittest"));
 }
 
@@ -74,6 +79,14 @@ TEST(StringUtilTest, TrimString)
         TrimString(str, L"#@$");
         EXPECT_EQ(std::wstring(L""), str);
     }
+
+    {
+        std::string str1 = "!$$||hello-world##@@||$$";
+        std::string str2 = "!$$||hello-world##@@||$$";
+        TrimTailingString(TrimLeadingString(str1, "!$|@#"), "!$|@#");
+        TrimString(str2, "!$|@#");
+        EXPECT_EQ(str1, str2);
+    }
 }
 
 TEST(StringUtilTest, ContainsOnlyChars)
@@ -85,10 +98,18 @@ TEST(StringUtilTest, ContainsOnlyChars)
     EXPECT_TRUE(ContainsOnlyChars(str2, "abcd"));
 }
 
-TEST(StringUtilTest, StringToLower)
+TEST(StringUtilTest, ToggleASCIIStringCase)
 {
-    std::string str = "abcEFGhijKKK";
-    EXPECT_EQ(std::string("abcefghijkkk"), (StringToLower(str), str));
+    std::string org_str = "HELLO, world";
+    std::string turned = ASCIIStringToLower(org_str);
+    EXPECT_EQ(std::string("hello, world"), turned);
+    EXPECT_EQ(std::string("HELLO, WORLD"), ASCIIStringToUpper(turned));
+}
+
+TEST(StringUtilTest, ASCIIStringCompareCaseInsensitive)
+{
+    EXPECT_TRUE(ASCIIStringCompareCaseInsensitive("hello world", "HELLO WORLD") == 0);
+    EXPECT_TRUE(ASCIIStringCompareCaseInsensitive("JOHNSTON", "John_Henry") != 0);
 }
 
 TEST(StringUtilTest, StartsWithAndEndsWith)
@@ -97,17 +118,17 @@ TEST(StringUtilTest, StartsWithAndEndsWith)
 
     EXPECT_TRUE(StartsWith(str, "hell"));
     EXPECT_FALSE(StartsWith(str, "HELL"));
-    EXPECT_TRUE(StartsWith(str, "HELL", false));
+    EXPECT_TRUE(StartsWith(str, "HELL", CaseMode::ASCII_INSENSITIVE));
 
     EXPECT_TRUE(StartsWith(std::string("hello"), "hello"));
-    EXPECT_TRUE(StartsWith(std::string("hello"), "HELLO", false));
+    EXPECT_TRUE(StartsWith(std::string("hello"), "HELLO", CaseMode::ASCII_INSENSITIVE));
     EXPECT_FALSE(StartsWith(std::string("hell"), "hello"));
 
     EXPECT_FALSE(EndsWith(str, "old"));
     EXPECT_TRUE(EndsWith(str, "orld"));
 
     EXPECT_TRUE(EndsWith(std::string("hello"), "hello"));
-    EXPECT_TRUE(EndsWith(std::string("hello"), "HellO", false));
+    EXPECT_TRUE(EndsWith(std::string("hello"), "HellO", CaseMode::ASCII_INSENSITIVE));
     EXPECT_FALSE(EndsWith(std::string("ell"), "hell"));
 }
 
@@ -117,7 +138,7 @@ TEST(StringUtilTest, WriteIntoTest)
     EXPECT_TRUE(buffer.empty());
     size_t written_size = 12;
     auto ptr = WriteInto(buffer, written_size + 1);
-	UNUSED_VAR(ptr);
+    UNUSED_VAR(ptr);
     EXPECT_EQ(written_size, buffer.size());
 }
 
@@ -156,9 +177,8 @@ TEST(StringUtilTest, MatchPatter)
     EXPECT_TRUE(MatchPattern(str, "hello?world"));
 }
 
-TEST(StringUtilTest, StringToLowerASCII)
+TEST(StringUtilTest, IsStringASCIIOnly)
 {
-    std::string org_str = "HELLO, world";
-    std::string turned = StringToLowerASCII(std::move(org_str));
-    EXPECT_EQ(turned, std::string("hello, world"));
+    EXPECT_TRUE(IsStringASCIIOnly("hello world!"));
+    EXPECT_FALSE(IsStringASCIIOnly("this is a mix encoding. \xe4\xbd\xa0\xe5\xa5\xbd"));
 }

@@ -385,8 +385,8 @@ public:
         size_type real_pos = std::min(pos, length() - 1);
         for (auto i = real_pos;; --i) {
             if (std::any_of(view.begin(), view.end(), [this, i](CharT ch) {
-                return Traits::eq(data_[i], ch);
-            })) {
+                                return Traits::eq(data_[i], ch);
+                            })) {
                 return i;
             }
 
@@ -421,8 +421,8 @@ public:
 
         for (auto i = pos; i < length(); ++i) {
             if (std::none_of(view.begin(), view.end(), [this, i](CharT ch) {
-                return Traits::eq(data_[i], ch);
-            })) {
+                                 return Traits::eq(data_[i], ch);
+                             })) {
                 return i;
             }
         }
@@ -454,8 +454,8 @@ public:
         size_type real_pos = std::min(pos, length() - 1);
         for (auto i = real_pos;; --i) {
             if (std::none_of(view.begin(), view.end(), [this, i](CharT ch) {
-                return Traits::eq(data_[i], ch);
-            })) {
+                                 return Traits::eq(data_[i], ch);
+                             })) {
                 return i;
             }
 

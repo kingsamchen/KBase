@@ -16,118 +16,95 @@
 
 namespace kbase {
 
-// Removes any characters specified by `remove_chars` from string `str`.
+// Eliminate any given characters from string `str`.
 
-void RemoveChars(std::string& str, StringView remove_chars);
-void RemoveChars(std::wstring& str, WStringView remove_chars);
+std::string& EraseChars(std::string& str, StringView chars);
+std::wstring& EraseChars(std::wstring& str, WStringView chars);
+
+std::string RemoveChars(const std::string& str, StringView chars);
+std::wstring RemoveChars(const std::wstring& str, WStringView chars);
 
 // Replace `find_with` with `replace_with` in `str`.
 // `pos` indicates where the search begins. if `pos` equals to `npos` or is greater
 // than the length of `str`, these functions do nothing.
 // If `relace_all` is not true, then only the first occurrence would be replaced.
 
-void ReplaceSubstring(std::string& str,
-                      StringView find_with,
-                      StringView replace_with,
-                      std::string::size_type pos = 0,
-                      bool replace_all = true);
-void ReplaceSubstring(std::wstring& str,
-                      WStringView find_with,
-                      WStringView replace_with,
-                      std::wstring::size_type pos = 0,
-                      bool replace_all = true);
+std::string& ReplaceString(std::string& str,
+                           StringView find_with,
+                           StringView replace_with,
+                           std::string::size_type pos = 0,
+                           bool replace_all = true);
+std::wstring& ReplaceString(std::wstring& str,
+                            WStringView find_with,
+                            WStringView replace_with,
+                            std::wstring::size_type pos = 0,
+                            bool replace_all = true);
 
-// Removes characters in `trim_chars` in a certain range of `in`.
-// `trim_chars` indicates characters that need to be removed from `in`.
+// Eliminate characters in `chars` in a certain range of `str`.
 
-void TrimString(std::string& str, StringView trim_chars);
-void TrimString(std::wstring& str, WStringView trim_chars);
+std::string& TrimString(std::string& str, StringView chars);
+std::wstring& TrimString(std::wstring& str, WStringView chars);
 
-void TrimLeadingString(std::string& str, StringView trim_chars);
-void TrimLeadingString(std::wstring& str, WStringView trim_chars);
+std::string& TrimLeadingString(std::string& str, StringView chars);
+std::wstring& TrimLeadingString(std::wstring& str, WStringView chars);
 
-void TrimTailingString(std::string& str, StringView trim_chars);
-void TrimTailingString(std::wstring& str, WStringView trim_chars);
+std::string& TrimTailingString(std::string& str, StringView chars);
+std::wstring& TrimTailingString(std::wstring& str, WStringView chars);
 
-// Returns true, if the `str` is empty or contains only characters in `chars`;
-// returns false, otherwise.
+// Return true, if the `str` is empty or contains only characters in `chars`;
+// Return false, otherwise.
 
-bool ContainsOnlyChars(const std::string& str, StringView chars);
-bool ContainsOnlyChars(const std::wstring& str, WStringView chars);
+bool ContainsOnlyChars(StringView str, StringView chars);
+bool ContainsOnlyChars(WStringView str, WStringView chars);
 
-// tolower and toupper are local sensitive, we might don't want to use them in some
-// situations.
-// it is legal to implicitly promotes a char to a wchar_t.
-// following functions toggle case only for ascii-characters.
+// Toggle the string to it's ASCII-lowercase or ASCII-uppercase equivalent.
 
-template<typename charT>
-charT ToLowerASCII(charT ch)
-{
-    return (ch >= 'A' && ch <= 'Z') ? ch + 'a' - 'A' : ch;
-}
+std::string& ASCIIStringToLower(std::string& str);
+std::wstring& ASCIIStringToLower(std::wstring& str);
 
-template<typename charT>
-charT ToUpperASCII(charT ch)
-{
-    return (ch >= 'a' && ch <= 'z') ? ch - 'a' + 'A' : ch;
-}
+std::string& ASCIIStringToUpper(std::string& str);
+std::wstring& ASCIIStringToUpper(std::wstring& str);
 
-// Converts the ASCII characters in a string to lower-case or upper-case.
+// Compares two strings for case-insensitive ASCII characters only.
+// And results are
+//  < 0 (lhs < rhs)
+//  = 0 (lhs == rhs)
+//  > 0 (lhs > rhs)
 
-void StringToLowerASCII(std::string& str);
-void StringToLowerASCII(std::wstring& str);
+int ASCIIStringCompareCaseInsensitive(StringView lhs, StringView rhs);
+int ASCIIStringCompareCaseInsensitive(WStringView lhs, WStringView rhs);
 
-std::string&& StringToLowerASCII(std::string&& str);
-std::wstring&& StringToLowerASCII(std::wstring&& str);
+bool ASCIIStringEqualCaseInsensitive(StringView lhs, StringView rhs);
+bool ASCIIStringEqualCaseInsensitive(WStringView lhs, WStringView rhs);
 
-void StringToUpperASCII(std::string& str);
-void StringToUpperASCII(std::wstring& str);
+enum class CaseMode {
+    SENSITIVE,
+    ASCII_INSENSITIVE
+};
 
-std::string&& StringToUpperASCII(std::string&& str);
-std::wstring&& StringToUpperASCII(std::wstring&& str);
-
-// Converts the string to lower-case or upper-case.
-// These functions support non-ASCII characters.
-
-void StringToLower(std::string& str);
-void StringToLower(std::wstring& str);
-
-void StringToUpper(std::string& str);
-void StringToUpper(std::wstring& str);
-
-// Compares two strings in case-insensitive mode.
-// These functions support non-ASCII characters, and are local sensitive.
-
-int StringCompareCaseInsensitive(const std::string& x, const std::string& y);
-int StringCompareCaseInsensitive(const std::wstring& x, const std::wstring& y);
-
-// Compares two wide-string in case-insensitive mode.
-// Not local sensitive
-int SysStringCompareCaseInsensitive(const std::wstring& x, const std::wstring& y);
-
-// Returns true, if `str` starts with `token`.
-// Returns false, otherwise.
+// Return true, if `str` starts with `token`.
+// Return false, otherwise.
 
 bool StartsWith(StringView str,
                 StringView token,
-                bool case_sensitive = true);
+                CaseMode mode = CaseMode::SENSITIVE);
 bool StartsWith(WStringView str,
                 WStringView token,
-                bool case_sensitive = true);
+                CaseMode mode = CaseMode::SENSITIVE);
 
-// Returns true, if `str` ends with `token`.
-// Returns false, otherwise.
+// Return true, if `str` ends with `token`.
+// Return false, otherwise.
 
 bool EndsWith(StringView str,
               StringView token,
-              bool case_sensitive = true);
+              CaseMode mode = CaseMode::SENSITIVE);
 bool EndsWith(WStringView str,
               WStringView token,
-              bool case_sensitive = true);
+              CaseMode mode = CaseMode::SENSITIVE);
 
 // Set up enough memory in `str` to accomodate a c-style string with length
-// of `length_including_null`. be wary of that real size of the string data
-// does not count the null - terminate character. this function is useful when
+// of `length_including_null`. Be wary of that real size of the string data
+// does not count the null-terminate character. This function is useful when
 // interaction between a string object and a legacy API is required.
 // Returns pointer to the underlying data of the string object.
 template<typename strT>
@@ -142,24 +119,18 @@ typename strT::value_type* WriteInto(strT& str, size_t length_including_null)
     return &str[0];
 }
 
-// Split a string into fields delimieted by any of the characters in `delimiters`.
+// Split a string, delimieted by any of the characters in `delimiters`, into fields.
 // Fields are added into `tokens`.
 // Returns the number of tokens found.
 
-size_t SplitString(const std::string& str,
-                   StringView delimiters,
-                   std::vector<std::string>& tokens);
-size_t SplitString(const std::wstring& str,
-                   WStringView delimiters,
-                   std::vector<std::wstring>& tokens);
+size_t SplitString(StringView str, StringView delimiters, std::vector<std::string>& tokens);
+size_t SplitString(WStringView str, WStringView delimiters, std::vector<std::wstring>& tokens);
 
-// Combines string parts in `tokens` by using `sep` as separator.
+// Combines string parts in `tokens` by using `sep` as the separator.
 // Returns combined string.
 
-std::string JoinString(const std::vector<std::string>& tokens,
-                       StringView sep);
-std::wstring JoinString(const std::vector<std::wstring>& tokens,
-                        WStringView sep);
+std::string JoinString(const std::vector<std::string>& tokens, StringView sep);
+std::wstring JoinString(const std::vector<std::wstring>& tokens, WStringView sep);
 
 // Pattern matching algorithm, also supports wildcards, in case-sensitive mode.
 // metacharacter `?` matches exactly one character unless the character is a `.`
@@ -168,28 +139,8 @@ bool MatchPattern(const std::string& str, const std::string& pat);
 bool MatchPattern(const std::wstring& str, const std::wstring& pat);
 
 // Determines if all characters in string are defined in ASCII code page.
-bool IsStringASCII(StringView str);
-bool IsStringASCII(WStringView str);
-
-template<typename T>
-struct ToUnsigned {
-    using Unsigned = T;
-};
-
-template<>
-struct ToUnsigned<char> {
-    using Unsigned = unsigned char;
-};
-
-template<>
-struct ToUnsigned<signed char> {
-    using Unsigned = unsigned char;
-};
-
-template<>
-struct ToUnsigned<wchar_t> {
-    using Unsigned = unsigned short;
-};
+bool IsStringASCIIOnly(StringView str);
+bool IsStringASCIIOnly(WStringView str);
 
 }   // namespace kbase
 

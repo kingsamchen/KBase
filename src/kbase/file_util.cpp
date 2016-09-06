@@ -131,7 +131,7 @@ void DuplicateDirectory(const Path& src, const Path& dest, bool recursive)
 
     // The destination cannot be a subfolder of the source in recursive mode.
     bool permitted = !(recursive &&
-                       StartsWith(full_dest.value(), full_src.value(), false));
+                       StartsWith(full_dest.value(), full_src.value(), CaseMode::ASCII_INSENSITIVE));
     ENSURE(CHECK, permitted)(full_src.value())(full_dest.value()).Require();
 
     if (!DirectoryExists(full_dest)) {

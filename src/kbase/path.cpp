@@ -32,9 +32,20 @@ string_type::size_type FindDriveLetter(const string_type& path)
     return string_type::npos;
 }
 
+// Compares two wide-string in case-insensitive mode.
+// Not local sensitive
+int SysStringCompareCaseInsensitive(const std::wstring& x, const std::wstring& y)
+{
+    int ret = CompareStringOrdinal(x.data(), static_cast<int>(x.length()),
+                                   y.data(), static_cast<int>(y.length()), TRUE);
+    ENSURE(CHECK, ret != 0)(x)(y).Require();
+
+    return ret - CSTR_EQUAL;
+}
+
 inline bool EqualPathValue(const string_type& x, const string_type& y)
 {
-    return !kbase::SysStringCompareCaseInsensitive(x, y);
+    return SysStringCompareCaseInsensitive(x, y) == 0;
 }
 
 // This function adheres the equality stipulated for two Path objects:
@@ -136,7 +147,7 @@ bool operator!=(const Path& lhs, const Path& rhs)
 
 bool operator<(const Path& lhs, const Path& rhs)
 {
-    return (kbase::SysStringCompareCaseInsensitive(lhs.value(), rhs.value()) < 0);
+    return (SysStringCompareCaseInsensitive(lhs.value(), rhs.value()) < 0);
 }
 
 // static
@@ -332,7 +343,7 @@ Path& Path::Append(const Path& components)
 
 Path& Path::AppendASCII(const std::string& components)
 {
-    ENSURE(CHECK, IsStringASCII(components)).Require();
+    ENSURE(CHECK, IsStringASCIIOnly(components)).Require();
 
     return Append(ASCIIToWide(components));
 }
@@ -482,7 +493,7 @@ bool Path::ReferenceParent() const
 
 std::string Path::AsASCII() const
 {
-    if (!kbase::IsStringASCII(path_)) {
+    if (!kbase::IsStringASCIIOnly(path_)) {
         return std::string();
     }
 
@@ -497,7 +508,7 @@ std::string Path::AsUTF8() const
 // static
 Path Path::FromASCII(const std::string& path_in_ascii)
 {
-    if (!kbase::IsStringASCII(path_in_ascii)) {
+    if (!kbase::IsStringASCIIOnly(path_in_ascii)) {
         return Path();
     }
 
