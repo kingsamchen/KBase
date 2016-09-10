@@ -6,8 +6,8 @@
 #pragma once
 #endif
 
-#ifndef KBASE_AT_EXIT_H_
-#define KBASE_AT_EXIT_H_
+#ifndef KBASE_AT_EXIT_MANAGER_H_
+#define KBASE_AT_EXIT_MANAGER_H_
 
 #include <functional>
 #include <mutex>
@@ -17,11 +17,14 @@
 
 namespace kbase {
 
+// We can control the execution time of cleanup callbacks via `AtExitManager`, especially in
+// a DLL on Windows.
+
 class AtExitManager {
 public:
-    using AtExitCallback = std::function<void()>;
+    using ExitCallback = std::function<void()>;
 
-    AtExitManager();
+    AtExitManager() noexcept;
 
     ~AtExitManager();
 
@@ -29,17 +32,16 @@ public:
 
     DISALLOW_MOVE(AtExitManager);
 
-    static void RegisterCallback(const AtExitCallback& callback);
+    static void RegisterCallback(ExitCallback callback);
 
 private:
-    static void ProcessCallbackNow();
+    static void ProcessExitCallback();
 
 private:
     std::mutex lock_;
-    std::stack<AtExitCallback> callback_stack_;
-    AtExitManager* next_at_exit_manager_;
+    std::stack<ExitCallback> exit_callbacks_;
 };
 
 }   // namespace kbase
 
-#endif  // KBASE_AT_EXIT_H_
+#endif  // KBASE_AT_EXIT_MANAGER_H_
