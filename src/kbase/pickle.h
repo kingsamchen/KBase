@@ -31,9 +31,9 @@ public:
 
     explicit PickleReader(const Pickle& pickle);
 
-    DEFAULT_COPY(PickleReader)
+    DEFAULT_COPY(PickleReader);
 
-    DEFAULT_MOVE(PickleReader)
+    DEFAULT_MOVE(PickleReader);
 
     ~PickleReader() = default;
 
@@ -302,12 +302,12 @@ private:
 template<typename T>
 Pickle& operator<<(Pickle& pickle, const std::vector<T>& value)
 {
-	pickle << value.size();
-	for (const auto& ele : value) {
-		pickle << ele;
-	}
+    pickle << value.size();
+    for (const auto& ele : value) {
+        pickle << ele;
+    }
 
-	return pickle;
+    return pickle;
 }
 
 template<typename T>
@@ -324,30 +324,30 @@ Pickle& operator<<(Pickle& pickle, const std::list<T>& value)
 template<typename T1, typename T2>
 Pickle& operator<<(Pickle& pickle, const std::pair<T1, T2>& value)
 {
-	pickle << value.first << value.second;
-	return pickle;
+    pickle << value.first << value.second;
+    return pickle;
 }
 
 template<typename Key, typename Compare = std::less<Key>>
 Pickle& operator<<(Pickle& pickle, const std::set<Key, Compare>& value)
 {
-	pickle << value.size();
-	for (const auto& ele : value) {
-		pickle << ele;
-	}
+    pickle << value.size();
+    for (const auto& ele : value) {
+        pickle << ele;
+    }
 
-	return pickle;
+    return pickle;
 }
 
 template<typename Key, typename T, typename Compare = std::less<Key>>
 Pickle& operator<<(Pickle& pickle, const std::map<Key, T, Compare>& value)
 {
-	pickle << value.size();
-	for (const auto& pair : value) {
-		pickle << pair;
-	}
+    pickle << value.size();
+    for (const auto& pair : value) {
+        pickle << pair;
+    }
 
-	return pickle;
+    return pickle;
 }
 
 template<typename Key, typename Hash = std::hash<Key>, typename KeyEqual = std::equal_to<Key>>
@@ -379,15 +379,15 @@ Pickle& operator<<(Pickle& pickle, const std::unordered_map<Key, T, Hash, KeyEqu
 template<typename T>
 PickleReader& operator>>(PickleReader& reader, std::vector<T>& value)
 {
-	size_t size;
-	reader >> size;
-	for (size_t i = 0; i < size; ++i) {
-		T ele;
-		reader >> ele;
-		value.push_back(std::move(ele));
-	}
+    size_t size;
+    reader >> size;
+    for (size_t i = 0; i < size; ++i) {
+        T ele;
+        reader >> ele;
+        value.push_back(std::move(ele));
+    }
 
-	return reader;
+    return reader;
 }
 
 template<typename T>
@@ -407,36 +407,36 @@ PickleReader& operator>>(PickleReader& reader, std::list<T>& value)
 template<typename T1, typename T2>
 PickleReader& operator>>(PickleReader& reader, std::pair<T1, T2>& value)
 {
-	reader >> value.first >> value.second;
-	return reader;
+    reader >> value.first >> value.second;
+    return reader;
 }
 
 template<typename Key, typename Compare = std::less<Key>>
 PickleReader& operator>>(PickleReader& reader, std::set<Key, Compare>& value)
 {
-	size_t size;
-	reader >> size;
-	for (size_t i = 0; i < size; ++i) {
-		Key ele;
-		reader >> ele;
-		value.insert(std::move(ele));
-	}
+    size_t size;
+    reader >> size;
+    for (size_t i = 0; i < size; ++i) {
+        Key ele;
+        reader >> ele;
+        value.insert(std::move(ele));
+    }
 
-	return reader;
+    return reader;
 }
 
 template<typename Key, typename T, typename Compare = std::less<Key>>
 PickleReader& operator>>(PickleReader& reader, std::map<Key, T, Compare>& value)
 {
-	size_t size;
-	reader >> size;
-	for (size_t i = 0; i < size; ++i) {
-		std::pair<Key, T> ele;
-		reader >> ele;
-		value.emplace(std::move(ele));
-	}
+    size_t size;
+    reader >> size;
+    for (size_t i = 0; i < size; ++i) {
+        std::pair<Key, T> ele;
+        reader >> ele;
+        value.emplace(std::move(ele));
+    }
 
-	return reader;
+    return reader;
 }
 
 template<typename Key, typename Hash = std::hash<Key>, typename KeyEqual = std::equal_to<Key>>

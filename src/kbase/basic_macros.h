@@ -19,11 +19,11 @@
 
 #define DEFAULT_COPY(classname)                         \
     classname(const classname&) = default;              \
-    classname& operator=(const classname&) = default;
+    classname& operator=(const classname&) = default
 
 #define DEFAULT_MOVE(classname)                         \
     classname(classname&&) = default;                   \
-    classname& operator=(classname&&) = default;
+    classname& operator=(classname&&) = default
 
 #define UNUSED_VAR(x) \
     ::kbase::internal::SilenceUnusedVariableWarning(x)
