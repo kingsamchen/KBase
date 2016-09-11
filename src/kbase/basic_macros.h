@@ -28,13 +28,16 @@
 #define UNUSED_VAR(x) \
     ::kbase::internal::SilenceUnusedVariableWarning(x)
 
-#define NAME_CAT(prefix, tag) prefix##tag
-#define MODULE_VAR(tag) NAME_CAT(_module_, tag)
-#define DECLARE_DLL_FUNCTION(fn, type, dll)                 \
-    auto MODULE_VAR(__LINE__) = GetModuleHandleW(L##dll);   \
-    auto fn = MODULE_VAR(__LINE__) ? reinterpret_cast<type>(GetProcAddress(MODULE_VAR(__LINE__), #fn)) : nullptr
+#define CONCATENATE_IMPL(part1, part2) part1##part2
+#define CONCATENATE(part1, part2) CONCATENATE_IMPL(part1, part2)
+#define ANONYMOUS_VAR(tag) CONCATENATE(tag, __LINE__)
 
-#define FORCE_AS_MEMBER_FUNCTION()                          \
+#define DECLARE_DLL_FUNCTION(fn, type, dll)                     \
+    auto ANONYMOUS_VAR(_module_) = GetModuleHandleW(L##dll);    \
+    auto fn = ANONYMOUS_VAR(_module_) ?                         \
+                reinterpret_cast<type>(GetProcAddress(ANONYMOUS_VAR(_module_), #fn)) : nullptr
+
+#define FORCE_AS_MEMBER_FUNCTION()                      \
     UNUSED_VAR(this)
 
 // Put complicated implementation below.
