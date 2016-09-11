@@ -23,7 +23,7 @@ void SHAHash(const void* data, size_t size, SHAType type, Digest* digest)
 {
     // Acquire service provider.
     HCRYPTPROV provider = 0;
-    ON_SCOPE_EXIT([&provider] { if (provider) CryptReleaseContext(provider, 0); });
+    ON_SCOPE_EXIT { if (provider) CryptReleaseContext(provider, 0); };
     BOOL rv = CryptAcquireContextW(&provider, nullptr, nullptr, PROV_RSA_AES,
                                    CRYPT_VERIFYCONTEXT);
     ENSURE(RAISE, rv != 0)(LastError()).Require("CryptAcquireContext failed.");
@@ -31,7 +31,7 @@ void SHAHash(const void* data, size_t size, SHAType type, Digest* digest)
     {
         // Acquire hash object.
         HCRYPTHASH hash = 0;
-        ON_SCOPE_EXIT([&hash] { if (hash) CryptDestroyHash(hash); });
+        ON_SCOPE_EXIT { if (hash) CryptDestroyHash(hash); };
         rv = CryptCreateHash(provider, type, 0, 0, &hash);
         ENSURE(RAISE, rv != 0)(LastError()).Require("CryptCreateHash failed.");
 

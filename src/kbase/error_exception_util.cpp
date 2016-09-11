@@ -133,13 +133,13 @@ std::wstring LastError::GetDescriptiveMessage() const
                                        reinterpret_cast<LPTSTR>(&buffer),
                                        0,
                                        nullptr);
-    ON_SCOPE_EXIT([&buffer] { if (buffer) LocalFree(buffer); });
+    ON_SCOPE_EXIT { if (buffer) LocalFree(buffer); };
 
     // Check if it's a network-related error.
     if (text_length == 0) {
         HMODULE dll = LoadLibraryExW(L"netmsg.dll", nullptr, DONT_RESOLVE_DLL_REFERENCES);
         if (dll) {
-            ON_SCOPE_EXIT([&dll] { FreeLibrary(dll); });
+            ON_SCOPE_EXIT { FreeLibrary(dll); };
             text_length = FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER |
                                          FORMAT_MESSAGE_IGNORE_INSERTS |
                                          FORMAT_MESSAGE_FROM_HMODULE,

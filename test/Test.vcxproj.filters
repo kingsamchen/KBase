@@ -119,5 +119,8 @@
     <ClCompile Include="samples\string_encoding_conversions_unittest.cpp">
       <Filter>samples</Filter>
     </ClCompile>
+    <ClCompile Include="samples\scope_guard_unittest.cpp">
+      <Filter>samples</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

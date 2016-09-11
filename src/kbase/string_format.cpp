@@ -184,7 +184,7 @@ void StringAppendPrintf(std::string* str, const char* fmt, ...)
 {
     va_list args;
     va_start(args, fmt);
-    ON_SCOPE_EXIT([&] { va_end(args); });
+    ON_SCOPE_EXIT { va_end(args); };
     StringAppendPrintfT(str, fmt, args);
 }
 
@@ -192,7 +192,7 @@ void StringAppendPrintf(std::wstring* str, const wchar_t* fmt, ...)
 {
     va_list args;
     va_start(args, fmt);
-    ON_SCOPE_EXIT([&] { va_end(args); });
+    ON_SCOPE_EXIT { va_end(args); };
     StringAppendPrintfT(str, fmt, args);
 }
 
@@ -200,7 +200,7 @@ std::string StringPrintf(const char* fmt, ...)
 {
     va_list args;
     va_start(args, fmt);
-    ON_SCOPE_EXIT([&] { va_end(args); });
+    ON_SCOPE_EXIT { va_end(args); };
 
     std::string str;
     StringAppendPrintfT(&str, fmt, args);
@@ -212,7 +212,7 @@ std::wstring StringPrintf(const wchar_t* fmt, ...)
 {
     va_list args;
     va_start(args, fmt);
-    ON_SCOPE_EXIT([&] { va_end(args); });
+    ON_SCOPE_EXIT { va_end(args); };
 
     std::wstring str;
     StringAppendPrintfT(&str, fmt, args);
@@ -224,7 +224,7 @@ const std::string& StringPrintf(std::string* str, const char* fmt, ...)
 {
     va_list args;
     va_start(args, fmt);
-    ON_SCOPE_EXIT([&] { va_end(args); });
+    ON_SCOPE_EXIT { va_end(args); };
 
     str->clear();
     StringAppendPrintfT(str, fmt, args);
@@ -236,7 +236,7 @@ const std::wstring& StringPrintf(std::wstring* str, const wchar_t* fmt, ...)
 {
     va_list args;
     va_start(args, fmt);
-    ON_SCOPE_EXIT([&] { va_end(args); });
+    ON_SCOPE_EXIT { va_end(args); };
 
     str->clear();
     StringAppendPrintfT(str, fmt, args);
