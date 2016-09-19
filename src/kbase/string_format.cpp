@@ -4,9 +4,7 @@
 
 #include "kbase/string_format.h"
 
-#include <cctype>
-#include <cstdarg>
-
+#include "kbase/error_exception_util.h"
 #include "kbase/scope_guard.h"
 
 namespace {
@@ -28,6 +26,55 @@ const char kEscapeBegin = '{';
 const char kEscapeEnd = '}';
 const char kSpecifierDelimeter = ':';
 const char kPlaceholderChar = '@';
+
+void AppendPrintfT(std::string& str, char* buf, size_t max_count_including_null, const char* fmt,
+                   va_list args)
+{
+    va_list args_copy;
+    va_copy(args_copy, args);
+    int real_size = vsnprintf(buf, max_count_including_null, fmt, args_copy);
+    va_end(args_copy);
+    if (real_size < max_count_including_null) {
+        // vsnprintf() guarantees the resulting string will be terminated with a null-terminator.
+        str.append(buf);
+        return;
+    }
+
+    std::vector<char> backup_buf(real_size + 1);
+    va_copy(args_copy, args);
+    vsnprintf(backup_buf.data(), backup_buf.size(), fmt, args_copy);
+    va_end(args_copy);
+    str.append(backup_buf.data());
+}
+
+void AppendPrintfT(std::wstring& str, wchar_t* buf, size_t max_count_including_null,
+                   const wchar_t* fmt, va_list args)
+{
+    va_list args_copy;
+    va_copy(args_copy, args);
+    int rv = vswprintf(buf, max_count_including_null, fmt, args_copy);
+    va_end(args_copy);
+    if (rv >= 0) {
+        str.append(buf, rv);
+        return;
+    }
+
+    constexpr size_t kMaxAllowed = 16U * 1024 * 1024;
+    size_t tentative_count = max_count_including_null;
+    std::vector<wchar_t> backup_buf;
+    while (true) {
+        tentative_count <<= 1;
+        ENSURE(RAISE, tentative_count <= kMaxAllowed)(tentative_count)(kMaxAllowed).Require();
+        backup_buf.resize(tentative_count);
+        va_copy(args_copy, args);
+        rv = vswprintf(backup_buf.data(), backup_buf.size(), fmt, args_copy);
+        va_end(args_copy);
+        if (rv > 0) {
+            str.append(backup_buf.data(), rv);
+            break;
+        }
+    }
+}
 
 template<typename CharT>
 inline unsigned long ExtractPlaceholderIndex(const CharT* first_digit, CharT** last_digit)
@@ -111,6 +158,79 @@ typename FmtStr<CharT>::String AnalyzeFormatStringT(const CharT* fmt,
 
 namespace kbase {
 
+template<typename StrT>
+void StringAppendPrintfT(StrT& str, const typename StrT::value_type* fmt, va_list args)
+{
+    using CharT = typename StrT::value_type;
+
+    constexpr size_t kDefaultCount = 1024U;
+    CharT buf[kDefaultCount];
+
+    AppendPrintfT(str, buf, kDefaultCount, fmt, args);
+}
+
+void StringAppendPrintf(std::string& str, const char* fmt, ...)
+{
+    va_list args;
+    va_start(args, fmt);
+    ON_SCOPE_EXIT { va_end(args); };
+
+    StringAppendPrintfT(str, fmt, args);
+}
+
+void StringAppendPrintf(std::wstring& str, const wchar_t* fmt, ...)
+{
+    va_list args;
+    va_start(args, fmt);
+    ON_SCOPE_EXIT { va_end(args); };
+
+    StringAppendPrintfT(str, fmt, args);
+}
+
+std::string StringPrintf(const char* fmt, ...)
+{
+    va_list args;
+    va_start(args, fmt);
+    ON_SCOPE_EXIT { va_end(args); };
+
+    std::string str;
+    StringAppendPrintfT(str, fmt, args);
+
+    return str;
+}
+
+std::wstring StringPrintf(const wchar_t* fmt, ...)
+{
+    va_list args;
+    va_start(args, fmt);
+    ON_SCOPE_EXIT { va_end(args); };
+
+    std::wstring str;
+    StringAppendPrintfT(str, fmt, args);
+
+    return str;
+}
+
+void StringPrintf(std::string& str, const char* fmt, ...)
+{
+    va_list args;
+    va_start(args, fmt);
+    ON_SCOPE_EXIT { va_end(args); };
+
+    str.clear();
+    StringAppendPrintfT(str, fmt, args);
+}
+
+void StringPrintf(std::wstring& str, const wchar_t* fmt, ...)
+{
+    va_list args;
+    va_start(args, fmt);
+    ON_SCOPE_EXIT { va_end(args); };
+
+    str.clear();
+    StringAppendPrintfT(str, fmt, args);
+}
+
 namespace internal {
 
 std::string AnalyzeFormatString(const char* fmt, PlaceholderList<char>* placeholders)
@@ -125,123 +245,5 @@ std::wstring AnalyzeFormatString(const wchar_t* fmt,
 }
 
 }   // namespace internal
-
-inline int vsnprintfT(char* buf, size_t buf_size, size_t count_to_write,
-                      const char* fmt, va_list args)
-{
-    return vsnprintf_s(buf, buf_size, count_to_write, fmt, args);
-}
-
-inline int vsnprintfT(wchar_t* buf, size_t buf_size, size_t count_to_write,
-                      const wchar_t* fmt, va_list args)
-{
-    return _vsnwprintf_s(buf, buf_size, count_to_write, fmt, args);
-}
-
-template<typename strT>
-void StringAppendPrintfT(strT* str, const typename strT::value_type* fmt, va_list ap)
-{
-    typedef typename strT::value_type charT;
-
-    const int kDefaultCharCount = 1024;
-    charT buf[kDefaultCharCount];
-
-    int ret = vsnprintfT(buf, kDefaultCharCount, kDefaultCharCount - 1, fmt, ap);
-
-    if (ret >= 0) {
-        str->append(buf, ret);
-        return;
-    }
-
-    // data is truncated.
-    // adjust the buffer size until it fits
-
-    const int kMaxAllowedCharCount = (1 << 25);
-    int tentative_char_count = kDefaultCharCount;
-    while (true) {
-        tentative_char_count <<= 1;
-        if (tentative_char_count > kMaxAllowedCharCount) {
-            throw StringPrintfDataLengthError("memory needed exceeds the threshold");
-        }
-
-        std::vector<charT> dynamic_buf(tentative_char_count);
-
-        // vsnprintf-like functions on Windows don't change the |ap|
-        // while their counterparts on Linux do.
-        // if you use VS2013 or higher, or compilers that support C99
-        // you alternatively can use |va_copy| to make a copy of |ap|
-        // during each iteration.
-        int rv = vsnprintfT(&dynamic_buf[0], tentative_char_count,
-                             tentative_char_count - 1, fmt, ap);
-        if (rv >= 0) {
-            str->append(&dynamic_buf[0], rv);
-            return;
-        }
-    }
-}
-
-void StringAppendPrintf(std::string* str, const char* fmt, ...)
-{
-    va_list args;
-    va_start(args, fmt);
-    ON_SCOPE_EXIT { va_end(args); };
-    StringAppendPrintfT(str, fmt, args);
-}
-
-void StringAppendPrintf(std::wstring* str, const wchar_t* fmt, ...)
-{
-    va_list args;
-    va_start(args, fmt);
-    ON_SCOPE_EXIT { va_end(args); };
-    StringAppendPrintfT(str, fmt, args);
-}
-
-std::string StringPrintf(const char* fmt, ...)
-{
-    va_list args;
-    va_start(args, fmt);
-    ON_SCOPE_EXIT { va_end(args); };
-
-    std::string str;
-    StringAppendPrintfT(&str, fmt, args);
-
-    return str;
-}
-
-std::wstring StringPrintf(const wchar_t* fmt, ...)
-{
-    va_list args;
-    va_start(args, fmt);
-    ON_SCOPE_EXIT { va_end(args); };
-
-    std::wstring str;
-    StringAppendPrintfT(&str, fmt, args);
-
-    return str;
-}
-
-const std::string& StringPrintf(std::string* str, const char* fmt, ...)
-{
-    va_list args;
-    va_start(args, fmt);
-    ON_SCOPE_EXIT { va_end(args); };
-
-    str->clear();
-    StringAppendPrintfT(str, fmt, args);
-
-    return *str;
-}
-
-const std::wstring& StringPrintf(std::wstring* str, const wchar_t* fmt, ...)
-{
-    va_list args;
-    va_start(args, fmt);
-    ON_SCOPE_EXIT { va_end(args); };
-
-    str->clear();
-    StringAppendPrintfT(str, fmt, args);
-
-    return *str;
-}
 
 }   // namespace kbase

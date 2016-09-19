@@ -18,20 +18,6 @@
 
 namespace kbase {
 
-// All Printf-series functions may throw an exception, if the size of the buffer
-// that stores the formatted data exceeds the threshold.
-
-class StringPrintfDataLengthError : public std::length_error {
-public:
-    explicit StringPrintfDataLengthError(const std::string& what)
-        : length_error(what)
-    {}
-
-    explicit StringPrintfDataLengthError(const char* what)
-        : length_error(what)
-    {}
-};
-
 class StringFormatSpecifierError : public std::invalid_argument {
 public:
     explicit StringFormatSpecifierError(const std::string& what)
@@ -43,18 +29,23 @@ public:
     {}
 };
 
-// Return a string with given format.
+// All Printf-series functions may throw an exception, if the size of the buffer that stores
+// the formatted data exceeds the threshold.
+
+// Return a string in given format.
 
 std::string StringPrintf(const char* fmt, ...);
 std::wstring StringPrintf(const wchar_t* fmt, ...);
 
-// Modify a string with given format and return the string.
+// Modify a string in given format and return the string.
 
-const std::string& StringPrintf(std::string* str, const char* fmt, ...);
-const std::wstring& StringPrintf(std::string* str, const wchar_t* fmt, ...);
+void StringPrintf(std::string& str, const char* fmt, ...);
+void StringPrintf(std::string& str, const wchar_t* fmt, ...);
 
-void StringAppendPrintf(std::string* str, const char* fmt, ...);
-void StringAppendPrintf(std::wstring* str, const wchar_t* fmt, ...);
+// Append a string in given format.
+
+void StringAppendPrintf(std::string& str, const char* fmt, ...);
+void StringAppendPrintf(std::wstring& str, const wchar_t* fmt, ...);
 
 namespace internal {
 

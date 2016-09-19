@@ -4,12 +4,9 @@
 
 #include "stdafx.h"
 
-#include "gtest\gtest.h"
-#define NDEBUG
-#include "kbase\string_format.h"
-#undef NDEBUG
-#include <iostream>
-#include <string>
+#include "gtest/gtest.h"
+
+#include "kbase/string_format.h"
 
 namespace {
 
@@ -22,6 +19,12 @@ bool ComparePlaceholder(const Placeholder<CharT>& p, unsigned i, unsigned pos, c
     return p.index == i && p.pos == pos && p.format_specifier == spec;
 }
 
+}
+
+TEST(StringFormatTest, StringPrintfSeries)
+{
+    EXPECT_EQ(std::string("hello, 0xCC, test 123"), StringPrintf("hello, %s, test %d", "0xCC", 123));
+    EXPECT_EQ(std::wstring(L"hello, 0xCC, test 123"), StringPrintf(L"hello, %s, test %d", L"0xCC", 123));
 }
 
 TEST(StringFormatTest, AnalyzeFormatString)
