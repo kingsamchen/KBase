@@ -4,28 +4,27 @@
 
 #include "kbase/string_format.h"
 
-#include "kbase/error_exception_util.h"
 #include "kbase/scope_guard.h"
 
 namespace {
 
-using kbase::StringFormatSpecifierError;
-using kbase::internal::FmtStr;
+using kbase::FormatError;
+using kbase::NotReached;
+using kbase::internal::FormatTraits;
 using kbase::internal::Placeholder;
 using kbase::internal::PlaceholderList;
 using kbase::internal::IsDigit;
 using kbase::internal::StrToUL;
-using kbase::internal::EnsureFormatSpecifier;
 
-enum class FormatStringParseState {
+enum class FormatParseState {
     IN_TEXT,
     IN_FORMAT
 };
 
-const char kEscapeBegin = '{';
-const char kEscapeEnd = '}';
-const char kSpecifierDelimeter = ':';
-const char kPlaceholderChar = '@';
+constexpr char kEscapeBegin = '{';
+constexpr char kEscapeEnd = '}';
+constexpr char kSpecifierDelimeter = ':';
+constexpr char kPlaceholderMark = '@';
 
 void AppendPrintfT(std::string& str, char* buf, size_t max_count_including_null, const char* fmt,
                    va_list args)
@@ -76,88 +75,6 @@ void AppendPrintfT(std::wstring& str, wchar_t* buf, size_t max_count_including_n
     }
 }
 
-template<typename CharT>
-inline unsigned long ExtractPlaceholderIndex(const CharT* first_digit, CharT** last_digit)
-{
-    auto index = StrToUL(first_digit, last_digit);
-    --*last_digit;
-
-    return index;
-}
-
-template<typename CharT>
-typename FmtStr<CharT>::String AnalyzeFormatStringT(const CharT* fmt,
-                                                    PlaceholderList<CharT>* placeholders)
-{
-    const size_t kInitialCapacity = 32;
-    typename FmtStr<CharT>::String analyzed_fmt;
-    analyzed_fmt.reserve(kInitialCapacity);
-
-    placeholders->clear();
-    Placeholder<CharT> placeholder;
-
-    auto state = FormatStringParseState::IN_TEXT;
-    for (auto ptr = fmt; *ptr != '\0'; ++ptr) {
-        if (*ptr == kEscapeBegin) {
-            // `{` is an invalid token for format-state.
-            EnsureFormatSpecifier(state != FormatStringParseState::IN_FORMAT);
-
-            if (*(ptr + 1) == kEscapeBegin) {
-                // Use `{{` to represent literal `{`.
-                analyzed_fmt += kEscapeBegin;
-                ++ptr;
-            } else if (IsDigit(*(ptr + 1))) {
-                CharT* last_digit;
-                placeholder.index = ExtractPlaceholderIndex(ptr + 1, &last_digit);
-                ptr = last_digit;
-                EnsureFormatSpecifier(*(ptr + 1) == kEscapeEnd ||
-                                      *(ptr + 1) == kSpecifierDelimeter);
-                if (*(ptr + 1) == kSpecifierDelimeter) {
-                    ++ptr;
-                }
-
-                // Get into format-state.
-                state = FormatStringParseState::IN_FORMAT;
-            } else {
-                throw StringFormatSpecifierError("Format string is not valid");
-            }
-        } else if (*ptr == kEscapeEnd) {
-            if (state == FormatStringParseState::IN_TEXT) {
-                EnsureFormatSpecifier(*(ptr + 1) == kEscapeEnd);
-                analyzed_fmt += kEscapeEnd;
-                ++ptr;
-            } else {
-                placeholder.pos = analyzed_fmt.length();
-                analyzed_fmt += '@';
-                placeholders->push_back(placeholder);
-                placeholder.format_specifier.clear();
-
-                // Now we turn back to text-state.
-                state = FormatStringParseState::IN_TEXT;
-            }
-        } else {
-            if (state == FormatStringParseState::IN_TEXT) {
-                analyzed_fmt += *ptr;
-            } else {
-                placeholder.format_specifier += *ptr;
-            }
-        }
-    }
-
-    EnsureFormatSpecifier(state == FormatStringParseState::IN_TEXT);
-
-    std::sort(std::begin(*placeholders), std::end(*placeholders),
-              [](const Placeholder<CharT>& lhs, const Placeholder<CharT>& rhs) {
-        return lhs.index < rhs.index;
-    });
-
-    return analyzed_fmt;
-}
-
-} // namespace
-
-namespace kbase {
-
 template<typename StrT>
 void StringAppendPrintfT(StrT& str, const typename StrT::value_type* fmt, va_list args)
 {
@@ -168,6 +85,86 @@ void StringAppendPrintfT(StrT& str, const typename StrT::value_type* fmt, va_lis
 
     AppendPrintfT(str, buf, kDefaultCount, fmt, args);
 }
+
+template<typename CharT>
+size_t ExtractPlaceholderIndex(const CharT* first_digit, CharT*& last_digit)
+{
+    auto index = StrToUL(first_digit, last_digit);
+    --last_digit;
+
+    return index;
+}
+
+template<typename CharT>
+typename FormatTraits<CharT>::String AnalyzeFormatT(const CharT* fmt, PlaceholderList<CharT>& placeholders)
+{
+    constexpr size_t kInitialCapacity = 32;
+    typename FormatTraits<CharT>::String analyzed_fmt;
+    analyzed_fmt.reserve(kInitialCapacity);
+
+    placeholders.clear();
+    Placeholder<CharT> placeholder;
+
+    auto state = FormatParseState::IN_TEXT;
+    for (auto ptr = fmt; *ptr != '\0'; ++ptr) {
+        if (*ptr == kEscapeBegin) {
+            // `{` is an invalid token for in-format state.
+            ENSURE(RAISE, state != FormatParseState::IN_FORMAT).Require<FormatError>();
+            if (*(ptr + 1) == kEscapeBegin) {
+                // Use `{{` to represent literal `{`.
+                analyzed_fmt += kEscapeBegin;
+                ++ptr;
+            } else if (IsDigit(*(ptr + 1))) {
+                CharT* last_digit;
+                placeholder.index = ExtractPlaceholderIndex(ptr + 1, last_digit);
+                ptr = last_digit;
+                ENSURE(RAISE, (*(ptr + 1) == kEscapeEnd) ||
+                              (*(ptr + 1) == kSpecifierDelimeter)).Require<FormatError>();
+                if (*(ptr + 1) == kSpecifierDelimeter) {
+                    ++ptr;
+                }
+
+                // Turn into in-format state.
+                state = FormatParseState::IN_FORMAT;
+            } else {
+                ENSURE(RAISE, NotReached()).Require<FormatError>();
+            }
+        } else if (*ptr == kEscapeEnd) {
+            if (state == FormatParseState::IN_TEXT) {
+                ENSURE(RAISE, *(ptr + 1) == kEscapeEnd).Require<FormatError>();
+                analyzed_fmt += kEscapeEnd;
+                ++ptr;
+            } else {
+                placeholder.pos = analyzed_fmt.length();
+                analyzed_fmt += kPlaceholderMark;
+                placeholders.push_back(placeholder);
+                placeholder.format_specifier.clear();
+
+                // Now we turn back into in-text state.
+                state = FormatParseState::IN_TEXT;
+            }
+        } else {
+            if (state == FormatParseState::IN_TEXT) {
+                analyzed_fmt += *ptr;
+            } else {
+                placeholder.format_specifier += *ptr;
+            }
+        }
+    }
+
+    ENSURE(RAISE, state == FormatParseState::IN_TEXT).Require<FormatError>();
+
+    std::sort(std::begin(placeholders), std::end(placeholders),
+              [](const auto& lhs, const auto& rhs) {
+                  return lhs.index < rhs.index;
+              });
+
+    return analyzed_fmt;
+}
+
+} // namespace
+
+namespace kbase {
 
 void StringAppendPrintf(std::string& str, const char* fmt, ...)
 {
@@ -233,15 +230,14 @@ void StringPrintf(std::wstring& str, const wchar_t* fmt, ...)
 
 namespace internal {
 
-std::string AnalyzeFormatString(const char* fmt, PlaceholderList<char>* placeholders)
+std::string AnalyzeFormat(const char* fmt, PlaceholderList<char>& placeholders)
 {
-    return AnalyzeFormatStringT(fmt, placeholders);
+    return AnalyzeFormatT(fmt, placeholders);
 }
 
-std::wstring AnalyzeFormatString(const wchar_t* fmt,
-                                 PlaceholderList<wchar_t>* placeholders)
+std::wstring AnalyzeFormat(const wchar_t* fmt, PlaceholderList<wchar_t>& placeholders)
 {
-    return AnalyzeFormatStringT(fmt, placeholders);
+    return AnalyzeFormatT(fmt, placeholders);
 }
 
 }   // namespace internal
