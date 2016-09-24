@@ -38,7 +38,7 @@ public:
 std::string StringPrintf(const char* fmt, ...);
 std::wstring StringPrintf(const wchar_t* fmt, ...);
 
-// Modify a string in given format and return the string.
+// Modify a string in given format.
 
 void StringPrintf(std::string& str, const char* fmt, ...);
 void StringPrintf(std::string& str, const wchar_t* fmt, ...);
