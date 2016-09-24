@@ -1,3 +1,4 @@
+
 KBase
 ==========
 
@@ -5,41 +6,41 @@ KBase
 
 A light-weight base library for C++.
 
-### Compatibility
+### Build Instructions
 
-KBase is initially a toy project for fun, not aimd for cross-platform.
+**Requirements**
 
-Since I build this project with Visual Studio 2015 on Windows 10, some facilities or infrastructures that may jeopardize code portability to other compilers or platforms are inevitably employed.
+- Windows 7, or later
+- Visual Studio 2015, or later
 
-Including but not limited to
+Neither other platforms, nor other compilers are officially supported; although, compilers that support C++ 14 features and support building Windows native code, should work.
 
-- part of C++11 features
-- brand new APIs firstly introduced since Windows Vista/7
-- un-portable CRT implementations, such as secured-string-manipulation functions 
+Cross-platform is planned, but not yet scheduled. And since quite a few Windows-specific APIs are (inevitably) used, it would take time to make the code work on other platforms.
 
-Therefore, the **minimum** requirements are
+I will update the readme file as soon as the port progress is made.
 
-- Visual Studio 2013 on Windows 7 (32/64-bit, thought X64 is the default target platform)
-- GNU C++ that supports C++11 on cygwin could possibly be used if non-portable part was replaced with standard counterparts or your own implementations.
+**Build Steps**
 
-### Compilation
+1. Clone the repository
+2. Open the `KBase.sln` file, then build the project `KBase`, it will end up with the static library `kbase.lib` in the directory `KBase/build/<Configuration>/`
+3. If you want to build the `Test` project, then
+    1. first need to build `gtest` project, for which just open solution file `KBase/test/third-party/gtest.sln`, then build the project.
+    2. build `Test` project
 
-KBase aims to be a static library. Just download the source code and open the `.sln` file with your VS then build, ending up with `kbase.lib`。
+Please be noted that, only 64-bit code compilation is officially supported, though 32-bit should work too.
 
-If you use GNU C++, you may need to write makefile on your own to build the entire project.
+Besides, all these projects originally are build with `/MD(d)` flags.
 
-The test sub-project is built on top of GTest, please have it built in advance. The details of how `gtest.lib` is referenced can be examined from project setting files.
+### Usages and Samples
 
-### Disclaimer
+Directory `docs` contains documentations for explaining how to use each facility of KBase.
 
-Once again, KBase is a personal-interest-driven project. There is no any guarantee for its long-term maintenance.
+The sub-project `Test` contains a set of unit test files, which can also be regarded as code samples in a certain of extend.
 
-KBase is inspired by base lib of Chromium. However, I don't approve of the way they use C++, thus I build KBase in my own coding flavor, and also with adapting to my personal needs.
+Though archives in these two directories may not being detailed as they should be, I will do my best to make them complete.
 
-### Usage and Samples
+### Disclaimers
 
-Directory `Docs` contains documentations for explaining how to use each part of KBase.
+KBase is initially a practicing project for fun, i.e. a personal-interest-driven project. There is no guarantee for its long-term maintenance.
 
-The sub-directory `KBase_Test` contains a series of unit test files, which can be regarded as code samples in a certain of extend.
-
-Though archives in these two directories may not as detailed as they should be, I will do my best to make them complete.
+KBase is inspired by base lib from Chromium. However, I don't approve of the way how they use C++, thus I build KBase in my own coding flavor, and also with adapting to my personal needs.
