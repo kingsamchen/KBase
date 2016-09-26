@@ -12,13 +12,20 @@
 #include <cstdint>
 #include <string>
 
+#include "kbase/basic_macros.h"
+
 // Defines types that would be shared by among several files.
 namespace kbase {
 
 // |PathKey| is used by |PathService| and |BasePathProvider|.
 using PathKey = int;
 
+#if defined(OS_WIN)
 using PathChar = wchar_t;
+#else
+using PathChar = char;
+#endif
+
 using PathString = std::basic_string<PathChar>;
 
 using byte = uint8_t;
