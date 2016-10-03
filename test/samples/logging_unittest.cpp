@@ -2,17 +2,16 @@
  @ 0xCCCCCCCC
 */
 
-#include "stdafx.h"
-
-#include "gtest\gtest.h"
-#include <Windows.h>
-
 #include <iostream>
 #include <thread>
 #include <vector>
 
-#include "kbase\file_util.h"
-#include "kbase\logging.h"
+#include <Windows.h>
+
+#include "gtest/gtest.h"
+
+#include "kbase/file_util.h"
+#include "kbase/logging.h"
 
 using namespace kbase;
 

@@ -2,12 +2,11 @@
  @ 0xCCCCCCCC
 */
 
-#include "stdafx.h"
-
 #include <vector>
 
-#include "gtest\gtest.h"
-#include "kbase\scoped_handle.h"
+#include "gtest/gtest.h"
+
+#include "kbase/scoped_handle.h"
 
 using kbase::ScopedSysHandle;
 using kbase::ScopedStdioHandle;

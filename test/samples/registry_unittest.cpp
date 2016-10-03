@@ -2,12 +2,11 @@
  @ 0xCCCCCCCC
 */
 
-#include "stdafx.h"
-
-#include "gtest\gtest.h"
-#include "kbase\registry.h"
-
 #include <utility>
+
+#include "gtest/gtest.h"
+
+#include "kbase/registry.h"
 
 namespace {
 

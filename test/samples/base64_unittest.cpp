@@ -2,10 +2,9 @@
  @ 0xCCCCCCCC
 */
 
-#include "stdafx.h"
+#include "gtest/gtest.h"
 
-#include "gtest\gtest.h"
-#include "kbase\base64.h"
+#include "kbase/base64.h"
 
 namespace {
 

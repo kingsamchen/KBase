@@ -2,13 +2,11 @@
  @ 0xCCCCCCCC
 */
 
-#include "stdafx.h"
-
-#include "gtest\gtest.h"
-#include "kbase\auto_reset.h"
-
-#include <string>
 #include <vector>
+
+#include "gtest/gtest.h"
+
+#include "kbase/auto_reset.h"
 
 namespace {
 

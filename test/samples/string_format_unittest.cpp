@@ -2,8 +2,6 @@
  @ 0xCCCCCCCC
 */
 
-#include "stdafx.h"
-
 #include "gtest/gtest.h"
 
 #if !defined(NDEBUG)

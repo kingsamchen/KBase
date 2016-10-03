@@ -2,17 +2,15 @@
  @ 0xCCCCCCCC
 */
 
-#include "stdafx.h"
-
-#include "gtest/gtest.h"
-#include "kbase/path.h"
-
 #include <algorithm>
 #include <functional>
 #include <tuple>
 #include <xutility>
 
+#include "gtest/gtest.h"
+
 #include "kbase/basic_types.h"
+#include "kbase/path.h"
 
 using std::placeholders::_1;
 using kbase::PathString;

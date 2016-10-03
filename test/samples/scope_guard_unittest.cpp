@@ -2,11 +2,10 @@
  @ 0xCCCCCCCC
 */
 
-#include "stdafx.h"
-
 #include <vector>
 
 #include "gtest/gtest.h"
+
 #include "kbase/scope_guard.h"
 
 TEST(ScopeGuardTest, OnScopeExit)

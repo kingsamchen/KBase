@@ -2,13 +2,11 @@
  @ 0xCCCCCCCC
 */
 
-#include "stdafx.h"
-
 #include "gtest/gtest.h"
-#include "kbase/string_util.h"
 
 #include "kbase/auto_reset.h"
 #include "kbase/basic_macros.h"
+#include "kbase/string_util.h"
 
 using namespace kbase;
 

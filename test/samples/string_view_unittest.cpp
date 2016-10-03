@@ -2,9 +2,8 @@
  @ 0xCCCCCCCC
 */
 
-#include "stdafx.h"
-
 #include "gtest/gtest.h"
+
 #include "kbase/string_view.h"
 
 TEST(StringViewTest, Ctor)

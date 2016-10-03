@@ -2,14 +2,11 @@
  @ 0xCCCCCCCC
 */
 
-#include "stdafx.h"
-
-#include "gtest\gtest.h"
-#include "kbase\lru_cache.h"
-
-#include <algorithm>
 #include <memory>
-#include <string>
+
+#include "gtest/gtest.h"
+
+#include "kbase/lru_cache.h"
 
 namespace {
 

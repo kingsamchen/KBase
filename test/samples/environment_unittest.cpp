@@ -2,9 +2,8 @@
  @ 0xCCCCCCCC
 */
 
-#include "stdafx.h"
-
 #include "gtest/gtest.h"
+
 #include "kbase/environment.h"
 
 TEST(EnvironmentTest, GetVar)

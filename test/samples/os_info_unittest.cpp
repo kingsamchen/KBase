@@ -2,8 +2,6 @@
  @ 0xCCCCCCCC
 */
 
-#include "stdafx.h"
-
 #include <thread>
 
 #include "gtest/gtest.h"

@@ -2,10 +2,9 @@
  @ 0xCCCCCCCC
 */
 
-#include "stdafx.h"
+#include "gtest/gtest.h"
 
-#include "gtest\gtest.h"
-#include "kbase\command_line.h"
+#include "kbase/command_line.h"
 
 TEST(CommandLineTest, Ctors)
 {

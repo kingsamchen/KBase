@@ -2,14 +2,13 @@
  @ 0xCCCCCCCC
 */
 
-#include "stdafx.h"
-
-#include "windows.h"
-
 #include <map>
 #include <vector>
 
+#include "windows.h"
+
 #include "gtest/gtest.h"
+
 #include "kbase/error_exception_util.h"
 
 using namespace kbase;

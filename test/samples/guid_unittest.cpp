@@ -2,10 +2,9 @@
  @ 0xCCCCCCCC
 */
 
-#include "stdafx.h"
+#include "gtest/gtest.h"
 
-#include "gtest\gtest.h"
-#include "kbase\guid.h"
+#include "kbase/guid.h"
 
 TEST(GUIDTest, Generate)
 {

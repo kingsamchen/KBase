@@ -2,15 +2,13 @@
  @ 0xCCCCCCCC
 */
 
-#include "stdafx.h"
-
-#include "gtest\gtest.h"
-#include "kbase\lazy.h"
-
 #include <atomic>
-#include <string>
 #include <thread>
 #include <vector>
+
+#include "gtest/gtest.h"
+
+#include "kbase/lazy.h"
 
 namespace {
 
@@ -99,6 +97,6 @@ TEST(LazyTest, ThreadSafety)
 
         vth.back().join();
     }
-    
+
     EXPECT_EQ(g_activation_trigger, true);
 }

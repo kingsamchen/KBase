@@ -2,9 +2,8 @@
  @ 0xCCCCCCCC
 */
 
-#include "stdafx.h"
-
 #include "gtest/gtest.h"
+
 #include "kbase/at_exit_manager.h"
 
 namespace {

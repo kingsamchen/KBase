@@ -2,16 +2,14 @@
  @ 0xCCCCCCCC
 */
 
-#include "stdafx.h"
-
-#include "gtest\gtest.h"
-#include "kbase\file_util.h"
-
 #include <iostream>
 #include <utility>
 
-#include "kbase\path_service.h"
-#include "kbase\string_util.h"
+#include "gtest/gtest.h"
+
+#include "kbase/file_util.h"
+#include "kbase/path_service.h"
+#include "kbase/string_util.h"
 
 using namespace kbase;
 

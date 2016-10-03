@@ -2,7 +2,6 @@
  @ 0xCCCCCCCC
 */
 
-#include "stdafx.h"
 #include "gtest/gtest.h"
 
 #include "kbase/basic_macros.h"

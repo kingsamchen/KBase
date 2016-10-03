@@ -2,13 +2,12 @@
  @ 0xCCCCCCCC
 */
 
-#include "stdafx.h"
-#include "gtest\gtest.h"
-
 #include <functional>
 #include <string>
 
-#include "kbase\signals.h"
+#include "gtest/gtest.h"
+
+#include "kbase/signals.h"
 
 namespace {
 

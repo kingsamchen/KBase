@@ -2,14 +2,12 @@
  @ 0xCCCCCCCC
 */
 
-#include "stdafx.h"
-
-#include "gtest\gtest.h"
-#include "kbase\file_version_info.h"
-
 #include <iostream>
 
-#include "kbase\path.h"
+#include "gtest/gtest.h"
+
+#include "kbase/file_version_info.h"
+#include "kbase/path.h"
 
 namespace {
 

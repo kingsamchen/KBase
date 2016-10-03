@@ -2,14 +2,13 @@
  @ 0xCCCCCCCC
 */
 
-#include "stdafx.h"
-
-#include "gtest\gtest.h"
-#include "kbase\path_service.h"
+#include <cassert>
 
 #include <Windows.h>
 
-#include <cassert>
+#include "gtest/gtest.h"
+
+#include "kbase/path_service.h"
 
 using namespace kbase;
 
@@ -46,7 +45,7 @@ TEST(PathServiceTest, RegisterPathProvider)
 
     PathService::RegisterPathProvider(TestPathProvider,
                                       TEST_PATH_START, TEST_PATH_END);
-    
+
     Path path = PathService::Get(DIR_TEST);
     EXPECT_FALSE(path.empty());
     EXPECT_FALSE(path.ReferenceParent());

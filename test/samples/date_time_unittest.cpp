@@ -2,11 +2,9 @@
  @ 0xCCCCCCCC
 */
 
-#include "stdafx.h"
+#include "gtest/gtest.h"
 
-#include "gtest\gtest.h"
-
-#include "kbase\date_time.h"
+#include "kbase/date_time.h"
 
 using namespace kbase;
 
@@ -140,7 +138,7 @@ TEST_F(DateTimeTest, ComparisonOperator)
     EXPECT_FALSE(now == long_time_before);
     EXPECT_TRUE(now != long_time_before);
     EXPECT_FALSE(now != now_copy);
- 
+
     // less and greater
     EXPECT_TRUE(long_time_before < now);
     EXPECT_TRUE(now > long_time_before);
@@ -148,7 +146,7 @@ TEST_F(DateTimeTest, ComparisonOperator)
     EXPECT_TRUE(now >= long_time_before);
     EXPECT_TRUE(now >= now_copy);
     EXPECT_TRUE(now <= now_copy);
-    EXPECT_FALSE(long_time_before > now);   
+    EXPECT_FALSE(long_time_before > now);
 }
 
 // arithmetics

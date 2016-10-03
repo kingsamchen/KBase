@@ -2,14 +2,13 @@
  @ 0xCCCCCCCC
 */
 
-#include "stdafx.h"
-
-#include "gtest\gtest.h"
-#include "kbase\singleton.h"
-
 #include <atomic>
 #include <thread>
 #include <vector>
+
+#include "gtest/gtest.h"
+
+#include "kbase/singleton.h"
 
 namespace {
 
