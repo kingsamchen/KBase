@@ -120,7 +120,7 @@
     <ClCompile Include="kbase\pickle.cpp" />
     <ClCompile Include="kbase\registry.cpp" />
     <ClCompile Include="kbase\sha.cpp" />
-    <ClCompile Include="kbase\stack_walker.cpp" />
+    <ClCompile Include="kbase\stack_walker_win.cpp" />
     <ClCompile Include="kbase\string_encoding_conversions.cpp" />
     <ClCompile Include="kbase\string_format.cpp" />
     <ClCompile Include="kbase\string_util.cpp" />

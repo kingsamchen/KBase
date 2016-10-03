@@ -7,13 +7,12 @@
 #include <mutex>
 #include <sstream>
 
-#include <windows.h>
+#include <Windows.h>
 #pragma warning(push)
 #pragma warning(disable: 4091)
 #include <DbgHelp.h>
 #pragma warning(pop)
 
-#include "kbase/basic_macros.h"
 #include "kbase/singleton.h"
 #include "kbase/string_util.h"
 
@@ -25,7 +24,7 @@ using kbase::DefaultSingletonTraits;
 using kbase::LeakySingletonTraits;
 using kbase::Singleton;
 
-std::wstring GetExeDir()
+std::wstring GetExecutableDirectory()
 {
     std::wstring exe_path;
     wchar_t* data = kbase::WriteInto(exe_path, MAX_PATH);
@@ -37,7 +36,7 @@ std::wstring GetExeDir()
 }
 
 // A helper class to resolve symbol information in callstack.
-// Make the class a singleton to keep the symbol handler alive within entire
+// Make the class a singleton to keep the symbol handler alive within the entire
 // process lifecycle(initializing symbol handler is expensive). And use leaky
 // traits just in case some components using this class during application exit.
 class SymbolContext {
@@ -105,7 +104,7 @@ void SymbolContext::InitSymbolHandler()
     }
 
     std::wstring search_path_list(search_path_buffer);
-    search_path_list.append(L";").append(GetExeDir());
+    search_path_list.append(L";").append(GetExecutableDirectory());
 
     if (!SymSetSearchPathW(GetCurrentProcess(), search_path_list.c_str())) {
         init_error_code_ = GetLastError();
@@ -136,7 +135,7 @@ void SymbolContext::ResolveCallStackToStream(const void* const* stack_frames, si
                                            symbol_info);
 
         DWORD line_displacement = 0;
-        IMAGEHLP_LINE64 line_info = { sizeof(IMAGEHLP_LINE64) };
+        IMAGEHLP_LINE64 line_info {sizeof(IMAGEHLP_LINE64)};
         BOOL line_resolved = SymGetLineFromAddr64(GetCurrentProcess(), frame, &line_displacement,
                                                   &line_info);
 
@@ -175,11 +174,11 @@ StackWalker::StackWalker()
 StackWalker::StackWalker(CONTEXT* context)
 {
     // Force initializing symbo handler.
-    // It's important to call `SymInitialize` on x64, before calling `StackWalk64`;
-    // Otherwise, `StackWalk64` would get stack frames wrong.
+    // It's important to call SymInitialize() on x64, before calling StackWalk64();
+    // Otherwise, StackWalk64() would get incorrect stack frames.
     SymbolContext::GetInstance();
     context->ContextFlags = CONTEXT_FULL;
-    STACKFRAME64 stack_frame { 0 };
+    STACKFRAME64 stack_frame {0};
 #if defined(_WIN64)
     DWORD machine_arch = IMAGE_FILE_MACHINE_AMD64;
     stack_frame.AddrPC.Offset = context->Rip;

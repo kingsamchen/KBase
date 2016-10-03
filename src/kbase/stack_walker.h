@@ -11,8 +11,12 @@
 
 #include <array>
 
+#include "kbase/basic_macros.h"
+
+#if defined(OS_WIN)
 struct _CONTEXT;
 using CONTEXT = _CONTEXT;
+#endif
 
 namespace kbase {
 
@@ -20,8 +24,10 @@ class StackWalker {
 public:
     StackWalker();
 
-    // Using in SEH context.
+#if defined(OS_WIN)
+    // Dumps a callstack for an exception case.
     explicit StackWalker(CONTEXT* context);
+#endif
 
     ~StackWalker() = default;
 
@@ -30,8 +36,8 @@ public:
     std::string CallStackToString();
 
 private:
-    static const size_t kMaxStackFrames = 64;
-    std::array<void*, kMaxStackFrames> stack_frames_ { nullptr };
+    static constexpr size_t kMaxStackFrames = 64U;
+    std::array<void*, kMaxStackFrames> stack_frames_ {nullptr};
     size_t valid_frame_count_ = 0;
 };
 

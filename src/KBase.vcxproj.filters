@@ -72,9 +72,6 @@
     <ClCompile Include="kbase\string_util.cpp">
       <Filter>kbase</Filter>
     </ClCompile>
-    <ClCompile Include="kbase\stack_walker.cpp">
-      <Filter>kbase</Filter>
-    </ClCompile>
     <ClCompile Include="kbase\minidump.cpp">
       <Filter>kbase</Filter>
     </ClCompile>
@@ -88,6 +85,9 @@
       <Filter>..\build\pch</Filter>
     </ClCompile>
     <ClCompile Include="kbase\string_encoding_conversions.cpp">
+      <Filter>kbase</Filter>
+    </ClCompile>
+    <ClCompile Include="kbase\stack_walker_win.cpp">
       <Filter>kbase</Filter>
     </ClCompile>
   </ItemGroup>
