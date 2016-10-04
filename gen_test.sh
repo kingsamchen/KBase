@@ -18,9 +18,9 @@ fi
 
 sh_root=`pwd`
 readonly sh_root
-output_path="build/"${build_type}
+output_path=${sh_root}"/build/"${build_type}
 readonly output_path
-phantom_path="build/"${build_type}"/phantom"
+phantom_path=${sh_root}"/build/"${build_type}"/phantom"
 readonly phantom_path
 
 # We automatically build gtest if necessary, since its content won't change.
