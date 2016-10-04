@@ -2,22 +2,21 @@
 KBase
 ==========
 
-### Introduction
+## Introduction
+---
 
 A light-weight base library for C++.
 
-### Build Instructions
+
+## Build Instructions
+---
+
+### Windows
 
 **Requirements**
 
 - Windows 7, or later
 - Visual Studio 2015, or later
-
-Neither other platforms, nor other compilers are officially supported; although, compilers that support C++ 14 features and support building Windows native code, should work.
-
-Cross-platform is planned, but not yet scheduled. And since quite a few Windows-specific APIs are (inevitably) used, it would take time to make the code work on other platforms.
-
-I will update the readme file as soon as the port progress is made.
 
 **Build Steps**
 
@@ -29,9 +28,31 @@ I will update the readme file as soon as the port progress is made.
 
 Please be noted that, only 64-bit code compilation is officially supported, though 32-bit should work too.
 
-Besides, all these projects originally are build with `/MD(d)` flags.
+Besides, all these projects originally are built with `/MD(d)` flags.
 
-### Usages and Samples
+### Ubuntu
+
+**Requirements**
+
+- 14.04 LTS x64, or later
+- g++ 5, or later
+- CMake 2.8, or later
+
+I only test code base with g++, but, I guess, clang in versions that support C++ 14 features (3.4, or later) should also work. 
+
+**Build Steps**
+
+1. Clone the repository, and `cd` to `KBase` directory
+2. execute `gen_kbase.sh` to build the project `KBase`, it will end up with the static library `libkbase.a` in the directory `KBase/build/<BuildType>/`
+3. If you want to build the `Test` project, just execute `gen_test.sh`
+
+Porting to posix-compatible systems is still in the progress, please check the file `KBase/src/CMakeLists.txt` to see the detail list of modules that have been ported.
+
+Please be noted that, building `KBase` project would not install header files into system include directory.
+
+
+## Usages and Samples
+---
 
 Directory `docs` contains documentations for explaining how to use each facility of KBase.
 
@@ -39,7 +60,9 @@ The sub-project `Test` contains a set of unit test files, which can also be rega
 
 Though archives in these two directories may not being detailed as they should be, I will do my best to make them complete.
 
-### Disclaimers
+
+## Disclaimers
+---
 
 KBase is initially a practicing project for fun, i.e. a personal-interest-driven project. There is no guarantee for its long-term maintenance.
 
