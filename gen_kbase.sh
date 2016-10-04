@@ -21,18 +21,13 @@ readonly output_path
 phantom_path="build/"${build_type}"/phantom"
 readonly phantom_path
 
-libgtest_path=${output_path}"/libgtest.a"
-if [ ! -e $libgtest_path ]; then
-    gtest_int_dir=${phantom_path}"/gtest"
-    if [ ! -d $gtest_int_dir ]; then
-        mkdir -p $gtest_int_dir
-    fi
-
-    sh_root=`pwd`
-    cmake_file_path=$sh_root"/test/third-party"
-    cd $gtest_int_dir
-    cmake -D CMAKE_BUILD_TYPE=$build_type $cmake_file_path
-    make
-else
-    echo "lib gtest is already updated; nothing to build"
+kbase_obj_dir=${phantom_path}"/kbase"
+if [ ! -d $kbase_obj_dir ]; then
+    mkdir -p $kbase_obj_dir
 fi
+
+sh_root=`pwd`
+cmake_file_path=$sh_root"/src"
+cd $kbase_obj_dir
+cmake -D CMAKE_BUILD_TYPE=$build_type $cmake_file_path
+make

@@ -246,3 +246,6 @@ ModelManifest.xml
 
 # Visual Studio Code
 .vscode/
+
+# Mainly for ycm
+*.pyc
