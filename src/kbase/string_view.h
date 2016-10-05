@@ -10,8 +10,14 @@
 #define KBASE_STRING_VIEW_H_
 
 #include <algorithm>
+#include <stdexcept>
 
 #include "kbase/basic_macros.h"
+
+#if defined(OS_POSIX)
+#include <cstddef>
+#include <string>
+#endif
 
 namespace kbase {
 
@@ -20,15 +26,15 @@ namespace internal {
 // FNV-1a hash function. Shamelessly stolen from STL.
 inline size_t HashByteSequence(const unsigned char* data, size_t length) noexcept
 {
-#if defined(_WIN64)
+#if defined(_WIN64) || defined(OS_POSIX)
     static_assert(sizeof(size_t) == 8, "This code is for 64-bit size_t.");
     constexpr size_t kFNVOffsetBasis = 14695981039346656037ULL;
     constexpr size_t kFNVPrime = 1099511628211ULL;
-#else /* defined(_WIN64) */
+#else
     static_assert(sizeof(size_t) == 4, "This code is for 32-bit size_t.");
     constexpr size_t kFNVOffsetBasis = 2166136261U;
     constexpr size_t kFNVPrime = 16777619U;
-#endif /* defined(_WIN64) */
+#endif
 
     size_t val = kFNVOffsetBasis;
     for (size_t next = 0; next < length; ++next) {
@@ -519,6 +525,9 @@ std::basic_ostream<CharT, Traits>& operator<<(std::basic_ostream<CharT, Traits>&
     return os;
 }
 
+template<typename CharT, typename Traits>
+constexpr typename BasicStringView<CharT, Traits>::size_type BasicStringView<CharT, Traits>::npos;
+
 using StringView = BasicStringView<char>;
 using WStringView = BasicStringView<wchar_t>;
 
@@ -529,7 +538,7 @@ using WStringView = BasicStringView<wchar_t>;
 namespace std {
 
 template<>
-struct std::hash<kbase::StringView> {
+struct hash<kbase::StringView> {
     size_t operator()(kbase::StringView view) const
     {
         auto src = reinterpret_cast<const unsigned char*>(view.data());
@@ -540,7 +549,7 @@ struct std::hash<kbase::StringView> {
 };
 
 template<>
-struct std::hash<kbase::WStringView> {
+struct hash<kbase::WStringView> {
     size_t operator()(kbase::WStringView view) const
     {
         auto src = reinterpret_cast<const unsigned char*>(view.data());

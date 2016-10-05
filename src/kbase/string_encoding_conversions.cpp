@@ -5,6 +5,7 @@
 #include "kbase/string_encoding_conversions.h"
 
 #include <codecvt>
+#include <locale>
 
 #include "kbase/error_exception_util.h"
 #include "kbase/string_util.h"

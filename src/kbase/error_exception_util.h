@@ -14,15 +14,20 @@
 #include <stdexcept>
 
 #include "kbase/basic_macros.h"
-#include "kbase/path.h"
 #include "kbase/string_encoding_conversions.h"
+
+#if defined(OS_WIN)
+#include "kbase/path.h"
+#endif
 
 namespace kbase {
 
 enum class EnsureAction {
     CHECK,
     RAISE,
+#if defined(OS_WIN)
     RAISE_WITH_DUMP
+#endif
 };
 
 constexpr bool NotReached()
@@ -45,7 +50,7 @@ constexpr bool NotReached()
     GUARANTOR_A.CaptureValue(#x, (x)).GUARANTOR_##next
 
 #define MAKE_GUARANTOR(cond, action) \
-    kbase::Guarantor(cond, __FILE__, __LINE__, kbase::EnsureAction::##action)
+    kbase::Guarantor(cond, __FILE__, __LINE__, kbase::EnsureAction::action)
 
 #define ENSURE(action, cond) \
     static_assert(std::is_same<std::remove_const_t<decltype(cond)>, bool>::value, \
@@ -123,14 +128,18 @@ private:
 
     void Raise();
 
+#if defined(OS_WIN)
     void RaiseWithDump();
+#endif
 
 private:
     EnsureAction action_required_;
     std::ostringstream exception_desc_;
 };
 
-void AlwaysCheckForEnsureInDebug(bool always_check);
+void AlwaysCheckFirstInDebug(bool always_check);
+
+#if defined(OS_WIN)
 
 // If `dump_dir` wasn't specified, current directory is used as storage location.
 void SetMiniDumpDirectory(const Path& dump_dir);
@@ -175,6 +184,8 @@ public:
 private:
     Path dump_path_;
 };
+
+#endif  // OS_WIN
 
 }   // namespace kbase
 

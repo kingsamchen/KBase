@@ -6,25 +6,27 @@
 
 #include <ctime>
 
-#include <Windows.h>
-
-#include "kbase/minidump.h"
 #include "kbase/scope_guard.h"
 #include "kbase/stack_walker.h"
 
+#if defined(OS_WIN)
+#include <Windows.h>
+#endif
+
+#if defined(OS_WIN)
+#include "kbase/minidump.h"
+#endif
+
 namespace {
+
+#if defined(OS_WIN)
 
 using kbase::Path;
 using kbase::PathString;
 
-bool g_always_enable_check_in_debug = true;
 Path g_minidump_dir_path;
 
-bool ShouldCheckFirst()
-{
-    return g_always_enable_check_in_debug && ACTION_IS_ON(CHECK);
-}
-
+// TODO: replace raw time with human-readable substitution.
 PathString GenerateMiniDumpFileName()
 {
     PathString file_name(L"crash_");
@@ -34,9 +36,27 @@ PathString GenerateMiniDumpFileName()
     return file_name;
 }
 
+#endif  // OS_WIN
+
+bool g_always_check_first_in_debug = true;
+
+bool ShouldCheckFirst()
+{
+#if defined(NDEBUG)
+    return false;
+#else
+    return g_always_check_first_in_debug;
+#endif
+}
+
 }   // namespace
 
 namespace kbase {
+
+void AlwaysCheckFirstInDebug(bool always_check)
+{
+    g_always_check_first_in_debug = always_check;
+}
 
 void Guarantor::Require()
 {
@@ -49,11 +69,14 @@ void Guarantor::Require()
             Raise();
             break;
 
-        case EnsureAction::RAISE_WITH_DUMP:
+#if defined(OS_WIN)
+          case EnsureAction::RAISE_WITH_DUMP:
             RaiseWithDump();
             break;
+#endif
 
         default:
+            Check();
             break;
     }
 }
@@ -64,13 +87,21 @@ void Guarantor::Require(StringView msg)
     Require();
 }
 
+// TODO: Add portable DebugPresent() check and then DebugBreak() if a debugger is attached.
 void Guarantor::Check()
 {
     StackWalker callstack;
     callstack.DumpCallStack(exception_desc_);
-    std::wstring message = UTF8ToWide(exception_desc_.str());
+    std::string description = exception_desc_.str();
+#if defined(OS_WIN)
+    std::wstring message = UTF8ToWide(description);
     MessageBoxW(nullptr, message.c_str(), L"Checking Failed", MB_OK | MB_TOPMOST | MB_ICONHAND);
     __debugbreak();
+#else
+    fwrite(description.data(), sizeof(char), description.length(), stderr);
+    fflush(stderr);
+    abort();
+#endif
 }
 
 void Guarantor::Raise()
@@ -83,6 +114,8 @@ void Guarantor::Raise()
     callstack.DumpCallStack(exception_desc_);
     throw std::runtime_error(exception_desc_.str());
 }
+
+#if defined(OS_WIN)
 
 void Guarantor::RaiseWithDump()
 {
@@ -101,15 +134,12 @@ void Guarantor::RaiseWithDump()
     throw std::runtime_error(exception_desc_.str());
 }
 
-void AlwaysCheckForEnsureInDebug(bool always_check)
-{
-    g_always_enable_check_in_debug = always_check;
-}
-
 void SetMiniDumpDirectory(const Path& dump_dir)
 {
     g_minidump_dir_path = dump_dir;
 }
+
+// -*- LastError implementation -*-
 
 LastError::LastError()
     : error_code_(GetLastError())
@@ -172,5 +202,7 @@ std::ostream& operator<<(std::ostream& os, const LastError& last_error)
 
     return os;
 }
+
+#endif  // OS_WIN
 
 }   // namespace kbase

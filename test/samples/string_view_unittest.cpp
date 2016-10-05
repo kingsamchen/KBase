@@ -4,6 +4,7 @@
 
 #include "gtest/gtest.h"
 
+#include "kbase/basic_macros.h"
 #include "kbase/string_view.h"
 
 TEST(StringViewTest, Ctor)
@@ -73,6 +74,10 @@ TEST(StringViewTest, Ctor)
         constexpr char bk = s2.back();
         constexpr auto sub = s2.substr(5);
         constexpr const char* ss = sub.data();
+
+        UNUSED_VAR(ft);
+        UNUSED_VAR(bk);
+        UNUSED_VAR(ss);
     }
 }
 
@@ -322,6 +327,11 @@ TEST(StringViewTest, Hash)
 {
     kbase::StringView v = "hello world";
     kbase::WStringView w = L"hello world";
-    EXPECT_EQ(std::hash<std::string>()(v.ToString()), std::hash<decltype(v)>()(v));
-    EXPECT_EQ(std::hash<std::wstring>()(w.ToString()), std::hash<decltype(w)>()(w));
+    kbase::StringView vx = "This is a test text";
+    kbase::WStringView wx = L"This is a test text";
+
+    EXPECT_EQ(std::hash<kbase::StringView>()(v), std::hash<kbase::StringView>()(v));
+    EXPECT_EQ(std::hash<kbase::WStringView>()(w), std::hash<kbase::WStringView>()(w));
+    EXPECT_NE(std::hash<kbase::StringView>()(v), std::hash<kbase::StringView>()(vx));
+    EXPECT_NE(std::hash<kbase::WStringView>()(w), std::hash<kbase::WStringView>()(wx));
 }

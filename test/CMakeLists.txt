@@ -14,7 +14,9 @@ link_directories(${CMAKE_BINARY_DIR}/../../)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/../../")
 set(SOURCES
     main.cpp
+    samples/error_exception_util_unittest.cpp
     samples/stack_walker_unittest.cpp
+    samples/string_view_unittest.cpp
     )
 
 add_executable(test ${SOURCES})
