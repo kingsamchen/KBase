@@ -39,7 +39,7 @@ constexpr bool NotReached()
 // Besides, we also need to make the CHECK-call cause no runtime penalty,
 // when in non-debug mode.
 #if defined(NDEBUG)
-#define ACTION_IS_ON(action) (kbase::EnsureAction::##action != kbase::EnsureAction::CHECK)
+#define ACTION_IS_ON(action) (kbase::EnsureAction::action != kbase::EnsureAction::CHECK)
 #else
 #define ACTION_IS_ON(action) true
 #endif
