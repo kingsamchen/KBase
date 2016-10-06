@@ -4,7 +4,12 @@
 
 #include "kbase/string_format.h"
 
+#include "kbase/basic_macros.h"
 #include "kbase/scope_guard.h"
+
+#if defined(OS_POSIX)
+#include <cstdarg>
+#endif
 
 namespace {
 
@@ -33,7 +38,9 @@ void AppendPrintfT(std::string& str, char* buf, size_t max_count_including_null,
     va_copy(args_copy, args);
     int real_size = vsnprintf(buf, max_count_including_null, fmt, args_copy);
     va_end(args_copy);
-    if (real_size < max_count_including_null) {
+
+    ENSURE(RAISE, real_size >= 0)(real_size).Require();
+    if (static_cast<size_t>(real_size) < max_count_including_null) {
         // vsnprintf() guarantees the resulting string will be terminated with a null-terminator.
         str.append(buf);
         return;

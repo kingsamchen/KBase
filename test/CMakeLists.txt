@@ -16,7 +16,11 @@ set(SOURCES
     main.cpp
     samples/error_exception_util_unittest.cpp
     samples/stack_walker_unittest.cpp
+    samples/string_encoding_conversions_unittest.cpp
+    samples/string_format_unittest.cpp
+    samples/string_util_unittest.cpp
     samples/string_view_unittest.cpp
+    samples/tokenizer_unittest.cpp
     )
 
 add_executable(test ${SOURCES})

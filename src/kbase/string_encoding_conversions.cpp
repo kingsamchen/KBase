@@ -14,13 +14,13 @@ namespace kbase {
 
 std::string WideToUTF8(WStringView wide_str)
 {
-    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t, 0x10ffff, std::little_endian>> converter;
     return converter.to_bytes(wide_str.begin(), wide_str.end());
 }
 
 std::wstring UTF8ToWide(StringView utf_str)
 {
-    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t, 0x10ffff, std::little_endian>> converter;
     return converter.from_bytes(utf_str.begin(), utf_str.end());
 }
 

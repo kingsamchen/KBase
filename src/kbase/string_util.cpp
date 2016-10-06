@@ -4,11 +4,7 @@
 
 #include "kbase/string_util.h"
 
-#include <Windows.h>
-
 #include <algorithm>
-#include <cassert>
-#include <cctype>
 
 #include "kbase/basic_types.h"
 #include "kbase/error_exception_util.h"
@@ -143,7 +139,7 @@ bool StartsWithT(BasicStringView<CharT> str, BasicStringView<CharT> token, CaseM
         }
             break;
         default:
-            ENSURE(CHECK, kbase::NotReached())(kbase::enum_cast(mode));
+            ENSURE(CHECK, kbase::NotReached())(kbase::enum_cast(mode)).Require();
     }
 
     return rv;
@@ -175,7 +171,7 @@ bool EndsWithT(BasicStringView<CharT> str, BasicStringView<CharT> token, CaseMod
         }
             break;
         default:
-            ENSURE(CHECK, kbase::NotReached())(kbase::enum_cast(mode));
+            ENSURE(CHECK, kbase::NotReached())(kbase::enum_cast(mode)).Require();
     }
 
     return rv;

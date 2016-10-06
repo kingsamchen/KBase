@@ -6,8 +6,9 @@
 
 #if !defined(NDEBUG)
 #define NDEBUG
-#include "kbase/string_format.h"
 #endif
+
+#include "kbase/string_format.h"
 
 namespace {
 
@@ -25,7 +26,7 @@ bool ComparePlaceholder(const Placeholder<CharT>& p, unsigned i, unsigned pos, c
 TEST(StringFormatTest, StringPrintfSeries)
 {
     EXPECT_EQ(std::string("hello, 0xCC, test 123"), StringPrintf("hello, %s, test %d", "0xCC", 123));
-    EXPECT_EQ(std::wstring(L"hello, 0xCC, test 123"), StringPrintf(L"hello, %s, test %d", L"0xCC", 123));
+    EXPECT_EQ(std::wstring(L"hello, 0xCC, test 123"), StringPrintf(L"hello, %ls, test %d", L"0xCC", 123));
 }
 
 TEST(StringFormatTest, AnalyzeFormatString)
