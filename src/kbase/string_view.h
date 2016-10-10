@@ -43,7 +43,7 @@ inline size_t HashByteSequence(const unsigned char* data, size_t length) noexcep
         val *= kFNVPrime;
     }
 
-    return (val);
+    return val;
 }
 
 // Tries to compute the length of a string constant at compile time.
@@ -77,8 +77,6 @@ public:
         : data_(nullptr), length_(0)
     {}
 
-    constexpr BasicStringView(const BasicStringView&) noexcept = default;
-
     // Supports implicit conversion.
     BasicStringView(const std::basic_string<CharT>& str) noexcept
         : data_(str.data()), length_(str.length())
@@ -95,7 +93,7 @@ public:
 
     ~BasicStringView() = default;
 
-    BasicStringView& operator=(const BasicStringView&) noexcept = default;
+    DEFAULT_COPY(BasicStringView);
 
     constexpr const_iterator begin() const noexcept
     {

@@ -25,6 +25,8 @@
     classname(classname&&) = delete;                    \
     classname& operator=(classname&&) = delete
 
+// Default function is implicitly constexpr and noexcept, whenever it can be.
+
 #define DEFAULT_COPY(classname)                         \
     classname(const classname&) = default;              \
     classname& operator=(const classname&) = default

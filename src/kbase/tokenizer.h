@@ -9,6 +9,7 @@
 #ifndef KBASE_TOKENIZER_H_
 #define KBASE_TOKENIZER_H_
 
+#include "kbase/basic_macros.h"
 #include "kbase/error_exception_util.h"
 #include "kbase/string_view.h"
 
@@ -33,15 +34,11 @@ public:
         SeekToken();
     }
 
-    TokenIterator(const TokenIterator&) noexcept = default;
-
-    TokenIterator(TokenIterator&&) noexcept = default;
-
-    TokenIterator& operator=(const TokenIterator&) noexcept = default;
-
-    TokenIterator& operator=(TokenIterator&&) noexcept = default;
-
     ~TokenIterator() = default;
+
+    DEFAULT_COPY(TokenIterator);
+
+    DEFAULT_MOVE(TokenIterator);
 
     TokenIterator& operator++()
     {
@@ -124,15 +121,11 @@ public:
         : data_(str), delim_(delim)
     {}
 
-    BasicTokenizer(const BasicTokenizer&) noexcept = default;
-
-    BasicTokenizer(BasicTokenizer&&) noexcept = default;
-
     ~BasicTokenizer() = default;
 
-    BasicTokenizer& operator=(const BasicTokenizer&) noexcept = default;
+    DEFAULT_COPY(BasicTokenizer);
 
-    BasicTokenizer& operator=(BasicTokenizer&&) noexcept = default;
+    DEFAULT_MOVE(BasicTokenizer);
 
     iterator begin() const noexcept
     {
