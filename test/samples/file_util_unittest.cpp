@@ -15,8 +15,8 @@ using namespace kbase;
 
 namespace {
 
-const Path dir = PathService::Get(DIR_CURRENT).AppendTo(L"abc_test");
-const Path file_path = dir.AppendTo(L"abc.txt");
+const Path dir = PathService::Get(DIR_CURRENT).AppendWith(L"abc_test");
+const Path file_path = dir.AppendWith(L"abc.txt");
 
 void CreateDirectoryWithFile()
 {
@@ -103,7 +103,7 @@ TEST(FileUtilTest, DuplicateFile)
     CreateDirectoryWithFile();
     ASSERT_TRUE(PathExists(dir));
     ASSERT_TRUE(PathExists(file_path));
-    Path new_file = dir.filename().AppendTo(L"new_file.lala");
+    Path new_file = dir.filename().AppendWith(L"new_file.lala");
     DuplicateFile(file_path, new_file);
     EXPECT_TRUE(PathExists(new_file));
     RemoveFile(new_file, false);
@@ -116,7 +116,7 @@ TEST(FileUtilTest, DuplicateDirectory)
     ASSERT_TRUE(PathExists(dir));
     ASSERT_TRUE(PathExists(file_path));
     Path new_dir(L"C:\\moved_dir");
-    Path new_file = new_dir.AppendTo(file_path.filename());
+    Path new_file = new_dir.AppendWith(file_path.filename());
     DuplicateDirectory(dir, new_dir, true);
     EXPECT_TRUE(PathExists(new_dir));
     EXPECT_TRUE(PathExists(new_file));
@@ -129,7 +129,7 @@ TEST(FileUtilTest, MakeFileMove)
     ASSERT_TRUE(PathExists(dir));
     ASSERT_TRUE(PathExists(file_path));
     Path new_dir(L"C:\\moved_dir");
-    Path new_file = new_dir.AppendTo(file_path.filename());
+    Path new_file = new_dir.AppendWith(file_path.filename());
     MakeFileMove(dir, new_dir);
     EXPECT_FALSE(PathExists(dir));
     EXPECT_FALSE(PathExists(file_path));

@@ -125,7 +125,7 @@ void Guarantor::RaiseWithDump()
 
     // If succeeded in creating the minidump, throws an exception with path attached;
     // Otherwise, throws a normal exception instead.
-    auto dump_file_path = g_minidump_dir_path.AppendTo(GenerateMiniDumpFileName());
+    auto dump_file_path = g_minidump_dir_path.AppendWith(GenerateMiniDumpFileName());
     bool created = CreateMiniDump(dump_file_path);
     if (created) {
         throw ExceptionWithMiniDump(dump_file_path, exception_desc_.str());

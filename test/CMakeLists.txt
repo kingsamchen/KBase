@@ -15,6 +15,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/../../")
 set(SOURCES
     main.cpp
     samples/error_exception_util_unittest.cpp
+    samples/path_unittest.cpp
     samples/stack_walker_unittest.cpp
     samples/string_encoding_conversions_unittest.cpp
     samples/string_format_unittest.cpp

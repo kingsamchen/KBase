@@ -4,8 +4,6 @@
 
 #include <algorithm>
 #include <functional>
-#include <tuple>
-#include <xutility>
 
 #include "gtest/gtest.h"
 
@@ -16,225 +14,256 @@ using std::placeholders::_1;
 using kbase::PathString;
 using kbase::Path;
 
-namespace {
-
-typedef std::pair<Path, Path> PathTestPair;
-
-bool ContainsNullterminator(const PathString& path_str)
-{
-    return std::any_of(path_str.begin(), path_str.end(),
-                       std::bind(std::equal_to<wchar_t>(), L'\0', _1));
-}
-
-}   // namespace
-
-// Null-terminator character indicates the end of a path.
-// |Path| internally cuts them off.
 TEST(PathTest, Ctor)
 {
-    PathString test_path = L"C:\\abc\\def";
-    PathString test_path2 = test_path + PathString(2, L'\0');
-    ASSERT_FALSE(ContainsNullterminator(test_path));
-    ASSERT_TRUE(ContainsNullterminator(test_path2));
+    PathString test_path = PATH_LITERAL("C:\\abc\\def");
+    Path path(test_path);
+    Path another_path(PATH_LITERAL("C:\\test"));
 
-    Path path(test_path2);
-    EXPECT_FALSE(ContainsNullterminator(path.value()));
-}
-
-TEST(PathTest, Comparison)
-{
-    Path path1(L"c:\\abc\\def\\ghi.ado"), path2(L"C:\\ABC\\DEF\\GHI.ado");
-    Path path3(L"C:\\test\\unk");
-
-    EXPECT_EQ(path1, path2);
-    EXPECT_NE(path1, path3);
-    EXPECT_LT(path1, path3);
+    UNUSED_VAR(path);
+    UNUSED_VAR(another_path);
 }
 
 TEST(PathTest, PathSeparator)
 {
-    // IsSeparator
-    EXPECT_TRUE(Path::IsSeparator(L'\\'));
-    EXPECT_TRUE(Path::IsSeparator(L'/'));
-    EXPECT_FALSE(Path::IsSeparator(L'|'));
+    // IsSeparator()
+    {
+        EXPECT_TRUE(Path::IsSeparator(PATH_LITERAL('\\')));
+        EXPECT_TRUE(Path::IsSeparator(PATH_LITERAL('/')));
+        EXPECT_FALSE(Path::IsSeparator(PATH_LITERAL('|')));
+    }
 
+    // EndsWithSeperator()
     {
         EXPECT_FALSE(Path().EndsWithSeparator());
-        Path path(L"C:\\test\\path");
-        EXPECT_FALSE(path.EndsWithSeparator());
-        EXPECT_FALSE(path.StripTrailingSeparators().EndsWithSeparator());
-        Path p(L"C:\\test\\path");
-        EXPECT_EQ(p, p.StripTrailingSeparators());
-        EXPECT_EQ(Path(L"C:\\"), Path(L"C:\\").StripTrailingSeparators());
-        EXPECT_EQ(Path(L"C:/"), Path(L"C:/").StripTrailingSeparators());
-        EXPECT_EQ(Path(L"/"), Path(L"/").StripTrailingSeparators());
+        EXPECT_FALSE(Path(PATH_LITERAL("C:\\abc")).EndsWithSeparator());
+        EXPECT_FALSE(Path(PATH_LITERAL("/home")).EndsWithSeparator());
+        EXPECT_TRUE(Path(PATH_LITERAL("C:\\")).EndsWithSeparator());
+        EXPECT_TRUE(Path(PATH_LITERAL("C:\\abc\\")).EndsWithSeparator());
+        EXPECT_TRUE(Path(PATH_LITERAL("/usr/")).EndsWithSeparator());
     }
 
+    // StripTrailingSeparators()
     {
-        const Path crit(L"C:/test/path");
-        Path path(L"C:\\test\\path");
-        EXPECT_EQ(crit, path.MakePathSeparatorTo(L'/'));
-        EXPECT_NE(crit, path.MakePreferredSeparator());
+        EXPECT_EQ(Path(PATH_LITERAL("C:\\test\\demo")).value(),
+                  Path(PATH_LITERAL("C:\\test\\demo\\")).StripTrailingSeparators().value());
+        EXPECT_EQ(Path(PATH_LITERAL("C:\\test\\demo")).value(),
+                  Path(PATH_LITERAL("C:\\test\\demo")).StripTrailingSeparators().value());
+
+        EXPECT_EQ(Path(PATH_LITERAL("/home/kc")).value(),
+                  Path(PATH_LITERAL("/home/kc/")).StripTrailingSeparators().value());
+        EXPECT_EQ(Path(PATH_LITERAL("/home/kc")).value(),
+                  Path(PATH_LITERAL("/home/kc")).StripTrailingSeparators().value());
+
+        EXPECT_EQ(Path(PATH_LITERAL("C:\\")).value(),
+                  Path(PATH_LITERAL("C:\\")).StripTrailingSeparators().value());
+        EXPECT_EQ(Path(PATH_LITERAL("C:/")).value(),
+                  Path(PATH_LITERAL("C:/")).StripTrailingSeparators().value());
+        EXPECT_EQ(Path(PATH_LITERAL("C:")).value(),
+                  Path(PATH_LITERAL("C:")).StripTrailingSeparators().value());
+        EXPECT_EQ(Path(PATH_LITERAL("C:abc")).value(),
+                  Path(PATH_LITERAL("C:abc")).StripTrailingSeparators().value());
+
+        EXPECT_EQ(Path(PATH_LITERAL("/")).value(),
+                  Path(PATH_LITERAL("/")).StripTrailingSeparators().value());
     }
 
+    // MakePreferredSeparator() and MakePathSeparatorTo()
     {
-        const Path crit(L"test.txt");
-        Path path(L"test.txt");
-        EXPECT_EQ(crit, path.MakePreferredSeparator());
+#if defined(OS_WIN)
+        EXPECT_EQ(Path(PATH_LITERAL("C:\\test\\path")).value(),
+                  Path(PATH_LITERAL("C:/test/path")).MakePreferredSeparator().value());
+        EXPECT_EQ(Path(PATH_LITERAL("C:\\test\\path")).value(),
+                  Path(PATH_LITERAL("C:\\test\\path")).MakePreferredSeparator().value());
+#else
+        EXPECT_EQ(Path(PATH_LITERAL("C:/test/path")).value(),
+                  Path(PATH_LITERAL("C:/test/path")).MakePreferredSeparator().value());
+        EXPECT_EQ(Path(PATH_LITERAL("C:/test/path")).value(),
+                  Path(PATH_LITERAL("C:\\test\\path")).MakePreferredSeparator().value());
+#endif
+        EXPECT_EQ(Path(PATH_LITERAL("C:/test/path")).value(),
+                  Path(PATH_LITERAL("C:\\test\\path")).MakePathSeparatorTo(PATH_LITERAL('/')).value());
+        EXPECT_EQ(Path(PATH_LITERAL("C:test.txt")).value(),
+                  Path(PATH_LITERAL("C:test.txt")).MakePreferredSeparator().value());
     }
 }
 
 TEST(PathTest, ParentPath)
 {
-    const Path kRootDir(L"..");
+    // Top-pathes
+    EXPECT_EQ(Path().value(), Path(PATH_LITERAL("")).parent_path().value());
+    EXPECT_EQ(Path().value(), Path(PATH_LITERAL(".")).parent_path().value());
+    EXPECT_EQ(Path().value(), Path(PATH_LITERAL("..")).parent_path().value());
+    EXPECT_EQ(Path().value(), Path(PATH_LITERAL("abc")).parent_path().value());
+    EXPECT_EQ(Path().value(), Path(PATH_LITERAL("C:\\")).parent_path().value());
+    EXPECT_EQ(Path().value(), Path(PATH_LITERAL("C:/")).parent_path().value());
+    EXPECT_EQ(Path().value(), Path(PATH_LITERAL("C:")).parent_path().value());
+    EXPECT_EQ(Path().value(), Path(PATH_LITERAL("/")).parent_path().value());
 
-    Path cur_paths[] { Path(L""), Path(L"."), Path(L".."), Path(L"abc") };
-    for (const auto& path : cur_paths) {
-        EXPECT_EQ(Path(), path.parent_path());
-    }
+    EXPECT_EQ(Path(PATH_LITERAL("..")).value(), Path(PATH_LITERAL("../abc")).parent_path().value());
+    EXPECT_EQ(Path(PATH_LITERAL(".")).value(), Path(PATH_LITERAL(".\\abc")).parent_path().value());
+    EXPECT_EQ(Path(PATH_LITERAL(".")).value(), Path(PATH_LITERAL("./abc")).parent_path().value());
 
-    Path root_paths[] { Path(L"../abc") };
-    for (const auto& path : root_paths) {
-        EXPECT_EQ(kRootDir, path.parent_path());
-    }
-
-    Path path(L"C:\\test\\path\\data.txt");
-    EXPECT_EQ(Path(L"C:\\test\\path"), path.parent_path());
-    path = Path(L"/abc");
-    EXPECT_EQ(Path(L"/"), path.parent_path());
-
-    Path relative_root(L"C:tmp.txt");
-    EXPECT_EQ(Path(L"C:"), relative_root.parent_path());
-    EXPECT_EQ(Path(), relative_root.parent_path().parent_path());
-
-    Path preferred_root(L"C:\\tmp.txt");
-    EXPECT_EQ(Path(L"C:\\"), preferred_root.parent_path());
-    EXPECT_EQ(Path(), preferred_root.parent_path().parent_path());
-
-    Path nix_root(L"C:/tmp.txt");
-    EXPECT_EQ(Path(L"C:/"), nix_root.parent_path());
-    EXPECT_EQ(Path(), nix_root.parent_path().parent_path());
-
-    Path unc_root(LR"(\\server\)");
-    EXPECT_EQ(Path(LR"(\\)"), unc_root.parent_path());
-    EXPECT_EQ(Path(), unc_root.parent_path().parent_path());
+    EXPECT_EQ(Path(PATH_LITERAL("C:\\test\\path")).value(),
+              Path(PATH_LITERAL("C:\\test\\path\\data.txt")).parent_path().value());
+    EXPECT_EQ(Path(PATH_LITERAL("/")).value(),
+              Path(PATH_LITERAL("/home")).parent_path().value());
+    EXPECT_EQ(Path(PATH_LITERAL("C:\\")).value(),
+              Path(PATH_LITERAL("C:\\tmp.txt")).parent_path().value());
+    EXPECT_EQ(Path(PATH_LITERAL("C:")).value(),
+              Path(PATH_LITERAL("C:tmp.txt")).parent_path().value());
+    EXPECT_EQ(Path(PATH_LITERAL("C:/")).value(),
+              Path(PATH_LITERAL("C:/tmp.txt")).parent_path().value());
+    EXPECT_EQ(Path(PATH_LITERAL("\\\\")).value(),
+              Path(PATH_LITERAL("\\\\server\\")).parent_path().value());
 }
 
 TEST(PathTest, FileName)
 {
-    PathTestPair base_dir_test[] {
-        { Path(), Path() },
-        { Path(L"."), Path(L".") },
-        { Path(L".."), Path(L"..") },
-        { Path(L"abc"), Path(L"abc") },
-        { Path(L"abc"), Path(L"./abc") },
-        { Path(L"abc"), Path(L"C:\\abc") },
-        { Path(L"foo"), Path(L"C:\\foo\\") },
-        { Path(L"C:\\"), Path(L"C:\\") },
-        { Path(L"C:"), Path(L"C:") },
-        { Path(L"tmp.txt"), Path(L"C:tmp.txt") },
-        { Path(L"/"), Path(L"/") }
-    };
-
-    for (const auto& p : base_dir_test) {
-        EXPECT_EQ(p.first, p.second.filename());
-    }
+    EXPECT_EQ(Path().value(), Path().filename().value());
+    EXPECT_EQ(Path(PATH_LITERAL(".")).value(), Path(PATH_LITERAL(".")).filename().value());
+    EXPECT_EQ(Path(PATH_LITERAL("..")).value(), Path(PATH_LITERAL("..")).filename().value());
+    EXPECT_EQ(Path(PATH_LITERAL("abc")).value(), Path(PATH_LITERAL("abc")).filename().value());
+    EXPECT_EQ(Path(PATH_LITERAL("abc")).value(), Path(PATH_LITERAL("./abc")).filename().value());
+    EXPECT_EQ(Path(PATH_LITERAL("abc")).value(), Path(PATH_LITERAL("C:\\abc")).filename().value());
+    EXPECT_EQ(Path(PATH_LITERAL("foo")).value(), Path(PATH_LITERAL("C:\\foo\\")).filename().value());
+    EXPECT_EQ(Path(PATH_LITERAL("C:\\")).value(), Path(PATH_LITERAL("C:\\")).filename().value());
+    EXPECT_EQ(Path(PATH_LITERAL("C:")).value(), Path(PATH_LITERAL("C:")).filename().value());
+    EXPECT_EQ(Path(PATH_LITERAL("tmp.txt")).value(), Path(PATH_LITERAL("C:tmp.txt")).filename().value());
+    EXPECT_EQ(Path(PATH_LITERAL("/")).value(), Path(PATH_LITERAL("/")).filename().value());
 }
 
 TEST(PathTest, PathComponents)
 {
-    typedef std::pair<Path, std::vector<std::wstring>> PathComponentPair;
+    typedef std::pair<Path, std::vector<Path::string_type>> PathComponentPair;
     PathComponentPair componnet_test[] {
-        { Path(L"C:tmp.txt"), { L"C:", L"tmp.txt" } },
-        { Path(L"C:\\tmp.txt"), { L"C:", L"\\", L"tmp.txt" } },
-        { Path(L"C:\\foo\\bar"), { L"C:", L"\\", L"foo", L"bar"} },
-        { Path(L"..\\abc"), { L"..", L"abc" } }
+        { Path(PATH_LITERAL("C:tmp.txt")), { PATH_LITERAL("C:"), PATH_LITERAL("tmp.txt") } },
+        { Path(PATH_LITERAL("C:\\tmp.txt")), { PATH_LITERAL("C:"), PATH_LITERAL("\\"), PATH_LITERAL("tmp.txt") } },
+        { Path(PATH_LITERAL("C:\\foo\\bar")), { PATH_LITERAL("C:"), PATH_LITERAL("\\"), PATH_LITERAL("foo"), PATH_LITERAL("bar") } },
+        { Path(PATH_LITERAL("..\\abc")), { PATH_LITERAL(".."), PATH_LITERAL("abc") } },
+        { Path(PATH_LITERAL("/home/kc/demo.txt")), { PATH_LITERAL("/"), PATH_LITERAL("home"), PATH_LITERAL("kc"), PATH_LITERAL("demo.txt") } }
     };
 
-    std::vector<std::wstring> comp;
+    std::vector<Path::string_type> comp;
     for (const auto& p : componnet_test) {
         p.first.GetComponents(comp);
         EXPECT_EQ(p.second, comp);
     }
 }
 
-TEST(PathTest, PathProperty)
+TEST(PathTest, IsAbsolutePath)
 {
-    typedef std::pair<Path, bool> PathPropertyPair;
-
-    // IsAbsolte
-    PathPropertyPair abs_path[] {
-        { Path(L"."), false },
-        { Path(L"abc"), false },
-        { Path(L"./abc"), false },
-        { Path(L".."), false },
-        { Path(L"../abc"), false },
-        { Path(L"C:abc"), false },
-        { Path(L"C://abc"), true }
-    };
-
-    for (const auto& p : abs_path) {
-        EXPECT_EQ(p.second, p.first.IsAbsolute());
-    }
-
-    // ReferenceParent
-    PathPropertyPair refer_parent_path[] {
-        { Path(L"./abc"), false },
-        { Path(L".."), true },
-        { Path(L"../abc"), true }
-    };
-
-    for (const auto& p : refer_parent_path) {
-        std::cout << p.first.AsASCII() << std::endl;
-        EXPECT_EQ(p.second, p.first.ReferenceParent());
-    }
-
-    typedef std::tuple<Path, Path, bool> PathPropertyTuple;
-    PathPropertyTuple paths[] {
-        std::make_tuple(Path(L"./abc"), Path(L"./abc/def"), true),
-        std::make_tuple(Path(L"C:\\"), Path(L"C:\\abc"), true),
-        std::make_tuple(Path(L"C:\\test\\"), Path(L"C:\\abc\\"), false)
-    };
-
-    for (const auto& t : paths) {
-        EXPECT_EQ(std::get<0>(t).IsParent(std::get<1>(t)), std::get<2>(t));
-    }
+    EXPECT_EQ(false, Path(PATH_LITERAL(".")).IsAbsolute());
+    EXPECT_EQ(false, Path(PATH_LITERAL("abc")).IsAbsolute());
+    EXPECT_EQ(false, Path(PATH_LITERAL("./abc")).IsAbsolute());
+    EXPECT_EQ(false, Path(PATH_LITERAL("..")).IsAbsolute());
+    EXPECT_EQ(false, Path(PATH_LITERAL("../abc")).IsAbsolute());
+    EXPECT_EQ(false, Path(PATH_LITERAL("C:abc")).IsAbsolute());
+    EXPECT_EQ(true, Path(PATH_LITERAL("C://abc")).IsAbsolute());
 }
 
 TEST(PathTest, PathAppend)
 {
-    typedef std::tuple<Path, Path, std::wstring> PathAppendTuple;
-    PathAppendTuple paths[] {
-        std::make_tuple(Path(L"C:abc"), Path(L"C:"), L"abc"),
-        std::make_tuple(Path(L"C:\\abc"), Path(L"C:\\"), L"abc"),
-        std::make_tuple(Path(L"C:\\abc\\def"), Path(L"C:\\abc"), L"def")
-    };
+#if defined(OS_WIN)
+    EXPECT_EQ(Path(PATH_LITERAL("C:abc")).value(), Path(PATH_LITERAL("C:")).AppendWithASCII("abc").value());
+    EXPECT_EQ(Path(PATH_LITERAL("C:\\abc")).value(), Path(PATH_LITERAL("C:\\")).AppendWithASCII("abc").value());
+    EXPECT_EQ(Path(PATH_LITERAL("C:\\abc\\def")).value(), Path(PATH_LITERAL("C:\\abc")).AppendWithASCII("def").value());
+    EXPECT_EQ(Path(PATH_LITERAL("C:\\abc\\def")).value(), Path(PATH_LITERAL("C:\\abc\\")).AppendWithASCII("def").value());
+    EXPECT_EQ(Path(PATH_LITERAL("C:\\abc\\def")).value(), Path(PATH_LITERAL("C:\\")).AppendWithASCII("abc\\def").value());
+#else
+    EXPECT_EQ(Path(PATH_LITERAL("/home")).value(), Path(PATH_LITERAL("/")).AppendWith("home").value());
+    EXPECT_EQ(Path(PATH_LITERAL("/home/kc/projects")).value(), Path(PATH_LITERAL("/home")).AppendWith("kc/projects").value());
+    EXPECT_EQ(Path(PATH_LITERAL("/home/kc/projects")).value(), Path(PATH_LITERAL("/home/")).AppendWith("kc/projects").value());
+#endif
+}
 
-    for (const auto& t : paths) {
-        EXPECT_EQ(std::get<0>(t), std::get<1>(t).AppendTo(std::get<2>(t)));
-    }
-
-    Path current(LR"(C:\user\kingsley chen\)");
-    Path child(LR"(C:\user\kingsley chen\app data\test)");
-    Path path(LR"(C:\user\kingsley chen\documents\)");
+TEST(PathTest, RelativePathAppend)
+{
+#if defined(OS_WIN)
+    Path current(PATH_LITERAL("C:\\user\\kingsley chen"));
+    Path child(PATH_LITERAL("C:\\user\\kingsley chen\\app data\\test"));
+    Path path(PATH_LITERAL("C:\\user\\kingsley chen\\documents"));
     EXPECT_TRUE(current.AppendRelativePath(child, &path));
-    EXPECT_EQ(path, Path(L"C:\\user\\kingsley chen\\documents\\app data\\test"));
+    EXPECT_EQ(path.value(), Path(PATH_LITERAL("C:\\user\\kingsley chen\\documents\\app data\\test")).value());
+#else
+    Path current(PATH_LITERAL("/home/kingsamchen"));
+    Path child(PATH_LITERAL("/home/kingsamchen/app-data/test"));
+    Path path(PATH_LITERAL("/home/kingsamchen/documents"));
+    EXPECT_TRUE(current.AppendRelativePath(child, &path));
+    EXPECT_EQ(path.value(), Path(PATH_LITERAL("/home/kingsamchen/documents/app-data/test")).value());
+#endif
+}
+
+TEST(PathTest, IsParent)
+{
+    EXPECT_TRUE(Path(PATH_LITERAL("./abc")).IsParent(Path(PATH_LITERAL("./abc/def"))));
+    EXPECT_TRUE(Path(PATH_LITERAL("C:")).IsParent(Path(PATH_LITERAL("C:abc.txt"))));
+    EXPECT_TRUE(Path(PATH_LITERAL("C:\\")).IsParent(Path(PATH_LITERAL("C:\\abc"))));
+    EXPECT_FALSE(Path(PATH_LITERAL("C:\\test\\")).IsParent(Path(PATH_LITERAL("C:\\abc\\"))));
+
+    EXPECT_TRUE(Path(PATH_LITERAL("/")).IsParent(Path(PATH_LITERAL("/home/kc"))));
+    EXPECT_TRUE(Path(PATH_LITERAL("/usr/")).IsParent(Path(PATH_LITERAL("/usr/bin"))));
+}
+
+TEST(PathTest, ReferenceParent)
+{
+    EXPECT_FALSE(Path(PATH_LITERAL("./abc")).ReferenceParent());
+    EXPECT_FALSE(Path(PATH_LITERAL("./")).ReferenceParent());
+    EXPECT_TRUE(Path(PATH_LITERAL("..")).ReferenceParent());
+    EXPECT_TRUE(Path(PATH_LITERAL("../abc")).ReferenceParent());
 }
 
 TEST(PathTest, PathExtension)
 {
-    Path path(L"C:\\abc\\def\\xxx.dat");
-    EXPECT_EQ(path.extension(), std::wstring(L".dat"));
-    path.RemoveExtension();
-    EXPECT_EQ(path.extension(), std::wstring());
-    EXPECT_EQ(path, Path(L"C:\\abc\\def\\xxx"));
-    path.AddExtension(L".txt");
-    EXPECT_EQ(path.extension(), std::wstring(L".txt"));
-    path.ReplaceExtension(L".avi");
-    EXPECT_EQ(path.extension(), std::wstring(L".avi"));
-    EXPECT_TRUE(path.MatchExtension(L".avi"));
-    path.AddExtension(L".td");
-    EXPECT_EQ(path.extension(), std::wstring(L".td"));
-    path.ReplaceExtension(L"");
-    EXPECT_EQ(path.extension(), std::wstring(L".avi"));
+    using string_type = Path::string_type;
+
+    EXPECT_EQ(string_type(PATH_LITERAL(".dat")), Path(PATH_LITERAL("C:\\abc\\def\\xxx.dat")).extension());
+    EXPECT_EQ(string_type(PATH_LITERAL(".log")), Path(PATH_LITERAL("C:\\abc\\def\\xxx.dat.log")).extension());
+    EXPECT_EQ(string_type(PATH_LITERAL("")), Path(PATH_LITERAL("C:\\abc\\def\\xxx")).extension());
+
+    EXPECT_EQ(Path(PATH_LITERAL("C:\\abc\\def\\xxx")).value(),
+              Path(PATH_LITERAL("C:\\abc\\def\\xxx.dat")).RemoveExtension().value());
+    EXPECT_EQ(Path(PATH_LITERAL("C:\\abc\\def\\xxx.dat")).value(),
+              Path(PATH_LITERAL("C:\\abc\\def\\xxx.dat.log")).RemoveExtension().value());
+    EXPECT_EQ(Path(PATH_LITERAL("C:\\abc\\def\\xxx")).value(),
+              Path(PATH_LITERAL("C:\\abc\\def\\xxx")).RemoveExtension().value());
+
+    EXPECT_EQ(Path(PATH_LITERAL("C:\\abc\\def\\xxx.dat")).value(),
+              Path(PATH_LITERAL("C:\\abc\\def\\xxx")).AddExtension(PATH_LITERAL("dat")).value());
+    EXPECT_EQ(Path(PATH_LITERAL("C:\\abc\\def\\xxx.dat")).value(),
+              Path(PATH_LITERAL("C:\\abc\\def\\xxx")).AddExtension(PATH_LITERAL(".dat")).value());
+    EXPECT_EQ(Path(PATH_LITERAL("C:\\abc\\def\\xxx.dat.log")).value(),
+              Path(PATH_LITERAL("C:\\abc\\def\\xxx.dat")).AddExtension(PATH_LITERAL(".log")).value());
+    EXPECT_EQ(Path(PATH_LITERAL("C:\\abc\\def\\xxx.dat.log")).value(),
+              Path(PATH_LITERAL("C:\\abc\\def\\xxx")).AddExtension(PATH_LITERAL(".dat.log")).value());
+
+    EXPECT_EQ(Path(PATH_LITERAL("C:\\abc\\def\\xxx.log")).value(),
+              Path(PATH_LITERAL("C:\\abc\\def\\xxx.dat")).ReplaceExtension(PATH_LITERAL(".log")).value());
+    EXPECT_EQ(Path(PATH_LITERAL("C:\\abc\\def\\xxx.log")).value(),
+              Path(PATH_LITERAL("C:\\abc\\def\\xxx.dat")).ReplaceExtension(PATH_LITERAL("log")).value());
+    EXPECT_EQ(Path(PATH_LITERAL("C:\\abc\\def\\xxx")).value(),
+              Path(PATH_LITERAL("C:\\abc\\def\\xxx.dat")).ReplaceExtension(PATH_LITERAL(".")).value());
+    EXPECT_EQ(Path(PATH_LITERAL("C:\\abc\\def\\xxx")).value(),
+              Path(PATH_LITERAL("C:\\abc\\def\\xxx.dat")).ReplaceExtension(PATH_LITERAL("")).value());
+    EXPECT_EQ(Path(PATH_LITERAL("C:\\abc\\def\\xxx.dat")).value(),
+              Path(PATH_LITERAL("C:\\abc\\def\\xxx")).ReplaceExtension(PATH_LITERAL(".dat")).value());
+    EXPECT_EQ(Path(PATH_LITERAL("C:\\abc\\def\\xxx.dat")).value(),
+              Path(PATH_LITERAL("C:\\abc\\def\\xxx")).ReplaceExtension(PATH_LITERAL("dat")).value());
+}
+
+TEST(PathTest, Comparison)
+{
+    EXPECT_TRUE(Path(PATH_LITERAL("C:\\abc\\def\\test.txt")) == Path(PATH_LITERAL("C:\\abc\\def\\test.txt")));
+    EXPECT_TRUE(Path(PATH_LITERAL("C:\\abc\\def\\test.txt")) != Path(PATH_LITERAL("C:\\abc\\def\\")));
+    EXPECT_TRUE(Path(PATH_LITERAL("/home/kc")) == Path(PATH_LITERAL("/home/kc")));
+    EXPECT_TRUE(Path(PATH_LITERAL("/home/kc")) != Path(PATH_LITERAL("/home/test")));
+    EXPECT_FALSE(Path(PATH_LITERAL("/home/kc")) < Path(PATH_LITERAL("/home/kc")));
+    EXPECT_TRUE(Path(PATH_LITERAL("/home/kc")) < Path(PATH_LITERAL("/home/zen")));
+
+    // case-sensitivity
+#if defined(OS_WIN)
+    EXPECT_TRUE(Path(PATH_LITERAL("C:\\abc\\def\\test.txt")) == Path(PATH_LITERAL("c:\\ABC\\def\\TEST.TXT")));
+#else
+    EXPECT_FALSE(Path(PATH_LITERAL("/home/kc")) == Path(PATH_LITERAL("/HOME/kc")));
+#endif
 }
