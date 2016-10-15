@@ -7,7 +7,6 @@
 #include <mutex>
 #include <sstream>
 
-#include <Windows.h>
 #pragma warning(push)
 #pragma warning(disable: 4091)
 #include <DbgHelp.h>

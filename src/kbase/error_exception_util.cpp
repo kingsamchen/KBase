@@ -10,10 +10,6 @@
 #include "kbase/stack_walker.h"
 
 #if defined(OS_WIN)
-#include <Windows.h>
-#endif
-
-#if defined(OS_WIN)
 #include "kbase/minidump.h"
 #endif
 
