@@ -19,6 +19,7 @@ namespace kbase {
 
 // We can control the execution time of cleanup callbacks via `AtExitManager`, especially in
 // a DLL on Windows.
+// Only one instance is allowed in a module.
 
 class AtExitManager {
 public:

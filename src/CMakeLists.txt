@@ -7,6 +7,7 @@ include_directories(.)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY  "${CMAKE_BINARY_DIR}/../../")
 
 set(SOURCES
+    kbase/at_exit_manager.cpp
     kbase/error_exception_util.cpp
     kbase/path.cpp
     kbase/stack_walker_posix.cpp
