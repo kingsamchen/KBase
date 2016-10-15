@@ -200,5 +200,8 @@
     <ClInclude Include="kbase\string_encoding_conversions.h">
       <Filter>kbase</Filter>
     </ClInclude>
+    <ClInclude Include="kbase\secure_c_runtime.h">
+      <Filter>kbase</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
