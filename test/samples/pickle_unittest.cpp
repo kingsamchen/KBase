@@ -11,6 +11,7 @@
 #include "gtest/gtest.h"
 
 #include "kbase/pickle.h"
+#include "kbase/secure_c_runtime.h"
 
 using kbase::Pickle;
 using kbase::PickleReader;
@@ -28,8 +29,8 @@ auto data_list = std::make_tuple(true,
                                  false,
                                  65535,
                                  0xDEADBEEF,
-                                 1LL,
-                                 0xFFFFFFFFFFFFFFFFULL,
+                                 INT64_C(1),
+                                 UINT64_C(0xFFFFFFFFFFFFFFFF),
                                  3.14F,
                                  3.1415926,
                                  std::string("hello"),
@@ -97,7 +98,7 @@ TEST(PickleTest, Construction)
     // from serialized buffer.
     std::vector<char> buf;
     buf.resize(pk.size());
-    memcpy_s(buf.data(), buf.size(), pk.data(), pk.size());
+    kbase::SecureMemcpy(buf.data(), buf.size(), pk.data(), pk.size());
     Pickle copy_pk(buf.data(), buf.size());
     EXPECT_TRUE(EqualsPickle(pk, copy_pk));
 
@@ -161,7 +162,11 @@ TEST(PickleTest, FundamentalWrite)
     EXPECT_EQ(0x7F, *int_probe);
 
     pickle.Write(kChaosData, kChaosDataSize);
+#if defined(OS_WIN)
     EXPECT_EQ(18, pickle.payload_size());
+#else
+    EXPECT_EQ(28, pickle.payload_size());   // wchar_t on posix-platform is in 4-byte
+#endif
     const auto* char_probe = reinterpret_cast<const char*>(pickle.payload()) + 8;
     EXPECT_EQ('1', *char_probe);
 }
@@ -171,7 +176,11 @@ TEST(PickleTest, SerializeString)
     Pickle pickle;
     std::wstring str = L"abcde";
     pickle << str;
+#if defined(OS_WIN)
     EXPECT_EQ(18, pickle.payload_size());
+#else
+    EXPECT_EQ(28, pickle.payload_size());   // wchar_t on posix-platform is in 4-byte
+#endif
     const size_t* size_probe = reinterpret_cast<const size_t*>(pickle.payload());
     EXPECT_EQ(5, *size_probe);
     const wchar_t* str_probe = reinterpret_cast<const wchar_t*>(size_probe + 1);

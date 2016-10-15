@@ -6,19 +6,20 @@
 
 #include <algorithm>
 
+#include "kbase/secure_c_runtime.h"
 #include "kbase/string_util.h"
 
 namespace {
 
 // Rounds up `num` to the nearest multiple of `factor`.
-constexpr size_t RoundToMultiple(size_t num, size_t factor)
+constexpr size_t RoundToMultiple(size_t num, size_t factor) noexcept
 {
     return factor == 0 ? 0 : (num - 1 - (num - 1) % factor + factor);
 }
 
 // Zeros padding memory; otherwise some memory detectors may complain about
 // uninitialized memory.
-void SanitizePadding(byte* padding_begin, size_t padding_size)
+void SanitizePadding(kbase::byte* padding_begin, size_t padding_size)
 {
     if (padding_size != 0) {
         memset(padding_begin, 0, padding_size);
@@ -29,12 +30,12 @@ void SanitizePadding(byte* padding_begin, size_t padding_size)
 
 namespace kbase {
 
-PickleReader::PickleReader(const void* pickled_data, size_t size_in_bytes)
+PickleReader::PickleReader(const void* pickled_data, size_t size_in_bytes) noexcept
     : read_ptr_(static_cast<const byte*>(pickled_data) + sizeof(Pickle::Header)),
       data_end_(read_ptr_ + size_in_bytes - sizeof(Pickle::Header))
 {}
 
-PickleReader::PickleReader(const Pickle& pickle)
+PickleReader::PickleReader(const Pickle& pickle) noexcept
     : read_ptr_(pickle.payload()),
       data_end_(pickle.end_of_payload())
 {}
@@ -44,10 +45,10 @@ PickleReader& PickleReader::operator>>(std::string& value)
     PickleReader& reader = *this;
     size_t length;
     reader >> length;
-	if (length != 0) {
-		auto* dest = WriteInto(value, length + 1);
-		Read(dest, sizeof(std::string::value_type) * length);
-	}
+    if (length != 0) {
+        auto* dest = WriteInto(value, length + 1);
+        ReadRawData(dest, sizeof(std::string::value_type) * length);
+    }
 
     return reader;
 }
@@ -57,18 +58,18 @@ PickleReader& PickleReader::operator>>(std::wstring& value)
     PickleReader& reader = *this;
     size_t length;
     reader >> length;
-	if (length != 0) {
-		auto* dest = WriteInto(value, length + 1);
-		Read(dest, sizeof(std::wstring::value_type) * length);
-	}
+    if (length != 0) {
+        auto* dest = WriteInto(value, length + 1);
+        ReadRawData(dest, sizeof(std::wstring::value_type) * length);
+    }
 
     return reader;
 }
 
-void PickleReader::Read(void* dest, size_t size_in_bytes)
+void PickleReader::ReadRawData(void* dest, size_t size_in_bytes)
 {
     ENSURE(CHECK, !!*this && size_in_bytes != 0).Require();
-    memcpy_s(dest, size_in_bytes, read_ptr_, size_in_bytes);
+    SecureMemcpy(dest, size_in_bytes, read_ptr_, size_in_bytes);
     SeekReadPosition(size_in_bytes);
 }
 
@@ -109,14 +110,14 @@ Pickle::Pickle(const void* data, size_t size_in_bytes)
 {
     ENSURE(CHECK, data != nullptr && size_in_bytes > 0).Require();
     ResizeCapacity(size_in_bytes);
-    memcpy_s(header_, capacity_, data, size_in_bytes);
+    SecureMemcpy(header_, capacity_, data, size_in_bytes);
 }
 
 Pickle::Pickle(const Pickle& other)
     : header_(nullptr), capacity_(0)
 {
     ResizeCapacity(other.size());
-    memcpy_s(header_, capacity_, other.header_, other.size());
+    SecureMemcpy(header_, capacity_, other.header_, other.size());
 }
 
 Pickle::Pickle(Pickle&& other) noexcept
@@ -141,7 +142,7 @@ Pickle& Pickle::operator=(const Pickle& rhs)
             ResizeCapacity(rhs.size());
         }
 
-        memcpy_s(header_, capacity_, rhs.header_, rhs.size());
+        SecureMemcpy(header_, capacity_, rhs.header_, rhs.size());
     }
 
     return *this;
@@ -205,7 +206,7 @@ void Pickle::Write(const void* data, size_t size_in_bytes)
     size_t last_payload_size = payload_size();
     byte* dest = SeekWritePosition(size_in_bytes);
     size_t free_buf_size = capacity_ - (dest - reinterpret_cast<byte*>(header_));
-    memcpy_s(dest, free_buf_size, data, size_in_bytes);
+    SecureMemcpy(dest, free_buf_size, data, size_in_bytes);
     size_t padding_size = payload_size() - last_payload_size - size_in_bytes;
     SanitizePadding(dest - padding_size, padding_size);
 }

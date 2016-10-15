@@ -27,9 +27,9 @@ class Pickle;
 
 class PickleReader {
 public:
-    PickleReader(const void* pickled_data, size_t size_in_bytes);
+    PickleReader(const void* pickled_data, size_t size_in_bytes) noexcept;
 
-    explicit PickleReader(const Pickle& pickle);
+    explicit PickleReader(const Pickle& pickle) noexcept;
 
     DEFAULT_COPY(PickleReader);
 
@@ -37,7 +37,7 @@ public:
 
     ~PickleReader() = default;
 
-    explicit operator bool() const
+    explicit operator bool() const noexcept
     {
         return read_ptr_ < data_end_;
     }
@@ -112,8 +112,8 @@ public:
 
     PickleReader& operator>>(std::wstring& value);
 
-    // Deserializes data in the size of `size_in_bytes`.
-    void Read(void* dest, size_t size_in_bytes);
+    // Copy serialized raw bytes into `dest` in the size of `size_in_bytes`.
+    void ReadRawData(void* dest, size_t size_in_bytes);
 
     // Skips read pointer by at least `data_size` bytes.
     void SkipData(size_t data_size) noexcept;

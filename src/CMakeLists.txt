@@ -10,6 +10,7 @@ set(SOURCES
     kbase/at_exit_manager.cpp
     kbase/error_exception_util.cpp
     kbase/path.cpp
+    kbase/pickle.cpp
     kbase/stack_walker_posix.cpp
     kbase/string_encoding_conversions.cpp
     kbase/string_format.cpp
