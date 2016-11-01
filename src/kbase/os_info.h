@@ -122,7 +122,7 @@ private:
         return wow64_status_;
     }
 
-    friend DefaultSingletonTraits<OSInfo>;
+    friend LeakySingletonTraits<OSInfo>;
 
 private:
     SystemArchitecture architecture_;

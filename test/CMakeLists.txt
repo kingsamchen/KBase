@@ -18,6 +18,7 @@ set(SOURCES
     samples/error_exception_util_unittest.cpp
     samples/path_unittest.cpp
     samples/pickle_unittest.cpp
+    samples/singleton_unittest.cpp
     samples/stack_walker_unittest.cpp
     samples/string_encoding_conversions_unittest.cpp
     samples/string_format_unittest.cpp

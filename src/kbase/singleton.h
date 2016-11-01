@@ -18,22 +18,27 @@ namespace kbase {
 
 template<typename T>
 struct DefaultSingletonTraits {
+    static constexpr bool kDestroyAtExit = true;
+
     static T* Create()
     {
         return new T();
     }
 
-    static void Destroy(T* instance)
+    static void Destroy(T* instance) noexcept
     {
         delete instance;
     }
-
-    static const bool kDestroyAtExit = true;
 };
 
 template<typename T>
-struct LeakySingletonTraits : public DefaultSingletonTraits<T> {
+struct LeakySingletonTraits {
     static const bool kDestroyAtExit = false;
+
+    static T* Create()
+    {
+        return new T();
+    }
 };
 
 template<typename T, typename Traits = DefaultSingletonTraits<T>>
@@ -57,22 +62,28 @@ private:
     static void Initialize()
     {
         instance_ = Traits::Create();
-        if (Traits::kDestroyAtExit) {
-            AtExitManager::RegisterCallback([]() {
-                Traits::Destroy(instance_);
-            });
-        }
+        RegisterForCleanup(std::integral_constant<bool, Traits::kDestroyAtExit>());
     }
+
+    static void RegisterForCleanup(std::true_type)
+    {
+        AtExitManager::RegisterCallback([]() {
+            Traits::Destroy(instance_);
+        });
+    }
+
+    static void RegisterForCleanup(std::false_type)
+    {}
 
 private:
     static T* instance_;
     static std::once_flag flag_;
 };
 
-template<typename T, typename Traits = DefaultSingletonTraits<T>>
+template<typename T, typename Traits>
 T* Singleton<T, Traits>::instance_ = nullptr;
 
-template<typename T, typename Traits = DefaultSingletonTraits<T>>
+template<typename T, typename Traits>
 std::once_flag Singleton<T, Traits>::flag_;
 
 }   // namespace kbase

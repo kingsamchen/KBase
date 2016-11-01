@@ -73,7 +73,7 @@ private:
 
     void InitSymbolHandler();
 
-    friend DefaultSingletonTraits<SymbolContext>;
+    friend LeakySingletonTraits<SymbolContext>;
 
 private:
     DWORD init_error_code_;
