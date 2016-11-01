@@ -16,6 +16,15 @@
 
 namespace kbase {
 
+// You should not use this facility unless:
+// (1) deterministic time and order (which is enforced by `AtExitManager`) for destruction of
+//     singletons are required, or
+// (2) intentional leaky singleton is required (because we may need the singleton even during
+//     application exit)
+// Otherwise, you should consider using Scott-Meyers' idiom first, since our demand on C++ 11
+// compliant compilers, which guarantee thread-safe static storage initialization.
+// Also be noted that, DON'T use singleton, whenever possible.
+
 template<typename T>
 struct DefaultSingletonTraits {
     static constexpr bool kDestroyAtExit = true;
@@ -72,7 +81,7 @@ private:
         });
     }
 
-    static void RegisterForCleanup(std::false_type)
+    static void RegisterForCleanup(std::false_type) noexcept
     {}
 
 private:
