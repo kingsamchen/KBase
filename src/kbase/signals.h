@@ -33,13 +33,13 @@ class SignalImpl;
 
 template<typename Func, typename... Args>
 struct SlotImpl : std::enable_shared_from_this<SlotImpl<Func, Args...>>, IDisposable {
-    using Source = SignalImpl<Func, Args...>;
+    using SignalType = SignalImpl<Func, Args...>;
 
-    SlotImpl(const std::shared_ptr<Source>& signal_source, Func&& func)
+    SlotImpl(const std::shared_ptr<SignalType>& signal_source, Func&& func)
         : fn(std::move(func)), source(signal_source), weakly_bound(false)
     {}
 
-    SlotImpl(const std::shared_ptr<Source>& signal_source, Func&& func,
+    SlotImpl(const std::shared_ptr<SignalType>& signal_source, Func&& func,
              const std::shared_ptr<void>& object)
         : fn(std::move(func)), source(signal_source),
           weakly_bound_object(object), weakly_bound(true)
@@ -62,7 +62,7 @@ struct SlotImpl : std::enable_shared_from_this<SlotImpl<Func, Args...>>, IDispos
     }
 
     Func fn;
-    std::weak_ptr<Source> source;
+    std::weak_ptr<SignalType> source;
     std::weak_ptr<void> weakly_bound_object;
     bool weakly_bound;
 };
@@ -70,8 +70,8 @@ struct SlotImpl : std::enable_shared_from_this<SlotImpl<Func, Args...>>, IDispos
 template<typename Func, typename... Args>
 class SignalImpl {
 private:
-    using SlotImpl = SlotImpl<Func, Args...>;
-    using SlotList = std::vector<std::shared_ptr<SlotImpl>>;
+    using SlotType = SlotImpl<Func, Args...>;
+    using SlotList = std::vector<std::shared_ptr<SlotType>>;
 
 public:
     SignalImpl()
@@ -84,7 +84,7 @@ public:
 
     DISALLOW_MOVE(SignalImpl);
 
-    void AddSlot(const std::shared_ptr<SlotImpl>& slot)
+    void AddSlot(const std::shared_ptr<SlotType>& slot)
     {
         std::lock_guard<std::mutex> lock(mutex_);
         CopyIfNeeded();
@@ -112,7 +112,7 @@ public:
         }
     }
 
-    void RemoveSlot(const std::shared_ptr<SlotImpl>& slot)
+    void RemoveSlot(const std::shared_ptr<SlotType>& slot)
     {
         std::lock_guard<std::mutex> lock(mutex_);
         CopyIfNeeded();
@@ -163,7 +163,7 @@ class Signal;
 
 class Slot {
 private:
-    explicit Slot(const std::shared_ptr<internal::IDisposable>& slot_impl)
+    explicit Slot(const std::shared_ptr<internal::IDisposable>& slot_impl) noexcept
         : impl_(slot_impl)
     {}
 
@@ -172,11 +172,11 @@ public:
 
     DISALLOW_COPY(Slot);
 
-    Slot(Slot&& other)
+    Slot(Slot&& other) noexcept
         : impl_(std::move(other.impl_))
     {}
 
-    Slot& operator=(Slot&& rhs)
+    Slot& operator=(Slot&& rhs) noexcept
     {
         if (this != &rhs) {
             impl_ = std::move(rhs.impl_);
