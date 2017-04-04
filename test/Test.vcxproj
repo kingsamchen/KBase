@@ -110,7 +110,6 @@
     <ClCompile Include="samples\registry_unittest.cpp" />
     <ClCompile Include="samples\scoped_handle_unittest.cpp" />
     <ClCompile Include="samples\scope_guard_unittest.cpp" />
-    <ClCompile Include="samples\sha_unittest.cpp" />
     <ClCompile Include="samples\signals_unittest.cpp" />
     <ClCompile Include="samples\singleton_unittest.cpp" />
     <ClCompile Include="samples\stack_walker_unittest.cpp" />

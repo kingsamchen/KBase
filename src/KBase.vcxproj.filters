@@ -63,9 +63,6 @@
     <ClCompile Include="kbase\registry.cpp">
       <Filter>kbase</Filter>
     </ClCompile>
-    <ClCompile Include="kbase\sha.cpp">
-      <Filter>kbase</Filter>
-    </ClCompile>
     <ClCompile Include="kbase\string_format.cpp">
       <Filter>kbase</Filter>
     </ClCompile>
@@ -159,9 +156,6 @@
       <Filter>kbase</Filter>
     </ClInclude>
     <ClInclude Include="kbase\scoped_handle.h">
-      <Filter>kbase</Filter>
-    </ClInclude>
-    <ClInclude Include="kbase\sha.h">
       <Filter>kbase</Filter>
     </ClInclude>
     <ClInclude Include="kbase\singleton.h">

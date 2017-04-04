@@ -119,7 +119,6 @@
     <ClCompile Include="kbase\path_service.cpp" />
     <ClCompile Include="kbase\pickle.cpp" />
     <ClCompile Include="kbase\registry.cpp" />
-    <ClCompile Include="kbase\sha.cpp" />
     <ClCompile Include="kbase\stack_walker_win.cpp" />
     <ClCompile Include="kbase\string_encoding_conversions.cpp" />
     <ClCompile Include="kbase\string_format.cpp" />
@@ -156,7 +155,6 @@
     <ClInclude Include="kbase\pickle.h" />
     <ClInclude Include="kbase\registry.h" />
     <ClInclude Include="kbase\scope_guard.h" />
-    <ClInclude Include="kbase\sha.h" />
     <ClInclude Include="kbase\stack_walker.h" />
     <ClInclude Include="kbase\string_encoding_conversions.h" />
     <ClInclude Include="kbase\string_format.h" />
