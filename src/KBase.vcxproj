@@ -14,7 +14,7 @@
     <ProjectGuid>{09A7A9C8-4AE9-4606-8104-9100C4C910DF}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <ProjectName>KBase</ProjectName>
-    <WindowsTargetPlatformVersion>10.0.14393.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
