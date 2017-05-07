@@ -12,7 +12,6 @@
 
 namespace {
 
-using namespace kbase;
 using namespace kbase::internal;
 
 template<typename CharT>
@@ -21,7 +20,9 @@ bool ComparePlaceholder(const Placeholder<CharT>& p, unsigned i, unsigned pos, c
     return p.index == i && p.pos == pos && p.format_specifier == spec;
 }
 
-}
+}   // namespace
+
+namespace kbase {
 
 TEST(StringFormatTest, StringPrintfSeries)
 {
@@ -74,3 +75,5 @@ TEST(StringFormatTest, Format)
     EXPECT_THROW(StringFormat("{0: >bx}", 123), FormatError);    // type-mark is more than once
     EXPECT_THROW(StringFormat("{0: }", 123), FormatError);    // empty specifier
 }
+
+}   // namespace kbase

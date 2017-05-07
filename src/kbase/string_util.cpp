@@ -15,10 +15,10 @@ using kbase::BasicStringView;
 using kbase::CaseMode;
 
 enum TrimPosition : unsigned int {
-    TRIM_NONE = 0,
-    TRIM_LEADING = 1 << 0,
-    TRIM_TAILING = 1 << 1,
-    TRIM_ALL = TRIM_LEADING | TRIM_TAILING
+    TrimNone = 0,
+    TrimLeading = 1 << 0,
+    TrimTailing = 1 << 1,
+    TrimAll = TrimLeading | TrimTailing
 };
 
 template<typename StrT>
@@ -57,9 +57,9 @@ void TrimStringT(StrT& str, BasicStringView<typename StrT::value_type> chars, Tr
 {
     using size_type = typename StrT::size_type;
 
-    size_type not_matched_first = (pos & TrimPosition::TRIM_LEADING) ?
+    size_type not_matched_first = (pos & TrimPosition::TrimLeading) ?
         str.find_first_not_of(chars.data(), 0, chars.length()) : 0;
-    size_type not_matched_last = (pos & TrimPosition::TRIM_TAILING) ?
+    size_type not_matched_last = (pos & TrimPosition::TrimTailing) ?
         str.find_last_not_of(chars.data(), StrT::npos, chars.size()) : str.length() - 1;
 
     if (str.empty() || not_matched_first == StrT::npos || not_matched_last == StrT::npos) {
@@ -123,10 +123,10 @@ bool StartsWithT(BasicStringView<CharT> str, BasicStringView<CharT> token, CaseM
 
     bool rv = false;
     switch (mode) {
-        case CaseMode::SENSITIVE:
+        case CaseMode::Sensitive:
             rv = str.compare(0, token.length(), token.data()) == 0;
             break;
-        case CaseMode::ASCII_INSENSITIVE:
+        case CaseMode::ASCIIInsensitive:
         {
 #if defined(_MSC_VER)
             auto str_begin = stdext::make_checked_array_iterator(str.begin(), str.length());
@@ -155,10 +155,10 @@ bool EndsWithT(BasicStringView<CharT> str, BasicStringView<CharT> token, CaseMod
     bool rv = false;
     auto offset = str.length() - token.length();
     switch (mode) {
-        case CaseMode::SENSITIVE:
+        case CaseMode::Sensitive:
             rv = str.compare(offset, token.length(), token.data()) == 0;
             break;
-        case CaseMode::ASCII_INSENSITIVE:
+        case CaseMode::ASCIIInsensitive:
         {
 #if defined(_MSC_VER)
             auto str_begin = stdext::make_checked_array_iterator(str.begin(), str.length(), offset);
@@ -341,37 +341,37 @@ std::wstring& ReplaceString(std::wstring& str,
 
 std::string& TrimString(std::string& str, StringView chars)
 {
-    TrimStringT(str, chars, TrimPosition::TRIM_ALL);
+    TrimStringT(str, chars, TrimPosition::TrimAll);
     return str;
 }
 
 std::wstring& TrimString(std::wstring& str, WStringView chars)
 {
-    TrimStringT(str, chars, TrimPosition::TRIM_ALL);
+    TrimStringT(str, chars, TrimPosition::TrimAll);
     return str;
 }
 
 std::string& TrimLeadingString(std::string& str, StringView chars)
 {
-    TrimStringT(str, chars, TrimPosition::TRIM_LEADING);
+    TrimStringT(str, chars, TrimPosition::TrimLeading);
     return str;
 }
 
 std::wstring& TrimLeadingString(std::wstring& str, WStringView chars)
 {
-    TrimStringT(str, chars, TrimPosition::TRIM_LEADING);
+    TrimStringT(str, chars, TrimPosition::TrimLeading);
     return str;
 }
 
 std::string& TrimTailingString(std::string& str, StringView chars)
 {
-    TrimStringT(str, chars, TrimPosition::TRIM_TAILING);
+    TrimStringT(str, chars, TrimPosition::TrimTailing);
     return str;
 }
 
 std::wstring& TrimTailingString(std::wstring& str, WStringView chars)
 {
-    TrimStringT(str, chars, TrimPosition::TRIM_TAILING);
+    TrimStringT(str, chars, TrimPosition::TrimTailing);
     return str;
 }
 

@@ -8,7 +8,7 @@
 #include "kbase/basic_macros.h"
 #include "kbase/string_util.h"
 
-using namespace kbase;
+namespace kbase {
 
 TEST(StringUtilTest, EraseAndRemove)
 {
@@ -116,17 +116,17 @@ TEST(StringUtilTest, StartsWithAndEndsWith)
 
     EXPECT_TRUE(StartsWith(str, "hell"));
     EXPECT_FALSE(StartsWith(str, "HELL"));
-    EXPECT_TRUE(StartsWith(str, "HELL", CaseMode::ASCII_INSENSITIVE));
+    EXPECT_TRUE(StartsWith(str, "HELL", CaseMode::ASCIIInsensitive));
 
     EXPECT_TRUE(StartsWith(std::string("hello"), "hello"));
-    EXPECT_TRUE(StartsWith(std::string("hello"), "HELLO", CaseMode::ASCII_INSENSITIVE));
+    EXPECT_TRUE(StartsWith(std::string("hello"), "HELLO", CaseMode::ASCIIInsensitive));
     EXPECT_FALSE(StartsWith(std::string("hell"), "hello"));
 
     EXPECT_FALSE(EndsWith(str, "old"));
     EXPECT_TRUE(EndsWith(str, "orld"));
 
     EXPECT_TRUE(EndsWith(std::string("hello"), "hello"));
-    EXPECT_TRUE(EndsWith(std::string("hello"), "HellO", CaseMode::ASCII_INSENSITIVE));
+    EXPECT_TRUE(EndsWith(std::string("hello"), "HellO", CaseMode::ASCIIInsensitive));
     EXPECT_FALSE(EndsWith(std::string("ell"), "hell"));
 }
 
@@ -180,3 +180,5 @@ TEST(StringUtilTest, IsStringASCIIOnly)
     EXPECT_TRUE(IsStringASCIIOnly("hello world!"));
     EXPECT_FALSE(IsStringASCIIOnly("this is a mix encoding. \xe4\xbd\xa0\xe5\xa5\xbd"));
 }
+
+}   // namespace kbase

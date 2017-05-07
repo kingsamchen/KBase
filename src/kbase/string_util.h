@@ -78,8 +78,8 @@ bool ASCIIStringEqualCaseInsensitive(StringView lhs, StringView rhs);
 bool ASCIIStringEqualCaseInsensitive(WStringView lhs, WStringView rhs);
 
 enum class CaseMode {
-    SENSITIVE,
-    ASCII_INSENSITIVE
+    Sensitive,
+    ASCIIInsensitive
 };
 
 // Return true, if `str` starts with `token`.
@@ -87,20 +87,20 @@ enum class CaseMode {
 
 bool StartsWith(StringView str,
                 StringView token,
-                CaseMode mode = CaseMode::SENSITIVE);
+                CaseMode mode = CaseMode::Sensitive);
 bool StartsWith(WStringView str,
                 WStringView token,
-                CaseMode mode = CaseMode::SENSITIVE);
+                CaseMode mode = CaseMode::Sensitive);
 
 // Return true, if `str` ends with `token`.
 // Return false, otherwise.
 
 bool EndsWith(StringView str,
               StringView token,
-              CaseMode mode = CaseMode::SENSITIVE);
+              CaseMode mode = CaseMode::Sensitive);
 bool EndsWith(WStringView str,
               WStringView token,
-              CaseMode mode = CaseMode::SENSITIVE);
+              CaseMode mode = CaseMode::Sensitive);
 
 // Set up enough memory in `str` to accomodate a c-style string with length
 // of `length_including_null`. Be wary of that real size of the string data

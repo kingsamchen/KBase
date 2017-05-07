@@ -13,14 +13,18 @@ std::wstring ws = L"\u4f60\u597d hello chinese test \u4e2d\u6587\u6d4b\u8bd5";
 
 }   // namespace
 
+namespace kbase {
+
 TEST(StringEncodingConversionTest, W2U8)
 {
-    auto u8s = kbase::WideToUTF8(ws);
+    auto u8s = WideToUTF8(ws);
     EXPECT_EQ(utf8_s, u8s);
 }
 
 TEST(StringEncodingConversionTest, U82W)
 {
-    auto wss = kbase::UTF8ToWide(utf8_s);
+    auto wss = UTF8ToWide(utf8_s);
     EXPECT_EQ(ws, wss);
 }
+
+}   // namespace kbase

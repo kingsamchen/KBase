@@ -7,9 +7,7 @@
 #include "kbase/basic_macros.h"
 #include "kbase/tokenizer.h"
 
-using kbase::Tokenizer;
-using kbase::WTokenizer;
-using kbase::TokenIterator;
+namespace kbase {
 
 TEST(TokenizerTest, TokenIterator)
 {
@@ -44,3 +42,5 @@ TEST(TokenizerTest, Iterate)
         }
     }
 }
+
+}   // namespace kbase

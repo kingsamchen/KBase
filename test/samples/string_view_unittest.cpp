@@ -7,11 +7,13 @@
 #include "kbase/basic_macros.h"
 #include "kbase/string_view.h"
 
+namespace kbase {
+
 TEST(StringViewTest, Ctor)
 {
     // for default constructor
     {
-        kbase::StringView empty_view;
+        StringView empty_view;
         EXPECT_TRUE(empty_view.empty());
         EXPECT_EQ(nullptr, empty_view.data());
         EXPECT_EQ(0, empty_view.length());
@@ -21,14 +23,14 @@ TEST(StringViewTest, Ctor)
     {
         const char* s = "hello, world";
         size_t len = strlen(s);
-        kbase::StringView s_v(s, len);
+        StringView s_v(s, len);
         EXPECT_FALSE(s_v.empty());
         std::cout << s_v.data() << std::endl << s_v.length() << std::endl;
         EXPECT_EQ(s, s_v.data());
         EXPECT_EQ(len, s_v.length());
 
         std::string str = "this is a test text";
-        kbase::StringView s_v2(str.data(), str.length());
+        StringView s_v2(str.data(), str.length());
         EXPECT_FALSE(s_v2.empty());
         std::cout << s_v2.data() << std::endl << s_v2.length() << std::endl;
         EXPECT_EQ(str.data(), s_v2.data());
@@ -38,8 +40,8 @@ TEST(StringViewTest, Ctor)
     // for copy constructor
     {
         std::string str = "this is a test text";
-        kbase::StringView s_v(str.data(), str.length());
-        kbase::StringView s_v_copy(s_v);
+        StringView s_v(str.data(), str.length());
+        StringView s_v_copy(s_v);
         EXPECT_TRUE(s_v.data() == s_v_copy.data());
         EXPECT_TRUE(s_v.length() == s_v_copy.length());
     }
@@ -48,7 +50,7 @@ TEST(StringViewTest, Ctor)
     {
         const char* s = "hello, world";
         size_t len = strlen(s);
-        kbase::StringView s_v(s);
+        StringView s_v(s);
         EXPECT_EQ(s, s_v.data());
         EXPECT_EQ(len, s_v.length());
     }
@@ -56,18 +58,18 @@ TEST(StringViewTest, Ctor)
     // for BasicStringView(const std::basic_string<CharT>& str)
     {
         std::string str = "this is a test text";
-        kbase::StringView s_v(str);
+        StringView s_v(str);
         EXPECT_EQ(str.data(), s_v.data());
         EXPECT_EQ(str.length(), s_v.length());
     }
 
     // compile-time evaluations.
     {
-        constexpr kbase::StringView s1;
+        constexpr StringView s1;
         constexpr bool empty = s1.empty();
         EXPECT_TRUE(empty);
 
-        constexpr kbase::StringView s2 = "this is a test text";
+        constexpr StringView s2 = "this is a test text";
         constexpr bool not_empty = s2.empty();
         EXPECT_FALSE(not_empty);
         constexpr char ft = s2.front();
@@ -83,8 +85,8 @@ TEST(StringViewTest, Ctor)
 
 TEST(StringViewTest, AssignOperator)
 {
-    kbase::StringView v = "Hello, world";
-    kbase::StringView v_ex = "this is a test text";
+    StringView v = "Hello, world";
+    StringView v_ex = "this is a test text";
     EXPECT_FALSE(v.length() == v_ex.length());
     v = v_ex;
     EXPECT_TRUE(v.length() == v_ex.length());
@@ -92,7 +94,7 @@ TEST(StringViewTest, AssignOperator)
 
 TEST(StringViewTest, MaxSize)
 {
-    kbase::StringView view;
+    StringView view;
     auto max_size = std::numeric_limits<size_t>::max();
     EXPECT_EQ(max_size, view.max_size());
 }
@@ -100,7 +102,7 @@ TEST(StringViewTest, MaxSize)
 TEST(StringViewTest, Iterator)
 {
     const char* raw_str = "hello world";
-    kbase::StringView view = raw_str;
+    StringView view = raw_str;
     std::string str(view.begin(), view.end());
     std::cout << str << std::endl;
     EXPECT_EQ(std::string(raw_str), str);
@@ -113,7 +115,7 @@ TEST(StringViewTest, Iterator)
 
 TEST(StringViewTest, ElementAccess)
 {
-    kbase::StringView view = "hello world";
+    StringView view = "hello world";
 
     // for operator[]
     EXPECT_EQ('h', view[0]);
@@ -133,7 +135,7 @@ TEST(StringViewTest, ElementAccess)
 
 TEST(StringViewTest, Modifiers)
 {
-    kbase::StringView view = "hello world";
+    StringView view = "hello world";
     size_t space_pos = std::distance(view.begin(), std::find(view.begin(), view.end(), ' '));
     std::cout << space_pos << std::endl;
     ASSERT_TRUE(space_pos <= view.length());
@@ -146,8 +148,8 @@ TEST(StringViewTest, Modifiers)
     v_suffix.RemoveSuffix(view.length() - space_pos);
     EXPECT_EQ(std::string("hello"), std::string(v_suffix.data(), v_suffix.length()));
 
-    kbase::StringView v_1 = "hello";
-    kbase::StringView v_2 = "world";
+    StringView v_1 = "hello";
+    StringView v_2 = "world";
     v_1.swap(v_2);
     EXPECT_EQ(std::string("world"), std::string(v_1.data(), v_1.length()));
     EXPECT_EQ(std::string("hello"), std::string(v_2.data(), v_2.length()));
@@ -156,16 +158,16 @@ TEST(StringViewTest, Modifiers)
 TEST(StringViewTest, ToStdString)
 {
     std::string str = "hello, world";
-    kbase::StringView view = str;
+    StringView view = str;
     EXPECT_EQ(str, view.ToString());
 
-    kbase::StringView empty_view;
+    StringView empty_view;
     EXPECT_EQ(std::string(), empty_view.ToString());
 }
 
 TEST(StringViewTest, Copy)
 {
-    kbase::StringView view = "hello, world";
+    StringView view = "hello, world";
     std::vector<char> buf(32);
 
     {
@@ -189,7 +191,7 @@ TEST(StringViewTest, Copy)
 
 TEST(StringViewTest, Substr)
 {
-    kbase::StringView view = "hello, world";
+    StringView view = "hello, world";
 
     EXPECT_EQ(std::string(", world"), view.substr(5).ToString());
     EXPECT_EQ(std::string("hello"), view.substr(0, 5).ToString());
@@ -198,8 +200,8 @@ TEST(StringViewTest, Substr)
 
 TEST(StringViewTest, Compare)
 {
-    kbase::StringView v_1 = "hello";
-    kbase::StringView v_2 = "hell";
+    StringView v_1 = "hello";
+    StringView v_2 = "hell";
     EXPECT_TRUE(v_1.compare(v_2) > 0);
 
     EXPECT_TRUE(v_1.compare(0, 4, v_2) == 0);
@@ -215,9 +217,9 @@ TEST(StringViewTest, Compare)
 
 TEST(StringViewTest, Find)
 {
-    kbase::StringView view = "hello, world";
-    kbase::StringView view_ex = "where there is a will, there is a way";
-    kbase::StringView view_ng = "This is a string";
+    StringView view = "hello, world";
+    StringView view_ex = "where there is a will, there is a way";
+    StringView view_ng = "This is a string";
     auto npos = decltype(view)::npos;
 
     // for find
@@ -240,7 +242,7 @@ TEST(StringViewTest, Find)
 
 TEST(StringViewTest, FindOf)
 {
-    kbase::StringView view = "where there is a will, there is a way";
+    StringView view = "where there is a will, there is a way";
     auto npos = decltype(view)::npos;
 
     // for find_first_of
@@ -248,18 +250,18 @@ TEST(StringViewTest, FindOf)
     EXPECT_EQ(2, view.find_first_of("aeiou"));
 
     // for find_last_of
-    kbase::StringView view_1 = "abcd-1234-abcd-1234";
+    StringView view_1 = "abcd-1234-abcd-1234";
     EXPECT_EQ(13, view_1.find_last_of("d", 14));
     EXPECT_EQ(npos, view_1.find_last_of("x"));
 
-    kbase::StringView view_2 = "ABCD-1234-ABCD-1234";
+    StringView view_2 = "ABCD-1234-ABCD-1234";
     EXPECT_EQ(11, view_2.find_last_of("B1", 12));
     EXPECT_EQ(16, view_2.find_last_of("D2"));
 
-    kbase::StringView view_3 = "456-EFG-456-EFG";
+    StringView view_3 = "456-EFG-456-EFG";
     EXPECT_EQ(4, view_3.find_last_of("5E", 8));
 
-    kbase::StringView view_4 = "12-ab-12-ab";
+    StringView view_4 = "12-ab-12-ab";
     EXPECT_EQ(4, view_4.find_last_of("ba3", 8));
     EXPECT_EQ(9, view_4.find_last_of("a2"));
 }
@@ -267,36 +269,36 @@ TEST(StringViewTest, FindOf)
 TEST(StringViewTest, FindNotOf)
 {
     {
-        kbase::StringView view_1 = "xddd-1234-abcd";
+        StringView view_1 = "xddd-1234-abcd";
         EXPECT_EQ(4, view_1.find_first_not_of("d", 2));
         EXPECT_EQ(1, view_1.find_first_not_of("x"));
 
-        kbase::StringView view_2 = "BBB-1111";
-        EXPECT_EQ(kbase::StringView::npos, view_2.find_first_not_of("B1", 6));
+        StringView view_2 = "BBB-1111";
+        EXPECT_EQ(StringView::npos, view_2.find_first_not_of("B1", 6));
         EXPECT_EQ(3, view_2.find_first_not_of("B2"));
 
-        kbase::StringView view_3 = "444-555-GGG";
+        StringView view_3 = "444-555-GGG";
         EXPECT_EQ(3, view_3.find_first_not_of("45G"));
 
-        kbase::StringView view_4 = "12-ab-12-ab";
+        StringView view_4 = "12-ab-12-ab";
         EXPECT_EQ(5, view_4.find_first_not_of("ba3", 5));
         EXPECT_EQ(2, view_4.find_first_not_of("12"));
     }
 
     {
-        kbase::StringView view_1 = "dddd-1dd4-abdd";
+        StringView view_1 = "dddd-1dd4-abdd";
         EXPECT_EQ(5, view_1.find_last_not_of("d", 7));
         EXPECT_EQ(11, view_1.find_last_not_of("d"));
 
-        kbase::StringView view_2 = "BBB-1111";
+        StringView view_2 = "BBB-1111";
         EXPECT_EQ(3, view_2.find_last_not_of("B1", 6));
-        EXPECT_EQ(kbase::StringView::npos, view_2.find_last_not_of("B-1"));
+        EXPECT_EQ(StringView::npos, view_2.find_last_not_of("B-1"));
 
-        kbase::StringView view_3 = "444-555-GGG";
+        StringView view_3 = "444-555-GGG";
         EXPECT_EQ(7, view_3.find_last_not_of("45G"));
         EXPECT_EQ(3, view_3.find_last_not_of("45G", 6, 6));
 
-        kbase::StringView view_4 = "12-ab-12-ab";
+        StringView view_4 = "12-ab-12-ab";
         EXPECT_EQ(1, view_4.find_last_not_of("b-a", 5));
         EXPECT_EQ(10, view_4.find_last_not_of("12"));
     }
@@ -304,8 +306,8 @@ TEST(StringViewTest, FindNotOf)
 
 TEST(StringViewTest, OperatorComparison)
 {
-    kbase::StringView view_1 = "abc";
-    kbase::StringView view_2 = "adc";
+    StringView view_1 = "abc";
+    StringView view_2 = "adc";
     EXPECT_FALSE(view_1 == view_2);
     EXPECT_TRUE(view_1 != view_2);
 
@@ -317,21 +319,23 @@ TEST(StringViewTest, OperatorComparison)
 
 TEST(StringViewTest, Output)
 {
-    kbase::StringView v = "hello world";
-    kbase::WStringView w = L"test text";
+    StringView v = "hello world";
+    WStringView w = L"test text";
     std::cout << v << std::endl;
     std::wcout << w << std::endl;
 }
 
 TEST(StringViewTest, Hash)
 {
-    kbase::StringView v = "hello world";
-    kbase::WStringView w = L"hello world";
-    kbase::StringView vx = "This is a test text";
-    kbase::WStringView wx = L"This is a test text";
+    StringView v = "hello world";
+    WStringView w = L"hello world";
+    StringView vx = "This is a test text";
+    WStringView wx = L"This is a test text";
 
-    EXPECT_EQ(std::hash<kbase::StringView>()(v), std::hash<kbase::StringView>()(v));
-    EXPECT_EQ(std::hash<kbase::WStringView>()(w), std::hash<kbase::WStringView>()(w));
-    EXPECT_NE(std::hash<kbase::StringView>()(v), std::hash<kbase::StringView>()(vx));
-    EXPECT_NE(std::hash<kbase::WStringView>()(w), std::hash<kbase::WStringView>()(wx));
+    EXPECT_EQ(std::hash<StringView>()(v), std::hash<StringView>()(v));
+    EXPECT_EQ(std::hash<WStringView>()(w), std::hash<WStringView>()(w));
+    EXPECT_NE(std::hash<StringView>()(v), std::hash<StringView>()(vx));
+    EXPECT_NE(std::hash<WStringView>()(w), std::hash<WStringView>()(wx));
 }
+
+}   // namespace kbase

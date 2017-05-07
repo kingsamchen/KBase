@@ -91,12 +91,12 @@ std::string AnalyzeFormat(const char* fmt, PlaceholderList<char>& placeholders);
 std::wstring AnalyzeFormat(const wchar_t* fmt, PlaceholderList<wchar_t>& placeholders);
 
 enum class SpecifierCategory {
-    NONE = 0,
-    PADDING_ALIGN,
-    SIGN,
-    WIDTH,
-    PRECISION,
-    TYPE
+    None = 0,
+    PaddingAlign,
+    Sign,
+    Width,
+    Precision,
+    Type
 };
 
 inline bool IsDigit(char ch)
@@ -134,31 +134,31 @@ SpecifierCategory GuessNextSpecCategory(const CharT* spec)
 {
     // Maybe we have finished parsing.
     if (*spec == '\0') {
-        return SpecifierCategory::NONE;
+        return SpecifierCategory::None;
     }
 
     if (*(spec + 1) == '<' || *(spec + 1) == '>') {
-        return SpecifierCategory::PADDING_ALIGN;
+        return SpecifierCategory::PaddingAlign;
     }
 
     if (*spec == '+') {
-        return SpecifierCategory::SIGN;
+        return SpecifierCategory::Sign;
     }
 
     if (IsDigit(*spec)) {
-        return SpecifierCategory::WIDTH;
+        return SpecifierCategory::Width;
     }
 
     if (*spec == '.') {
-        return SpecifierCategory::PRECISION;
+        return SpecifierCategory::Precision;
     }
 
     if (IsTypeSpecifier(*spec)) {
-        return SpecifierCategory::TYPE;
+        return SpecifierCategory::Type;
     }
 
     ENSURE(RAISE, NotReached()).Require<FormatError>();
-    return SpecifierCategory::NONE;
+    return SpecifierCategory::None;
 }
 
 template<typename CharT>
@@ -167,7 +167,7 @@ void ApplyPaddingAlignFormat(const CharT* spec,
                              typename FormatTraits<CharT>::Stream& stream,
                              const CharT*& spec_end)
 {
-    ENSURE(RAISE, last_spec_type < SpecifierCategory::PADDING_ALIGN).Require<FormatError>();
+    ENSURE(RAISE, last_spec_type < SpecifierCategory::PaddingAlign).Require<FormatError>();
 
     typename FormatTraits<CharT>::Stream& os = stream;
 
@@ -188,7 +188,7 @@ void ApplySignFormat(const CharT* spec,
                      typename FormatTraits<CharT>::Stream& stream,
                      const CharT*& spec_end)
 {
-    ENSURE(RAISE, last_spec_type < SpecifierCategory::SIGN).Require<FormatError>();
+    ENSURE(RAISE, last_spec_type < SpecifierCategory::Sign).Require<FormatError>();
 
     typename FormatTraits<CharT>::Stream& os = stream;
 
@@ -203,7 +203,7 @@ void ApplyWidthFormat(const CharT* spec,
                       typename FormatTraits<CharT>::Stream& stream,
                       const CharT*& spec_end)
 {
-    ENSURE(RAISE, last_spec_type < SpecifierCategory::WIDTH).Require<FormatError>();
+    ENSURE(RAISE, last_spec_type < SpecifierCategory::Width).Require<FormatError>();
 
     typename FormatTraits<CharT>::Stream& os = stream;
 
@@ -220,7 +220,7 @@ void ApplyPrecisionFormat(const CharT* spec,
                           typename FormatTraits<CharT>::Stream& stream,
                           const CharT*& spec_end)
 {
-    ENSURE(RAISE, last_spec_type < SpecifierCategory::PRECISION).Require<FormatError>();
+    ENSURE(RAISE, last_spec_type < SpecifierCategory::Precision).Require<FormatError>();
 
     typename FormatTraits<CharT>::Stream& os = stream;
 
@@ -237,7 +237,7 @@ void ApplyTypeFormat(const CharT* spec,
                      typename FormatTraits<CharT>::Stream& stream,
                      const CharT*& spec_end)
 {
-    ENSURE(RAISE, last_spec_type < SpecifierCategory::TYPE).Require<FormatError>();
+    ENSURE(RAISE, last_spec_type < SpecifierCategory::Type).Require<FormatError>();
 
     typename FormatTraits<CharT>::Stream& os = stream;
 
@@ -288,33 +288,33 @@ void FormatArgWithSpecifier(Arg&& arg,
     }
 
     auto spec = specifier.data();
-    auto last_spec_type = SpecifierCategory::NONE;
-    auto next_spec_type = SpecifierCategory::NONE;
-    while ((next_spec_type = GuessNextSpecCategory(spec)) != SpecifierCategory::NONE) {
+    auto last_spec_type = SpecifierCategory::None;
+    auto next_spec_type = SpecifierCategory::None;
+    while ((next_spec_type = GuessNextSpecCategory(spec)) != SpecifierCategory::None) {
         switch (next_spec_type) {
-            case SpecifierCategory::PADDING_ALIGN:
+            case SpecifierCategory::PaddingAlign:
                 ApplyPaddingAlignFormat(spec, last_spec_type, stream, spec);
-                last_spec_type = SpecifierCategory::PADDING_ALIGN;
+                last_spec_type = SpecifierCategory::PaddingAlign;
                 break;
 
-            case SpecifierCategory::SIGN:
+            case SpecifierCategory::Sign:
                 ApplySignFormat(spec, last_spec_type, stream, spec);
-                last_spec_type = SpecifierCategory::SIGN;
+                last_spec_type = SpecifierCategory::Sign;
                 break;
 
-            case SpecifierCategory::WIDTH:
+            case SpecifierCategory::Width:
                 ApplyWidthFormat(spec, last_spec_type, stream, spec);
-                last_spec_type = SpecifierCategory::WIDTH;
+                last_spec_type = SpecifierCategory::Width;
                 break;
 
-            case SpecifierCategory::PRECISION:
+            case SpecifierCategory::Precision:
                 ApplyPrecisionFormat(spec, last_spec_type, stream, spec);
-                last_spec_type = SpecifierCategory::PRECISION;
+                last_spec_type = SpecifierCategory::Precision;
                 break;
 
-            case SpecifierCategory::TYPE:
+            case SpecifierCategory::Type:
                 ApplyTypeFormat(spec, last_spec_type, stream, spec);
-                last_spec_type = SpecifierCategory::TYPE;
+                last_spec_type = SpecifierCategory::Type;
                 break;
 
             default:

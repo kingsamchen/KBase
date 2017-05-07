@@ -22,8 +22,8 @@ using kbase::internal::IsDigit;
 using kbase::internal::StrToUL;
 
 enum class FormatParseState {
-    IN_TEXT,
-    IN_FORMAT
+    InText,
+    InFormat
 };
 
 constexpr char kEscapeBegin = '{';
@@ -112,11 +112,11 @@ typename FormatTraits<CharT>::String AnalyzeFormatT(const CharT* fmt, Placeholde
     placeholders.clear();
     Placeholder<CharT> placeholder;
 
-    auto state = FormatParseState::IN_TEXT;
+    auto state = FormatParseState::InText;
     for (auto ptr = fmt; *ptr != '\0'; ++ptr) {
         if (*ptr == kEscapeBegin) {
             // `{` is an invalid token for in-format state.
-            ENSURE(RAISE, state != FormatParseState::IN_FORMAT).Require<FormatError>();
+            ENSURE(RAISE, state != FormatParseState::InFormat).Require<FormatError>();
             if (*(ptr + 1) == kEscapeBegin) {
                 // Use `{{` to represent literal `{`.
                 analyzed_fmt += kEscapeBegin;
@@ -132,12 +132,12 @@ typename FormatTraits<CharT>::String AnalyzeFormatT(const CharT* fmt, Placeholde
                 }
 
                 // Turn into in-format state.
-                state = FormatParseState::IN_FORMAT;
+                state = FormatParseState::InFormat;
             } else {
                 ENSURE(RAISE, NotReached()).Require<FormatError>();
             }
         } else if (*ptr == kEscapeEnd) {
-            if (state == FormatParseState::IN_TEXT) {
+            if (state == FormatParseState::InText) {
                 ENSURE(RAISE, *(ptr + 1) == kEscapeEnd).Require<FormatError>();
                 analyzed_fmt += kEscapeEnd;
                 ++ptr;
@@ -148,10 +148,10 @@ typename FormatTraits<CharT>::String AnalyzeFormatT(const CharT* fmt, Placeholde
                 placeholder.format_specifier.clear();
 
                 // Now we turn back into in-text state.
-                state = FormatParseState::IN_TEXT;
+                state = FormatParseState::InText;
             }
         } else {
-            if (state == FormatParseState::IN_TEXT) {
+            if (state == FormatParseState::InText) {
                 analyzed_fmt += *ptr;
             } else {
                 placeholder.format_specifier += *ptr;
@@ -159,7 +159,7 @@ typename FormatTraits<CharT>::String AnalyzeFormatT(const CharT* fmt, Placeholde
         }
     }
 
-    ENSURE(RAISE, state == FormatParseState::IN_TEXT).Require<FormatError>();
+    ENSURE(RAISE, state == FormatParseState::InText).Require<FormatError>();
 
     std::sort(std::begin(placeholders), std::end(placeholders),
               [](const auto& lhs, const auto& rhs) {
