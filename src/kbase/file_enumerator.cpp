@@ -39,7 +39,7 @@ Path FileEnumerator::Next()
                 cur_root.Append(pattern_);
             }
 
-            find_handle_.Reset(FindFirstFileExW(cur_root.value().c_str(),
+            find_handle_.reset(FindFirstFileExW(cur_root.value().c_str(),
                                                 FindExInfoBasic,
                                                 &find_data_,
                                                 FindExSearchNameMatch,
@@ -48,8 +48,7 @@ Path FileEnumerator::Next()
             has_find_data_ = true;
         } else {
             // Enumeration in this directory is accomplished.
-            if (!FindNextFileW(find_handle_, &find_data_)) {
-                FindClose(find_handle_);
+            if (!FindNextFileW(find_handle_.get(), &find_data_)) {
                 find_handle_ = nullptr;
             }
         }

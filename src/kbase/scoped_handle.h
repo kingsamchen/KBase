@@ -11,133 +11,89 @@
 
 #include <Windows.h>
 
-#include <cstdio>
-#include <cstddef>
-
 #include "kbase/basic_macros.h"
 
 namespace kbase {
 
-template<typename HandleType>
 struct HandleTraits {
-    using Handle = HandleType;
-
-    HandleTraits() = delete;
-    ~HandleTraits() = delete;
-};
-
-template<>
-struct HandleTraits<HANDLE> {
     using Handle = HANDLE;
 
     HandleTraits() = delete;
 
     ~HandleTraits() = delete;
 
-    static Handle NullHandle()
+    static Handle NullHandle() noexcept
     {
         return nullptr;
     }
 
-    static bool IsValid(Handle handle)
+    static bool IsValid(Handle handle) noexcept
     {
         return handle != nullptr && handle != INVALID_HANDLE_VALUE;
     }
 
-    static void Close(Handle handle)
+    static void Close(Handle handle) noexcept
     {
         CloseHandle(handle);
     }
 };
 
-template<>
-struct HandleTraits<FILE*> {
-    using Handle = FILE*;
-
-    HandleTraits() = delete;
-
-    ~HandleTraits() = delete;
-
-    static Handle NullHandle()
-    {
-        return nullptr;
-    }
-
-    static bool IsValid(Handle handle)
-    {
-        return handle != nullptr;
-    }
-
-    static void Close(Handle handle)
-    {
-        fclose(handle);
-    }
-};
-
-template<typename HandleType, typename TraitsType = HandleTraits<HandleType>>
-class ScopedHandle {
+template<typename Traits>
+class GenericScopedHandle {
 public:
-    using Handle = HandleType;
-    using Traits = TraitsType;
+    using Handle = typename Traits::Handle;
 
-    ScopedHandle() = default;
+    GenericScopedHandle() noexcept
+        : handle_(Traits::NullHandle())
+    {}
 
-    explicit ScopedHandle(Handle handle)
+    explicit GenericScopedHandle(Handle handle) noexcept
         : handle_(handle)
     {}
 
-    ScopedHandle(ScopedHandle&& other)
+    GenericScopedHandle(GenericScopedHandle&& other) noexcept
+        : handle_(other.handle_)
     {
-        *this = std::move(other);
+        other.handle_ = Traits::NullHandle();
     }
 
-    ~ScopedHandle()
-    {
-        *this = nullptr;
-    }
-
-    ScopedHandle& operator=(ScopedHandle&& rhs)
-    {
-        if (this != &rhs) {
-            Close();
-            handle_ = rhs.handle_;
-            rhs.handle_ = Traits::NullHandle();
-        }
-
-        return *this;
-    }
-
-    DISALLOW_COPY(ScopedHandle);
-
-    // A convenient way for destroying the object.
-    ScopedHandle& operator=(nullptr_t)
+    ~GenericScopedHandle()
     {
         Close();
+    }
+
+    GenericScopedHandle& operator=(GenericScopedHandle&& rhs) noexcept
+    {
+        Close();
+
+        handle_ = rhs.handle_;
+        rhs.handle_ = Traits::NullHandle();
+
         return *this;
     }
 
-    explicit operator bool() const
+    // A convenient way for destroying the object.
+    GenericScopedHandle& operator=(nullptr_t) noexcept
+    {
+        Close();
+        handle_ = Traits::NullHandle();
+
+        return *this;
+    }
+
+    DISALLOW_COPY(GenericScopedHandle);
+
+    explicit operator bool() const noexcept
     {
         return Traits::IsValid(handle_);
     }
 
-    // Be careful.
-    operator Handle() const
+    Handle get() const noexcept
     {
         return handle_;
     }
 
-    void Close()
-    {
-        if (Traits::IsValid(handle_)) {
-            Traits::Close(handle_);
-            handle_ = Traits::NullHandle();
-        }
-    }
-
-    // Releases the ownership of the managed handle.
-    // Returns managed handle or NullHandle if there was no managed object.
-    Handle Release()
+    Handle release() noexcept
     {
         Handle self = handle_;
         handle_ = Traits::NullHandle();
@@ -145,37 +101,45 @@ public:
         return self;
     }
 
-    Handle Get() const
-    {
-        return handle_;
-    }
-
-    // Replaces the managed handle.
-    void Reset(Handle new_handle)
+    void reset(Handle new_handle) noexcept
     {
         Close();
         handle_ = new_handle;
     }
 
-    void swap(ScopedHandle& other)
+    void reset(nullptr_t = nullptr) noexcept
+    {
+        Close();
+        handle_ = Traits::NullHandle();
+    }
+
+    void swap(GenericScopedHandle& other) noexcept
     {
         using std::swap;
         swap(handle_, other.handle_);
     }
 
 private:
-    Handle handle_ = Traits::NullHandle();
+    // In most cases, caller should update `handle_` after calling this function.
+    void Close() noexcept
+    {
+        if (Traits::IsValid(handle_)) {
+            Traits::Close(handle_);
+        }
+    }
+
+private:
+    Handle handle_;
 };
 
 // Specialized version for std::swap.
-template<typename HandleType, typename TraitsType = HandleTraits<HandleType>>
-void swap(ScopedHandle<HandleType>& lhs, ScopedHandle<HandleType>& rhs)
+template<typename Traits>
+void swap(GenericScopedHandle<Traits>& lhs, GenericScopedHandle<Traits>& rhs) noexcept
 {
     lhs.swap(rhs);
 }
 
-using ScopedSysHandle = ScopedHandle<HANDLE>;
-using ScopedStdioHandle = ScopedHandle<FILE*>;
+using ScopedHandle = GenericScopedHandle<HandleTraits>;
 
 }   // namespace kbase
 

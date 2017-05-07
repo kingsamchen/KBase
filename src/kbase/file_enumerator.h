@@ -25,8 +25,9 @@ namespace kbase {
 
 namespace internal {
 
-struct FindHandleTraits : public kbase::HandleTraits<HANDLE> {
+struct FindHandleTraits : HandleTraits {
     FindHandleTraits() = delete;
+
     ~FindHandleTraits() = delete;
 
     static void Close(Handle handle)
@@ -35,7 +36,7 @@ struct FindHandleTraits : public kbase::HandleTraits<HANDLE> {
     }
 };
 
-typedef kbase::ScopedHandle<HANDLE, FindHandleTraits> FileFindHandle;
+typedef kbase::GenericScopedHandle<FindHandleTraits> FileFindHandle;
 
 }   // namespace internal
 

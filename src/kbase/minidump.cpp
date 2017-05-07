@@ -21,17 +21,17 @@
 namespace {
 
 using kbase::Path;
-using kbase::ScopedSysHandle;
+using kbase::ScopedHandle;
 
 bool WriteMiniDumpFile(const Path& dump_path, EXCEPTION_POINTERS* ex_ptrs)
 {
-    ScopedSysHandle dump_file(CreateFileW(dump_path.value().c_str(),
-                                          GENERIC_WRITE,
-                                          0,
-                                          nullptr,
-                                          CREATE_ALWAYS,
-                                          FILE_ATTRIBUTE_NORMAL,
-                                          nullptr));
+    ScopedHandle dump_file(CreateFileW(dump_path.value().c_str(),
+                                       GENERIC_WRITE,
+                                       0,
+                                       nullptr,
+                                       CREATE_ALWAYS,
+                                       FILE_ATTRIBUTE_NORMAL,
+                                       nullptr));
     if (!dump_file) {
 #if !defined(NDEBUG)
         kbase::LastError error;
@@ -47,7 +47,7 @@ bool WriteMiniDumpFile(const Path& dump_path, EXCEPTION_POINTERS* ex_ptrs)
 
     BOOL rv = MiniDumpWriteDump(GetCurrentProcess(),
                                 GetCurrentProcessId(),
-                                dump_file.Get(),
+                                dump_file.get(),
                                 MiniDumpNormal,
                                 &exception_information,
                                 nullptr,

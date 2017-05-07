@@ -23,7 +23,7 @@ using kbase::OldFileDisposalOption;
 
 using kbase::PathChar;
 using kbase::PathString;
-using kbase::ScopedSysHandle;
+using kbase::ScopedHandle;
 
 const char* kLogSeverityNames[] { "INFO", "WARNING", "ERROR", "FATAL" };
 
@@ -35,7 +35,7 @@ LoggingDestination g_logging_dest = LoggingDestination::LOG_TO_FILE;
 OldFileDisposalOption g_old_file_option = OldFileDisposalOption::APPEND_TO_OLD_LOG_FILE;
 
 PathString g_log_file_path;
-ScopedSysHandle g_log_file;
+ScopedHandle g_log_file;
 
 const PathChar kLogFileName[] = L"_debug_message.log";
 
@@ -124,7 +124,7 @@ bool InitLogFile()
     // Because if we opened a file with `FILE_APPEND_DATA` flag only, the system
     // will ensure that each appending is atomic.
     // See https://msdn.microsoft.com/en-us/library/windows/hardware/ff548289(v=vs.85).aspx.
-    g_log_file.Reset(CreateFileW(g_log_file_path.c_str(),
+    g_log_file.reset(CreateFileW(g_log_file_path.c_str(),
                                  FILE_APPEND_DATA,
                                  FILE_SHARE_READ | FILE_SHARE_WRITE,
                                  nullptr,
@@ -133,7 +133,7 @@ bool InitLogFile()
                                  nullptr));
     if (!g_log_file) {
         g_log_file_path = GetFallbackLogFilePath();
-        g_log_file.Reset(CreateFileW(g_log_file_path.c_str(),
+        g_log_file.reset(CreateFileW(g_log_file_path.c_str(),
                                      FILE_APPEND_DATA,
                                      FILE_SHARE_READ | FILE_SHARE_WRITE,
                                      nullptr,
@@ -217,7 +217,7 @@ LogMessage::~LogMessage()
     // race condition. This is why you should call `ConfigureLoggingSettings` at start.
     if ((g_logging_dest & LoggingDestination::LOG_TO_FILE) && InitLogFile()) {
         DWORD bytes_written = 0;
-        WriteFile(g_log_file, msg.data(), static_cast<DWORD>(msg.length() * sizeof(char)),
+        WriteFile(g_log_file.get(), msg.data(), static_cast<DWORD>(msg.length() * sizeof(char)),
                   &bytes_written, nullptr);
     }
 }
