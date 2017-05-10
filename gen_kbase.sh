@@ -29,5 +29,5 @@ fi
 sh_root=`pwd`
 cmake_file_path=$sh_root"/src"
 cd $kbase_obj_dir
-cmake -D CMAKE_BUILD_TYPE=$build_type $cmake_file_path
+cmake -D CMAKE_CXX_COMPILER="/usr/bin/clang++" CMAKE_BUILD_TYPE=$build_type $cmake_file_path
 make

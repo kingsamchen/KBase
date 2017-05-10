@@ -31,6 +31,7 @@ public:
         : exit_callback_(std::forward<F>(fn)), dismissed_(false)
     {}
 
+    // Overloaded operator+ on ScopeGuardDriver relies move-ctor.
     ScopeGuard(ScopeGuard&& other) noexcept(std::is_nothrow_move_constructible<ExitCallback>::value)
         : exit_callback_(std::move(other.exit_callback_)), dismissed_(other.dismissed_)
     {

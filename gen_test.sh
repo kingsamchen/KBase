@@ -34,7 +34,7 @@ if [ ! -e $libgtest_path ]; then
 
     gtest_cmake_file_path=$sh_root"/test/third-party"
     cd $gtest_obj_dir
-    cmake -D CMAKE_BUILD_TYPE=$build_type $gtest_cmake_file_path
+    cmake -D CMAKE_CXX_COMPILER="/usr/bin/clang++" CMAKE_BUILD_TYPE=$build_type $gtest_cmake_file_path
     make
 else
     echo "lib gtest is already updated; nothing to build"
@@ -53,6 +53,5 @@ fi
 
 test_cmake_file_path=$sh_root"/test"
 cd $test_obj_dir
-cmake -D CMAKE_BUILD_TYPE=$build_type $test_cmake_file_path
+cmake -D CMAKE_CXX_COMPILER="/usr/bin/clang++" CMAKE_BUILD_TYPE=$build_type $test_cmake_file_path
 make
-

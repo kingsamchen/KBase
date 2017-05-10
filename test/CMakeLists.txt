@@ -1,6 +1,10 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.1)
 
 project(Test CXX)
+
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 set(CXX_FLAGS
     -g
@@ -18,6 +22,7 @@ set(SOURCES
     samples/error_exception_util_unittest.cpp
     samples/path_unittest.cpp
     samples/pickle_unittest.cpp
+    samples/scope_guard_unittest.cpp
     samples/signals_unittest.cpp
     samples/singleton_unittest.cpp
     samples/stack_walker_unittest.cpp
@@ -28,5 +33,5 @@ set(SOURCES
     samples/tokenizer_unittest.cpp
     )
 
-add_executable(test ${SOURCES})
-target_link_libraries(test ${PROJECT_LINK_LIBS})
+add_executable(kbase_test ${SOURCES})
+target_link_libraries(kbase_test ${PROJECT_LINK_LIBS})
