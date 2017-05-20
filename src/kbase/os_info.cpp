@@ -30,10 +30,10 @@ std::wstring GetProcessorModelName()
 {
     const wchar_t kKeyName[] = L"HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0";
 
-    kbase::RegKey key(HKEY_LOCAL_MACHINE);
-    key.OpenKey(kKeyName, KEY_READ);
+    kbase::RegKey key;
+    key.Open(HKEY_LOCAL_MACHINE, kKeyName, KEY_READ);
     std::wstring processor_model_name;
-    key.ReadValue(L"ProcessorNameString", &processor_model_name);
+    key.ReadValue(L"ProcessorNameString", processor_model_name);
 
     return processor_model_name;
 }

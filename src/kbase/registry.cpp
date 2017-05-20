@@ -5,43 +5,37 @@
 #include "kbase/registry.h"
 
 #include <cassert>
-#include <cstdlib>
 
 #include "kbase/error_exception_util.h"
+#include "kbase/logging.h"
+#include "kbase/string_encoding_conversions.h"
 #include "kbase/string_util.h"
 
 namespace kbase {
 
-RegKey::RegKey()
+RegKey::RegKey() noexcept
     : key_(nullptr)
 {}
 
-RegKey::RegKey(HKEY key)
-    : key_(key)
+RegKey::RegKey(HKEY rootkey, const wchar_t* subkey, REGSAM access, DWORD& disposition)
+    : key_(nullptr)
+{
+    auto rv = RegCreateKeyExW(rootkey, subkey, 0, nullptr, REG_OPTION_NON_VOLATILE, access,
+                                  nullptr, &key_, &disposition);
+
+    LOG_IF(WARNING, rv != ERROR_SUCCESS)
+        << "Failed to create instance for key " << kbase::WideToUTF8(subkey)
+        << "; Error: " << rv;
+}
+
+RegKey::RegKey(RegKey&& other) noexcept
+    : key_(other.Release())
 {}
 
-RegKey::RegKey(HKEY rootkey, const wchar_t* subkey, REGSAM access)
-    : key_(nullptr)
+RegKey& RegKey::operator=(RegKey&& other) noexcept
 {
-    if (rootkey) {
-        Create(rootkey, subkey, access);
-    } else {
-        assert(!subkey);
-    }
-}
-
-RegKey::RegKey(RegKey&& other)
-    : key_(nullptr)
-{
-    *this = std::move(other);
-}
-
-RegKey& RegKey::operator=(RegKey&& other)
-{
-    if (this != &other) {
-        key_ = other.key_;
-        other.key_ = nullptr;
-    }
+    Close();
+    key_ = other.Release();
 
     return *this;
 }
@@ -51,7 +45,46 @@ RegKey::~RegKey()
     Close();
 }
 
-HKEY RegKey::Release()
+// static
+RegKey RegKey::Create(HKEY rootkey, const wchar_t* subkey, REGSAM access)
+{
+    DWORD ignored;
+    return Create(rootkey, subkey, access, ignored);
+}
+
+// static
+RegKey RegKey::Create(HKEY rootkey, const wchar_t* subkey, REGSAM access, DWORD& disposition)
+{
+    ENSURE(CHECK, subkey != nullptr).Require();
+    return RegKey(rootkey, subkey, access, disposition);
+}
+
+void RegKey::Open(const wchar_t* subkey, REGSAM access)
+{
+    Open(key_, subkey, access);
+}
+
+void RegKey::Open(HKEY rootkey, const wchar_t* subkey, REGSAM access)
+{
+    ENSURE(CHECK, rootkey != nullptr && subkey != nullptr).Require();
+
+    HKEY new_key = nullptr;
+    auto rv = RegOpenKeyExW(rootkey, subkey, 0, access, &new_key);
+    LOG_IF(WARNING, rv != ERROR_SUCCESS)
+        << "Failed to create instance for key " << kbase::WideToUTF8(subkey)
+        << "; Error: " << rv;
+
+    Close();
+
+    key_ = new_key;
+}
+
+HKEY RegKey::Get() const noexcept
+{
+    return key_;
+}
+
+HKEY RegKey::Release() noexcept
 {
     HKEY key = key_;
     key_ = nullptr;
@@ -59,65 +92,7 @@ HKEY RegKey::Release()
     return key;
 }
 
-void RegKey::Create(HKEY rootkey, const wchar_t* subkey, REGSAM access)
-{
-    Create(rootkey, subkey, access, nullptr);
-}
-
-void RegKey::Create(HKEY rootkey, const wchar_t* subkey, REGSAM access,
-                    DWORD* disposition)
-{
-    assert(rootkey && subkey && access);
-    Close();
-
-    long result = RegCreateKeyEx(rootkey, subkey, 0, nullptr, REG_OPTION_NON_VOLATILE,
-                                 access, nullptr, &key_, disposition);
-    // It seems that Reg* API series does not set calling thread's last error code
-    // when they fail.
-    SetLastError(result);
-    ENSURE(RAISE, result == ERROR_SUCCESS)(LastError()).Require("Can't create or open the key!");
-}
-
-void RegKey::CreateKey(const wchar_t* key_name, REGSAM access)
-{
-    assert(key_name && access);
-
-    HKEY subkey = nullptr;
-    long result = RegCreateKeyEx(key_, key_name, 0, nullptr, REG_OPTION_NON_VOLATILE,
-                                 access, nullptr, &subkey, nullptr);
-    SetLastError(result);
-    ENSURE(RAISE, result == ERROR_SUCCESS)(LastError()).Require("Can't create or open the key!");
-
-    Close();
-
-    key_ = subkey;
-}
-
-void RegKey::Open(HKEY rootkey, const wchar_t* subkey, REGSAM access)
-{
-    assert(rootkey && subkey && access);
-    Close();
-
-    long result = RegOpenKeyEx(rootkey, subkey, 0, access, &key_);
-    SetLastError(result);
-    ENSURE(RAISE, result == ERROR_SUCCESS)(LastError()).Require("Can't open the key!");
-}
-
-void RegKey::OpenKey(const wchar_t* key_name, REGSAM access)
-{
-    assert(key_name && access);
-
-    HKEY subkey = nullptr;
-    long result = RegOpenKeyEx(key_, key_name, 0, access, &subkey);
-    SetLastError(result);
-    ENSURE(RAISE, result == ERROR_SUCCESS)(LastError()).Require("Can't open the key!");
-
-    Close();
-
-    key_ = subkey;
-}
-
-void RegKey::Close()
+void RegKey::Close() noexcept
 {
     if (key_) {
         RegCloseKey(key_);
@@ -126,241 +101,221 @@ void RegKey::Close()
 }
 
 // static
-bool RegKey::KeyExists(HKEY rootkey, const wchar_t* subkey, WOW6432Node node_key)
+bool RegKey::KeyExists(HKEY rootkey, const wchar_t* subkey, WOW6432Node node_mode)
 {
     REGSAM access = KEY_READ;
-    if (node_key == FORCE_WOW64_32KEY) {
+    if (node_mode == Force32KeyOnWOW64) {
         access |= KEY_WOW64_32KEY;
-    } else if (node_key == FORCE_WOW64_64KEY) {
+    } else if (node_mode == Force64KeyOnWOW64) {
         access |= KEY_WOW64_64KEY;
     }
 
     HKEY key = nullptr;
-    long rv = RegOpenKeyExW(rootkey, subkey, 0, access, &key);
+    auto rv = RegOpenKeyExW(rootkey, subkey, 0, access, &key);
     if (rv == ERROR_SUCCESS) {
         RegCloseKey(key);
         return true;
     }
 
-    SetLastError(rv);
-    LastError err;
-    ENSURE(RAISE, err.error_code() == ERROR_FILE_NOT_FOUND)(err).Require("Error in RegOpenKeyEx");
+    ENSURE(RAISE, rv == ERROR_FILE_NOT_FOUND)(rv).Require();
 
     return false;
 }
 
 bool RegKey::HasValue(const wchar_t* value_name) const
 {
-    BOOL result = RegQueryValueEx(key_, value_name, 0, nullptr, nullptr, nullptr);
+    ENSURE(RAISE, IsValid()).Require();
 
-    if (result == ERROR_SUCCESS) {
+    auto rv = RegQueryValueExW(key_, value_name, nullptr, nullptr, nullptr, nullptr);
+    if (rv == ERROR_SUCCESS) {
         return true;
     }
 
-    SetLastError(result);
-    LastError err;
-    ENSURE(RAISE, err.error_code() == ERROR_FILE_NOT_FOUND)(err).Require("Error occured");
+    ENSURE(RAISE, rv == ERROR_FILE_NOT_FOUND)(rv).Require();
 
     return false;
 }
 
 size_t RegKey::GetValueCount() const
 {
-    DWORD value_count = 0;
-    long result = RegQueryInfoKey(key_, nullptr, nullptr, nullptr, nullptr, nullptr,
-                                  nullptr, &value_count, nullptr, nullptr, nullptr,
-                                  nullptr);
+    ENSURE(RAISE, IsValid()).Require();
 
-    SetLastError(result);
-    ENSURE(RAISE, result == ERROR_SUCCESS)(LastError()).Require("Failed to get value count");
+    DWORD value_count = 0;
+    auto rv = RegQueryInfoKeyW(key_, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+                               &value_count, nullptr, nullptr, nullptr, nullptr);
+
+    ENSURE(RAISE, rv == ERROR_SUCCESS)(rv).Require();
 
     return static_cast<size_t>(value_count);
 }
 
-void RegKey::GetValueNameAt(size_t index, std::wstring* value_name) const
+void RegKey::GetValueNameAt(size_t index, std::wstring& value_name) const
 {
-    wchar_t buf[MAX_PATH];
+    ENSURE(RAISE, IsValid()).Require();
+
+    wchar_t buf[MAX_PATH + 1];
     DWORD buf_size = _countof(buf);
+    auto rv = RegEnumValueW(key_, static_cast<DWORD>(index), buf, &buf_size, nullptr, nullptr,
+                            nullptr, nullptr);
 
-    long result = RegEnumValue(key_, static_cast<DWORD>(index), buf, &buf_size,
-                               nullptr, nullptr, nullptr, nullptr);
-    SetLastError(result);
-    ENSURE(RAISE, result == ERROR_SUCCESS)(LastError()).Require("Failed to get value name");
+    ENSURE(RAISE, rv == ERROR_SUCCESS)(rv).Require();
 
-    *value_name = buf;
+    value_name = buf;
 }
 
-void RegKey::DeleteKey(const wchar_t* key_name)
+void RegKey::DeleteKey(const wchar_t* key_name) const
 {
-    assert(key_ && key_name);
+    ENSURE(RAISE, IsValid()).Require();
 
-    long result = RegDeleteTree(key_, key_name);
-    SetLastError(result);
-    ENSURE(RAISE, result == ERROR_SUCCESS)(LastError()).Require("Failed to delete the key");
+    auto rv = RegDeleteTreeW(key_, key_name);
+    ENSURE(RAISE, rv == ERROR_SUCCESS)(rv).Require();
 }
 
-void RegKey::DeleteValue(const wchar_t* value_name)
+void RegKey::DeleteValue(const wchar_t* value_name) const
 {
-    assert(key_ && value_name);
+    ENSURE(RAISE, IsValid()).Require();
 
-    long result = RegDeleteValue(key_, value_name);
-    SetLastError(result);
-    ENSURE(RAISE, result == ERROR_SUCCESS)(LastError()).Require("Failed to delete the value");
+    auto rv = RegDeleteValueW(key_, value_name);
+    ENSURE(RAISE, rv == ERROR_SUCCESS)(rv).Require();
 }
 
-bool RegKey::ReadValue(const wchar_t* value_name, void* data, DWORD* data_size,
-                       DWORD* data_type) const
+void RegKey::ReadRawValue(const wchar_t* value_name, void* data, DWORD& data_size,
+                          DWORD& data_type) const
 {
-    long result = RegGetValue(key_, nullptr, value_name, 0, data_type, data,
-                              data_size);
+    ENSURE(RAISE, IsValid()).Require();
 
-    return result == ERROR_SUCCESS ? true : (SetLastError(result), false);
+    auto rv = RegGetValueW(key_, nullptr, value_name, 0, &data_type, data, &data_size);
+    ENSURE(RAISE, rv == ERROR_SUCCESS)(rv).Require();
 }
 
-bool RegKey::ReadValue(const wchar_t* value_name, DWORD restricted_type, void* data,
-                       DWORD* data_size) const
+void RegKey::ReadRawValue(const wchar_t* value_name, DWORD restricted_type, void* data,
+                          DWORD& data_size) const
 {
-    long result = RegGetValue(key_, nullptr, value_name, restricted_type, nullptr,
-                              data, data_size);
+    ENSURE(RAISE, IsValid()).Require();
 
-    return result == ERROR_SUCCESS ? true : (SetLastError(result), false);
+    auto rv = RegGetValueW(key_, nullptr, value_name, restricted_type, nullptr, data, &data_size);
+    ENSURE(RAISE, rv == ERROR_SUCCESS)(rv).Require();
 }
 
-bool RegKey::ReadValue(const wchar_t* value_name, std::wstring* value) const
+void RegKey::ReadValue(const wchar_t* value_name, std::wstring& value) const
 {
-    const DWORD kCharSize = sizeof(wchar_t);
-    DWORD str_length = 1024;   // including null
+    ENSURE(RAISE, IsValid()).Require();
+
+    constexpr DWORD kCharSize = sizeof(wchar_t);
+
+    // Length including null.
+    DWORD str_length = 1024;
+
     // It seems that automatic expansion for environment strings in RegGetValue
     // behaves incorrect when using std::basic_string as its buffer.
     // Therefore, does expansions on our own.
-    DWORD restricted_type = RRF_RT_REG_SZ | RRF_NOEXPAND | RRF_RT_REG_EXPAND_SZ;
+    DWORD restricted_type = RRF_RT_REG_SZ | RRF_RT_REG_EXPAND_SZ | RRF_NOEXPAND;
     DWORD data_type = 0;
     DWORD data_size = 0;
+
     std::wstring raw_data;
 
-    long result = 0;
+    long rv = 0;
     do {
         wchar_t* data_ptr = WriteInto(raw_data, str_length);
         data_size = str_length * kCharSize;
-        result = RegGetValue(key_, nullptr, value_name, restricted_type, &data_type,
-                             data_ptr, &data_size);
-        if (result == ERROR_SUCCESS) {
+        rv = RegGetValueW(key_, nullptr, value_name, restricted_type, &data_type, data_ptr,
+                          &data_size);
+        if (rv == ERROR_SUCCESS) {
             if (data_type == REG_SZ) {
                 size_t written_length = data_size / kCharSize - 1;
-                value->assign(data_ptr, written_length);
-                return true;
-            } else if (data_type == REG_EXPAND_SZ) {
+                value.assign(data_ptr, written_length);
+                return;
+            }
+
+            if (data_type == REG_EXPAND_SZ) {
                 std::wstring expanded;
                 wchar_t* ptr = WriteInto(expanded, str_length);
-                DWORD size = ExpandEnvironmentStrings(data_ptr, ptr, str_length);
-                if (size == 0) {
-                    // functions fails, and it internally sets the last error.
-                    return false;
-                } else if (size > str_length) {
+                DWORD size = ExpandEnvironmentStringsW(data_ptr, ptr, str_length);
+                ENSURE(RAISE, size > 0)(LastError()).Require();
+                if (size > str_length) {
                     data_size = size * kCharSize;
-                    result = ERROR_MORE_DATA;
+                    rv = ERROR_MORE_DATA;
                 } else {
-                    value->assign(ptr, size - 1);
-                    return true;
+                    value.assign(ptr, size - 1);
+                    return;
                 }
             }
         }
-    } while (result == ERROR_MORE_DATA && (str_length = data_size / kCharSize, true));
+    } while (rv == ERROR_MORE_DATA && (str_length = data_size / kCharSize, true));
 
-    // An error caused by registry APIs occured.
-    SetLastError(result);
-    return false;
+    ENSURE(RAISE, NotReached())(rv).Require();
 }
 
-bool RegKey::ReadValue(const wchar_t* value_name,
-                       std::vector<std::wstring>* values) const
+void RegKey::ReadValue(const wchar_t* value_name, std::vector<std::wstring>& values) const
 {
-    assert(values);
-    const size_t kCharSize = sizeof(wchar_t);
+    ENSURE(RAISE, IsValid()).Require();
+
+    constexpr size_t kCharSize = sizeof(wchar_t);
     DWORD restricted_type = RRF_RT_REG_MULTI_SZ;
     DWORD data_size = 0;
 
-    // gets the data size, in bytes.
-    bool result = ReadValue(value_name, restricted_type, nullptr, &data_size);
-    if (!result) {
-        return false;
-    }
+    // Acquires the data size, in bytes.
+    ReadRawValue(value_name, restricted_type, nullptr, data_size);
 
     std::wstring raw_data;
     wchar_t* data_ptr = WriteInto(raw_data, data_size / kCharSize);
-    result = ReadValue(value_name, restricted_type, data_ptr, &data_size);
-    if (!result) {
-        return false;
-    }
+    ReadRawValue(value_name, restricted_type, data_ptr, data_size);
 
-    SplitString(raw_data, std::wstring(1, 0), *values);
-
-    return true;
+    SplitString(raw_data, std::wstring(1, L'\0'), values);
 }
 
-bool RegKey::ReadValue(const wchar_t* value_name, DWORD* value) const
+void RegKey::ReadValue(const wchar_t* value_name, DWORD& value) const
 {
-    assert(value);
     DWORD restricted_type = RRF_RT_DWORD;
     DWORD tmp = 0;
     DWORD data_size = sizeof(DWORD);
 
-    bool result = ReadValue(value_name, restricted_type, &tmp, &data_size);
-    if (!result) {
-        return false;
-    }
+    ReadRawValue(value_name, restricted_type, &tmp, data_size);
 
-    assert(data_size == sizeof(DWORD));
-    *value = tmp;
+    ENSURE(CHECK, data_size == sizeof(DWORD))(data_size).Require();
 
-    return true;
+    value = tmp;
 }
 
-bool RegKey::ReadValue(const wchar_t* value_name, DWORD64* value) const
+void RegKey::ReadValue(const wchar_t* value_name, DWORD64& value) const
 {
-    assert(value);
     DWORD restricted_type = RRF_RT_QWORD;
     DWORD64 tmp = 0;
     DWORD data_size = sizeof(DWORD64);
 
-    bool result = ReadValue(value_name, restricted_type, &tmp, &data_size);
-    if (!result) {
-        return false;
-    }
+    ReadRawValue(value_name, restricted_type, &tmp, data_size);
 
-    assert(data_size == sizeof(DWORD64));
-    *value = tmp;
+    ENSURE(CHECK, data_size == sizeof(DWORD64))(data_size).Require();
 
-    return true;
+    value = tmp;
 }
 
-void RegKey::WriteValue(const wchar_t* value_name, DWORD value)
+void RegKey::WriteValue(const wchar_t* value_name, DWORD value) const
 {
     WriteValue(value_name, &value, sizeof(DWORD), REG_DWORD);
 }
 
-void RegKey::WriteValue(const wchar_t* value_name, DWORD64 value)
+void RegKey::WriteValue(const wchar_t* value_name, DWORD64 value) const
 {
     WriteValue(value_name, &value, sizeof(DWORD64), REG_QWORD);
 }
 
-void RegKey::WriteValue(const wchar_t* value_name, const wchar_t* value)
+void RegKey::WriteValue(const wchar_t* value_name, const wchar_t* value, size_t length) const
 {
-    WriteValue(value_name, value, sizeof(wchar_t) * (wcslen(value) + 1), REG_SZ);
+    // Data size includes terminating-null character.
+    WriteValue(value_name, value, sizeof(wchar_t) * (length + 1), REG_SZ);
 }
 
 void RegKey::WriteValue(const wchar_t* value_name, const void* data, size_t data_size,
-                        DWORD data_type)
+                        DWORD data_type) const
 {
-    assert(data && data_size > 0);
-    long result = RegSetValueEx(key_,
-                                value_name,
-                                0,
-                                data_type,
-                                static_cast<const BYTE*>(data),
-                                static_cast<DWORD>(data_size));
-    SetLastError(result);
-    ENSURE(RAISE, result == ERROR_SUCCESS)(LastError()).Require("Failed to write value");
+    ENSURE(CHECK, data && data_size > 0).Require();
+
+    auto rv = RegSetValueExW(key_, value_name, 0, data_type, static_cast<const BYTE*>(data),
+                             static_cast<DWORD>(data_size));
+
+    ENSURE(RAISE, rv == ERROR_SUCCESS)(rv).Require();
 }
 
 // RegKeyIterator class implementations.
