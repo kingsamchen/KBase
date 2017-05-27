@@ -45,15 +45,18 @@ TEST(RegistryTest, OpenKeys)
     {
         RegKey key;
         EXPECT_FALSE(static_cast<bool>(key));
+        EXPECT_TRUE(key.subkey_name().empty());
 
         key.Open(HKEY_LOCAL_MACHINE, LR"(SYSTEM\CurrentControlSet)", KEY_READ);
         EXPECT_TRUE(static_cast<bool>(key));
+        EXPECT_FALSE(key.subkey_name().empty());
 
         key.Open(L"Control", KEY_READ);
         EXPECT_TRUE(static_cast<bool>(key));
 
         key.Open(L"FakeSubkey", KEY_READ);
         EXPECT_FALSE(static_cast<bool>(key));
+        EXPECT_TRUE(key.subkey_name().empty());
     }
 
     {
@@ -141,6 +144,46 @@ TEST(RegistryTest, ValueOperations)
     RegKey dk;
     dk.Open(HKEY_CURRENT_USER, L"SOFTWARE", DELETE | KEY_READ | KEY_WRITE);
     dk.DeleteKey(L"KBase");
+}
+
+TEST(RegistryTest, RegKeyIteratorBasic)
+{
+    RegKeyIterator regkey_it(HKEY_CURRENT_USER, L"SOFTWARE");
+    ASSERT_NE(regkey_it, RegKeyIterator());
+
+    auto name = regkey_it->subkey_name();
+    EXPECT_FALSE(name.empty());
+    EXPECT_TRUE(static_cast<bool>(*regkey_it));
+
+    {
+        RegKeyIterator copy(regkey_it);
+        EXPECT_EQ(copy ,regkey_it);
+        EXPECT_EQ(copy->subkey_name(), regkey_it->subkey_name());
+    }
+
+    EXPECT_TRUE(static_cast<bool>(*regkey_it));
+}
+
+TEST(RegistryTest, RegKeyIteratorIteration)
+{
+    RegKeyIterator it(HKEY_CURRENT_USER, L"SOFTWARE");
+    while (it != RegKeyIterator()) {
+        ++it;
+    }
+
+    EXPECT_EQ(it, RegKeyIterator());
+}
+
+TEST(RegistryTest, RegKeyIteratorRangeBasedFor)
+{
+    RegKeyIterator it(HKEY_CURRENT_USER, L"SOFTWARE");
+    bool rv = false;
+    for (const auto& key : it) {
+        rv |= static_cast<bool>(key);
+        std::wcout << key.subkey_name() << "\n";
+    }
+
+    EXPECT_TRUE(rv);
 }
 
 }   // namespace kbase

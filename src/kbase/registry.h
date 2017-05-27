@@ -9,7 +9,7 @@
 #ifndef KBASE_REGISTRY_H_
 #define KBASE_REGISTRY_H_
 
-#include <array>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -66,6 +66,11 @@ public:
     explicit operator bool() const noexcept
     {
         return IsValid();
+    }
+
+    const std::wstring& subkey_name() const noexcept
+    {
+        return subkey_name_;
     }
 
     // Returns true if the registry key exists; Returns false if it doesn't.
@@ -136,125 +141,68 @@ private:
 
 private:
     HKEY key_;
+    std::wstring subkey_name_;
 };
 
+// Iterates over the sub-keys of a given registry key.
 class RegKeyIterator {
 public:
-    // If construction fails, the internal state is invalid.
-    RegKeyIterator(HKEY rootkey, const wchar_t* folder_key);
+    using iterator_category = std::input_iterator_tag;
+    using difference_type = ptrdiff_t;
+    using value_type = RegKey;
+    using reference = const RegKey&;
+    using pointer = const RegKey*;
 
-    ~RegKeyIterator();
+    // Constructs an end iterator.
+    RegKeyIterator() = default;
 
-    // Support for move-semantics
-    RegKeyIterator(RegKeyIterator&& other);
-    RegKeyIterator& operator=(RegKeyIterator&& other);
+    // Constructs a registry key iterator that refers to the first subkey of the given
+    // registry key. If the given key cannot be iterated, returns an end iterator.
+    RegKeyIterator(HKEY rootkey, const wchar_t* subkey);
 
-    DISALLOW_COPY(RegKeyIterator);
+    explicit RegKeyIterator(const RegKey& key);
 
-    bool Valid() const
-    {
-        return key_ != nullptr && index_ >= 0;
-    }
+    ~RegKeyIterator() = default;
 
-    int index() const
-    {
-        return index_;
-    }
+    DEFAULT_COPY(RegKeyIterator);
 
-    size_t subkey_count() const
-    {
-        return subkey_count_;
-    }
-
-    const wchar_t* key_name() const
-    {
-        return key_name_.data();
-    }
+    DEFAULT_MOVE(RegKeyIterator);
 
     RegKeyIterator& operator++();
 
-private:
-    bool Read();
-    void Close();
+    reference operator*() const noexcept;
+
+    pointer operator->() const noexcept;
+
+    friend bool operator==(const RegKeyIterator& lhs, const RegKeyIterator& rhs) noexcept
+    {
+        return lhs.impl_ == rhs.impl_;
+    }
+
+    friend bool operator!=(const RegKeyIterator& lhs, const RegKeyIterator& rhs) noexcept
+    {
+        return !(lhs == rhs);
+    }
 
 private:
-    HKEY key_;
-    int index_; // when index_ becomes negative, enumeration is done.
-    size_t subkey_count_;
-    std::array<wchar_t, MAX_PATH> key_name_;
+    class Impl;
+    std::shared_ptr<Impl> impl_;
 };
 
-class RegValueIterator {
-private:
-    enum {
-        INITIAL_NAME_SIZE = MAX_PATH,
-        INITIAL_VALUE_SIZE = 512
-    };
+inline RegKeyIterator& begin(RegKeyIterator& it) noexcept
+{
+    return it;
+}
 
-public:
-    RegValueIterator(HKEY rootkey, const wchar_t* folder_key);
+inline const RegKeyIterator& begin(const RegKeyIterator& it) noexcept
+{
+    return it;
+}
 
-    ~RegValueIterator();
-
-    RegValueIterator(const RegValueIterator&) = delete;
-    RegValueIterator& operator=(const RegValueIterator&) = delete;
-
-    // Support for move-semantics.
-    RegValueIterator(RegValueIterator&& other);
-    RegValueIterator& operator=(RegValueIterator&& other);
-
-    bool Valid() const
-    {
-        return key_ != nullptr && index_ >= 0;
-    }
-
-    int index() const
-    {
-        return index_;
-    }
-
-    size_t value_count() const
-    {
-        return value_count_;
-    }
-
-    DWORD type() const
-    {
-        return type_;
-    }
-
-    const wchar_t* value_name() const
-    {
-        return value_name_.c_str();
-    }
-
-    size_t value_size() const
-    {
-        return value_size_;
-    }
-
-    const char* value() const
-    {
-        return value_.data();
-    }
-
-    RegValueIterator& operator++();
-
-private:
-    bool Read();
-    void Close();
-
-private:
-    HKEY key_;
-    int index_;
-    size_t value_count_;
-    DWORD max_value_name_length_;  // always in characters.
-    DWORD max_value_length_;       // in bytes.
-    DWORD type_;
-    std::wstring value_name_;
-    std::vector<char> value_;
-    size_t value_size_;
-};
+inline RegKeyIterator end(const RegKeyIterator&) noexcept
+{
+    return RegKeyIterator();
+}
 
 }   // namespace kbase
 

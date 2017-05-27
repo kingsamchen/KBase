@@ -4,10 +4,11 @@
 
 #include "kbase/registry.h"
 
-#include <cassert>
+#include <Shlwapi.h>
 
 #include "kbase/error_exception_util.h"
 #include "kbase/logging.h"
+#include "kbase/scope_guard.h"
 #include "kbase/string_encoding_conversions.h"
 #include "kbase/string_util.h"
 
@@ -21,21 +22,27 @@ RegKey::RegKey(HKEY rootkey, const wchar_t* subkey, REGSAM access, DWORD& dispos
     : key_(nullptr)
 {
     auto rv = RegCreateKeyExW(rootkey, subkey, 0, nullptr, REG_OPTION_NON_VOLATILE, access,
-                                  nullptr, &key_, &disposition);
+                              nullptr, &key_, &disposition);
 
     LOG_IF(WARNING, rv != ERROR_SUCCESS)
         << "Failed to create instance for key " << kbase::WideToUTF8(subkey)
         << "; Error: " << rv;
+
+    if (rv == ERROR_SUCCESS) {
+        subkey_name_ = subkey;
+    }
 }
 
 RegKey::RegKey(RegKey&& other) noexcept
-    : key_(other.Release())
+    : key_(other.Release()), subkey_name_(std::move(other.subkey_name_))
 {}
 
 RegKey& RegKey::operator=(RegKey&& other) noexcept
 {
     Close();
+
     key_ = other.Release();
+    subkey_name_ = std::move(other.subkey_name_);
 
     return *this;
 }
@@ -77,6 +84,10 @@ void RegKey::Open(HKEY rootkey, const wchar_t* subkey, REGSAM access)
     Close();
 
     key_ = new_key;
+
+    if (rv == ERROR_SUCCESS) {
+        subkey_name_ = subkey;
+    }
 }
 
 HKEY RegKey::Get() const noexcept
@@ -98,6 +109,8 @@ void RegKey::Close() noexcept
         RegCloseKey(key_);
         key_ = nullptr;
     }
+
+    subkey_name_.clear();
 }
 
 // static
@@ -318,197 +331,140 @@ void RegKey::WriteValue(const wchar_t* value_name, const void* data, size_t data
     ENSURE(RAISE, rv == ERROR_SUCCESS)(rv).Require();
 }
 
-// RegKeyIterator class implementations.
+// -*- RegKeyIterator::Impl implementations -*-
 
-RegKeyIterator::RegKeyIterator(HKEY rootkey, const wchar_t* folder_key)
-    : key_(nullptr), index_(-1), subkey_count_(0)
-{
-    long result = RegOpenKeyEx(rootkey, folder_key, 0, KEY_READ, &key_);
-    if (result == ERROR_SUCCESS) {
-        DWORD subkey_count = 0;
-        result = RegQueryInfoKey(key_, nullptr, nullptr, nullptr, &subkey_count,
-                                 nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
-                                 nullptr);
-        if (result != ERROR_SUCCESS) {
-            Close();
-        } else {
-            subkey_count_ = subkey_count;
-            index_ = subkey_count - 1;
-        }
+class RegKeyIterator::Impl {
+public:
+    // Will take the ownership of `key`.
+    Impl(HKEY key, int subkey_count);
+
+    ~Impl();
+
+    DISALLOW_COPY(Impl);
+
+    DISALLOW_MOVE(Impl);
+
+    // Returns true, if successfully advanced to the next key.
+    // Returns false, if there is no more key to iterate.
+    bool Next();
+
+    const value_type& subkey() const noexcept
+    {
+        return subkey_;
     }
 
-    Read();
-}
+private:
+    HKEY key_;
+    int next_index_;
+    int subkey_count_;
+    value_type subkey_;
+};
 
-RegKeyIterator::~RegKeyIterator()
+RegKeyIterator::Impl::Impl(HKEY key, int subkey_count)
+    : key_(key), next_index_(0), subkey_count_(subkey_count)
 {
-    Close();
+    ENSURE(CHECK, key != nullptr && subkey_count > 0)(key)(subkey_count).Require();
+
+    Next();
 }
 
-RegKeyIterator::RegKeyIterator(RegKeyIterator&& other)
-{
-    *this = std::move(other);
-}
-
-RegKeyIterator& RegKeyIterator::operator=(RegKeyIterator&& other)
-{
-    if (this != &other) {
-        key_ = other.key_;
-        index_ = other.index_;
-
-        other.key_ = nullptr;
-        other.index_ = -1;
-
-        key_name_ = std::move(other.key_name_);
-    }
-
-    return *this;
-}
-
-void RegKeyIterator::Close()
+RegKeyIterator::Impl::~Impl()
 {
     if (key_) {
         RegCloseKey(key_);
-        key_ = nullptr;
     }
 }
 
-bool RegKeyIterator::Read()
+bool RegKeyIterator::Impl::Next()
 {
-    if (Valid()) {
-        DWORD name_length = MAX_PATH;
-        long result = RegEnumKeyEx(key_, index_, key_name_.data(), &name_length,
-                                   nullptr, nullptr, nullptr, nullptr);
-        if (result == ERROR_SUCCESS) {
-            return true;
-        }
+    if (next_index_ >= subkey_count_) {
+        return false;
     }
 
-    key_name_[0] = L'\0';
-    return false;
+    wchar_t name_buf[MAX_PATH + 1];
+    DWORD name_buf_size = _countof(name_buf);
+    auto rv = RegEnumKeyExW(key_, next_index_, name_buf, &name_buf_size, nullptr, nullptr, nullptr,
+                            nullptr);
+
+    ENSURE(RAISE, rv == ERROR_SUCCESS)(rv).Require();
+
+    // Be careful, opening some registry keys may fail due to lack of administrator privilege.
+    subkey_.Open(key_, name_buf, KEY_READ | KEY_SET_VALUE);
+
+    ++next_index_;
+
+    return true;
+}
+
+// -*- RegKeyIterator implementations -*-
+
+RegKeyIterator::RegKeyIterator(HKEY rootkey, const wchar_t* subkey)
+{
+    HKEY key = nullptr;
+    auto rv = RegOpenKeyExW(rootkey, subkey, 0, KEY_READ, &key);
+    if (rv != ERROR_SUCCESS) {
+        LOG(WARNING) << "Failed to construct RegKeyIterator on " << subkey << "; Error: " << rv;
+        return;
+    }
+
+    auto guard = MAKE_SCOPE_GUARD { RegCloseKey(key); };
+
+    DWORD subkey_count = 0;
+    rv = RegQueryInfoKeyW(key, nullptr, nullptr, nullptr, &subkey_count, nullptr, nullptr, nullptr,
+                          nullptr, nullptr, nullptr, nullptr);
+
+    if (rv != ERROR_SUCCESS) {
+        LOG(WARNING) << "Failed to query count of subkey for " << subkey << "; Error: " << rv;
+        return;
+    }
+
+    if (subkey_count > 0) {
+        impl_ = std::make_shared<Impl>(key, static_cast<int>(subkey_count));
+        guard.Dismiss();
+    }
+}
+
+RegKeyIterator::RegKeyIterator(const RegKey& regkey)
+{
+    if (!regkey) {
+        return;
+    }
+
+    HKEY key = SHRegDuplicateHKey(regkey.Get());
+    auto guard = MAKE_SCOPE_GUARD { RegCloseKey(key); };
+
+    DWORD subkey_count = 0;
+    auto result = RegQueryInfoKeyW(key, nullptr, nullptr, nullptr, &subkey_count, nullptr, nullptr,
+                                   nullptr, nullptr, nullptr, nullptr, nullptr);
+
+    if (result != ERROR_SUCCESS) {
+        LOG(WARNING) << "Failed to query count of subkey; Error: " << result;
+        return;
+    }
+
+    if (subkey_count > 0) {
+        impl_ = std::make_shared<Impl>(key, static_cast<int>(subkey_count));
+        guard.Dismiss();
+    }
 }
 
 RegKeyIterator& RegKeyIterator::operator++()
 {
-    if (Valid()) {
-        --index_;
-        Read();
+    if (!impl_->Next()) {
+        impl_ = nullptr;
     }
 
     return *this;
 }
 
-// RegValueIterator class implementations
-
-RegValueIterator::RegValueIterator(HKEY rootkey, const wchar_t* folder_key)
-    : key_(nullptr),
-      index_(-1),
-      value_count_(0),
-      value_(INITIAL_VALUE_SIZE, 0),
-      value_size_(0)
+RegKeyIterator::reference RegKeyIterator::operator*() const noexcept
 {
-    long result = RegOpenKeyEx(rootkey, folder_key, 0, KEY_READ, &key_);
-    if (result == ERROR_SUCCESS) {
-        DWORD value_count = 0;
-        DWORD max_value_name_length = 0, max_value_length = 0;
-        result = RegQueryInfoKey(key_, nullptr, nullptr, nullptr, nullptr, nullptr,
-                                 nullptr, &value_count, &max_value_name_length,
-                                 &max_value_length, nullptr, nullptr);
-        if (result != ERROR_SUCCESS) {
-            Close();
-        } else {
-            value_count_ = value_count;
-            index_ = value_count - 1;
-            max_value_name_length_ = max_value_name_length;
-            max_value_length_ = max_value_length;
-        }
-    }
-
-    Read();
+    return impl_->subkey();
 }
 
-RegValueIterator::~RegValueIterator()
+RegKeyIterator::pointer RegKeyIterator::operator->() const noexcept
 {
-    Close();
-}
-
-RegValueIterator::RegValueIterator(RegValueIterator&& other)
-{
-    *this = std::move(other);
-}
-
-RegValueIterator& RegValueIterator::operator=(RegValueIterator&& other)
-{
-    if (this != &other) {
-        key_ = other.key_;
-        index_ = other.index_;
-        value_count_ = other.value_count_;
-        type_ = other.type_;
-        value_size_ = other.value_size_;
-        value_name_ = std::move(other.value_name_);
-        value_ = std::move(other.value_);
-
-        other.key_ = nullptr;
-        other.index_ = -1;
-        other.value_count_ = 0;
-        other.type_ = REG_NONE;
-        other.value_size_ = 0;
-    }
-
-    return *this;
-}
-
-void RegValueIterator::Close()
-{
-    if (key_) {
-        RegCloseKey(key_);
-        key_ = nullptr;
-    }
-}
-
-RegValueIterator& RegValueIterator::operator++()
-{
-    if (Valid()) {
-        --index_;
-        Read();
-    }
-
-    return *this;
-}
-
-bool RegValueIterator::Read()
-{
-    if (Valid()) {
-        DWORD value_size = INITIAL_VALUE_SIZE;
-        DWORD name_length = INITIAL_NAME_SIZE;
-        wchar_t* name = WriteInto(value_name_, name_length);
-        long result = RegEnumValue(key_, index_, name, &name_length, nullptr, &type_,
-                                   reinterpret_cast<BYTE*>(&value_[0]), &value_size);
-        // Current size is too small.
-        if (result == ERROR_MORE_DATA) {
-            assert(value_size < max_value_length_);
-            assert(name_length < max_value_name_length_);
-
-            value_size = max_value_length_;
-            name_length = max_value_name_length_;
-            name = WriteInto(value_name_, name_length);
-            value_.resize(value_size, 0);
-
-            result = RegEnumValue(key_, index_, name, &name_length, nullptr, &type_,
-                                  reinterpret_cast<BYTE*>(&value_[0]), &value_size);
-        }
-
-        if (result == ERROR_SUCCESS) {
-            value_size_ = value_size;
-            return true;
-        }
-    }
-
-    type_ = REG_NONE;
-    value_name_[0] = L'\0';
-    value_[0] = 0;
-    value_size_ = 0;
-    return false;
+    return &impl_->subkey();
 }
 
 }   // namespace kbase
