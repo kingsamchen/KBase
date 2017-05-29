@@ -13,10 +13,10 @@
 #include "kbase/pickle.h"
 #include "kbase/secure_c_runtime.h"
 
+namespace {
+
 using kbase::Pickle;
 using kbase::PickleReader;
-
-namespace {
 
 typedef struct {
     uint32_t payload_size;
@@ -88,6 +88,8 @@ bool EqualsPickle(const Pickle& lhs, const Pickle& rhs)
 }
 
 }   // namespace
+
+namespace kbase {
 
 TEST(PickleTest, Construction)
 {
@@ -373,3 +375,5 @@ TEST(PickleTest, SerializeAndDeserialize)
     auto unmarshalled_data_list = UnMarshalDataFromPickle(pickle);
     EXPECT_EQ(unmarshalled_data_list, data_list);
 }
+
+}   // namespace kbase
