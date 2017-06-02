@@ -4,49 +4,81 @@
 
 #include <cassert>
 
-#include <Windows.h>
-
 #include "gtest/gtest.h"
 
+#include "kbase/base_path_provider.h"
 #include "kbase/path_service.h"
 
-using namespace kbase;
-
-namespace {
+namespace kbase {
 
 enum PathProviderForTest : PathKey {
-    TEST_PATH_START = 100,
-    DIR_TEST,
-    TEST_PATH_END
+    TestPathStart = 100,
+    DirTest,
+    TestPathEnd
 };
 
-}   // namespace
+Path GetTestDirectory()
+{
+    return Path(PATH_LITERAL("Test"));
+}
+
+enum PathProviderForRecursive : PathKey {
+    RecursivePathStart = 200,
+    DirTestOnCurrent,
+    RecursivePathEnd
+};
+
+Path GetTestOnCurrentDirectory()
+{
+    return PathService::Get(DirCurrent).Append(PATH_LITERAL("Test"));
+}
 
 TEST(PathServiceTest, GetPath)
 {
     // PathService::Get always returns absolute path.
-    for (auto key = BASE_PATH_START + 1; key < BASE_PATH_END; ++key) {
+    for (auto key = BasePathStart + 1; key < BasePathEnd; ++key) {
         Path path = PathService::Get(key);
         EXPECT_FALSE(path.empty());
         EXPECT_FALSE(path.ReferenceParent());
+        std::cout << "Path key " << key << " passed\n";
     }
 }
 
 TEST(PathServiceTest, RegisterPathProvider)
 {
-    auto TestPathProvider = [](PathKey key)->Path {
-        assert(key == DIR_TEST);
-        wchar_t buffer[_MAX_PATH+1];
-        GetCurrentDirectory(_MAX_PATH + 1, buffer);
-        return Path(buffer);
+    auto TestPathProvider = [](PathKey key) {
+        if (key == DirTest) {
+           return GetTestDirectory();
+        }
+
+        return Path();
     };
 
-    EXPECT_TRUE(PathService::Get(DIR_TEST).empty());
+    EXPECT_TRUE(PathService::Get(DirTest).empty());
 
-    PathService::RegisterPathProvider(TestPathProvider,
-                                      TEST_PATH_START, TEST_PATH_END);
+    PathService::RegisterPathProvider(TestPathProvider, TestPathStart, TestPathEnd);
 
-    Path path = PathService::Get(DIR_TEST);
+    Path path = PathService::Get(DirTest);
     EXPECT_FALSE(path.empty());
     EXPECT_FALSE(path.ReferenceParent());
 }
+
+TEST(PathServiceTest, RecursiveGet)
+{
+    auto provider_fn = [](PathKey key) {
+        if (key == DirTestOnCurrent) {
+            return GetTestOnCurrentDirectory();
+        }
+
+        return Path();
+    };
+
+    PathService::RegisterPathProvider(provider_fn, RecursivePathStart, RecursivePathEnd);
+
+    Path path;
+    EXPECT_NO_THROW({
+        path = PathService::Get(DirTestOnCurrent);
+    });
+}
+
+}   // namespace kbase

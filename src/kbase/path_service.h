@@ -13,14 +13,16 @@
 
 #include "kbase/basic_macros.h"
 #include "kbase/basic_types.h"
-#include "kbase/base_path_provider.h"
 #include "kbase/path.h"
 
 namespace kbase {
 
+// The path service is thread-safe. It is also OK to call PathService::Get() inside
+// a provider function.
+
 class PathService {
 public:
-    typedef std::function<Path(PathKey)> ProviderFunc;
+    using ProviderFunc = std::function<Path(PathKey)>;
 
     PathService() = delete;
 
@@ -37,9 +39,7 @@ public:
     // Users can register their own path provider along with a bunch of new path keys.
     // By default, only in debug mode does this function internally do key overlapping
     // checking.
-    // WARNING: The provider itself must not call |PathService::Get|.
-    static void RegisterPathProvider(ProviderFunc provider,
-                                     PathKey start, PathKey end);
+    static void RegisterPathProvider(ProviderFunc provider, PathKey start, PathKey end);
 
     // Disables internal cache.
     static void DisableCache();

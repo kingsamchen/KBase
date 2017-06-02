@@ -4,31 +4,26 @@
 
 #include "kbase/path_service.h"
 
-#include <forward_list>
 #include <mutex>
 #include <unordered_map>
+#include <vector>
 
 #include "kbase/base_path_provider.h"
 #include "kbase/error_exception_util.h"
 #include "kbase/file_util.h"
 #include "kbase/lazy.h"
 
-using kbase::Path;
-using kbase::PathKey;
-using kbase::Lazy;
-
-namespace kbase {
-
-Path BasePathProvider(PathKey);
-
-}   // namespace kbase
-
 namespace {
 
-typedef kbase::PathService::ProviderFunc ProviderFunc;
-typedef std::unordered_map<PathKey, Path> PathMap;
+using kbase::Lazy;
+using kbase::Path;
+using kbase::PathKey;
+using kbase::PathService;
 
-// Both |start| and |end| are used to prevent path keys claimed by different
+using ProviderFunc = PathService::ProviderFunc ;
+using PathMap = std::unordered_map<PathKey, Path>;
+
+// Both `start` and `end` are used to prevent path keys claimed by different
 // providers being overlapped.
 struct PathProvider {
     ProviderFunc fn;
@@ -36,51 +31,57 @@ struct PathProvider {
     PathKey end;
 };
 
-// We keep providers in a linked list, and ensure that our provider is always placed
-// in tail.
-typedef std::forward_list<PathProvider> ProviderChain;
-
-struct PathData {
-    ProviderChain providers;
-    std::mutex lock;
-    PathMap cached_path_table;
+struct PathContext {
+    std::recursive_mutex mutex;
+    std::vector<PathProvider> providers;
+    PathMap path_cache;
     bool cache_disabled;
 
-    PathData()
+    PathContext()
         : providers({ PathProvider { kbase::BasePathProvider,
-                                     kbase::BASE_PATH_START,
-                                     kbase::BASE_PATH_END }}),
+                                     kbase::BasePathStart,
+                                     kbase::BasePathEnd }}),
           cache_disabled(false)
     {}
+
+    DISALLOW_COPY(PathContext);
 };
 
-PathData& GetPathData()
+PathContext& GetPathContext()
 {
-    static Lazy<PathData> path_data;
-    return path_data.value();
+    static Lazy<PathContext> path_context;
+    return path_context.value();
 }
 
-// Returns the path corresponding to the key, or an empty path if no cache was found.
-// The caller takes responsibility for thread safety.
-Path GetPathFromCache(PathKey key, const PathData& path_data)
+// Returns the path corresponding to the `key`, or an empty path if no cache was found.
+Path GetPathFromCache(PathKey key)
 {
-    if (path_data.cache_disabled || key == kbase::DIR_CURRENT) {
+    auto& path_context = GetPathContext();
+    std::lock_guard<std::recursive_mutex> lock(path_context.mutex);
+
+    if (path_context.cache_disabled || key == kbase::DirCurrent) {
         return Path();
     }
 
-    auto it = path_data.cached_path_table.find(key);
-    if (it != path_data.cached_path_table.end()) {
-        return it->second;
-    }
-
-    return Path();
+    auto it = path_context.path_cache.find(key);
+    return it != path_context.path_cache.end() ? it->second : Path();
 }
 
-// The caller takes responsibility for thread safety.
-void EnsureNoPathKeyOverlapped(PathKey start, PathKey end, const PathData& path_data)
+void CachePathWithKey(PathKey key, const Path& path)
+{
+    auto& path_context = GetPathContext();
+    std::lock_guard<std::recursive_mutex> lock(path_context.mutex);
+
+    // We don't cache current directory.
+    if (!path_context.cache_disabled && key != kbase::DirCurrent) {
+        path_context.path_cache[key] = path;
+    }
+}
+
+void EnsureNoPathKeyOverlapped(PathKey start, PathKey end, const PathContext& path_data)
 {
     for (const PathProvider& provider : path_data.providers) {
-        ENSURE(CHECK, start >= provider.end || end <= provider.start)
+        ENSURE(CHECK, start > provider.end || end < provider.start)
             (start)(end)(provider.start)(provider.end).Require();
     }
 }
@@ -92,96 +93,82 @@ namespace kbase {
 // static
 Path PathService::Get(PathKey key)
 {
-    PathData& path_data = GetPathData();
-    ENSURE(CHECK, key >= BASE_PATH_START)(key).Require();
-    ENSURE(CHECK, path_data.providers.empty() == false).Require();
+    ENSURE(CHECK, key >= BasePathStart)(key).Require();
+    ENSURE(CHECK, GetPathContext().providers.empty() == false).Require();
 
-    ProviderChain::const_iterator provider;
+    PathContext& path_context = GetPathContext();
+
+    Path path = GetPathFromCache(key);
+    if (!path.empty()) {
+        return path;
+    }
+
     {
-        std::lock_guard<std::mutex> scoped_lock(path_data.lock);
-        Path&& path = GetPathFromCache(key, path_data);
-        if (!path.empty()) {
-            return path;
-        }
-
-        // To prevent head being modified by accidently registering a new provider
-        // from other threads.
-        provider = path_data.providers.begin();
-    }
-
-    Path path;
-    for (; provider != path_data.providers.end(); ++provider) {
-        path = provider->fn(key);
-        if (!path.empty()) {
-            break;
+        std::lock_guard<std::recursive_mutex> lock(path_context.mutex);
+        for (const auto& provider : path_context.providers) {
+            path = provider.fn(key);
+            if (!path.empty()) {
+                break;
+            }
         }
     }
 
-    // No corresponding path to the path key.
+    // No path that associates with the key was found.
     if (path.empty()) {
         return path;
     }
 
-    // Ensure that the returned path never contains '..'.
+    // Ensure the returned path never contains '..'.
     if (!path.IsAbsolute()) {
-        Path&& full_path = MakeAbsoluteFilePath(path);
+        Path full_path = MakeAbsoluteFilePath(path);
         ENSURE(CHECK, !full_path.empty())(path.value()).Require();
         path = std::move(full_path);
     }
 
-    // Special case for current direcotry: We never cache it.
-    std::lock_guard<std::mutex> scoped_lock(path_data.lock);
-    if (!path_data.cache_disabled && key != DIR_CURRENT) {
-        path_data.cached_path_table[key] = path;
-    }
+    CachePathWithKey(key, path);
 
     return path;
 }
 
 // static
-void PathService::RegisterPathProvider(ProviderFunc provider,
-                                       PathKey start, PathKey end)
+void PathService::RegisterPathProvider(ProviderFunc provider, PathKey start, PathKey end)
 {
-    PathData& path_data = GetPathData();
-    ENSURE(CHECK, path_data.providers.empty() == false).Require();
     ENSURE(CHECK, start < end)(start)(end).Require();
 
-    std::lock_guard<std::mutex> scoped_lock(path_data.lock);
+    PathContext& path_context = GetPathContext();
 
-#ifdef _DEBUG
-    EnsureNoPathKeyOverlapped(start, end, path_data);
+    std::lock_guard<std::recursive_mutex> lock(path_context.mutex);
+
+#if !defined(NDEBUG)
+    EnsureNoPathKeyOverlapped(start, end, path_context);
 #endif
 
-    path_data.providers.emplace_front(PathProvider { provider, start, end });
+    path_context.providers.push_back(PathProvider { provider, start, end });
 }
 
 // static
 void PathService::DisableCache()
 {
-    PathData& path_data = GetPathData();
+    PathContext& path_context = GetPathContext();
 
-    std::lock_guard<std::mutex> scoped_lock(path_data.lock);
+    std::lock_guard<std::recursive_mutex> scoped_lock(path_context.mutex);
 
-    if (path_data.cache_disabled) {
-        return;
+    if (!path_context.cache_disabled) {
+        path_context.path_cache.clear();
+        path_context.cache_disabled = true;
     }
-
-    path_data.cached_path_table.clear();
-    path_data.cache_disabled = true;
 }
 
 // static
 void PathService::EnableCache()
 {
-    PathData& path_data = GetPathData();
+    PathContext& path_context = GetPathContext();
 
-    std::lock_guard<std::mutex> scoped_lock(path_data.lock);
+    std::lock_guard<std::recursive_mutex> lock(path_context.mutex);
 
-    if (!path_data.cache_disabled) {
-        return;
+    if (path_context.cache_disabled) {
+        path_context.cache_disabled = false;
     }
-
-    path_data.cache_disabled = false;
 }
 
 }   // namespace kbase

@@ -9,28 +9,36 @@
 #ifndef KBASE_BASE_PATH_PROVIDER_H_
 #define KBASE_BASE_PATH_PROVIDER_H_
 
+#include "kbase/basic_macros.h"
 #include "kbase/basic_types.h"
+#include "kbase/path.h"
 
 namespace kbase {
 
 enum BasePathKey : PathKey {
-    BASE_PATH_START = 0,
-    FILE_EXE,               // path with filename of the current executable.
-    FILE_MODULE,            // path with filename of the module running the code.
-    DIR_CURRENT,            // current directory.
-    DIR_EXE,                // directory containing FILE_EXE.
-    DIR_MODULE,             // directory containing FILE_MODULE.
-    DIR_TEMP,               // temporary directory.
-    DIR_USER_DESKTOP,       // current user's desktop.
-    DIR_PUBLIC_DESKTOP,     // public user's desktop.
-    DIR_WINDOWS,            // windows directory, i.e. C:\Windows.
-    DIR_SYSTEM,             // system directory, i.e. C:\Windows\System32.
-    DIR_PROGRAM_FILES,      // C:\Program Files.
-    DIR_PROGRAM_FILESX86,   // C:\Program Files or C:\Program Files (x86).
-    DIR_APP_DATA,           // current user's application data directory.
-    DIR_COMMON_APP_DATA,    // C:\ProgramData on or after system Vista.
-    BASE_PATH_END
+    BasePathStart = 0,
+    FileExe,               // Path with filename of the current executable.
+    FileModule,            // Path with filename of the module running the code.
+    DirExe,                // Directory containing FileExe.
+    DirModule,             // Directory containing FileModule.
+    DirCurrent,            // Current directory.
+    DirTemp,               // Temporary directory.
+    DirHome,               // User's home directory.
+#if defined(OS_WIN)
+    DirUserDesktop,        // Current user's desktop.
+    DirPublicDesktop,      // Public user's desktop.
+    DirWindows,            // Windows directory, i.e. C:\Windows.
+    DirSystem,             // System directory, i.e. C:\Windows\System32.
+    DirProgramFiles,       // Directory C:\Program Files.
+    DirProgramFilesX86,    // Directory C:\Program Files or C:\Program Files (x86).
+    DirRoamingAppData,     // Directory %AppData%.
+    DirLocalAppData,       // Directory %LocalAppData%.
+    DirCommonAppData,      // Usually C:\ProgramData.
+#endif
+    BasePathEnd
 };
+
+Path BasePathProvider(PathKey key);
 
 }   // namespace kbase
 

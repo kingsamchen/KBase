@@ -14,6 +14,10 @@
 // See @ http://blogs.msdn.com/b/oldnewthing/archive/2004/10/25/247180.aspx
 extern "C" IMAGE_DOS_HEADER __ImageBase;
 
+// Use macros to enforce inlining code.
+#define CURRENT_EXE() nullptr
+#define CURRENT_MODULE() reinterpret_cast<HMODULE>(&__ImageBase)
+
 namespace {
 
 using kbase::Path;
@@ -28,80 +32,89 @@ Path ShellGetFolderPath(const KNOWNFOLDERID& folder_id)
     return Path(folder_path);
 }
 
+Path GetModulePath(HMODULE module, wchar_t* buf, DWORD buf_size)
+{
+    GetModuleFileNameW(module, buf, buf_size);
+    return Path(buf);
+}
+
 }   // namespace
 
 namespace kbase {
 
 Path BasePathProvider(PathKey key)
 {
-    // Though the system does have support for long file path, I decide to ignore
-    // it here.
-    const size_t kMaxPath = MAX_PATH + 1;
+    // For simplicity, just ignore long path here.
+    constexpr DWORD kMaxPath = MAX_PATH + 1;
     wchar_t buffer[kMaxPath] {0};
     Path path;
 
     switch (key) {
-        case FILE_EXE:
-            GetModuleFileName(nullptr, buffer, kMaxPath);
-            path = Path(buffer);
+        case FileExe:
+            path = GetModulePath(CURRENT_EXE(), buffer, kMaxPath);
             break;
 
-        case FILE_MODULE: {
-            HMODULE module = reinterpret_cast<HMODULE>(&__ImageBase);
-            GetModuleFileName(module, buffer, kMaxPath);
-            path = Path(buffer);
+        case FileModule: {
+            path = GetModulePath(CURRENT_MODULE(), buffer, kMaxPath);
             break;
         }
 
-        case DIR_EXE:
-            path = PathService::Get(FILE_EXE).parent_path();
+        case DirExe:
+            path = GetModulePath(CURRENT_EXE(), buffer, kMaxPath).parent_path();
             break;
 
-        case DIR_MODULE:
-            path = PathService::Get(FILE_MODULE).parent_path();
+        case DirModule:
+            path = GetModulePath(CURRENT_MODULE(), buffer, kMaxPath).parent_path();
             break;
 
-        case DIR_CURRENT:
-            GetCurrentDirectory(kMaxPath, buffer);
+        case DirCurrent:
+            GetCurrentDirectoryW(kMaxPath, buffer);
             path = Path(buffer);
             break;
 
-        case DIR_TEMP:
-            GetTempPath(kMaxPath, buffer);
+        case DirTemp:
+            GetTempPathW(kMaxPath, buffer);
             path = Path(buffer);
             break;
 
-        case DIR_USER_DESKTOP:
+        case DirHome:
+            path = ShellGetFolderPath(FOLDERID_Profile);
+            break;
+
+        case DirUserDesktop:
             path = ShellGetFolderPath(FOLDERID_Desktop);
             break;
 
-        case DIR_PUBLIC_DESKTOP:
+        case DirPublicDesktop:
             path = ShellGetFolderPath(FOLDERID_PublicDesktop);
             break;
 
-        case DIR_WINDOWS:
-            GetWindowsDirectory(buffer, kMaxPath);
+        case DirWindows:
+            path = ShellGetFolderPath(FOLDERID_Windows);
+            break;
+
+        case DirSystem:
+            GetSystemDirectoryW(buffer, kMaxPath);
             path = Path(buffer);
             break;
 
-        case DIR_SYSTEM:
-            GetSystemDirectory(buffer, kMaxPath);
-            path = Path(buffer);
-            break;
-
-        case DIR_PROGRAM_FILES:
+        case DirProgramFiles:
             path = ShellGetFolderPath(FOLDERID_ProgramFiles);
             break;
 
-        case DIR_PROGRAM_FILESX86:
+        case DirProgramFilesX86:
             path = ShellGetFolderPath(FOLDERID_ProgramFilesX86);
             break;
 
-        case DIR_APP_DATA:
+        case DirRoamingAppData:
             path = ShellGetFolderPath(FOLDERID_RoamingAppData);
             break;
 
-        case DIR_COMMON_APP_DATA:
+        case DirLocalAppData:
+            path = ShellGetFolderPath(FOLDERID_LocalAppData);
+            break;
+
+        case DirCommonAppData:
             path = ShellGetFolderPath(FOLDERID_ProgramData);
             break;
 

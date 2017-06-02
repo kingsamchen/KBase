@@ -7,6 +7,7 @@
 
 #include "gtest/gtest.h"
 
+#include "kbase/base_path_provider.h"
 #include "kbase/file_util.h"
 #include "kbase/path_service.h"
 #include "kbase/string_util.h"
@@ -15,7 +16,7 @@ using namespace kbase;
 
 namespace {
 
-const Path dir = PathService::Get(DIR_CURRENT).AppendWith(L"abc_test");
+const Path dir = PathService::Get(DirCurrent).AppendWith(L"abc_test");
 const Path file_path = dir.AppendWith(L"abc.txt");
 
 void CreateDirectoryWithFile()
