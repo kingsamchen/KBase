@@ -6,6 +6,7 @@
 
 #include "gtest/gtest.h"
 
+#include "kbase/basic_macros.h"
 #include "kbase/base_path_provider.h"
 #include "kbase/path_service.h"
 
@@ -19,7 +20,7 @@ enum PathProviderForTest : PathKey {
 
 Path GetTestDirectory()
 {
-    return Path(PATH_LITERAL("Test"));
+    return Path(PATH_LITERAL("kbase_test"));
 }
 
 enum PathProviderForRecursive : PathKey {
@@ -30,7 +31,7 @@ enum PathProviderForRecursive : PathKey {
 
 Path GetTestOnCurrentDirectory()
 {
-    return PathService::Get(DirCurrent).Append(PATH_LITERAL("Test"));
+    return PathService::Get(DirCurrent).Append(PATH_LITERAL("kbase_test"));
 }
 
 TEST(PathServiceTest, GetPath)
@@ -40,7 +41,12 @@ TEST(PathServiceTest, GetPath)
         Path path = PathService::Get(key);
         EXPECT_FALSE(path.empty());
         EXPECT_FALSE(path.ReferenceParent());
-        std::cout << "Path key " << key << " passed\n";
+#if defined(OS_WIN)
+        auto path_value = path.AsUTF8();
+#else
+        auto path_value = path.value();
+#endif
+        std::cout << key << " <-> " << path_value << std::endl;
     }
 }
 

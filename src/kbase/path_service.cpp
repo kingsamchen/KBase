@@ -10,8 +10,15 @@
 
 #include "kbase/base_path_provider.h"
 #include "kbase/error_exception_util.h"
-#include "kbase/file_util.h"
 #include "kbase/lazy.h"
+
+#if defined(OS_WIN)
+#include "kbase/file_util.h"
+#else
+#include <cstdlib>
+
+#include <limits.h>
+#endif
 
 namespace {
 
@@ -22,6 +29,23 @@ using kbase::PathService;
 
 using ProviderFunc = PathService::ProviderFunc ;
 using PathMap = std::unordered_map<PathKey, Path>;
+
+// TODO: Remove this once we port file_util to posix-platform.
+#if !defined(OS_WIN)
+Path MakeAbsoluteFilePath(const Path& path)
+{
+    constexpr size_t kBufSize = PATH_MAX + 1;
+    char buf[kBufSize];
+
+    auto full_path = realpath(path.value().c_str(), buf);
+
+    if (!full_path) {
+        return Path();
+    }
+
+    return Path(full_path);
+}
+#endif
 
 // Both `start` and `end` are used to prevent path keys claimed by different
 // providers being overlapped.
