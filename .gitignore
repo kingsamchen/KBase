@@ -249,3 +249,7 @@ ModelManifest.xml
 
 # Mainly for ycm
 *.pyc
+
+# KDevelop
+*.kdev4/
+*.kdev4

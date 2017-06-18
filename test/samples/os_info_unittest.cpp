@@ -7,83 +7,65 @@
 #include "gtest/gtest.h"
 
 #include "kbase/os_info.h"
-#include "kbase/string_encoding_conversions.h"
 
-using kbase::OSInfo;
-using kbase::SystemVersion;
-using kbase::WOW64Status;
-using kbase::SystemArchitecture;
+namespace kbase {
 
-class OSInfoTest : public ::testing::Test {
-public:
-    static void SetUpTestCase()
-    {
-        instance_ = OSInfo::GetInstance();
-    }
-
-    static OSInfo* instance()
-    {
-        return instance_;
-    }
-
-    // It is used only in Singleton test.
-    OSInfo* instance_ptr = nullptr;
-
-private:
-    static OSInfo* instance_;
-};
-
-TEST_F(OSInfoTest, Singleton)
+TEST(OSInfoTest, UpTime)
 {
-    for (int i = 0; i < 100; ++i) {
-        std::thread th([&]() {
-            if (!instance_ptr) {
-                instance_ptr = OSInfo::GetInstance();
-            } else {
-                ASSERT_EQ(instance_ptr, OSInfo::GetInstance());
-            }
-        });
-
-        th.join();
-    }
+    auto uptime = OSInfo::UpTime();
+    EXPECT_TRUE(uptime.count() > 0);
+    std::cout << "uptime: " << uptime.count() << " seconds\n";
 }
 
-OSInfo* OSInfoTest::instance_;
-
-TEST_F(OSInfoTest, SysVersion)
+#if defined(OS_WIN)
+TEST(OSInfoTest, WOW64)
 {
-    // OSInfo::IsVersionOrGreater
-    EXPECT_TRUE(instance()->IsVersionOrGreater(SystemVersion::WIN_VISTA));
-    EXPECT_TRUE(instance()->IsVersionOrGreater(SystemVersion::WIN_7));
-    EXPECT_TRUE(instance()->IsVersionOrGreater(SystemVersion::WIN_8));
-    EXPECT_TRUE(instance()->IsVersionOrGreater(SystemVersion::WIN_8_1));
-    EXPECT_TRUE(instance()->IsVersionOrGreater(SystemVersion::WIN_10));
+    auto wow64_status = OSInfo::GetWOW64StatusForProcess(GetCurrentProcess());
+    bool host_64bit = OSInfo::RunningOn64BitSystem();
+#if defined(_WIN64)
+    bool app_64bit = true;
+#else
+    bool app_64bit = true;
+#endif
 
-    std::string ver_name = instance()->SystemVersionName();
+    if (host_64bit && !app_64bit) {
+        EXPECT_EQ(WOW64Status::Enabled, wow64_status);
+    } else {
+        EXPECT_EQ(WOW64Status::Disabled, wow64_status);
+    }
+}
+#endif
+
+TEST(OSInfoTest, Version)
+{
+
+#if defined(OS_WIN)
+    // OSInfo::IsVersionOrGreater
+    EXPECT_TRUE(OSInfo::GetInstance()->IsVersionOrGreater(SystemVersion::WinVista));
+    EXPECT_TRUE(OSInfo::GetInstance()->IsVersionOrGreater(SystemVersion::Win7));
+    EXPECT_TRUE(OSInfo::GetInstance()->IsVersionOrGreater(SystemVersion::Win8));
+    EXPECT_TRUE(OSInfo::GetInstance()->IsVersionOrGreater(SystemVersion::Win8_1));
+    EXPECT_TRUE(OSInfo::GetInstance()->IsVersionOrGreater(SystemVersion::Win10));
+#endif
+
+    std::string ver_name = OSInfo::GetInstance()->SystemName();
     std::cout << ver_name << std::endl;
     EXPECT_TRUE(ver_name != "Unknown");
+
+    auto ver_num = OSInfo::GetInstance()->version_number();
+    EXPECT_TRUE(ver_num.major_ver > 0 && ver_num.minor_ver >= 0);
+    std::cout << "Version number: " << ver_num.major_ver << "." << ver_num.minor_ver << "\n";
 }
 
-TEST_F(OSInfoTest, SysArchitecture)
+TEST(OSInfoTest, Misc)
 {
-    EXPECT_TRUE(instance()->RunningOn64BitSystem());
+    EXPECT_EQ(SystemArchitecture::X86_64, OSInfo::GetInstance()->architecture());
 
-    auto processor_model = instance()->ProcessorModelName();
-    std::cout << kbase::WideToASCII(processor_model) << std::endl;
-    EXPECT_FALSE(processor_model.empty());
+    EXPECT_GE(OSInfo::GetInstance()->number_of_cores(), 1UL);
+    std::cout << "num-of-cores: " << OSInfo::GetInstance()->number_of_cores() << "\n";
 
-    EXPECT_FALSE(instance()->IsServerSystem());
-
-    EXPECT_EQ(SystemArchitecture::X64_ARCHITECTURE, instance()->architecture());
-
-    EXPECT_NE(0, instance()->NumberOfProcessors());
-
-    EXPECT_EQ(65536, instance()->AllocationGranularity());
+    EXPECT_GT(OSInfo::GetInstance()->vm_granularity(), 0UL);
+    std::cout << "allocation-granularity: " << OSInfo::GetInstance()->vm_granularity() << "\n";
 }
 
-TEST_F(OSInfoTest, UpTime)
-{
-    auto time = OSInfo::UpTime();
-    EXPECT_TRUE(time > 0);
-    std::cout << time / 1000 / 1000 / 3600 << std::endl;
-}
+}   // namespace kbase

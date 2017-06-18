@@ -109,6 +109,7 @@
     <ClCompile Include="kbase\environment.cpp" />
     <ClCompile Include="kbase\error_exception_util.cpp" />
     <ClCompile Include="kbase\file_enumerator.cpp" />
+    <ClCompile Include="kbase\os_info.cpp" />
     <ClCompile Include="kbase\path.cpp" />
     <ClCompile Include="kbase\file_util.cpp" />
     <ClCompile Include="kbase\file_version_info.cpp" />
@@ -123,7 +124,7 @@
     <ClCompile Include="kbase\string_encoding_conversions.cpp" />
     <ClCompile Include="kbase\string_format.cpp" />
     <ClCompile Include="kbase\string_util.cpp" />
-    <ClCompile Include="kbase\os_info.cpp" />
+    <ClCompile Include="kbase\os_info_win.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="kbase\at_exit_manager.h" />

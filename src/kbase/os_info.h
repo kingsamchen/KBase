@@ -9,51 +9,53 @@
 #ifndef KBASE_OS_INFO_H_
 #define KBASE_OS_INFO_H_
 
+#include <chrono>
 #include <string>
 
 #include "kbase/basic_macros.h"
-#include "kbase/singleton.h"
 
-using HANDLE = void*;
+#if defined(OS_WIN)
+#include <Windows.h>
+#endif
 
 namespace kbase {
 
 enum class SystemArchitecture {
-    X86_ARCHITECTURE,
-    X64_ARCHITECTURE,
-    IA64_ARCHITECTURE,
-    UNKNOWN_ARCHITECTURE
+    X86,
+    X86_64,
+    Unknown
 };
 
+#if defined(OS_WIN)
 enum class WOW64Status {
-    WOW64_DISABLED,
-    WOW64_ENABLED,
-    WOW64_UNKNOWN
+    Disabled,
+    Enabled,
+    Unknown
 };
 
 // Doesn't support versions prior to Windows Vista.
 enum class SystemVersion : unsigned int {
-    WIN_VISTA,      // Also includes Server 2008.
-    WIN_7,          // Also includes Server 2008 R2.
-    WIN_8,          // Also includes Server 2012.
-    WIN_8_1,        // Also includes Server 2012 R2.
-    WIN_10,
+    WinVista,      // Also includes Server 2008.
+    Win7,          // Also includes Server 2008 R2.
+    Win8,          // Also includes Server 2012.
+    Win8_1,        // Also includes Server 2012 R2.
+    Win10,
 };
+#endif
 
-// It is a singleton.
 class OSInfo {
 public:
     struct VersionNumber {
-        VersionNumber() noexcept
-            : major_version(0), minor_version(0)
+        constexpr VersionNumber() noexcept
+            : major_ver(0), minor_ver(0)
         {}
 
-        constexpr VersionNumber(unsigned long major, unsigned long minor) noexcept
-            : major_version(major), minor_version(minor)
+        constexpr VersionNumber(int major, int minor) noexcept
+            : major_ver(major), minor_ver(minor)
         {}
 
-        unsigned long major_version;
-        unsigned long minor_version;
+        int major_ver;
+        int minor_ver;
     };
 
     ~OSInfo() = default;
@@ -65,43 +67,35 @@ public:
     static OSInfo* GetInstance();
 
     // Returns the uptime of the system.
-    // This duration is in microseconds, and does not include time the system
-    // spends in sleep or hibernation.
-    static uint64_t UpTime() noexcept;
+    // On Windows, this duration does not include time the system spends in sleep
+    // or hibernation.
+    static std::chrono::seconds UpTime();
 
-    // Returns WOW64_ENABLED, if the process is running under WOW64.
-    // Returns WOW64_DISABLED, if the process is 64-bit application, or the process
+#if defined(OS_WIN)
+    // Returns Enabled, if the process is running under WOW64.
+    // Returns Disabled, if the process is either a 64-bit application, or the process
     // is running on 32-bit system.
-    // Returns WOW64_UNKNOWN, if an error occurs.
+    // Returns Unknown, if an error occurs.
     // The handle to a process must have PROCESS_QUERY_INFORMATION access right.
     static WOW64Status GetWOW64StatusForProcess(HANDLE process) noexcept;
 
-    // Returns true, if the host system is 64-bit system.
-    // Return false, if not or an error occured.
-    bool RunningOn64BitSystem() const noexcept;
+    // Returns true, if the host system is 64-bit system;
+    // Returns false, otherwise.
+    static bool RunningOn64BitSystem() noexcept;
 
-    bool IsVersionOrGreater(SystemVersion version) const noexcept;
+    bool IsVersionOrGreater(SystemVersion version) const;
+#endif
 
-    std::string SystemVersionName() const;
+    std::string SystemName() const;
 
-    const std::wstring& ProcessorModelName() const noexcept
+    unsigned long number_of_cores() const noexcept
     {
-        return processor_model_name_;
+        return core_count_;
     }
 
-    bool IsServerSystem() const noexcept
+    unsigned long vm_granularity() const noexcept
     {
-        return is_server_;
-    }
-
-    unsigned long NumberOfProcessors() const noexcept
-    {
-        return processors_;
-    }
-
-    unsigned long AllocationGranularity() const noexcept
-    {
-        return allocation_granularity_;
+        return vm_granularity_;
     }
 
     SystemArchitecture architecture() const noexcept
@@ -117,32 +111,27 @@ public:
 private:
     OSInfo();
 
-    WOW64Status wow64_status() const noexcept
-    {
-        return wow64_status_;
-    }
-
-    friend LeakySingletonTraits<OSInfo>;
-
 private:
     SystemArchitecture architecture_;
-    WOW64Status wow64_status_;
-    bool is_server_;
-    std::wstring processor_model_name_;
     VersionNumber version_number_;
-    unsigned long processors_;
-    unsigned long allocation_granularity_;
+    unsigned long core_count_;
+    unsigned long vm_granularity_;
 };
 
 inline bool operator==(const OSInfo::VersionNumber& lhs, const OSInfo::VersionNumber& rhs) noexcept
 {
-    return lhs.major_version == rhs.major_version && lhs.minor_version == rhs.minor_version;
+    return lhs.major_ver == rhs.major_ver && lhs.minor_ver == rhs.minor_ver;
+}
+
+inline bool operator!=(const OSInfo::VersionNumber& lhs, const OSInfo::VersionNumber& rhs) noexcept
+{
+    return !(lhs == rhs);
 }
 
 inline bool operator<(const OSInfo::VersionNumber& lhs, const OSInfo::VersionNumber& rhs) noexcept
 {
-    return (lhs.major_version < rhs.major_version) ||
-           (lhs.major_version == rhs.major_version && lhs.minor_version < rhs.minor_version);
+    return (lhs.major_ver < rhs.major_ver) ||
+           (lhs.major_ver == rhs.major_ver && lhs.minor_ver < rhs.minor_ver);
 }
 
 }   // namespace kbase
