@@ -12,7 +12,7 @@ set(CXX_FLAGS
 
 include_directories(.)
 
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY  "${CMAKE_BINARY_DIR}/../../")
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY  "${CMAKE_BINARY_DIR}/../")
 
 set(SOURCES
     kbase/at_exit_manager.cpp

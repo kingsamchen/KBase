@@ -13,9 +13,9 @@ set(CXX_FLAGS
 include_directories("third-party/gtest/include" "../src")
 
 set(PROJECT_LINK_LIBS "libkbase.a" "libgtest.a" "pthread")
-link_directories(${CMAKE_BINARY_DIR}/../../)
+link_directories(${CMAKE_BINARY_DIR}/../)
 
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/../../")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/../")
 set(SOURCES
     main.cpp
     samples/at_exit_manager_unittest.cpp
