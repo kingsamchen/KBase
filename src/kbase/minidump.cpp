@@ -23,7 +23,9 @@ namespace {
 using kbase::Path;
 using kbase::ScopedHandle;
 
-bool WriteMiniDumpFile(const Path& dump_path, EXCEPTION_POINTERS* ex_ptrs)
+constexpr auto kStatusDumping = static_cast<DWORD>(0xE0000001);
+
+bool GenerateMiniDumpFile(const Path& dump_path, EXCEPTION_POINTERS* ex_ptrs)
 {
     ScopedHandle dump_file(CreateFileW(dump_path.value().c_str(),
                                        GENERIC_WRITE,
@@ -63,9 +65,10 @@ bool WriteMiniDumpFile(const Path& dump_path, EXCEPTION_POINTERS* ex_ptrs)
     return !!rv;
 }
 
-void HandleException(const Path& dump_path, EXCEPTION_POINTERS* ex_ptrs, bool* succeeded)
+int HandleException(const Path& dump_path, EXCEPTION_POINTERS* ex_ptrs, bool& succeeded)
 {
-    *succeeded = WriteMiniDumpFile(dump_path, ex_ptrs);
+    succeeded = GenerateMiniDumpFile(dump_path, ex_ptrs);
+    return EXCEPTION_CONTINUE_EXECUTION;
 }
 
 }   // namespace
@@ -75,10 +78,13 @@ namespace kbase {
 bool CreateMiniDump(const Path& dump_path)
 {
     bool succeeded = false;
+
+    // To make sure we end up with a valid stack trace for the calling thread, we force to
+    // issue an exception on-the-fly.
     __try {
-        RaiseException(EXCEPTION_BREAKPOINT, 0, 0, nullptr);
-    } __except (HandleException(dump_path, GetExceptionInformation(), &succeeded),
-                EXCEPTION_EXECUTE_HANDLER) {}
+        RaiseException(kStatusDumping, 0, 0, nullptr);
+    } __except (HandleException(dump_path, GetExceptionInformation(), succeeded))
+    {}
 
     return succeeded;
 }
