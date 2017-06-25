@@ -15,13 +15,15 @@ const std::pair<std::string, std::string> hash_pairs[] {
 
 }   // namespace
 
+namespace kbase {
+
 TEST(MD5Test, IncrementHashAndDigestToString)
 {
     kbase::MD5Digest ret;
     kbase::MD5Context context;
-    kbase::MD5Init(&context);
-    kbase::MD5Update(&context, hash_pairs[0].first.data(), hash_pairs[0].first.size());
-    kbase::MD5Final(&context, &ret);
+    kbase::MD5Init(context);
+    kbase::MD5Update(context, hash_pairs[0].first.data(), hash_pairs[0].first.size());
+    kbase::MD5Final(context, ret);
     EXPECT_EQ(hash_pairs[0].second, kbase::MD5DigestToString(ret));
 }
 
@@ -29,7 +31,7 @@ TEST(MD5Test, MD5Sum)
 {
     kbase::MD5Digest digest;
     for (auto& hp : hash_pairs) {
-        kbase::MD5Sum(hp.first.data(), hp.first.size(), &digest);
+        kbase::MD5Sum(hp.first.data(), hp.first.size(), digest);
         EXPECT_EQ(hp.second, kbase::MD5DigestToString(digest));
     }
 }
@@ -40,3 +42,5 @@ TEST(MD5Test, MD5String)
         EXPECT_EQ(hp.second, kbase::MD5String(hp.first));
     }
 }
+
+}   // namespace kbase

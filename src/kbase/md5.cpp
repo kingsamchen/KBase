@@ -43,6 +43,12 @@
 
 #include "kbase/md5.h"
 
+#include "kbase/basic_macros.h"
+
+#if !defined(COMPILER_MSVC)
+#include <cstring>
+#endif
+
 namespace {
 
 using kbase::MD5uint;
@@ -69,7 +75,7 @@ using kbase::MD5Context;
 // The check for little-endian architectures that tolerate unaligned
 // memory accesses is just an optimization. Nothing will break if it
 // doesn't work.
-#if defined(_MSC_VER) ||defined(__i386__) || defined(__x86_64__)
+#if defined(_M_IX86) || defined(_M_X64) || defined(__i386__) || defined(__x86_64__)
 #define SET(n) \
     (*(MD5uint *)&ptr[(n) * 4])
 #define GET(n) \
@@ -89,29 +95,28 @@ using kbase::MD5Context;
 // use this function to make the intention clear.
 // You also are responsible for the possible loss of data.
 template<typename To, typename From>
-inline void TuckInto(To& dest, const From& src)
+void TuckInto(To& dest, const From& src)
 {
     dest = static_cast<To>(src);
 }
 
 // This processes one or more 64-byte data blocks, but does NOT update
 // the bit counters. There are no alignment requirements.
-const void* Transform(MD5Context* context, const void* data, size_t size)
+const void* Transform(MD5Context& context, const void* data, size_t size)
 {
     MD5uint a, b, c, d;
-    MD5uint saved_a, saved_b, saved_c, saved_d;
     const MD5byte* ptr = static_cast<const MD5byte*>(data);
 
-    a = context->a;
-    b = context->b;
-    c = context->c;
-    d = context->d;
+    a = context.a;
+    b = context.b;
+    c = context.c;
+    d = context.d;
 
     do {
-        saved_a = a;
-        saved_b = b;
-        saved_c = c;
-        saved_d = d;
+        MD5uint saved_a = a;
+        MD5uint saved_b = b;
+        MD5uint saved_c = c;
+        MD5uint saved_d = d;
 
         /* Round 1 */
         STEP(F, a, b, c, d, SET(0), 0xd76aa478, 7)
@@ -193,10 +198,10 @@ const void* Transform(MD5Context* context, const void* data, size_t size)
         ptr += 64;
     } while (size -= 64);
 
-    context->a = a;
-    context->b = b;
-    context->c = c;
-    context->d = d;
+    context.a = a;
+    context.b = b;
+    context.c = c;
+    context.d = d;
 
     return ptr;
 }
@@ -205,40 +210,39 @@ const void* Transform(MD5Context* context, const void* data, size_t size)
 
 namespace kbase {
 
-void MD5Init(MD5Context* context)
+void MD5Init(MD5Context& context)
 {
-    context->a = 0x67452301;
-    context->b = 0xefcdab89;
-    context->c = 0x98badcfe;
-    context->d = 0x10325476;
+    context.a = 0x67452301;
+    context.b = 0xefcdab89;
+    context.c = 0x98badcfe;
+    context.d = 0x10325476;
 
-    context->lo = 0;
-    context->hi = 0;
+    context.lo = 0;
+    context.hi = 0;
 }
 
-void MD5Update(MD5Context* context, const void* data, size_t size)
+void MD5Update(MD5Context& context, const void* data, size_t size)
 {
-    MD5uint saved_lo = context->lo;
-    MD5uint used, free;
+    MD5uint saved_lo = context.lo;
 
-    if ((context->lo = static_cast<MD5uint>((saved_lo + size) & 0x1fffffff)) < saved_lo) {
-        context->hi++;
+    if ((context.lo = static_cast<MD5uint>((saved_lo + size) & 0x1fffffff)) < saved_lo) {
+        context.hi++;
     }
 
-    context->hi += static_cast<MD5uint>(size >> 29);
-    used = saved_lo & 0x3f;
+    context.hi += static_cast<MD5uint>(size >> 29);
+    MD5uint used = saved_lo & 0x3f;
 
     if (used) {
-        free = 64 - used;
+        MD5uint free = 64 - used;
         if (size < free) {
-            memcpy(&context->buffer[used], data, size);
+            memcpy(&context.buffer[used], data, size);
             return;
         }
 
-        memcpy(&context->buffer[used], data, free);
+        memcpy(&context.buffer[used], data, free);
         data = static_cast<const MD5byte*>(data) + free;
         size -= free;
-        Transform(context, context->buffer, 64);
+        Transform(context, context.buffer, 64);
     }
 
     if (size >= 64) {
@@ -246,61 +250,60 @@ void MD5Update(MD5Context* context, const void* data, size_t size)
         size &= 0x3f;
     }
 
-    memcpy(context->buffer, data, size);
+    memcpy(context.buffer, data, size);
 }
 
-void MD5Final(MD5Context* context, MD5Digest* digest)
+void MD5Final(MD5Context& context, MD5Digest& digest)
 {
-    unsigned long used, free;
-    used = context->lo & 0x3f;
-    context->buffer[used++] = 0x80;
-    free = 64 - used;
+    unsigned long used = context.lo & 0x3f;
+    context.buffer[used++] = 0x80;
+
+    unsigned long free = 64 - used;
 
     if (free < 8) {
-        memset(&context->buffer[used], 0, free);
-        Transform(context, context->buffer, 64);
+        memset(&context.buffer[used], 0, free);
+        Transform(context, context.buffer, 64);
         used = 0;
         free = 64;
     }
 
-    memset(&context->buffer[used], 0, free - 8);
+    memset(&context.buffer[used], 0, free - 8);
 
-    context->lo <<= 3;
-    TuckInto(context->buffer[56], context->lo);
-    TuckInto(context->buffer[57], context->lo >> 8);
-    TuckInto(context->buffer[58], context->lo >> 16);
-    TuckInto(context->buffer[59], context->lo >> 24);
-    TuckInto(context->buffer[60], context->hi);
-    TuckInto(context->buffer[61], context->hi >> 8);
-    TuckInto(context->buffer[62], context->hi >> 16);
-    TuckInto(context->buffer[63], context->hi >> 24);
+    context.lo <<= 3;
+    TuckInto(context.buffer[56], context.lo);
+    TuckInto(context.buffer[57], context.lo >> 8);
+    TuckInto(context.buffer[58], context.lo >> 16);
+    TuckInto(context.buffer[59], context.lo >> 24);
+    TuckInto(context.buffer[60], context.hi);
+    TuckInto(context.buffer[61], context.hi >> 8);
+    TuckInto(context.buffer[62], context.hi >> 16);
+    TuckInto(context.buffer[63], context.hi >> 24);
 
-    Transform(context, context->buffer, 64);
+    Transform(context, context.buffer, 64);
 
-    MD5Digest& d = *digest;
-    TuckInto(d[0], context->a);
-    TuckInto(d[1], context->a >> 8);
-    TuckInto(d[2], context->a >> 16);
-    TuckInto(d[3], context->a >> 24);
-    TuckInto(d[4], context->b);
-    TuckInto(d[5], context->b >> 8);
-    TuckInto(d[6], context->b >> 16);
-    TuckInto(d[7], context->b >> 24);
-    TuckInto(d[8], context->c);
-    TuckInto(d[9], context->c >> 8);
-    TuckInto(d[10], context->c >> 16);
-    TuckInto(d[11], context->c >> 24);
-    TuckInto(d[12], context->d);
-    TuckInto(d[13], context->d >> 8);
-    TuckInto(d[14], context->d >> 16);
-    TuckInto(d[15], context->d >> 24);
+    TuckInto(digest[0], context.a);
+    TuckInto(digest[1], context.a >> 8);
+    TuckInto(digest[2], context.a >> 16);
+    TuckInto(digest[3], context.a >> 24);
+    TuckInto(digest[4], context.b);
+    TuckInto(digest[5], context.b >> 8);
+    TuckInto(digest[6], context.b >> 16);
+    TuckInto(digest[7], context.b >> 24);
+    TuckInto(digest[8], context.c);
+    TuckInto(digest[9], context.c >> 8);
+    TuckInto(digest[10], context.c >> 16);
+    TuckInto(digest[11], context.c >> 24);
+    TuckInto(digest[12], context.d);
+    TuckInto(digest[13], context.d >> 8);
+    TuckInto(digest[14], context.d >> 16);
+    TuckInto(digest[15], context.d >> 24);
 
-    memset(context, 0, sizeof(*context));
+    memset(&context, 0, sizeof(context));
 }
 
 std::string MD5DigestToString(const MD5Digest& digest)
 {
-    const char kHexDigits[] = "0123456789abcdef";
+    constexpr char kHexDigits[] = "0123456789abcdef";
 
     std::string str;
     str.reserve(16);
@@ -312,18 +315,18 @@ std::string MD5DigestToString(const MD5Digest& digest)
     return str;
 }
 
-void MD5Sum(const void* data, size_t size, MD5Digest* digest)
+void MD5Sum(const void* data, size_t size, MD5Digest& digest)
 {
     MD5Context context;
-    MD5Init(&context);
-    MD5Update(&context, data, size);
-    MD5Final(&context, digest);
+    MD5Init(context);
+    MD5Update(context, data, size);
+    MD5Final(context, digest);
 }
 
-std::string MD5String(const std::string& str)
+std::string MD5String(StringView str)
 {
     MD5Digest digest;
-    MD5Sum(str.data(), str.size(), &digest);
+    MD5Sum(str.data(), str.size(), digest);
 
     return MD5DigestToString(digest);
 }

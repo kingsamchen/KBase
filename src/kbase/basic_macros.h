@@ -17,6 +17,16 @@
 #error Platform not supported
 #endif
 
+#if defined(_MSC_VER)
+#define COMPILER_MSVC 1
+#elif defined(__GNUC__)
+#define COMPILER_GCC 1
+#elif defined(__clang__)
+#define COMPILER_CLANG 1
+#else
+#error Compiler not supported
+#endif
+
 #define DISALLOW_COPY(classname)                        \
     classname(const classname&) = delete;               \
     classname& operator=(const classname&) = delete

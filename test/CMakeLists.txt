@@ -20,6 +20,7 @@ set(SOURCES
     main.cpp
     samples/at_exit_manager_unittest.cpp
     samples/error_exception_util_unittest.cpp
+    samples/md5_unittest.cpp
     samples/os_info_unittest.cpp
     samples/path_service_unittest.cpp
     samples/path_unittest.cpp

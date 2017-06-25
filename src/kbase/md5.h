@@ -11,6 +11,8 @@
 
 #include <array>
 
+#include "kbase/string_view.h"
+
 namespace kbase {
 
 // The underlying implementation of the functions that perform MD5 operations, is
@@ -32,20 +34,20 @@ struct MD5Context {
 // The following three functions are all together used to incrementally calculate
 // the MD5 checksum of a bunch of data.
 
-void MD5Init(MD5Context* context);
+void MD5Init(MD5Context& context);
 
-void MD5Update(MD5Context* context, const void* data, size_t size);
+void MD5Update(MD5Context& context, const void* data, size_t size);
 
-void MD5Final(MD5Context* context, MD5Digest* digest);
-
-// Converts a digest into a hexadecimal string.
-std::string MD5DigestToString(const MD5Digest& digest);
+void MD5Final(MD5Context& context, MD5Digest& digest);
 
 // Calculates the MD5 checksum of a given data.
-void MD5Sum(const void* data, size_t size, MD5Digest* digest);
+void MD5Sum(const void* data, size_t size, MD5Digest& digest);
 
-// Returns the MD5, in hexadecimal, of the |str|.
-std::string MD5String(const std::string& str);
+// Converts a digest into a hexadecimal representation.
+std::string MD5DigestToString(const MD5Digest& digest);
+
+// Returns the MD5 checksum, in hexadecimal, of the `str`.
+std::string MD5String(StringView str);
 
 }   // namespace kbase
 
