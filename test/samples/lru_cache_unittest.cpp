@@ -10,70 +10,77 @@
 
 namespace {
 
+template<typename T, size_t N>
+constexpr size_t array_size(const T(&)[N])
+{
+    return N;
+}
+
 template<typename CacheType>
 bool CacheOrderingMatch(const CacheType& cache,
                         const std::vector<typename CacheType::key_type>& seq)
 {
-    return
-        std::equal(cache.begin(), cache.end(), seq.begin(),
-               [](const typename CacheType::value_type& entry,
-                  const typename CacheType::key_type& key)->bool {
-            return entry.first == key;
-        });
+    return std::equal(cache.begin(), cache.end(), seq.begin(),
+                      [](const typename CacheType::value_type &entry,
+                         const typename CacheType::key_type &key)->bool {
+                          return entry.first == key;
+                      });
 }
 
 }   // namespace
 
+namespace kbase {
+
 TEST(LRUCacheTest, Construction)
 {
-    kbase::LRUTreeCache<int, std::string> non_limited(kbase::LRUTreeCache<int, std::string>::NO_AUTO_EVICT);
+    LRUCache<int, std::string> non_limited(LRUCache<int, std::string>::NoAutoEvict);
     EXPECT_FALSE(non_limited.auto_evict());
     EXPECT_EQ(non_limited.max_size(), 0);
 
-    kbase::LRUHashCache<int, std::string> ltd(1024);
+    LRUCache<int, std::string, HashMap> ltd(1024);
     EXPECT_TRUE(ltd.auto_evict());
     EXPECT_EQ(ltd.max_size(), 1024);
 }
 
 TEST(LRUCacheTest, Put)
 {
-    std::pair<int, std::string> candicates[] {
-        {65, "A"}, {66, "B"}, {67, "C"}, {68, "D"}, {69, "E"}, {70, "F"}, {71, "G"}
+    std::pair<int, std::string> candidates[] {
+            {65, "A"}, {66, "B"}, {67, "C"}, {68, "D"}, {69, "E"}, {70, "F"}, {71, "G"}
     };
 
-    kbase::LRUTreeCache<int, std::string> alphabet(5);
+    LRUCache<int, std::string> alphabet(5);
     EXPECT_TRUE(alphabet.empty());
 
     // case: normal insertion
 
     for (int i = 0; i < 3; ++i) {
-        alphabet.Put(candicates[i].first, candicates[i].second);
+        alphabet.Put(candidates[i].first, candidates[i].second);
     }
 
     EXPECT_EQ(alphabet.size(), 3);
     int idx = 0;
     for (auto it = alphabet.begin(); it != alphabet.end(); ++it, ++idx) {
-        EXPECT_EQ(it->first, candicates[idx].first);
-        EXPECT_EQ(it->second, candicates[idx].second);
+        EXPECT_EQ(it->first, candidates[idx].first);
+        EXPECT_EQ(it->second, candidates[idx].second);
     }
 
     // case: LRU replacement when running out of free space
 
-    for (int i = 3; i < _countof(candicates); ++i) {
-        alphabet.Put(candicates[i].first, candicates[i].second);
+    for (int i = 3; i < array_size(candidates); ++i) {
+        alphabet.Put(candidates[i].first, candidates[i].second);
     }
 
     EXPECT_EQ(alphabet.size(), alphabet.max_size());
     idx = 2;
     for (auto it = alphabet.begin(); it != alphabet.end(); ++it, ++idx) {
-        EXPECT_EQ(it->first, candicates[idx].first);
-        EXPECT_EQ(it->second, candicates[idx].second);
+        EXPECT_EQ(it->first, candidates[idx].first);
+        EXPECT_EQ(it->second, candidates[idx].second);
     }
 
-    // case: cache moveable but noncopyable objects
+    // case: cache movable but non-copyable objects
 
-    using AlphabetTable = kbase::LRUHashCache<std::string, std::unique_ptr<int>>;
-    AlphabetTable reverse_alphabet(AlphabetTable::NO_AUTO_EVICT);
+    using AlphabetTable = LRUCache<std::string, std::unique_ptr<int>, HashMap>;
+    AlphabetTable reverse_alphabet(AlphabetTable::NoAutoEvict);
     reverse_alphabet.Put("A", std::make_unique<int>(65));
     reverse_alphabet.Put("B", std::make_unique<int>(66));
 
@@ -82,8 +89,8 @@ TEST(LRUCacheTest, Put)
 
 TEST(LRUCacheTest, Get)
 {
-    using Dict = kbase::LRUTreeCache<int, std::string>;
-    Dict dt(Dict::NO_AUTO_EVICT);
+    using Dict = LRUCache<int, std::string>;
+    Dict dt(Dict::NoAutoEvict);
     dt.Put(65, "A");
     dt.Put(66, "B");
     dt.Put(67, "C");
@@ -111,8 +118,8 @@ TEST(LRUCacheTest, Get)
 
 TEST(LRUCacheTest, Evict)
 {
-    using Dict = kbase::LRUTreeCache<int, std::string>;
-    Dict dt(Dict::NO_AUTO_EVICT);
+    using Dict = LRUCache<int, std::string>;
+    Dict dt(Dict::NoAutoEvict);
     dt.Put(65, "A");
     dt.Put(66, "B");
     dt.Put(67, "C");
@@ -127,10 +134,10 @@ TEST(LRUCacheTest, Evict)
 
 TEST(LRUCacheTest, move_semantics)
 {
-    using Dict = kbase::LRUTreeCache<int, std::string>;
+    using Dict = LRUCache<int, std::string>;
 
     auto gen = []()->Dict {
-        Dict dt(Dict::NO_AUTO_EVICT);
+        Dict dt(Dict::NoAutoEvict);
         dt.Put(65, "A");
         dt.Put(66, "B");
         dt.Put(67, "C");
@@ -147,3 +154,5 @@ TEST(LRUCacheTest, move_semantics)
     EXPECT_FALSE(messy_dt.auto_evict());
     EXPECT_TRUE(CacheOrderingMatch(messy_dt, {65, 66, 67, 68}));
 }
+
+}   // namespace kbase

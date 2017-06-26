@@ -253,3 +253,6 @@ ModelManifest.xml
 # KDevelop
 *.kdev4/
 *.kdev4
+
+# CLion
+*.idea/

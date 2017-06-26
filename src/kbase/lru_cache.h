@@ -9,6 +9,7 @@
 #ifndef KBASE_LRU_CACHE_H_
 #define KBASE_LRU_CACHE_H_
 
+#include <list>
 #include <map>
 #include <unordered_map>
 
@@ -29,15 +30,11 @@ struct HashMap {
     using MapType = std::unordered_map<Key, Value>;
 };
 
-// A cache faicility that allows O(logn)-time, i.e. TreeMap-based implementation,
-// and O(1)-time, i.e. HashMap-based implementation, access to entries using a key.
+// A cache container that allows O(logn)-time, i.e. TreeMap-based implementation,
+// or O(1)-time, i.e. HashMap-based implementation, access to entries using a key.
 // If auto eviction is enabled, LRU-replacement algorithm would be employed when
 // the cache runs out its free storage.
-// The reason why a TreeMap-based implementation is also provided may be counter-
-// intuitive: tree based caches usually outperform their hash based rivals in
-// string-key circumstances.
-// For a much detailed benchmark, see @ http://timday.bitbucket.org/lru.html
-template<typename Key, typename Entry, template<typename, typename> class Map>
+template<typename Key, typename Entry, template<typename, typename> class Map = TreeMap>
 class LRUCache {
 public:
     using key_type = Key;
@@ -55,20 +52,26 @@ public:
     using const_reverse_iterator = typename CachedEntryList::const_reverse_iterator;
 
     enum : size_type {
-        NO_AUTO_EVICT = 0
+        NoAutoEvict = 0
     };
 
-    explicit LRUCache(size_type max_size)
+    explicit LRUCache(size_type max_size) noexcept(
+        std::is_nothrow_default_constructible<CachedEntryList>::value &&
+        std::is_nothrow_default_constructible<KeyTable>::value)
         : max_size_(max_size)
     {}
 
-    LRUCache(LRUCache&& other)
-        : max_size_(std::move(other.max_size_)),
+    LRUCache(LRUCache&& other) noexcept(
+        std::is_nothrow_move_constructible<CachedEntryList>::value &&
+        std::is_nothrow_move_constructible<KeyTable>::value)
+        : max_size_(other.max_size_),
           entry_ordering_list_(std::move(other.entry_ordering_list_)),
           key_table_(std::move(other.key_table_))
     {}
 
-    LRUCache& operator=(LRUCache&& rhs)
+    LRUCache& operator=(LRUCache&& rhs) noexcept(
+        std::is_nothrow_move_assignable<CachedEntryList>::value &&
+        std::is_nothrow_move_assignable<KeyTable>::value)
     {
         if (this != &rhs) {
             entry_ordering_list_ = std::move(rhs.entry_ordering_list_);
@@ -101,9 +104,9 @@ public:
         return PutInternal(key, std::move(entry));
     }
 
-    // Returns the iterator to the value associated with |key|.
+    // Returns the iterator to the value associated with `key`.
     // Returns end() if no matched value was found.
-    // Accessing a cached entry marks this entry as recently used by moving it to
+    // Access to a cached entry marks this entry as recently used by moving it to
     // the tail of cached entry list.
     iterator Get(const Key& key)
     {
@@ -113,15 +116,14 @@ public:
         }
 
         auto entry_it = key_it->second;
-        entry_ordering_list_.splice(entry_ordering_list_.end(), entry_ordering_list_,
-                                    entry_it);
+        entry_ordering_list_.splice(entry_ordering_list_.end(), entry_ordering_list_, entry_it);
 
         return entry_it;
     }
 
-    // Returns the iterator to the value associated with the |key|.
+    // Returns the iterator to the value associated with the `key`.
     // Returns end() if no such value was found.
-    // These two functions does not affect the ordering.
+    // These two functions does not touch the entry, i.e. will not mark the entry recently used.
 
     const_iterator find(const Key& key) const
     {
@@ -199,19 +201,23 @@ public:
     const_iterator cend() const { return entry_ordering_list_.cend(); }
 
 private:
-    template<typename Key, typename Entry>
-    iterator PutInternal(const Key& key, Entry&& entry)
+    template<typename KeyType, typename EntryType>
+    iterator PutInternal(const KeyType& key, EntryType&& entry)
     {
         auto key_it = key_table_.find(key);
         if (key_it != key_table_.end()) {
-            erase(key_it->second);
-        } else if (auto_evict() && (max_size() == size())) {
+            auto entry_it = key_it->second;
+            entry_it->second = std::forward<EntryType>(entry);
+            entry_ordering_list_.splice(entry_ordering_list_.end(), entry_ordering_list_, entry_it);
+            return entry_it;
+        }
+
+        if (auto_evict() && max_size() == size()) {
             Evict();
         }
 
-        entry_ordering_list_.push_back(value_type(key, std::forward<Entry>(entry)));
-        auto rv = key_table_.insert(
-            std::make_pair(key, --entry_ordering_list_.end()));
+        entry_ordering_list_.push_back({key, std::forward<EntryType>(entry)});
+        auto rv = key_table_.insert({key, std::prev(entry_ordering_list_.end())});
 
         return rv.first->second;
     }
@@ -221,12 +227,6 @@ private:
     CachedEntryList entry_ordering_list_;
     KeyTable key_table_;
 };
-
-template<typename Key, typename Entry>
-using LRUTreeCache = LRUCache<Key, Entry, TreeMap>;
-
-template<typename Key, typename Entry>
-using LRUHashCache = LRUCache<Key, Entry, HashMap>;
 
 }   // namespace kbase
 
