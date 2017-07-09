@@ -6,14 +6,14 @@
 #include <thread>
 #include <vector>
 
-#include <Windows.h>
-
 #include "gtest/gtest.h"
 
-#include "kbase/file_util.h"
+#include "kbase/basic_types.h"
 #include "kbase/logging.h"
 
-using namespace kbase;
+#if defined(OS_WIN)
+#include "kbase/file_util.h"
+#endif
 
 namespace {
 
@@ -29,12 +29,23 @@ bool Boolean(bool b)
     return b;
 }
 
+bool PathExists(const kbase::PathString& path)
+{
+#if defined(OS_WIN)
+    return kbase::PathExists(kbase::Path(path));
+#else
+    return access(path.c_str(), F_OK) == 0;
+#endif
+}
+
 }   // namespace
+
+namespace kbase {
 
 TEST(LoggingTest, MT)
 {
     LoggingSettings settings;
-    settings.log_item_options = LogItemOptions::ENABLE_ALL;
+    settings.log_item_options = LogItemOptions::EnableAll;
     ConfigureLoggingSettings(settings);
 
     std::vector<std::thread> vth;
@@ -43,7 +54,7 @@ TEST(LoggingTest, MT)
     }
 
     std::cout << "all are prepared" << std::endl;
-    for (auto& th : vth) {
+    for (auto &th : vth) {
         th.join();
     }
 }
@@ -51,8 +62,8 @@ TEST(LoggingTest, MT)
 TEST(LoggingTest, MinLevelAndConditionalLogging)
 {
     LoggingSettings logging_settings;
-    logging_settings.min_severity_level = LogSeverity::LOG_ERROR;
-    logging_settings.logging_destination = LoggingDestination::LOG_TO_ALL;
+    logging_settings.min_severity_level = LogSeverity::LogError;
+    logging_settings.logging_destination = LoggingDestination::LogToAll;
     ConfigureLoggingSettings(logging_settings);
     LOG(WARNING) << "LOG(WARNING)";
     LOG_IF(ERROR, Boolean(true)) << "LOG_IF(ERROR, Boolean(true))";
@@ -65,12 +76,12 @@ TEST(LoggingTest, MinLevelAndConditionalLogging)
 
 TEST(LoggingTest, CustomLogFileName)
 {
-    PathString log_name = L"my_test_debug.log";
+    PathString log_name(PATH_LITERAL("my_test_debug.log"));
     LoggingSettings logging_settings;
     logging_settings.log_file_path = log_name;
     ConfigureLoggingSettings(logging_settings);
     LOG(INFO) << "testing customized log file name";
-    ASSERT_TRUE(PathExists(Path(log_name)));
+    ASSERT_TRUE(::PathExists(log_name));
 }
 
 TEST(LoggingTest, FatalLevelCallStack)
@@ -78,3 +89,5 @@ TEST(LoggingTest, FatalLevelCallStack)
     ConfigureLoggingSettings(LoggingSettings());
     LOG(FATAL) << "simulate issuing a fatal error";
 }
+
+}   // namespace kbase

@@ -15,12 +15,6 @@
 #include "kbase/basic_types.h"
 #include "kbase/string_view.h"
 
-#if defined(OS_WIN)
-#define PATH_LITERAL(x) L##x
-#else
-#define PATH_LITERAL(x) x
-#endif
-
 namespace kbase {
 
 class Path {

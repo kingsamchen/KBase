@@ -18,6 +18,7 @@ set(SOURCES
     kbase/at_exit_manager.cpp
     kbase/base_path_provider_posix.cpp
     kbase/error_exception_util.cpp
+    kbase/logging.cpp
     kbase/md5.cpp
     kbase/os_info.cpp
     kbase/os_info_posix.cpp

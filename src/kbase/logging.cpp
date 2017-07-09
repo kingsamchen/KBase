@@ -4,15 +4,23 @@
 
 #include "kbase/logging.h"
 
-#include <cstdio>
+#include <chrono>
 #include <iomanip>
 #include <thread>
 
-#include <Windows.h>
-
-#include "kbase/error_exception_util.h"
-#include "kbase/scoped_handle.h"
+#include "kbase/basic_macros.h"
+//#include "kbase/error_exception_util.h"
+#include "kbase/secure_c_runtime.h"
 #include "kbase/stack_walker.h"
+
+#if defined(OS_WIN)
+#include <Windows.h>
+#endif
+
+#if defined(OS_POSIX)
+#include <fcntl.h>
+#include <unistd.h>
+#endif
 
 namespace {
 
@@ -23,42 +31,47 @@ using kbase::OldFileDisposalOption;
 
 using kbase::PathChar;
 using kbase::PathString;
-using kbase::ScopedHandle;
 
-const char* kLogSeverityNames[] { "INFO", "WARNING", "ERROR", "FATAL" };
+#if defined(OS_WIN)
+using FileHandle = HANDLE;
+const FileHandle kInvalidFileHandle = INVALID_HANDLE_VALUE;
+#else
+using FileHandle = int;
+constexpr FileHandle kInvalidFileHandle = -1;
+#endif
 
-const LogSeverity kAlwaysPrintErrorMinLevel = LogSeverity::LOG_ERROR;
+constexpr const char* kLogSeverityNames[] { "INFO", "WARNING", "ERROR", "FATAL" };
 
-LogSeverity g_min_severity_level = LogSeverity::LOG_INFO;
-LogItemOptions g_log_item_options = LogItemOptions::ENABLE_TIMESTAMP;
-LoggingDestination g_logging_dest = LoggingDestination::LOG_TO_FILE;
-OldFileDisposalOption g_old_file_option = OldFileDisposalOption::APPEND_TO_OLD_LOG_FILE;
+constexpr LogSeverity kAlwaysPrintErrorMinLevel = LogSeverity::LogError;
+
+LogSeverity g_min_severity_level = LogSeverity::LogInfo;
+LogItemOptions g_log_item_options = LogItemOptions::EnableTimestamp;
+LoggingDestination g_logging_dest = LoggingDestination::LogToFile;
+OldFileDisposalOption g_old_file_option = OldFileDisposalOption::AppendToOldFile;
 
 PathString g_log_file_path;
-ScopedHandle g_log_file;
-
-const PathChar kLogFileName[] = L"_debug_message.log";
+FileHandle g_log_file = kInvalidFileHandle;
 
 // Ouputs timestamp in the form like "20160126 09:14:38,456".
 void OutputNowTimestamp(std::ostream& stream)
 {
     namespace chrono = std::chrono;
 
-    // Because c-style date&time utilities don't support microsecond precison,
-    // we have to handle it on our own.
+    // Because c-style date & time don't support microsecond precison, we have to
+    // handle it on our own.
     auto time_now = chrono::system_clock::now();
     auto duration_in_ms = chrono::duration_cast<chrono::milliseconds>(time_now.time_since_epoch());
     auto ms_part = duration_in_ms - chrono::duration_cast<chrono::seconds>(duration_in_ms);
 
     tm local_time_now;
     time_t raw_time = chrono::system_clock::to_time_t(time_now);
-    _localtime64_s(&local_time_now, &raw_time);
+    kbase::SecureLocalTime(&raw_time, &local_time_now);
     stream << std::put_time(&local_time_now, "%Y%m%d %H:%M:%S,")
            << std::setfill('0') << std::setw(3) << ms_part.count();
 }
 
 template<typename charT>
-const charT* ExtractFileName(const charT* file_path)
+constexpr const charT* ExtractFileName(const charT* file_path)
 {
     const charT* p = file_path;
     const charT* last_pos = nullptr;
@@ -71,44 +84,101 @@ const charT* ExtractFileName(const charT* file_path)
     return last_pos ? last_pos + 1 : file_path;
 }
 
-// Returns the default path for log file.
-// We use the same path as the EXE file.
+#if defined(OS_WIN)
+using ProcessID = DWORD;
+#else
+using ProcessID = pid_t;
+#endif
+
+ProcessID GetCurrentProcessID()
+{
+#if defined(OS_WIN)
+    return GetCurrentProcessId();
+#else
+    return getpid();
+#endif
+}
+
+bool IsFileHandleValid(FileHandle handle)
+{
+#if defined(OS_WIN)
+    return handle != INVALID_HANDLE_VALUE && handle != nullptr;
+#else
+    return handle != -1;
+#endif
+}
+
+void DeleteFilePath(const PathString& file_path)
+{
+#if defined(OS_WIN)
+    DeleteFileW(file_path.c_str());
+#else
+    unlink(file_path.c_str());
+#endif
+}
+
+// Returns the default path for the log file.
+// We use the same path as the EXE file on Windows; and on POSIX systems, we simply
+// use current directory.
 PathString GetDefaultLogFilePath()
 {
-    const size_t kMaxPath = MAX_PATH + 1;
+#if defined(OS_WIN)
+    constexpr size_t kMaxPath = MAX_PATH + 1;
     PathChar exe_path[kMaxPath];
     GetModuleFileNameW(nullptr, exe_path, kMaxPath);
 
-    const PathChar kExeExt[] = L".exe";
     PathString default_path(exe_path);
-    auto dot_pos = default_path.rfind(kExeExt);
-    default_path.replace(dot_pos, _countof(kExeExt) - 1, kLogFileName);
+
+    auto dot_pos = default_path.rfind(L".exe");
+    if (dot_pos != PathString::npos) {
+        default_path.erase(dot_pos);
+    }
+
+    default_path += L"_debug.log";
 
     return default_path;
+#else
+    return PathString("debug.log");
+#endif
 }
 
-// Returns the fallback path for the log file.
+#if defined(OS_WIN)
+
+// Returns the fallback path for the log file on Windows.
 // We use the path in current directory as the fallback path, when using the
-// default path is not possible.
+// default path is not possible, such as on which we don't have the access to
+// write the file.
 PathString GetFallbackLogFilePath()
 {
-    ENSURE(CHECK, !g_log_file_path.empty()).Require();
-
-    const size_t kMaxPath = MAX_PATH + 1;
+    constexpr size_t kMaxPath = MAX_PATH + 1;
     PathChar cur_path[kMaxPath];
     GetCurrentDirectoryW(kMaxPath, cur_path);
 
     PathString fallback_path(cur_path);
-    fallback_path.append(L"\\").append(ExtractFileName(g_log_file_path.c_str()));
+    fallback_path.append(L"\\").append(L"debug.log");
 
     return fallback_path;
+}
+
+#endif
+
+void CloseLogFile()
+{
+    if (IsFileHandleValid(g_log_file)) {
+#if defined(OS_WIN)
+        CloseHandle(g_log_file);
+#else
+        close(g_log_file);
+#endif
+        g_log_file = kInvalidFileHandle;
+    }
 }
 
 // Once this function succeed, `g_log_file` refers to a valid and writable file.
 // Returns true, if we initialized the log file successfully, false otherwise.
 bool InitLogFile()
 {
-    if (g_log_file) {
+    if (IsFileHandleValid(g_log_file)) {
         return true;
     }
 
@@ -116,33 +186,39 @@ bool InitLogFile()
         g_log_file_path = GetDefaultLogFilePath();
     }
 
-    if (g_old_file_option == OldFileDisposalOption::DELETE_OLD_LOG_FILE) {
-        DeleteFileW(g_log_file_path.c_str());
+    if (g_old_file_option == OldFileDisposalOption::DeleteOldFile) {
+        DeleteFilePath(g_log_file_path);
     }
 
+#if defined(OS_WIN)
     // Surprisingly, we need neither a local nor a global lock here, on Windows.
     // Because if we opened a file with `FILE_APPEND_DATA` flag only, the system
     // will ensure that each appending is atomic.
     // See https://msdn.microsoft.com/en-us/library/windows/hardware/ff548289(v=vs.85).aspx.
-    g_log_file.reset(CreateFileW(g_log_file_path.c_str(),
+    g_log_file = CreateFileW(g_log_file_path.c_str(),
+                             FILE_APPEND_DATA,
+                             FILE_SHARE_READ | FILE_SHARE_WRITE,
+                             nullptr,
+                             OPEN_ALWAYS,
+                             FILE_ATTRIBUTE_NORMAL,
+                             nullptr);
+    if (g_log_file == INVALID_HANDLE_VALUE) {
+        g_log_file_path = GetFallbackLogFilePath();
+        g_log_file = CreateFileW(g_log_file_path.c_str(),
                                  FILE_APPEND_DATA,
                                  FILE_SHARE_READ | FILE_SHARE_WRITE,
                                  nullptr,
                                  OPEN_ALWAYS,
                                  FILE_ATTRIBUTE_NORMAL,
-                                 nullptr));
-    if (!g_log_file) {
-        g_log_file_path = GetFallbackLogFilePath();
-        g_log_file.reset(CreateFileW(g_log_file_path.c_str(),
-                                     FILE_APPEND_DATA,
-                                     FILE_SHARE_READ | FILE_SHARE_WRITE,
-                                     nullptr,
-                                     OPEN_ALWAYS,
-                                     FILE_ATTRIBUTE_NORMAL,
-                                     nullptr));
+                                 nullptr);
     }
+#else
+    // Similarly, we make atomic appending on POSIX systems, which saves us from using
+    // a global lock.
+    g_log_file = open(g_log_file_path.c_str(), O_CREAT | O_WRONLY | O_APPEND, 0666);
+#endif
 
-    return static_cast<bool>(g_log_file);
+    return IsFileHandleValid(g_log_file);
 }
 
 }   // namespace
@@ -151,18 +227,18 @@ namespace kbase {
 
 namespace internal {
 
-LogSeverity GetMinSeverityLevel()
+LogSeverity GetMinSeverityLevel() noexcept
 {
     return g_min_severity_level;
 }
 
 }   // namespace internal
 
-LoggingSettings::LoggingSettings()
- : min_severity_level(LogSeverity::LOG_INFO),
-   log_item_options(LogItemOptions::ENABLE_TIMESTAMP),
-   logging_destination(LoggingDestination::LOG_TO_FILE),
-   old_file_disposal_option(OldFileDisposalOption::APPEND_TO_OLD_LOG_FILE)
+LoggingSettings::LoggingSettings() noexcept
+ : min_severity_level(LogSeverity::LogInfo),
+   log_item_options(LogItemOptions::EnableTimestamp),
+   logging_destination(LoggingDestination::LogToFile),
+   old_file_disposal_option(OldFileDisposalOption::AppendToOldFile)
 {}
 
 void ConfigureLoggingSettings(const LoggingSettings& settings)
@@ -172,7 +248,7 @@ void ConfigureLoggingSettings(const LoggingSettings& settings)
     g_logging_dest = settings.logging_destination;
     g_old_file_option = settings.old_file_disposal_option;
 
-    if (!(g_logging_dest & LoggingDestination::LOG_TO_FILE)) {
+    if (!(g_logging_dest & LoggingDestination::LogToFile)) {
         return;
     }
 
@@ -180,19 +256,20 @@ void ConfigureLoggingSettings(const LoggingSettings& settings)
         g_log_file_path = settings.log_file_path;
     }
 
-    auto rv = InitLogFile();
-    ENSURE(CHECK, rv)(LastError()).Require();
+    CloseLogFile();
+
+    InitLogFile();
 }
 
 LogMessage::LogMessage(const char* file, int line, LogSeverity severity)
- : file_(file), line_(line), severity_(severity)
+    : file_name_(ExtractFileName(file)), line_(line), severity_(severity)
 {
     InitMessageHeader();
 }
 
 LogMessage::~LogMessage()
 {
-    if (severity_ == LogSeverity::LOG_FATAL) {
+    if (severity_ == LogSeverity::LogFatal) {
         stream_ << "\n";
         StackWalker walker;
         walker.DumpCallStack(stream_);
@@ -201,24 +278,28 @@ LogMessage::~LogMessage()
     stream_ << std::endl;
     std::string msg = stream_.str();
 
-    if (g_logging_dest & LoggingDestination::LOG_TO_SYSTEM_DEBUG_LOG) {
+    if ((g_logging_dest & LoggingDestination::LogToSystemDebugLog) ||
+        severity_ >= kAlwaysPrintErrorMinLevel) {
+#if defined(OS_WIN)
         OutputDebugStringA(msg.c_str());
-        // Also writes to standard error stream.
-        fwrite(msg.data(), sizeof(char), msg.length(), stderr);
-        fflush(stderr);
-    } else if (severity_ >= kAlwaysPrintErrorMinLevel) {
+#endif
+        // Log to standard error stream.
         fwrite(msg.data(), sizeof(char), msg.length(), stderr);
         fflush(stderr);
     }
 
-    // If `InitLogFile` wasn't called at the start of the program, do it on the spot.
+    // If `InitLogFile` wasn't called at the start of the program, do it on the fly.
     // However, if we unfortunately failed to initialize the log file, just skip the writting.
     // Note that, if more than one thread in here try to call `InitLogFile`, there will be a
     // race condition. This is why you should call `ConfigureLoggingSettings` at start.
-    if ((g_logging_dest & LoggingDestination::LOG_TO_FILE) && InitLogFile()) {
+    if ((g_logging_dest & LoggingDestination::LogToFile) && InitLogFile()) {
+#if defined(OS_WIN)
         DWORD bytes_written = 0;
-        WriteFile(g_log_file.get(), msg.data(), static_cast<DWORD>(msg.length() * sizeof(char)),
-                  &bytes_written, nullptr);
+        WriteFile(g_log_file, msg.data(), static_cast<DWORD>(msg.length()), &bytes_written,
+                  nullptr);
+#else
+        write(g_log_file, msg.data(), msg.length());
+#endif
     }
 }
 
@@ -226,20 +307,20 @@ void LogMessage::InitMessageHeader()
 {
     stream_ << "[";
 
-    if (g_log_item_options & LogItemOptions::ENABLE_TIMESTAMP) {
+    if (g_log_item_options & LogItemOptions::EnableTimestamp) {
         OutputNowTimestamp(stream_);
     }
 
-    if (g_log_item_options & LogItemOptions::ENABLE_PROCESS_ID) {
-        stream_ << " " << GetCurrentProcessId();
+    if (g_log_item_options & LogItemOptions::EnableProcessID) {
+        stream_ << " " << GetCurrentProcessID();
     }
 
-    if (g_log_item_options & LogItemOptions::ENABLE_THREAD_ID) {
+    if (g_log_item_options & LogItemOptions::EnableThreadID) {
         stream_ << " " << std::this_thread::get_id();
     }
 
     stream_ << " " << kLogSeverityNames[enum_cast(severity_)]
-            << " " << ExtractFileName(file_) << '(' << line_ << ")]";
+            << " " << file_name_ << '(' << line_ << ")]";
 }
 
 }   // namespace kbase

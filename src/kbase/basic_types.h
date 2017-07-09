@@ -17,13 +17,19 @@
 // Defines types that would be shared by among several files.
 namespace kbase {
 
-// |PathKey| is used by |PathService| and |BasePathProvider|.
+// `PathKey` is used by `PathService` and `BasePathProvider`.
 using PathKey = int;
 
 #if defined(OS_WIN)
 using PathChar = wchar_t;
 #else
 using PathChar = char;
+#endif
+
+#if defined(OS_WIN)
+#define PATH_LITERAL(x) L##x
+#else
+#define PATH_LITERAL(x) x
 #endif
 
 using PathString = std::basic_string<PathChar>;

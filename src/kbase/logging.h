@@ -17,48 +17,47 @@
 
 namespace kbase {
 
-// For keeping this facility independent as possible, try to not introduce other modules,
+// For keeping this facility independent as possible, try not to introduce other modules,
 // such as `Path`, `PathService` etc.
 
 // These log severities will be used as index into the array `log_severity_names`.
 enum class LogSeverity : int {
-    LOG_INFO = 0,
-    LOG_WARNING,
-    LOG_ERROR,
-    LOG_0 = LOG_ERROR,  // For why, see `COMPACT_LOG_0`.
-    LOG_FATAL
+    LogInfo = 0,
+    LogWarning,
+    LogError,
+    LogFatal
 };
 
 namespace internal {
 
-LogSeverity GetMinSeverityLevel();
+LogSeverity GetMinSeverityLevel() noexcept;
 
 }   // namespace internal
 
 enum LogItemOptions {
-    ENABLE_NONE = 0,
-    ENABLE_PROCESS_ID = 1 << 0,
-    ENABLE_THREAD_ID = 1 << 1,
-    ENABLE_TIMESTAMP = 1 << 2,
-    ENABLE_ALL = ENABLE_PROCESS_ID | ENABLE_THREAD_ID | ENABLE_TIMESTAMP
+    EnableNone = 0,
+    EnableProcessID = 1 << 0,
+    EnableThreadID = 1 << 1,
+    EnableTimestamp = 1 << 2,
+    EnableAll = EnableProcessID | EnableThreadID | EnableTimestamp
 };
 
 enum LoggingDestination {
-    LOG_NONE = 0,
-    LOG_TO_FILE = 1 << 0,
-    LOG_TO_SYSTEM_DEBUG_LOG = 1 << 1,
-    LOG_TO_ALL = LOG_TO_FILE | LOG_TO_SYSTEM_DEBUG_LOG
+    LogNone = 0,
+    LogToFile = 1 << 0,
+    LogToSystemDebugLog = 1 << 1,
+    LogToAll = LogToFile | LogToSystemDebugLog
 };
 
 enum OldFileDisposalOption {
-    APPEND_TO_OLD_LOG_FILE,
-    DELETE_OLD_LOG_FILE
+    AppendToOldFile,
+    DeleteOldFile
 };
 
 struct LoggingSettings {
     // Initializes to default values.
     // Note that, if `log_file_path` wasn't specified, use default path.
-    LoggingSettings();
+    LoggingSettings() noexcept;
 
     LogSeverity min_severity_level;
     LogItemOptions log_item_options;
@@ -77,18 +76,24 @@ void ConfigureLoggingSettings(const LoggingSettings& settings);
 // included by <windows.h>, so we add a special macro to handle this peculiar
 // chaos, in case the file was included.
 #define COMPACT_LOG_INFO \
-    kbase::LogMessage(__FILE__, __LINE__, kbase::LogSeverity::LOG_INFO)
+    kbase::LogMessage(__FILE__, __LINE__, kbase::LogSeverity::LogInfo)
 #define COMPACT_LOG_WARNING \
-    kbase::LogMessage(__FILE__, __LINE__, kbase::LogSeverity::LOG_WARNING)
+    kbase::LogMessage(__FILE__, __LINE__, kbase::LogSeverity::LogWarning)
 #define COMPACT_LOG_ERROR \
-    kbase::LogMessage(__FILE__, __LINE__, kbase::LogSeverity::LOG_ERROR)
+    kbase::LogMessage(__FILE__, __LINE__, kbase::LogSeverity::LogError)
 #define COMPACT_LOG_0 \
-    kbase::LogMessage(__FILE__, __LINE__, kbase::LogSeverity::LOG_ERROR)
+    kbase::LogMessage(__FILE__, __LINE__, kbase::LogSeverity::LogError)
 #define COMPACT_LOG_FATAL \
-    kbase::LogMessage(__FILE__, __LINE__, kbase::LogSeverity::LOG_FATAL)
+    kbase::LogMessage(__FILE__, __LINE__, kbase::LogSeverity::LogFatal)
+
+#define LOG_SEVERITY_FOR_INFO kbase::LogSeverity::LogInfo
+#define LOG_SEVERITY_FOR_WARNING kbase::LogSeverity::LogWarning
+#define LOG_SEVERITY_FOR_ERROR kbase::LogSeverity::LogError
+#define LOG_SEVERITY_FOR_0 kbase::LogSeverity::LogError
+#define LOG_SEVERITY_FOR_FATAL kbase::LogSeverity::LogFatal
 
 #define LOG_IS_ON(severity) \
-    ((kbase::LogSeverity::LOG_##severity) >= kbase::internal::GetMinSeverityLevel())
+    ((LOG_SEVERITY_FOR_##severity) >= kbase::internal::GetMinSeverityLevel())
 
 #if !defined(NDEBUG)
 #define DLOG_IS_ON(severity) LOG_IS_ON(severity)
@@ -121,7 +126,7 @@ public:
 
     DISALLOW_MOVE(LogMessage);
 
-    std::ostream& stream()
+    std::ostream& stream() noexcept
     {
         return stream_;
     }
@@ -135,7 +140,7 @@ private:
     void InitMessageHeader();
 
 private:
-    const char* file_;
+    const char* file_name_;
     int line_;
     LogSeverity severity_;
     std::ostringstream stream_;
@@ -143,7 +148,7 @@ private:
 
 // Used to suppress compiler warning or intellisense error.
 struct LogMessageVoidfy {
-    void operator&(const std::ostream&) const
+    void operator&(const std::ostream&) const noexcept
     {}
 };
 
