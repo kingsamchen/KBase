@@ -52,14 +52,14 @@ std::atomic<DataPack*> g_dp_ptr {nullptr};
 
 }   // namespace
 
+namespace kbase {
+
 TEST(LazyTest, Lazyness)
 {
     {
         kbase::Lazy<DataPack> data;
         EXPECT_EQ(g_activation_trigger, false);
-        EXPECT_FALSE(data.value_created());
         EXPECT_TRUE(data.value().inited);
-        EXPECT_TRUE(data.value_created());
         EXPECT_EQ(g_activation_trigger, true);
     }
 
@@ -100,3 +100,5 @@ TEST(LazyTest, ThreadSafety)
 
     EXPECT_EQ(g_activation_trigger, true);
 }
+
+}   // namespace kbase

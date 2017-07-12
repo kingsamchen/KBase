@@ -20,6 +20,7 @@ set(SOURCES
     main.cpp
     samples/at_exit_manager_unittest.cpp
     samples/error_exception_util_unittest.cpp
+    samples/lazy_unittest.cpp
     samples/logging_unittest.cpp
     samples/lru_cache_unittest.cpp
     samples/md5_unittest.cpp
