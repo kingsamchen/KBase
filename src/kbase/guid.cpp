@@ -4,49 +4,71 @@
 
 #include "kbase/guid.h"
 
-#include <objbase.h>
-
 #include <array>
-#include <cassert>
-#include <xutility>
+#include <random>
 
-#include "kbase/string_view.h"
-#include "kbase/string_encoding_conversions.h"
+#include "kbase/string_format.h"
+
+namespace {
+
+void GenerateRawGUIDBytes(std::array<uint64_t, 2>& raw_bytes)
+{
+    std::random_device rd;
+    std::mt19937 engine(rd());
+    std::uniform_int_distribution<std::uint64_t> dist;
+    raw_bytes[0] = dist(engine);
+    raw_bytes[1] = dist(engine);
+}
+
+bool IsLowerHexDigit(char c)
+{
+    return ('a' <= c && c <= 'f') ||
+           ('0' <= c && c <= '9');
+}
+
+bool IsHexDigit(char c)
+{
+    return ('A' <= c && c <= 'F') ||
+           ('a' <= c && c <= 'f') ||
+           ('0' <= c && c <= '9');
+}
+
+}   // namespace
 
 namespace kbase {
 
 std::string GenerateGUID()
 {
-    GUID guid;
-    auto rv = CoCreateGuid(&guid);
-    assert(SUCCEEDED(rv));
-    if (!SUCCEEDED(rv)) {
-        return std::string();
-    }
+    std::array<uint64_t, 2> raw_guid_bytes;
 
-    const int kGUIDStrSize = 40;
-    std::array<wchar_t, kGUIDStrSize> guid_str;
-    int count_written = StringFromGUID2(guid, guid_str.data(), kGUIDStrSize);
+    GenerateRawGUIDBytes(raw_guid_bytes);
 
-    // Since GUID contains ASCII-only characters, it is safe to do this conversion.
-    // Strips off { and }.
-    return count_written ?
-        WideToASCII(WStringView(guid_str.data() + 1, count_written - 3)) :
-        std::string();
+    // Set the version bits to 4.
+    raw_guid_bytes[0] &= 0xFFFFFFFFFFFF0FFFULL;
+    raw_guid_bytes[0] |= 0x0000000000004000ULL;
+
+    // Se the bits 6 and 7 of the clock_seq_hi_and_reserved to zero and one, respectively.
+    raw_guid_bytes[1] &= 0x3FFFFFFFFFFFFFFFULL;
+    raw_guid_bytes[1] |= 0x8000000000000000ULL;
+
+    return StringPrintf("%08x-%04x-%04x-%04x-%012llx",
+                        static_cast<unsigned int>(raw_guid_bytes[0] >> 32),
+                        static_cast<unsigned int>((raw_guid_bytes[0] >> 16) & 0x0000FFFF),
+                        static_cast<unsigned int>(raw_guid_bytes[0] & 0x0000FFFF),
+                        static_cast<unsigned int>(raw_guid_bytes[1] >> 48),
+                        raw_guid_bytes[1] & 0x0000FFFFFFFFFFFFULL);
 }
 
-bool IsGUIDValid(const std::string& guid)
+bool IsGUIDValid(StringView guid, bool strict_mode)
 {
-    // Without { prepended and } appended.
-    const size_t kGUIDSize = 36;
-    if (guid.length() != kGUIDSize) {
+    constexpr size_t kGUIDLength = 36;
+    if (guid.length() != kGUIDLength) {
         return false;
     }
 
-    // ord('0') ~ ord('9'), ord('A') ~ ord('F')
-    std::pair<int, int> ranges[] {{48, 57}, {65, 70}};
     for (size_t i = 0; i < guid.length(); ++i) {
-        if (guid[i] == '-') {
+        auto cur_ch = guid[i];
+        if (cur_ch == '-') {
             if (i == 8 || i == 13 || i == 18 || i == 23) {
                 continue;
             }
@@ -54,9 +76,8 @@ bool IsGUIDValid(const std::string& guid)
             return false;
         }
 
-        int ascii_code = static_cast<int>(guid[i]);
-        if ((ascii_code < ranges[0].first || ascii_code > ranges[0].second) &&
-            (ascii_code < ranges[1].first || ascii_code > ranges[1].second)) {
+        if ((strict_mode && !IsLowerHexDigit(cur_ch)) ||
+            (!strict_mode && !IsHexDigit(cur_ch))) {
             return false;
         }
     }
