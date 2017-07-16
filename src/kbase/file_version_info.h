@@ -9,22 +9,16 @@
 #ifndef KBASE_FILE_VERSION_INFO_H_
 #define KBASE_FILE_VERSION_INFO_H_
 
-#include <Windows.h>
-
 #include <memory>
 #include <string>
 #include <vector>
+
+#include <Windows.h>
 
 #include "kbase/basic_macros.h"
 #include "kbase/basic_types.h"
 
 namespace kbase {
-
-namespace internal {
-
-using VersionData = std::vector<kbase::byte>;
-
-}   // namespace internal
 
 class Path;
 
@@ -106,14 +100,16 @@ public:
     }
 
 private:
-    FileVersionInfo(internal::VersionData&& data);
+    using VersionData = std::vector<kbase::byte>;
+
+    explicit FileVersionInfo(VersionData&& data);
 
     // Returns the value associated with the |name|.
     // Returns an empty string otherwise.
     std::wstring GetValue(const wchar_t* name) const;
 
 private:
-    internal::VersionData data_;
+    VersionData data_;
     VS_FIXEDFILEINFO* info_block_ = nullptr;
     unsigned short lang_ = 0U;
     unsigned short code_page_ = 0U;

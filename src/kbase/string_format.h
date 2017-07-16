@@ -41,7 +41,7 @@ std::wstring StringPrintf(const wchar_t* fmt, ...);
 // Modify a string in given format.
 
 void StringPrintf(std::string& str, const char* fmt, ...);
-void StringPrintf(std::string& str, const wchar_t* fmt, ...);
+void StringPrintf(std::wstring& str, const wchar_t* fmt, ...);
 
 // Append a string in given format.
 

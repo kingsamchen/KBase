@@ -15,6 +15,8 @@ const kbase::Path kTargetFile(L"C:\\windows\\notepad.exe");
 
 }   // namespace
 
+namespace kbase {
+
 TEST(FileVersionInfoTest, FixedFileInfo)
 {
     auto version_info = kbase::FileVersionInfo::CreateForFile(kTargetFile);
@@ -35,3 +37,5 @@ TEST(FileVersionInfoTest, Values)
     EXPECT_FALSE(company.empty());
     std::wcout << product_version << std::endl << file_version << std::endl << company << std::endl;
 }
+
+}   // namespace kbase
