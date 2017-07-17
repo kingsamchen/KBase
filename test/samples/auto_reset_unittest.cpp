@@ -14,11 +14,14 @@ std::vector<std::string> value {"hello", "world", "kc"};
 
 }   // namespace
 
+namespace kbase {
+
 TEST(AutoResetTest, AutoReset)
 {
     auto vec = value;
+
     {
-        kbase::AutoReset<decltype(vec)> value_guard(&vec);
+        AutoReset<decltype(vec)> value_guard(&vec);
         vec.pop_back();
         vec.push_back("this is a test");
         EXPECT_NE(value, vec);
@@ -26,3 +29,5 @@ TEST(AutoResetTest, AutoReset)
 
     EXPECT_EQ(value, vec);
 }
+
+}   // namespace kbase

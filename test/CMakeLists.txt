@@ -19,6 +19,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/../")
 set(SOURCES
     main.cpp
     samples/at_exit_manager_unittest.cpp
+    samples/auto_reset_unittest.cpp
     samples/error_exception_util_unittest.cpp
     samples/guid_unittest.cpp
     samples/lazy_unittest.cpp

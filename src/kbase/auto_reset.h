@@ -9,6 +9,8 @@
 #ifndef KBASE_AUTO_RESET_H_
 #define KBASE_AUTO_RESET_H_
 
+#include <type_traits>
+
 #include "kbase/basic_macros.h"
 
 namespace kbase {
@@ -19,14 +21,13 @@ namespace kbase {
 template<typename T>
 class AutoReset {
 public:
-    explicit AutoReset(T* scoped_var)
+    explicit AutoReset(T* scoped_var) noexcept(std::is_nothrow_copy_constructible<T>::value)
         : scoped_var_(scoped_var), original_value_(*scoped_var)
     {}
 
     ~AutoReset()
     {
-        // Our backup is discardable now, move it back may more efficient.
-        *scoped_var_ = std::move(original_value_);
+        *scoped_var_ = original_value_;
     }
 
     DISALLOW_COPY(AutoReset);
