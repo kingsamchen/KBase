@@ -19,10 +19,12 @@ const std::pair<std::string, std::string> ciphers[] {
 
 }   // namespace
 
+namespace kbase {
+
 TEST(Base64Test, Encode)
 {
     for (const auto& cp : ciphers) {
-        auto encoded = kbase::Base64Encode(cp.first);
+        auto encoded = Base64Encode(cp.first);
         EXPECT_EQ(encoded, cp.second);
     }
 }
@@ -30,7 +32,7 @@ TEST(Base64Test, Encode)
 TEST(Base64Test, Decode)
 {
     for (const auto& cp : ciphers) {
-        auto decoded = kbase::Base64Decode(cp.second);
+        auto decoded = Base64Decode(cp.second);
         EXPECT_EQ(decoded, cp.first);
     }
 }
@@ -38,6 +40,8 @@ TEST(Base64Test, Decode)
 TEST(Base64Test, DecodeInvalid)
 {
     std::string s = "aHR0c\\~DovLzEj";
-    auto decoded = kbase::Base64Decode(s);
+    auto decoded = Base64Decode(s);
     EXPECT_TRUE(decoded.empty());
 }
+
+}   // namespace kbase

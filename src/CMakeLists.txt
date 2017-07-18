@@ -17,6 +17,7 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY  "${CMAKE_BINARY_DIR}/../")
 set(SOURCES
     kbase/at_exit_manager.cpp
     kbase/base_path_provider_posix.cpp
+    kbase/base64.cpp
     kbase/error_exception_util.cpp
     kbase/guid.cpp
     kbase/logging.cpp
