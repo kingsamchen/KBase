@@ -21,6 +21,7 @@ set(SOURCES
     samples/at_exit_manager_unittest.cpp
     samples/auto_reset_unittest.cpp
     samples/base64_unittest.cpp
+    samples/command_line_unittest.cpp
     samples/error_exception_util_unittest.cpp
     samples/guid_unittest.cpp
     samples/lazy_unittest.cpp

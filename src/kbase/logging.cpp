@@ -9,7 +9,6 @@
 #include <thread>
 
 #include "kbase/basic_macros.h"
-//#include "kbase/error_exception_util.h"
 #include "kbase/secure_c_runtime.h"
 #include "kbase/stack_walker.h"
 
@@ -40,7 +39,7 @@ using FileHandle = int;
 constexpr FileHandle kInvalidFileHandle = -1;
 #endif
 
-constexpr const char* kLogSeverityNames[] { "INFO", "WARNING", "ERROR", "FATAL" };
+constexpr const char* kLogSeverityNames[] {"INFO", "WARNING", "ERROR", "FATAL"};
 
 constexpr LogSeverity kAlwaysPrintErrorMinLevel = LogSeverity::LogError;
 

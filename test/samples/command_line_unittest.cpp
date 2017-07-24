@@ -4,153 +4,248 @@
 
 #include "gtest/gtest.h"
 
+#include "kbase/basic_types.h"
 #include "kbase/command_line.h"
+#include "kbase/string_encoding_conversions.h"
+
+namespace kbase {
 
 TEST(CommandLineTest, Ctors)
 {
-    {
-        kbase::Path path(L"C:\\windows\\system32\\calc.exe");
-        kbase::CommandLine cmdline(path);
+#if defined(OS_WIN)
+        Path path(L"C:\\windows\\system32\\calc.exe");
+#else
+        Path path("/usr/bin/calc");
+#endif
+        CommandLine cmdline(path);
         auto program = cmdline.GetProgram();
-        std::cout << program.AsASCII() << std::endl;
         EXPECT_EQ(program, path);
 
         int argc = 3;
-        const wchar_t* argv[] {L"C:\\abc.exe", L"-topmost=true", L"123"};
-        kbase::CommandLine dummy_cmdline(argc, argv);
-    }
+        const CommandLine::CharType* argv[] {
+            CMDLINE_LITERAL("/home/abc"), CMDLINE_LITERAL("--topmost=true"), CMDLINE_LITERAL("123")
+        };
 
-    // copy-semantics
-    {
-        const kbase::CommandLine& cmdline = kbase::CommandLine::ForCurrentProcess();
-        kbase::CommandLine new_copied_cmdline(cmdline);
-        kbase::CommandLine copy_op_cmdline(L"C:\\windows\\system32\\notepad.exe");
-        copy_op_cmdline = new_copied_cmdline;
-        EXPECT_EQ(new_copied_cmdline.GetArgv(), copy_op_cmdline.GetArgv());
-    }
+        CommandLine dummy_cmdline(argc, argv);
+        UNUSED_VAR(dummy_cmdline);
 
-    // move-semantics
-    {
-        const kbase::CommandLine& cmdline = kbase::CommandLine::ForCurrentProcess();
-        kbase::CommandLine new_copied_cmdline(cmdline);
-        kbase::CommandLine new_moved_cmdline(std::move(new_copied_cmdline));
-        EXPECT_EQ(new_moved_cmdline.GetArgv(), cmdline.GetArgv());
-    }
+#if defined(OS_WIN)
+    std::wstring cmdline_str = L"C:\\windows\\system32\\notepad.exe -r --maxmize D:\\test.txt";
+    CommandLine cmdline_from_str(cmdline_str);
+    EXPECT_EQ(cmdline_from_str.GetProgram(), Path(L"C:\\windows\\system32\\notepad.exe"));
+#endif
 }
 
+#if defined(OS_WIN)
 TEST(CommandLineTest, CurrentProcessCommandLine)
 {
-    const kbase::CommandLine& cmdline = kbase::CommandLine::ForCurrentProcess();
-    auto argv = cmdline.GetArgv();
+    CommandLine::Init(0, nullptr);
+    const CommandLine& cmdline = kbase::CommandLine::ForCurrentProcess();
+    auto argv = cmdline.GetArgs();
     for (const auto& arg : argv) {
         std::wcout << arg << std::endl;
     }
+
     EXPECT_FALSE(argv.empty());
 }
+#endif
 
 TEST(CommandLineTest, GetOrSetProgram)
 {
-    kbase::Path path(L"C:\\windows\\system32\\calc.exe");
-    kbase::CommandLine cmdline(path);
+    Path path(PATH_LITERAL("/usr/bin/calc"));
+    CommandLine cmdline(path);
     EXPECT_EQ(cmdline.GetProgram().value(), path.value());
 
-    kbase::Path path_with_space(L"  C:\\windows\\system32\\calc.exe ");
+    Path path_with_space(PATH_LITERAL("  /usr/bin/calc "));
     cmdline.SetProgram(path_with_space);
     EXPECT_EQ(cmdline.GetProgram(), path);
 
-    kbase::Path path_with_tabs(L"\tC:\\windows\\system32\\calc.exe\t\t");
+    Path path_with_tabs(PATH_LITERAL("\t/usr/bin/calc\t\t"));
     cmdline.SetProgram(path_with_tabs);
     EXPECT_EQ(cmdline.GetProgram(), path);
 
-    kbase::Path path_with_hybrid(L" \tC:\\windows\\system32\\calc.exe \t ");
-    cmdline.SetProgram(path_with_hybrid);
+    Path path_with_mixed(PATH_LITERAL(" \t/usr/bin/calc \t "));
+    cmdline.SetProgram(path_with_mixed);
     EXPECT_EQ(cmdline.GetProgram(), path);
 }
 
-TEST(CommandLineTest, DefaultSwithPrefix)
+TEST(CommandLineTest, SwithPrefix)
 {
-    kbase::Path path(L"C:\\windows\\system32\\calc.exe");
-    kbase::CommandLine cmdline(path);
-    EXPECT_EQ(cmdline.GetDefaultSwitchPrefix(), kbase::CommandLine::PREFIX_DASH);
+    Path path(PATH_LITERAL("/usr/bin/calc"));
+    CommandLine cmdline(path);
+    cmdline.AppendSwitch(CMDLINE_LITERAL("test"));
+    EXPECT_EQ(cmdline.switch_prefix(), CommandLine::PrefixDoubleDash);
 
-    cmdline.SetDefaultSwitchPrefix(kbase::CommandLine::PREFIX_SLASH);
-    EXPECT_NE(cmdline.GetDefaultSwitchPrefix(), kbase::CommandLine::PREFIX_DASH);
-    EXPECT_EQ(cmdline.GetDefaultSwitchPrefix(), kbase::CommandLine::PREFIX_SLASH);
+    cmdline.set_switch_prefix(CommandLine::PrefixSlash);
+    EXPECT_NE(cmdline.switch_prefix(), CommandLine::PrefixDoubleDash);
+    EXPECT_EQ(cmdline.switch_prefix(), CommandLine::PrefixSlash);
 }
 
 TEST(CommandLineTest, HasSwitch)
 {
-    std::wstring cmdline_str = L"C:\\windows\\system32\\notepad.exe -r --maxmize D:\\test.txt";
-    kbase::CommandLine cmdline(cmdline_str);
-    ASSERT_EQ(cmdline.GetProgram(), kbase::Path(L"C:\\windows\\system32\\notepad.exe"));
+    CommandLine::ArgList args {
+        CMDLINE_LITERAL("/usr/bin/calc"),
+        CMDLINE_LITERAL("-r"),
+        CMDLINE_LITERAL("123"),
+        CMDLINE_LITERAL("--maxmize"),
+        CMDLINE_LITERAL("test.txt")
+    };
 
-    EXPECT_TRUE(cmdline.HasSwitch(L"r"));
-    EXPECT_TRUE(cmdline.HasSwitch(L"maxmize"));
-    EXPECT_FALSE(cmdline.HasSwitch(L"path"));
+    CommandLine cmdline(args);
+    ASSERT_EQ(cmdline.GetProgram(), Path(PATH_LITERAL("/usr/bin/calc")));
+
+    EXPECT_TRUE(cmdline.HasSwitch(CMDLINE_LITERAL("r")));
+    EXPECT_TRUE(cmdline.HasSwitch(CMDLINE_LITERAL("maxmize")));
+    EXPECT_FALSE(cmdline.HasSwitch(CMDLINE_LITERAL("path")));
 }
 
 TEST(CommandLineTest, QuerySwitchValue)
 {
-    kbase::CommandLine cmdline(L"C:\\windows\\system32\\notepad.exe -a=1 --maxmize --t=1024 D:\\test.txt");
+    CommandLine::ArgList args {
+        CMDLINE_LITERAL("/usr/bin/calc"),
+        CMDLINE_LITERAL("-a=1"),
+        CMDLINE_LITERAL("123"),
+        CMDLINE_LITERAL("--t=1024"),
+        CMDLINE_LITERAL("--maxmize"),
+        CMDLINE_LITERAL("test.txt")
+    };
 
-    std::wstring value;
-    bool rv = cmdline.GetSwitchValue(L"a", &value);
+    CommandLine cmdline(args);
+
+    std::string value;
+    bool rv = cmdline.GetSwitchValueASCII(CMDLINE_LITERAL("a"), value);
     EXPECT_TRUE(rv);
-    EXPECT_EQ(value, L"1");
+    EXPECT_EQ(value, std::string("1"));
 
-    rv = cmdline.GetSwitchValue(L"maxmize", &value);
+    rv = cmdline.GetSwitchValueASCII(CMDLINE_LITERAL("maxmize"), value);
     EXPECT_TRUE(rv);
     EXPECT_TRUE(value.empty());
 
-    rv = cmdline.GetSwitchValue(L"ta", &value);
+    rv = cmdline.GetSwitchValueASCII(CMDLINE_LITERAL("ta"), value);
     EXPECT_FALSE(rv);
 }
 
 TEST(CommandLineTest, GetParameters)
 {
     {
-        kbase::CommandLine cmdline(L"C:\\abc.exe -a=1 -t=123 D:\\test.txt 3600 2014/11/25");
+        CommandLine::ArgList args {
+            CMDLINE_LITERAL("/usr/bin/calc"),
+            CMDLINE_LITERAL("-a=1"),
+            CMDLINE_LITERAL("123"),
+            CMDLINE_LITERAL("--t=1024"),
+            CMDLINE_LITERAL("1970/01/01"),
+            CMDLINE_LITERAL("--maxmize"),
+            CMDLINE_LITERAL("test.txt")
+        };
+
+        CommandLine cmdline(args);
         auto params = cmdline.GetParameters();
-        std::vector<std::wstring> p {L"D:\\test.txt", L"3600", L"2014/11/25"};
+        CommandLine::ArgList p {CMDLINE_LITERAL("123"), CMDLINE_LITERAL("1970/01/01"),
+                                CMDLINE_LITERAL("test.txt")};
         EXPECT_EQ(params, p);
     }
 
     {
-        kbase::CommandLine cmdline(L"C:\\abc.exe -a=1 -t=123");
+        CommandLine cmdline(CommandLine::ArgList{CMDLINE_LITERAL("/usr/bin/calc"),
+            CMDLINE_LITERAL("-a=1"), CMDLINE_LITERAL("--t=1024")});
         auto params = cmdline.GetParameters();
-        std::vector<std::wstring> empty;
+        CommandLine::ArgList empty;
         EXPECT_EQ(params, empty);
     }
 }
 
-TEST(CommandLineTest, GetArgv)
+TEST(CommandLineTest, GerArgsWithoutProgramStr)
 {
-    kbase::CommandLine::ArgList argv {L"D:\\test.exe", L"-a=1", L"-t=1024", L"-warmup", L"D:\\test.txt", L"2014-11-25"};
-    {
-    kbase::CommandLine cmdline(argv);
-    auto parsed_argv = cmdline.GetArgv();
-    EXPECT_EQ(parsed_argv, argv);
-    }
+    CommandLine::ArgList args {
+        CMDLINE_LITERAL("/usr/bin/calc"),
+        CMDLINE_LITERAL("-a=1"),
+        CMDLINE_LITERAL("123"),
+        CMDLINE_LITERAL("--t=1024"),
+        CMDLINE_LITERAL("1970/01/01"),
+        CMDLINE_LITERAL("/maxmize"),
+        CMDLINE_LITERAL("test.txt")
+    };
 
-    {
-    kbase::CommandLine cmdline(L"D:\\test.exe --a=1 /t=1024 --warmup D:\\test.txt 2014-11-25");
-    auto parsed_argv = cmdline.GetArgv();
-    EXPECT_EQ(parsed_argv, argv);
-    }
-}
+    CommandLine cmdline(args);
 
-TEST(CommandLineTest, GerArgvWithoutProgramStr)
-{
-    kbase::CommandLine cmdline(L"D:\\test.exe --a=1 /t=1024 --warmup D:\\test.txt 2014-11-25");
-    auto argv_str = cmdline.GetArgvStringWithoutProgram();
-    EXPECT_EQ(argv_str, L"-a=1 -t=1024 -warmup D:\\test.txt 2014-11-25");
+    auto args_str = cmdline.GetArgsStringWithoutProgram();
+    EXPECT_EQ(args_str,
+              CommandLine::StringType(CMDLINE_LITERAL(
+                "--a=1 --t=1024 --maxmize 123 1970/01/01 test.txt")));
+
+    cmdline.set_switch_prefix(CommandLine::PrefixSlash);
+    args_str = cmdline.GetArgsStringWithoutProgram();
+    EXPECT_EQ(args_str,
+              CommandLine::StringType(CMDLINE_LITERAL(
+                "/a=1 /t=1024 /maxmize 123 1970/01/01 test.txt")));
 }
 
 TEST(CommandLineTest, GetCommandLineString)
 {
-    kbase::CommandLine::ArgList argv{L"D:\\program files\\test.exe", L"-a=1", L"-t=1024", L"-warmup", L"D:\\test.txt", L"2014-11-25"};
-    kbase::CommandLine cmdline(argv);
+    CommandLine::ArgList args {
+#if defined(OS_WIN)
+        CMDLINE_LITERAL("D:\\program files\\test.exe"),
+#else
+        CMDLINE_LITERAL("/usr/bin/calc"),
+#endif
+        CMDLINE_LITERAL("-a=1"),
+        CMDLINE_LITERAL("123"),
+        CMDLINE_LITERAL("--t=1024"),
+        CMDLINE_LITERAL("1970/01/01"),
+        CMDLINE_LITERAL("/maxmize"),
+        CMDLINE_LITERAL("test.txt")
+    };
+
+    CommandLine cmdline(args);
+
+#if defined(OS_WIN)
+    auto cmdline_str = WideToUTF8(cmdline.GetCommandLineString());
+#else
     auto cmdline_str = cmdline.GetCommandLineString();
-    std::wcout << cmdline_str << std::endl;
-    EXPECT_EQ(cmdline_str, L"\"D:\\program files\\test.exe\" -a=1 -t=1024 -warmup D:\\test.txt 2014-11-25");
+#endif
+
+    std::cout << cmdline_str << std::endl;
+
+#if defined(OS_WIN)
+    EXPECT_EQ(cmdline_str,
+              "\"D:\\program files\\test.exe\" --a=1 --t=1024 --maxmize 123 1970/01/01 test.txt");
+#else
+    EXPECT_EQ(cmdline_str,
+              "/usr/bin/calc --a=1 --t=1024 --maxmize 123 1970/01/01 test.txt");
+#endif
 }
+
+TEST(CommandLineTest, CopyAndMove)
+{
+    // copy-semantics
+    {
+        CommandLine::ArgList args {
+            CMDLINE_LITERAL("/home/abc"), CMDLINE_LITERAL("--topmost=true"), CMDLINE_LITERAL("123")
+        };
+
+        CommandLine cmdline(args);
+
+        kbase::CommandLine new_copied_cmdline(cmdline);
+        kbase::CommandLine copy_op_cmdline(Path(PATH_LITERAL("C:\\windows\\notepad.exe")));
+        EXPECT_NE(new_copied_cmdline.GetCommandLineString(),
+                  copy_op_cmdline.GetCommandLineString());
+
+        copy_op_cmdline = new_copied_cmdline;
+        EXPECT_EQ(new_copied_cmdline.GetCommandLineString(),
+                  copy_op_cmdline.GetCommandLineString());
+    }
+
+    // move-semantics
+    {
+        CommandLine::ArgList args {
+            CMDLINE_LITERAL("/home/abc"), CMDLINE_LITERAL("--topmost=true"), CMDLINE_LITERAL("123")
+        };
+
+        CommandLine cmdline(args);
+        CommandLine another(std::move(cmdline));
+        EXPECT_EQ(CommandLine::StringType(CMDLINE_LITERAL("--topmost=true 123")),
+                  another.GetArgsStringWithoutProgram());
+    }
+}
+
+}   // namespace kbase
