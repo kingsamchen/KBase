@@ -104,6 +104,7 @@
     <ClCompile Include="kbase\at_exit_manager.cpp" />
     <ClCompile Include="kbase\base64.cpp" />
     <ClCompile Include="kbase\base_path_provider_win.cpp" />
+    <ClCompile Include="kbase\chrono_util.cpp" />
     <ClCompile Include="kbase\command_line.cpp" />
     <ClCompile Include="kbase\date_time.cpp" />
     <ClCompile Include="kbase\environment.cpp" />
@@ -133,6 +134,7 @@
     <ClInclude Include="kbase\base_path_provider.h" />
     <ClInclude Include="kbase\basic_macros.h" />
     <ClInclude Include="kbase\basic_types.h" />
+    <ClInclude Include="kbase\chrono_util.h" />
     <ClInclude Include="kbase\command_line.h" />
     <ClInclude Include="kbase\date_time.h" />
     <ClInclude Include="kbase\environment.h" />

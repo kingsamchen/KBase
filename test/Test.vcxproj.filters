@@ -101,5 +101,8 @@
       <Filter>samples</Filter>
     </ClCompile>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="samples\chrono_utils_unittest.cpp">
+      <Filter>samples</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

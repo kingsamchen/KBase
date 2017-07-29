@@ -93,6 +93,7 @@
     <ClCompile Include="samples\at_exit_manager_unittest.cpp" />
     <ClCompile Include="samples\auto_reset_unittest.cpp" />
     <ClCompile Include="samples\base64_unittest.cpp" />
+    <ClCompile Include="samples\chrono_utils_unittest.cpp" />
     <ClCompile Include="samples\command_line_unittest.cpp" />
     <ClCompile Include="samples\date_time_unittest.cpp" />
     <ClCompile Include="samples\environment_unittest.cpp" />

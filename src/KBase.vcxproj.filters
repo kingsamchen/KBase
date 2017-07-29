@@ -90,6 +90,9 @@
     <ClCompile Include="kbase\os_info.cpp">
       <Filter>kbase</Filter>
     </ClCompile>
+    <ClCompile Include="kbase\chrono_util.cpp">
+      <Filter>kbase</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="kbase\at_exit_manager.h">
@@ -198,6 +201,9 @@
       <Filter>kbase</Filter>
     </ClInclude>
     <ClInclude Include="kbase\secure_c_runtime.h">
+      <Filter>kbase</Filter>
+    </ClInclude>
+    <ClInclude Include="kbase\chrono_util.h">
       <Filter>kbase</Filter>
     </ClInclude>
   </ItemGroup>
