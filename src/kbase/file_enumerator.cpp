@@ -98,9 +98,9 @@ FileInfo FileEnumerator::GetInfo() const
     return FileInfo(find_data_.cFileName,
                     static_cast<int64_t>(file_size.QuadPart),
                     !!(find_data_.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY),
-                    DateTime(find_data_.ftCreationTime),
-                    DateTime(find_data_.ftLastWriteTime),
-                    DateTime(find_data_.ftLastAccessTime));
+                    FileTime(find_data_.ftCreationTime),
+                    FileTime(find_data_.ftLastWriteTime),
+                    FileTime(find_data_.ftLastAccessTime));
 }
 
 bool FileEnumerator::ShouldSkip(const Path& path)

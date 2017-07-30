@@ -24,9 +24,6 @@
     <ClCompile Include="kbase\command_line.cpp">
       <Filter>kbase</Filter>
     </ClCompile>
-    <ClCompile Include="kbase\date_time.cpp">
-      <Filter>kbase</Filter>
-    </ClCompile>
     <ClCompile Include="kbase\environment.cpp">
       <Filter>kbase</Filter>
     </ClCompile>
@@ -111,9 +108,6 @@
       <Filter>kbase</Filter>
     </ClInclude>
     <ClInclude Include="kbase\command_line.h">
-      <Filter>kbase</Filter>
-    </ClInclude>
-    <ClInclude Include="kbase\date_time.h">
       <Filter>kbase</Filter>
     </ClInclude>
     <ClInclude Include="kbase\environment.h">

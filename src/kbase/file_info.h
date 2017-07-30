@@ -12,18 +12,45 @@
 #include <cstdint>
 
 #include "kbase/basic_types.h"
-#include "kbase/date_time.h"
+#include "kbase/chrono_util.h"
 
 namespace kbase {
+
+class FileTime {
+public:
+    using time_type = TimePoint;
+
+    explicit FileTime(time_type time)
+        : time_(time)
+    {}
+
+#if defined(OS_WIN)
+    explicit FileTime(const FILETIME& winft)
+        : time_(TimePointFromWindowsFileTime(winft))
+    {}
+
+    explicit FileTime(const SYSTEMTIME& winst)
+        : time_(TimePointFromWindowsSystemTime(winst))
+    {}
+#endif
+
+    time_type value() const
+    {
+        return time_;
+    }
+
+private:
+    time_type time_;
+};
 
 class FileInfo {
 public:
     FileInfo(const PathString& name,
              int64_t size,
              bool is_directory,
-             const DateTime& creation_time,
-             const DateTime& last_modified_time,
-             const DateTime& last_accessed_time)
+             const FileTime& creation_time,
+             const FileTime& last_modified_time,
+             const FileTime& last_accessed_time)
         : name_(name),
           size_(size),
           is_directory_(is_directory),
@@ -49,17 +76,17 @@ public:
         return is_directory_;
     }
 
-    DateTime creation_time() const
+    FileTime creation_time() const
     {
         return creation_time_;
     }
 
-    DateTime last_modified_time() const
+    FileTime last_modified_time() const
     {
         return last_modified_time_;
     }
 
-    DateTime last_accessed_time() const
+    FileTime last_accessed_time() const
     {
         return last_accessed_time_;
     }
@@ -68,9 +95,9 @@ private:
     PathString name_;
     int64_t size_;
     bool is_directory_;
-    DateTime creation_time_;
-    DateTime last_modified_time_;
-    DateTime last_accessed_time_;
+    FileTime creation_time_;
+    FileTime last_modified_time_;
+    FileTime last_accessed_time_;
 };
 
 }   // namespace kbase

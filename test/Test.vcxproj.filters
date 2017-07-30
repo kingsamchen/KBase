@@ -13,9 +13,6 @@
     <ClCompile Include="samples\error_exception_util_unittest.cpp">
       <Filter>samples</Filter>
     </ClCompile>
-    <ClCompile Include="samples\date_time_unittest.cpp">
-      <Filter>samples</Filter>
-    </ClCompile>
     <ClCompile Include="samples\pickle_unittest.cpp">
       <Filter>samples</Filter>
     </ClCompile>

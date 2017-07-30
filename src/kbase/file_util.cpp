@@ -7,10 +7,9 @@
 #include <Windows.h>
 
 #include <algorithm>
-#include <cstdlib>
 #include <fstream>
 
-#include "kbase/date_time.h"
+#include "kbase/chrono_util.h"
 #include "kbase/error_exception_util.h"
 #include "kbase/file_enumerator.h"
 #include "kbase/logging.h"
@@ -59,9 +58,9 @@ FileInfo GetFileInfo(const Path& path)
     return FileInfo(path.filename().value(),
                     static_cast<int64_t>(file_size.QuadPart),
                     !!(attr_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY),
-                    DateTime(attr_data.ftCreationTime),
-                    DateTime(attr_data.ftLastWriteTime),
-                    DateTime(attr_data.ftLastAccessTime));
+                    FileTime(attr_data.ftCreationTime),
+                    FileTime(attr_data.ftLastWriteTime),
+                    FileTime(attr_data.ftLastAccessTime));
 }
 
 void RemoveFile(const Path& path, bool recursive)

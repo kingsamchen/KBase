@@ -9,14 +9,12 @@
 #ifndef KBASE_FILE_ENUMERATOR_H_
 #define KBASE_FILE_ENUMERATOR_H_
 
-#include <cstdint>
 #include <stack>
 
 #include <windows.h>
 
 #include "kbase/basic_macros.h"
 #include "kbase/basic_types.h"
-#include "kbase/date_time.h"
 #include "kbase/file_info.h"
 #include "kbase/path.h"
 #include "kbase/scoped_handle.h"
