@@ -5,6 +5,7 @@
 #include "gtest/gtest.h"
 
 #include "kbase/chrono_util.h"
+#include "kbase/secure_c_runtime.h"
 #include "kbase/string_util.h"
 
 namespace {
@@ -34,9 +35,9 @@ bool EqualFileTime(const FILETIME& lhs, const FILETIME& rhs)
 void PrintTimePoint(kbase::TimePoint tp)
 {
     auto time = std::chrono::system_clock::to_time_t(tp);
-    char buf[255];
-    ctime_s(buf, 255, &time);
-    std::cout << buf << std::endl;
+    tm local_time {0};
+    kbase::SecureLocalTime(&time, &local_time);
+    std::cout << std::put_time(&local_time, "%c") << std::endl;
 }
 
 }   // namespace

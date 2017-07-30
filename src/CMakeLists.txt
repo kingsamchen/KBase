@@ -19,6 +19,7 @@ set(SOURCES
     kbase/base_path_provider_posix.cpp
     kbase/base64.cpp
     kbase/command_line.cpp
+    kbase/chrono_util.cpp
     kbase/error_exception_util.cpp
     kbase/guid.cpp
     kbase/logging.cpp
