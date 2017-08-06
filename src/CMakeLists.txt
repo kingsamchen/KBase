@@ -20,6 +20,7 @@ set(SOURCES
     kbase/base64.cpp
     kbase/command_line.cpp
     kbase/chrono_util.cpp
+    kbase/environment_posix.cpp
     kbase/error_exception_util.cpp
     kbase/guid.cpp
     kbase/logging.cpp
@@ -32,6 +33,7 @@ set(SOURCES
     kbase/stack_walker_posix.cpp
     kbase/string_encoding_conversions.cpp
     kbase/string_format.cpp
-    kbase/string_util.cpp)
+    kbase/string_util.cpp
+    )
 
 add_library(kbase STATIC ${SOURCES})

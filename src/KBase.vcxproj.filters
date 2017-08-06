@@ -24,9 +24,6 @@
     <ClCompile Include="kbase\command_line.cpp">
       <Filter>kbase</Filter>
     </ClCompile>
-    <ClCompile Include="kbase\environment.cpp">
-      <Filter>kbase</Filter>
-    </ClCompile>
     <ClCompile Include="kbase\error_exception_util.cpp">
       <Filter>kbase</Filter>
     </ClCompile>
@@ -88,6 +85,9 @@
       <Filter>kbase</Filter>
     </ClCompile>
     <ClCompile Include="kbase\chrono_util.cpp">
+      <Filter>kbase</Filter>
+    </ClCompile>
+    <ClCompile Include="kbase\environment_win.cpp">
       <Filter>kbase</Filter>
     </ClCompile>
   </ItemGroup>
