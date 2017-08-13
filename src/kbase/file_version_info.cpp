@@ -25,11 +25,11 @@ namespace kbase {
 std::unique_ptr<FileVersionInfo> FileVersionInfo::CreateForFile(const Path& file)
 {
     DWORD info_size = GetFileVersionInfoSizeW(file.value().c_str(), nullptr);
-    ENSURE(RAISE, info_size != 0)(LastError()).Require();
+    ENSURE(THROW, info_size != 0)(LastError()).Require();
 
     VersionData version_data(info_size);
     BOOL rv = GetFileVersionInfoW(file.value().c_str(), 0, info_size, version_data.data());
-    ENSURE(RAISE, rv != 0)(LastError()).Require();
+    ENSURE(THROW, rv != 0)(LastError()).Require();
 
     return std::unique_ptr<FileVersionInfo>(new FileVersionInfo(std::move(version_data)));
 }
@@ -41,7 +41,7 @@ std::unique_ptr<FileVersionInfo> FileVersionInfo::CreateForModule(HMODULE module
     wchar_t file_name[kMaxPath] {0};
 
     DWORD rv = GetModuleFileNameW(module, file_name, kMaxPath);
-    ENSURE(RAISE, rv != 0)(LastError()).Require();
+    ENSURE(THROW, rv != 0)(LastError()).Require();
 
     return CreateForFile(kbase::Path(file_name));
 }

@@ -39,7 +39,7 @@ void AppendPrintfT(std::string& str, char* buf, size_t max_count_including_null,
     int real_size = vsnprintf(buf, max_count_including_null, fmt, args_copy);
     va_end(args_copy);
 
-    ENSURE(RAISE, real_size >= 0)(real_size).Require();
+    ENSURE(THROW, real_size >= 0)(real_size).Require();
     if (static_cast<size_t>(real_size) < max_count_including_null) {
         // vsnprintf() guarantees the resulting string will be terminated with a null-terminator.
         str.append(buf);
@@ -70,7 +70,7 @@ void AppendPrintfT(std::wstring& str, wchar_t* buf, size_t max_count_including_n
     std::vector<wchar_t> backup_buf;
     while (true) {
         tentative_count <<= 1;
-        ENSURE(RAISE, tentative_count <= kMaxAllowed)(tentative_count)(kMaxAllowed).Require();
+        ENSURE(THROW, tentative_count <= kMaxAllowed)(tentative_count)(kMaxAllowed).Require();
         backup_buf.resize(tentative_count);
         va_copy(args_copy, args);
         rv = vswprintf(backup_buf.data(), backup_buf.size(), fmt, args_copy);
@@ -116,7 +116,7 @@ typename FormatTraits<CharT>::String AnalyzeFormatT(const CharT* fmt, Placeholde
     for (auto ptr = fmt; *ptr != '\0'; ++ptr) {
         if (*ptr == kEscapeBegin) {
             // `{` is an invalid token for in-format state.
-            ENSURE(RAISE, state != FormatParseState::InFormat).Require<FormatError>();
+            ENSURE(THROW, state != FormatParseState::InFormat).ThrowIn<FormatError>().Require();
             if (*(ptr + 1) == kEscapeBegin) {
                 // Use `{{` to represent literal `{`.
                 analyzed_fmt += kEscapeBegin;
@@ -125,8 +125,9 @@ typename FormatTraits<CharT>::String AnalyzeFormatT(const CharT* fmt, Placeholde
                 CharT* last_digit;
                 placeholder.index = ExtractPlaceholderIndex(ptr + 1, last_digit);
                 ptr = last_digit;
-                ENSURE(RAISE, (*(ptr + 1) == kEscapeEnd) ||
-                              (*(ptr + 1) == kSpecifierDelimeter)).Require<FormatError>();
+                ENSURE(THROW, (*(ptr + 1) == kEscapeEnd) ||
+                              (*(ptr + 1) == kSpecifierDelimeter)).ThrowIn<FormatError>()
+                                                                  .Require();
                 if (*(ptr + 1) == kSpecifierDelimeter) {
                     ++ptr;
                 }
@@ -134,11 +135,11 @@ typename FormatTraits<CharT>::String AnalyzeFormatT(const CharT* fmt, Placeholde
                 // Turn into in-format state.
                 state = FormatParseState::InFormat;
             } else {
-                ENSURE(RAISE, NotReached()).Require<FormatError>();
+                ENSURE(THROW, NotReached()).ThrowIn<FormatError>().Require();
             }
         } else if (*ptr == kEscapeEnd) {
             if (state == FormatParseState::InText) {
-                ENSURE(RAISE, *(ptr + 1) == kEscapeEnd).Require<FormatError>();
+                ENSURE(THROW, *(ptr + 1) == kEscapeEnd).ThrowIn<FormatError>().Require();
                 analyzed_fmt += kEscapeEnd;
                 ++ptr;
             } else {
@@ -159,7 +160,7 @@ typename FormatTraits<CharT>::String AnalyzeFormatT(const CharT* fmt, Placeholde
         }
     }
 
-    ENSURE(RAISE, state == FormatParseState::InText).Require<FormatError>();
+    ENSURE(THROW, state == FormatParseState::InText).ThrowIn<FormatError>().Require();
 
     std::sort(std::begin(placeholders), std::end(placeholders),
               [](const auto& lhs, const auto& rhs) {

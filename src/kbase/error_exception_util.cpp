@@ -4,39 +4,21 @@
 
 #include "kbase/error_exception_util.h"
 
-#include <ctime>
-
 #include "kbase/scope_guard.h"
 #include "kbase/stack_walker.h"
 
 #if defined(OS_WIN)
-#include "kbase/minidump.h"
+#include <lmerr.h>
+
+#include "kbase/string_format.h"
+#include "kbase/string_util.h"
 #endif
 
 namespace {
 
-#if defined(OS_WIN)
-
-using kbase::Path;
-using kbase::PathString;
-
-Path g_minidump_dir_path;
-
-// TODO: replace raw time with human-readable substitution.
-PathString GenerateMiniDumpFileName()
-{
-    PathString file_name(L"crash_");
-    file_name += std::to_wstring(time(nullptr));
-    file_name += L".dmp";
-
-    return file_name;
-}
-
-#endif  // OS_WIN
-
 bool g_always_check_first_in_debug = true;
 
-bool ShouldCheckFirst()
+bool ShouldCheckFirst() noexcept
 {
 #if defined(NDEBUG)
     return false;
@@ -49,45 +31,32 @@ bool ShouldCheckFirst()
 
 namespace kbase {
 
-void AlwaysCheckFirstInDebug(bool always_check)
+void AlwaysCheckFirstInDebug(bool always_check) noexcept
 {
     g_always_check_first_in_debug = always_check;
 }
 
-void Guarantor::Require()
+void Guarantor::Require(StringView msg)
 {
-    switch (action_required_) {
-        case EnsureAction::CHECK:
-            Check();
-            break;
+    if (!msg.empty()) {
+        exception_desc_ << "Extra Message: " << msg << "\n";
+    }
 
-        case EnsureAction::RAISE:
-            Raise();
-            break;
+    StackWalker callstack;
+    callstack.DumpCallStack(exception_desc_);
 
-#if defined(OS_WIN)
-          case EnsureAction::RAISE_WITH_DUMP:
-            RaiseWithDump();
-            break;
-#endif
+    if (action_ == EnsureAction::Check || ShouldCheckFirst()) {
+        DoCheck();
+    }
 
-        default:
-            Check();
-            break;
+    if (action_ == EnsureAction::Throw) {
+        DoThrow();
     }
 }
 
-void Guarantor::Require(StringView msg)
-{
-    exception_desc_ << "Extra Message: " << msg << "\n";
-    Require();
-}
-
 // TODO: Add portable DebugPresent() check and then DebugBreak() if a debugger is attached.
-void Guarantor::Check()
+void Guarantor::DoCheck() const
 {
-    StackWalker callstack;
-    callstack.DumpCallStack(exception_desc_);
     std::string description = exception_desc_.str();
 #if defined(OS_WIN)
     std::wstring message = UTF8ToWide(description);
@@ -100,94 +69,60 @@ void Guarantor::Check()
 #endif
 }
 
-void Guarantor::Raise()
+void Guarantor::DoThrow()
 {
-    if (ShouldCheckFirst()) {
-        Check();
+    if (!exception_pump_) {
+        exception_pump_ = std::make_unique<internal::ExceptionPumpImpl<EnsureFailure>>();
     }
 
-    StackWalker callstack;
-    callstack.DumpCallStack(exception_desc_);
-    throw std::runtime_error(exception_desc_.str());
+    exception_pump_->Throw(exception_desc_.str());
 }
 
 #if defined(OS_WIN)
 
-void Guarantor::RaiseWithDump()
-{
-    if (ShouldCheckFirst()) {
-        Check();
-    }
-
-    // If succeeded in creating the minidump, throws an exception with path attached;
-    // Otherwise, throws a normal exception instead.
-    auto dump_file_path = g_minidump_dir_path.AppendWith(GenerateMiniDumpFileName());
-    bool created = CreateMiniDump(dump_file_path);
-    if (created) {
-        throw ExceptionWithMiniDump(dump_file_path, exception_desc_.str());
-    }
-
-    throw std::runtime_error(exception_desc_.str());
-}
-
-void SetMiniDumpDirectory(const Path& dump_dir)
-{
-    g_minidump_dir_path = dump_dir;
-}
-
 // -*- LastError implementation -*-
 
-LastError::LastError()
+LastError::LastError() noexcept
     : error_code_(GetLastError())
 {}
 
-unsigned long LastError::error_code() const
+DWORD LastError::error_code() const noexcept
 {
     return error_code_;
 }
 
 std::wstring LastError::GetDescriptiveMessage() const
 {
-    HLOCAL buffer = nullptr;
-    DWORD lang_id = MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US);
-    DWORD text_length = FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER |
-                                       FORMAT_MESSAGE_FROM_SYSTEM |
-                                       FORMAT_MESSAGE_IGNORE_INSERTS,
-                                       nullptr,
-                                       error_code_,
-                                       lang_id,
-                                       reinterpret_cast<LPTSTR>(&buffer),
-                                       0,
-                                       nullptr);
-    ON_SCOPE_EXIT { if (buffer) LocalFree(buffer); };
+    constexpr DWORD kErrorMessageBufSize = 256;
+    wchar_t message_buf[kErrorMessageBufSize];
 
-    // Check if it's a network-related error.
-    if (text_length == 0) {
-        HMODULE dll = LoadLibraryExW(L"netmsg.dll", nullptr, DONT_RESOLVE_DLL_REFERENCES);
-        if (dll) {
-            ON_SCOPE_EXIT { FreeLibrary(dll); };
-            text_length = FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER |
-                                         FORMAT_MESSAGE_IGNORE_INSERTS |
-                                         FORMAT_MESSAGE_FROM_HMODULE,
-                                         dll,
-                                         error_code_,
-                                         lang_id,
-                                         reinterpret_cast<LPTSTR>(&buffer),
-                                         0,
-                                         nullptr);
+    HMODULE module_handle = nullptr;
+    ON_SCOPE_EXIT { if (module_handle) FreeLibrary(module_handle); };
+
+    DWORD flags = FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS;
+
+    if (NERR_BASE <= error_code_ && error_code_ <= MAX_NERR) {
+        module_handle = LoadLibraryExW(L"netmsg.dll", nullptr, LOAD_LIBRARY_AS_DATAFILE);
+        if (module_handle) {
+            flags |= FORMAT_MESSAGE_FROM_HMODULE;
         }
     }
 
-    // Best efforts only...
-    std::wstring message_text;
-    if (text_length == 0 || !buffer) {
-        return message_text;
+    DWORD len = FormatMessageW(flags,
+                               module_handle,
+                               error_code_,
+                               MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US),
+                               message_buf,
+                               kErrorMessageBufSize,
+                               nullptr);
+
+    if (len) {
+        std::wstring msg(message_buf);
+        return TrimTailingString(msg, L"\r\n");
     }
 
-    // Remove the trailing \r\n.
-    message_text.assign(static_cast<LPCTSTR>(LocalLock(buffer)), text_length - 2);
-
-    return message_text;
+    return StringPrintf(L"Error (0x%X) while retrieve message for 0x%X", GetLastError(),
+                        error_code_);
 }
 
 std::ostream& operator<<(std::ostream& os, const LastError& last_error)
@@ -199,6 +134,6 @@ std::ostream& operator<<(std::ostream& os, const LastError& last_error)
     return os;
 }
 
-#endif  // OS_WIN
+#endif
 
 }   // namespace kbase

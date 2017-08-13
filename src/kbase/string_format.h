@@ -157,7 +157,7 @@ SpecifierCategory GuessNextSpecCategory(const CharT* spec)
         return SpecifierCategory::Type;
     }
 
-    ENSURE(RAISE, NotReached()).Require<FormatError>();
+    ENSURE(THROW, NotReached()).ThrowIn<FormatError>().Require();
     return SpecifierCategory::None;
 }
 
@@ -167,7 +167,8 @@ void ApplyPaddingAlignFormat(const CharT* spec,
                              typename FormatTraits<CharT>::Stream& stream,
                              const CharT*& spec_end)
 {
-    ENSURE(RAISE, last_spec_type < SpecifierCategory::PaddingAlign).Require<FormatError>();
+    ENSURE(THROW, last_spec_type < SpecifierCategory::PaddingAlign).ThrowIn<FormatError>()
+                                                                   .Require();
 
     typename FormatTraits<CharT>::Stream& os = stream;
 
@@ -188,7 +189,7 @@ void ApplySignFormat(const CharT* spec,
                      typename FormatTraits<CharT>::Stream& stream,
                      const CharT*& spec_end)
 {
-    ENSURE(RAISE, last_spec_type < SpecifierCategory::Sign).Require<FormatError>();
+    ENSURE(THROW, last_spec_type < SpecifierCategory::Sign).ThrowIn<FormatError>().Require();
 
     typename FormatTraits<CharT>::Stream& os = stream;
 
@@ -203,7 +204,7 @@ void ApplyWidthFormat(const CharT* spec,
                       typename FormatTraits<CharT>::Stream& stream,
                       const CharT*& spec_end)
 {
-    ENSURE(RAISE, last_spec_type < SpecifierCategory::Width).Require<FormatError>();
+    ENSURE(THROW, last_spec_type < SpecifierCategory::Width).ThrowIn<FormatError>().Require();
 
     typename FormatTraits<CharT>::Stream& os = stream;
 
@@ -220,7 +221,7 @@ void ApplyPrecisionFormat(const CharT* spec,
                           typename FormatTraits<CharT>::Stream& stream,
                           const CharT*& spec_end)
 {
-    ENSURE(RAISE, last_spec_type < SpecifierCategory::Precision).Require<FormatError>();
+    ENSURE(THROW, last_spec_type < SpecifierCategory::Precision).ThrowIn<FormatError>().Require();
 
     typename FormatTraits<CharT>::Stream& os = stream;
 
@@ -237,7 +238,7 @@ void ApplyTypeFormat(const CharT* spec,
                      typename FormatTraits<CharT>::Stream& stream,
                      const CharT*& spec_end)
 {
-    ENSURE(RAISE, last_spec_type < SpecifierCategory::Type).Require<FormatError>();
+    ENSURE(THROW, last_spec_type < SpecifierCategory::Type).ThrowIn<FormatError>().Require();
 
     typename FormatTraits<CharT>::Stream& os = stream;
 
@@ -336,7 +337,7 @@ typename FormatTraits<CharT>::String StringFormatT(const typename FormatTraits<C
                                           [arg_count](const auto& placeholder) {
                                               return placeholder.index < arg_count;
                                           });
-    ENSURE(RAISE, all_args_processed).Require<FormatError>();
+    ENSURE(THROW, all_args_processed).ThrowIn<FormatError>().Require();
 
     auto formatted_str(fmt);
 

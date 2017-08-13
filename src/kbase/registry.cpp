@@ -130,89 +130,89 @@ bool RegKey::KeyExists(HKEY rootkey, const wchar_t* subkey, WOW6432Node node_mod
         return true;
     }
 
-    ENSURE(RAISE, rv == ERROR_FILE_NOT_FOUND)(rv).Require();
+    ENSURE(THROW, rv == ERROR_FILE_NOT_FOUND)(rv).Require();
 
     return false;
 }
 
 bool RegKey::HasValue(const wchar_t* value_name) const
 {
-    ENSURE(RAISE, IsValid()).Require();
+    ENSURE(THROW, IsValid()).Require();
 
     auto rv = RegQueryValueExW(key_, value_name, nullptr, nullptr, nullptr, nullptr);
     if (rv == ERROR_SUCCESS) {
         return true;
     }
 
-    ENSURE(RAISE, rv == ERROR_FILE_NOT_FOUND)(rv).Require();
+    ENSURE(THROW, rv == ERROR_FILE_NOT_FOUND)(rv).Require();
 
     return false;
 }
 
 size_t RegKey::GetValueCount() const
 {
-    ENSURE(RAISE, IsValid()).Require();
+    ENSURE(THROW, IsValid()).Require();
 
     DWORD value_count = 0;
     auto rv = RegQueryInfoKeyW(key_, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
                                &value_count, nullptr, nullptr, nullptr, nullptr);
 
-    ENSURE(RAISE, rv == ERROR_SUCCESS)(rv).Require();
+    ENSURE(THROW, rv == ERROR_SUCCESS)(rv).Require();
 
     return static_cast<size_t>(value_count);
 }
 
 void RegKey::GetValueNameAt(size_t index, std::wstring& value_name) const
 {
-    ENSURE(RAISE, IsValid()).Require();
+    ENSURE(THROW, IsValid()).Require();
 
     wchar_t buf[MAX_PATH + 1];
     DWORD buf_size = _countof(buf);
     auto rv = RegEnumValueW(key_, static_cast<DWORD>(index), buf, &buf_size, nullptr, nullptr,
                             nullptr, nullptr);
 
-    ENSURE(RAISE, rv == ERROR_SUCCESS)(rv).Require();
+    ENSURE(THROW, rv == ERROR_SUCCESS)(rv).Require();
 
     value_name = buf;
 }
 
 void RegKey::DeleteKey(const wchar_t* key_name) const
 {
-    ENSURE(RAISE, IsValid()).Require();
+    ENSURE(THROW, IsValid()).Require();
 
     auto rv = RegDeleteTreeW(key_, key_name);
-    ENSURE(RAISE, rv == ERROR_SUCCESS)(rv).Require();
+    ENSURE(THROW, rv == ERROR_SUCCESS)(rv).Require();
 }
 
 void RegKey::DeleteValue(const wchar_t* value_name) const
 {
-    ENSURE(RAISE, IsValid()).Require();
+    ENSURE(THROW, IsValid()).Require();
 
     auto rv = RegDeleteValueW(key_, value_name);
-    ENSURE(RAISE, rv == ERROR_SUCCESS)(rv).Require();
+    ENSURE(THROW, rv == ERROR_SUCCESS)(rv).Require();
 }
 
 void RegKey::ReadRawValue(const wchar_t* value_name, void* data, DWORD& data_size,
                           DWORD& data_type) const
 {
-    ENSURE(RAISE, IsValid()).Require();
+    ENSURE(THROW, IsValid()).Require();
 
     auto rv = RegGetValueW(key_, nullptr, value_name, 0, &data_type, data, &data_size);
-    ENSURE(RAISE, rv == ERROR_SUCCESS)(rv).Require();
+    ENSURE(THROW, rv == ERROR_SUCCESS)(rv).Require();
 }
 
 void RegKey::ReadRawValue(const wchar_t* value_name, DWORD restricted_type, void* data,
                           DWORD& data_size) const
 {
-    ENSURE(RAISE, IsValid()).Require();
+    ENSURE(THROW, IsValid()).Require();
 
     auto rv = RegGetValueW(key_, nullptr, value_name, restricted_type, nullptr, data, &data_size);
-    ENSURE(RAISE, rv == ERROR_SUCCESS)(rv).Require();
+    ENSURE(THROW, rv == ERROR_SUCCESS)(rv).Require();
 }
 
 void RegKey::ReadValue(const wchar_t* value_name, std::wstring& value) const
 {
-    ENSURE(RAISE, IsValid()).Require();
+    ENSURE(THROW, IsValid()).Require();
 
     constexpr DWORD kCharSize = sizeof(wchar_t);
 
@@ -245,7 +245,7 @@ void RegKey::ReadValue(const wchar_t* value_name, std::wstring& value) const
                 std::wstring expanded;
                 wchar_t* ptr = WriteInto(expanded, str_length);
                 DWORD size = ExpandEnvironmentStringsW(data_ptr, ptr, str_length);
-                ENSURE(RAISE, size > 0)(LastError()).Require();
+                ENSURE(THROW, size > 0)(LastError()).Require();
                 if (size > str_length) {
                     data_size = size * kCharSize;
                     rv = ERROR_MORE_DATA;
@@ -257,12 +257,12 @@ void RegKey::ReadValue(const wchar_t* value_name, std::wstring& value) const
         }
     } while (rv == ERROR_MORE_DATA && (str_length = data_size / kCharSize, true));
 
-    ENSURE(RAISE, NotReached())(rv).Require();
+    ENSURE(THROW, NotReached())(rv).Require();
 }
 
 void RegKey::ReadValue(const wchar_t* value_name, std::vector<std::wstring>& values) const
 {
-    ENSURE(RAISE, IsValid()).Require();
+    ENSURE(THROW, IsValid()).Require();
 
     constexpr size_t kCharSize = sizeof(wchar_t);
     DWORD restricted_type = RRF_RT_REG_MULTI_SZ;
@@ -328,7 +328,7 @@ void RegKey::WriteValue(const wchar_t* value_name, const void* data, size_t data
     auto rv = RegSetValueExW(key_, value_name, 0, data_type, static_cast<const BYTE*>(data),
                              static_cast<DWORD>(data_size));
 
-    ENSURE(RAISE, rv == ERROR_SUCCESS)(rv).Require();
+    ENSURE(THROW, rv == ERROR_SUCCESS)(rv).Require();
 }
 
 // -*- RegKeyIterator::Impl implementations -*-
@@ -386,7 +386,7 @@ bool RegKeyIterator::Impl::Next()
     auto rv = RegEnumKeyExW(key_, next_index_, name_buf, &name_buf_size, nullptr, nullptr, nullptr,
                             nullptr);
 
-    ENSURE(RAISE, rv == ERROR_SUCCESS)(rv).Require();
+    ENSURE(THROW, rv == ERROR_SUCCESS)(rv).Require();
 
     // Be careful, opening some registry keys may fail due to lack of administrator privilege.
     subkey_.Open(key_, name_buf, KEY_READ | KEY_SET_VALUE);

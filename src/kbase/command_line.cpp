@@ -15,6 +15,8 @@
 
 #if defined(OS_WIN)
 #include <Windows.h>
+
+#include "kbase/string_encoding_conversions.h"
 #endif
 
 namespace {

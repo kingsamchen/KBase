@@ -171,7 +171,7 @@ void Pickle::ResizeCapacity(size_t new_capacity)
     new_capacity = RoundToMultiple(new_capacity, kCapacityUnit);
     void* ptr = realloc(header_, new_capacity);
 
-    ENSURE(RAISE, ptr != nullptr).Require("Failed to realloc a new memory block!");
+    ENSURE(THROW, ptr != nullptr).Require("Failed to realloc a new memory block!");
     header_ = static_cast<Header*>(ptr);
     capacity_ = new_capacity;
 }
