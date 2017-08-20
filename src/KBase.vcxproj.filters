@@ -27,9 +27,6 @@
     <ClCompile Include="kbase\error_exception_util.cpp">
       <Filter>kbase</Filter>
     </ClCompile>
-    <ClCompile Include="kbase\file_enumerator.cpp">
-      <Filter>kbase</Filter>
-    </ClCompile>
     <ClCompile Include="kbase\file_util.cpp">
       <Filter>kbase</Filter>
     </ClCompile>
@@ -90,6 +87,12 @@
     <ClCompile Include="kbase\environment_win.cpp">
       <Filter>kbase</Filter>
     </ClCompile>
+    <ClCompile Include="kbase\file_iterator_win.cpp">
+      <Filter>kbase</Filter>
+    </ClCompile>
+    <ClCompile Include="kbase\file_iterator.cpp">
+      <Filter>kbase</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="kbase\at_exit_manager.h">
@@ -114,9 +117,6 @@
       <Filter>kbase</Filter>
     </ClInclude>
     <ClInclude Include="kbase\error_exception_util.h">
-      <Filter>kbase</Filter>
-    </ClInclude>
-    <ClInclude Include="kbase\file_enumerator.h">
       <Filter>kbase</Filter>
     </ClInclude>
     <ClInclude Include="kbase\file_info.h">
@@ -198,6 +198,9 @@
       <Filter>kbase</Filter>
     </ClInclude>
     <ClInclude Include="kbase\chrono_util.h">
+      <Filter>kbase</Filter>
+    </ClInclude>
+    <ClInclude Include="kbase\file_iterator.h">
       <Filter>kbase</Filter>
     </ClInclude>
   </ItemGroup>

@@ -80,6 +80,13 @@ SYSTEMTIME TimePointToWindowsSystemTime(TimePoint time_point)
     return sys_time;
 }
 
+#else   // OS_WIN
+
+TimePoint TimePointFromTimespec(const timespec& timespec)
+{
+    return Clock::from_time_t(timespec.tv_sec) + std::chrono::nanoseconds(timespec.tv_nsec);
+}
+
 #endif
 
 }   // namespace kbase

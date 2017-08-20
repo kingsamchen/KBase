@@ -9,34 +9,13 @@
 #ifndef KBASE_SCOPED_HANDLE_H_
 #define KBASE_SCOPED_HANDLE_H_
 
-#include <Windows.h>
-
 #include "kbase/basic_macros.h"
 
+#if defined(OS_WIN)
+#include <Windows.h>
+#endif
+
 namespace kbase {
-
-struct HandleTraits {
-    using Handle = HANDLE;
-
-    HandleTraits() = delete;
-
-    ~HandleTraits() = delete;
-
-    static Handle NullHandle() noexcept
-    {
-        return nullptr;
-    }
-
-    static bool IsValid(Handle handle) noexcept
-    {
-        return handle != nullptr && handle != INVALID_HANDLE_VALUE;
-    }
-
-    static void Close(Handle handle) noexcept
-    {
-        CloseHandle(handle);
-    }
-};
 
 template<typename Traits>
 class GenericScopedHandle {
@@ -73,7 +52,7 @@ public:
     }
 
     // A convenient way for destroying the object.
-    GenericScopedHandle& operator=(nullptr_t) noexcept
+    GenericScopedHandle& operator=(std::nullptr_t) noexcept
     {
         Close();
         handle_ = Traits::NullHandle();
@@ -107,7 +86,7 @@ public:
         handle_ = new_handle;
     }
 
-    void reset(nullptr_t = nullptr) noexcept
+    void reset() noexcept
     {
         Close();
         handle_ = Traits::NullHandle();
@@ -139,7 +118,34 @@ void swap(GenericScopedHandle<Traits>& lhs, GenericScopedHandle<Traits>& rhs) no
     lhs.swap(rhs);
 }
 
-using ScopedHandle = GenericScopedHandle<HandleTraits>;
+#if defined(OS_WIN)
+
+struct WinHandleTraits {
+    using Handle = HANDLE;
+
+    WinHandleTraits() = delete;
+
+    ~WinHandleTraits() = delete;
+
+    static Handle NullHandle() noexcept
+    {
+        return nullptr;
+    }
+
+    static bool IsValid(Handle handle) noexcept
+    {
+        return handle != nullptr && handle != INVALID_HANDLE_VALUE;
+    }
+
+    static void Close(Handle handle) noexcept
+    {
+        CloseHandle(handle);
+    }
+};
+
+using ScopedHandle = GenericScopedHandle<WinHandleTraits>;
+
+#endif
 
 }   // namespace kbase
 

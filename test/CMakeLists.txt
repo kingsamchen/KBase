@@ -25,6 +25,7 @@ set(SOURCES
     samples/chrono_util_unittest.cpp
     samples/environment_unittest.cpp
     samples/error_exception_util_unittest.cpp
+    samples/file_iterator_unittest.cpp
     samples/guid_unittest.cpp
     samples/lazy_unittest.cpp
     samples/logging_unittest.cpp

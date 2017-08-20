@@ -15,6 +15,8 @@
 
 #if defined(OS_WIN)
 #include <Windows.h>
+#else
+#include <time.h>
 #endif
 
 namespace kbase {
@@ -31,6 +33,10 @@ FILETIME TimePointToWindowsFileTime(TimePoint time_point);
 TimePoint TimePointFromWindowsSystemTime(const SYSTEMTIME& sys_time);
 
 SYSTEMTIME TimePointToWindowsSystemTime(TimePoint time_point);
+
+#else
+
+TimePoint TimePointFromTimespec(const timespec& timespec);
 
 #endif
 

@@ -97,6 +97,7 @@
     <ClCompile Include="samples\command_line_unittest.cpp" />
     <ClCompile Include="samples\environment_unittest.cpp" />
     <ClCompile Include="samples\error_exception_util_unittest.cpp" />
+    <ClCompile Include="samples\file_iterator_unittest.cpp" />
     <ClCompile Include="samples\minidump_unittest.cpp" />
     <ClCompile Include="samples\path_unittest.cpp" />
     <ClCompile Include="samples\file_util_unittest.cpp" />

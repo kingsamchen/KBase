@@ -11,7 +11,7 @@
 
 #include "kbase/chrono_util.h"
 #include "kbase/error_exception_util.h"
-#include "kbase/file_enumerator.h"
+#include "kbase/file_iterator.h"
 #include "kbase/logging.h"
 #include "kbase/string_util.h"
 
@@ -40,8 +40,7 @@ bool DirectoryExists(const Path& path)
 
 bool IsDirectoryEmpty(const Path& path)
 {
-    FileEnumerator file_it(path, false, FileEnumerator::DIRS | FileEnumerator::FILES);
-    return file_it.Next().empty();
+    return FileIterator(path, false) == FileIterator();;
 }
 
 FileInfo GetFileInfo(const Path& path)
@@ -55,7 +54,7 @@ FileInfo GetFileInfo(const Path& path)
     file_size.HighPart = attr_data.nFileSizeHigh;
     file_size.LowPart = attr_data.nFileSizeLow;
 
-    return FileInfo(path.filename().value(),
+    return FileInfo(path,
                     static_cast<int64_t>(file_size.QuadPart),
                     !!(attr_data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY),
                     FileTime(attr_data.ftCreationTime),
@@ -138,21 +137,15 @@ void DuplicateDirectory(const Path& src, const Path& dest, bool recursive)
         ENSURE(THROW, rv != 0)(LastError()).Require("Failed to create top-level dest dir");
     }
 
-    int file_type = FileEnumerator::FILES;
-    if (recursive) {
-        file_type |= FileEnumerator::DIRS;
-    }
-
-    FileEnumerator file_it(full_src, recursive, file_type);
-    for (auto&& cur = file_it.Next(); !cur.empty(); cur = file_it.Next()) {
+    for (FileIterator fit(full_src, recursive); fit != FileIterator(); ++fit) {
         Path dest_for_cur = full_dest;
-        bool rv = full_src.AppendRelativePath(cur, &dest_for_cur);
-        ENSURE(CHECK, rv)(full_src.value())(cur.value())(dest_for_cur.value()).Require();
-        if (file_it.GetInfo().is_directory() && !DirectoryExists(dest_for_cur)) {
+        bool rv = full_src.AppendRelativePath(fit->file_path(), &dest_for_cur);
+        ENSURE(CHECK, rv)(full_src.value())(fit->file_path().value())(dest_for_cur.value()).Require();
+        if (fit->is_directory() && !DirectoryExists(dest_for_cur)) {
             BOOL ret = CreateDirectoryW(dest_for_cur.value().c_str(), nullptr);
             ENSURE(THROW, ret != 0)(LastError()).Require("Failed to create top-level dest dir");
         } else {
-            DuplicateFile(cur, dest_for_cur);
+            DuplicateFile(fit->file_path(), dest_for_cur);
         }
     }
 }
