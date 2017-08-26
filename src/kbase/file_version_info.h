@@ -10,17 +10,15 @@
 #define KBASE_FILE_VERSION_INFO_H_
 
 #include <memory>
-#include <string>
 #include <vector>
 
 #include <Windows.h>
 
 #include "kbase/basic_macros.h"
 #include "kbase/basic_types.h"
+#include "kbase/path.h"
 
 namespace kbase {
-
-class Path;
 
 class FileVersionInfo {
 public:
@@ -34,7 +32,7 @@ public:
 
     static std::unique_ptr<FileVersionInfo> CreateForModule(HMODULE module);
 
-    VS_FIXEDFILEINFO* fixed_file_info() const
+    VS_FIXEDFILEINFO* fixed_file_info() const noexcept
     {
         return info_block_;
     }
@@ -100,19 +98,19 @@ public:
     }
 
 private:
-    using VersionData = std::vector<kbase::byte>;
+    using VersionData = std::vector<byte>;
 
     explicit FileVersionInfo(VersionData&& data);
 
-    // Returns the value associated with the |name|.
+    // Returns the value associated with the `name`;
     // Returns an empty string otherwise.
     std::wstring GetValue(const wchar_t* name) const;
 
 private:
     VersionData data_;
-    VS_FIXEDFILEINFO* info_block_ = nullptr;
-    unsigned short lang_ = 0U;
-    unsigned short code_page_ = 0U;
+    VS_FIXEDFILEINFO* info_block_;
+    unsigned short lang_;
+    unsigned short code_page_;
 };
 
 }   // namespace kbase

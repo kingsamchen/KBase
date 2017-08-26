@@ -7,7 +7,6 @@
 #include "gtest/gtest.h"
 
 #include "kbase/file_version_info.h"
-#include "kbase/path.h"
 
 namespace {
 

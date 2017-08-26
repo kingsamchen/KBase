@@ -5,7 +5,6 @@
 #include "kbase/file_version_info.h"
 
 #include "kbase/error_exception_util.h"
-#include "kbase/path.h"
 #include "kbase/string_format.h"
 
 #pragma comment(lib, "version.lib")
@@ -43,11 +42,11 @@ std::unique_ptr<FileVersionInfo> FileVersionInfo::CreateForModule(HMODULE module
     DWORD rv = GetModuleFileNameW(module, file_name, kMaxPath);
     ENSURE(THROW, rv != 0)(LastError()).Require();
 
-    return CreateForFile(kbase::Path(file_name));
+    return CreateForFile(Path(file_name));
 }
 
 FileVersionInfo::FileVersionInfo(VersionData&& data)
-    : data_(std::move(data))
+    : data_(std::move(data)), info_block_(nullptr), lang_(0U), code_page_(0U)
 {
     // Set up VS_FIXEDFILEINFO struct.
     UINT dummy_size = 0U;
@@ -71,13 +70,14 @@ std::wstring FileVersionInfo::GetValue(const wchar_t* name) const
         {GetUserDefaultLangID(), code_page_}
     };
 
-    std::wstring sub_block;
     for (const auto& lang_cp : lang_codepage) {
-        StringPrintf(sub_block, L"\\StringFileInfo\\%04x%04x\\%s", lang_cp.language,
-                     lang_cp.code_page, name);
+        auto sub_block = StringPrintf(L"\\StringFileInfo\\%04x%04x\\%s", lang_cp.language,
+                                      lang_cp.code_page, name);
         LPVOID value_ptr = nullptr;
         UINT dummy_size = 0U;
+
         VerQueryValueW(data_.data(), sub_block.c_str(), &value_ptr, &dummy_size);
+
         if (value_ptr) {
             return std::wstring(static_cast<const wchar_t*>(value_ptr));
         }
