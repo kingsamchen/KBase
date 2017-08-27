@@ -16,15 +16,16 @@
 
 namespace kbase {
 
-// Returns an absolute or full path name of the relative `path`.
+// Returns an absolute or full path of the relative `path`.
 // Returns an empty path on error.
-Path MakeAbsoluteFilePath(const Path& path);
+// On POSIX, this function fails if the path does not exist.
+Path MakeAbsolutePath(const Path& path);
 
 // Returns true if the path exists.
-// Returns false if doesn't exist.
+// Returns false otherwise.
 bool PathExists(const Path& path);
 
-// Returns true if the directory exists.
+// Returns true if the path exists and is a directory.
 // Returns false, otherwise.
 bool DirectoryExists(const Path& path);
 
@@ -32,37 +33,43 @@ bool DirectoryExists(const Path& path);
 // Returns false otherwise.
 bool IsDirectoryEmpty(const Path& path);
 
+// Creates a directory, as well as creating any parent directories, if they don't exist.
+// Returns true on successful creation, or if the directory already exists.
+bool MakeDirectory(const Path& path);
+
 // Retrieves the information of a given file or directory.
-// Throws an exception when error occurs.
-// Be wary of that the size-field of the `FileInfo` is valid if and only if the
-// `path` indicates a file.
-FileInfo GetFileInfo(const Path& path);
+// Be wary of that the size-field of the `FileInfo` is valid if and only if the `path`
+// indicates a file.
+bool GetFileInfo(const Path& path, FileInfo& info);
 
 // Removes a file or a directory indicated by the given `path`.
 // If want to remove a directory non-recursively, the directory must be empty.
-// Throws an exception when failed.
-void RemoveFile(const Path& path, bool recursive);
+bool RemoveFile(const Path& path, bool recursive);
+
+#if defined(OS_WIN)
 
 // If the `path` refers to a directory, the system removes the directory only if the
 // directory is empty.
 // This function only marks the file or directory as should-be-deleted, it doesn't
 // guarantee the deletion will be enforced.
-// Throws an exception when failed to mark.
-void RemoveFileAfterReboot(const Path& path);
+bool RemoveFileAfterReboot(const Path& path);
+
+#endif
 
 // Copies a single file from `src` to `dest`.
-// If `dest` already exists, has it overwritten.
+// If a file specified by `dest` already exists, it will be overwritten.
 // The file copied retains file attribute from the source.
-void DuplicateFile(const Path& src, const Path& dest);
+bool DuplicateFile(const Path& src, const Path& dest);
 
-// Copies all files in `src` to `dest` if recursive is false.
-// Copies all content, including subfolders in `src` to `dest` if recursive is true.
-// Overwrites files that already exist.
-void DuplicateDirectory(const Path& src, const Path& dest, bool recursive);
+// Copies all files from `src` to `dest` if `recursive` is false.
+// Copies all content, including subfolders from `src` to `dest` if `recursive` is true.
+// Always overwrites files that already exist.
+bool DuplicateDirectory(const Path& src, const Path& dest, bool recursive);
 
 // Moves a file or a directory along with its subfolders from `src` to `dest`.
-// Overwrites any that already exists.
-void MakeFileMove(const Path& src, const Path& dest);
+// Always overwrites any that already exists.
+// If paths are on different volumes, this function will attempt to copy and delete.
+bool MakeFileMove(const Path& src, const Path& dest);
 
 // Reads contents of whole file at `path` into a string.
 // Data is read in binary mode, therefore no CRLF conversion involved.

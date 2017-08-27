@@ -24,6 +24,8 @@ set(SOURCES
     kbase/error_exception_util.cpp
     kbase/file_iterator.cpp
     kbase/file_iterator_posix.cpp
+    kbase/file_util.cpp
+    kbase/file_util_posix.cpp
     kbase/guid.cpp
     kbase/logging.cpp
     kbase/md5.cpp

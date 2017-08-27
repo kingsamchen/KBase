@@ -17,6 +17,12 @@
 
 namespace kbase {
 
+#if defined(OS_WIN)
+#define CMDLINE_LITERAL(x) L##x
+#else
+#define CMDLINE_LITERAL(x) x
+#endif
+
 // A command line consists of one or more arguments, which are tokens separated by
 // one or more spaces or tabs.
 // Arguments preceded with '--', '-', and '/' are switches. A switch can optionally

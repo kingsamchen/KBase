@@ -10,6 +10,7 @@
 
 #include "kbase/basic_types.h"
 #include "kbase/logging.h"
+#include "kbase/path.h"
 
 #if defined(OS_WIN)
 #include "kbase/file_util.h"

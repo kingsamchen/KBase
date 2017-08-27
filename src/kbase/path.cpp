@@ -453,11 +453,6 @@ std::string Path::AsASCII() const
     return kbase::WideToASCII(path_value_);
 }
 
-std::string Path::AsUTF8() const
-{
-    return kbase::WideToUTF8(path_value_);
-}
-
 // static
 Path Path::FromASCII(const std::string& path_in_ascii)
 {
@@ -469,13 +464,26 @@ Path Path::FromASCII(const std::string& path_in_ascii)
     return Path(kbase::ASCIIToWide(path_in_ascii));
 }
 
+#endif  // OS_WIN
+
+std::string Path::AsUTF8() const
+{
+#if defined(OS_WIN)
+    return kbase::WideToUTF8(path_value_);
+#else
+    return value();
+#endif
+}
+
 // static
 Path Path::FromUTF8(const std::string& path_in_utf8)
 {
+#if defined(OS_WIN)
     return Path(kbase::UTF8ToWide(path_in_utf8));
+#else
+    return Path(path_in_utf8);
+#endif
 }
-
-#endif  // OS_WIN
 
 bool operator==(const Path& lhs, const Path& rhs)
 {

@@ -110,6 +110,7 @@
     <ClCompile Include="kbase\error_exception_util.cpp" />
     <ClCompile Include="kbase\file_iterator.cpp" />
     <ClCompile Include="kbase\file_iterator_win.cpp" />
+    <ClCompile Include="kbase\file_util_win.cpp" />
     <ClCompile Include="kbase\os_info.cpp" />
     <ClCompile Include="kbase\path.cpp" />
     <ClCompile Include="kbase\file_util.cpp" />

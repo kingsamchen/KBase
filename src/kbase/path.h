@@ -17,6 +17,12 @@
 
 namespace kbase {
 
+#if defined(OS_WIN)
+#define PATH_LITERAL(x) L##x
+#else
+#define PATH_LITERAL(x) x
+#endif
+
 class Path {
 public:
     using value_type = PathChar;
@@ -155,15 +161,15 @@ public:
     // object.
     std::string AsASCII() const;
 
-    std::string AsUTF8() const;
-
     // If the `path_in_ascii` contains any non-ASCII character, the function returns
     // an empty Path.
     static Path FromASCII(const std::string& path_in_ascii);
 
-    static Path FromUTF8(const std::string& path_in_utf8);
-
 #endif  // OS_WIN
+
+    std::string AsUTF8() const;
+
+    static Path FromUTF8(const std::string& path_in_utf8);
 
 private:
     string_type path_value_;

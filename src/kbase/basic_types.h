@@ -26,14 +26,6 @@ using PathChar = wchar_t;
 using PathChar = char;
 #endif
 
-#if defined(OS_WIN)
-#define PATH_LITERAL(x) L##x
-#define CMDLINE_LITERAL(x) L##x
-#else
-#define PATH_LITERAL(x) x
-#define CMDLINE_LITERAL(x) x
-#endif
-
 using PathString = std::basic_string<PathChar>;
 
 using byte = uint8_t;

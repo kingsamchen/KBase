@@ -3,151 +3,246 @@
 */
 
 #include <iostream>
-#include <utility>
+#include <fstream>
 
 #include "gtest/gtest.h"
 
 #include "kbase/base_path_provider.h"
+#include "kbase/file_iterator.h"
 #include "kbase/file_util.h"
+#include "kbase/path.h"
 #include "kbase/path_service.h"
 #include "kbase/string_util.h"
 
-using namespace kbase;
-
 namespace {
 
-const Path dir = PathService::Get(DirCurrent).AppendWith(L"abc_test");
-const Path file_path = dir.AppendWith(L"abc.txt");
+using kbase::Path;
+using kbase::PathString;
 
-void CreateDirectoryWithFile()
+void CreateEmptyFile(const Path& filepath)
 {
-    CreateDirectoryW(dir.value().c_str(), nullptr);
-    auto handle =
-        CreateFileW(file_path.value().c_str(), GENERIC_READ | GENERIC_WRITE, 0, nullptr,
-                    CREATE_NEW, FILE_ATTRIBUTE_NORMAL, nullptr);
-    if (handle != INVALID_HANDLE_VALUE) {
-        CloseHandle(handle);
-    }
+    std::ofstream(filepath.value());
+}
+
+PathString ForcePathString(const std::string& str)
+{
+#if defined(OS_WIN)
+    return kbase::UTF8ToWide(str);
+#else
+    return str;
+#endif
+}
+
+std::string RandomTime()
+{
+    return std::to_string(std::chrono::system_clock::now().time_since_epoch().count());
 }
 
 }   // namespace
 
-TEST(FileUtilTest, MakeAbsoluteFilePath)
+namespace kbase {
+
+TEST(FileUtilTest, MakeAbsolutePath)
 {
-    const Path path_tags[] { Path(L"."), Path(L"..") };
+    // Paths indicated by . and .. always exist.
+    const Path path_tags[] {Path(PATH_LITERAL(".")), Path(PATH_LITERAL(".."))};
     for (const auto& tag : path_tags) {
-        auto&& abs_path = MakeAbsoluteFilePath(tag);
-        std::wcout << abs_path.value() << std::endl;
-        EXPECT_NE(abs_path, tag);
+        auto abs_path = MakeAbsolutePath(tag);
+        EXPECT_FALSE(abs_path.empty());
+        std::cout << abs_path.AsUTF8() << " -> " << tag.AsUTF8() << std::endl;
     }
 }
 
 TEST(FileUtilTest, PathExists)
 {
-    typedef std::pair<Path, bool> TestPathExistsPair;
-    TestPathExistsPair test_exists[] {
-        { Path(L"C:\\path_exists_test.fuck"), false },
-        { Path(L"C:\\Windows"), true }
-    };
+    Path tmp_dir = PathService::Get(DirTemp);
+    ASSERT_TRUE(!tmp_dir.empty());
 
-    for (const auto& p : test_exists) {
-        EXPECT_EQ(PathExists(p.first), p.second);
-    }
+    EXPECT_TRUE(PathExists(tmp_dir));
+
+    auto tmp_file = tmp_dir.AppendWith(PATH_LITERAL("nonexist_") + ForcePathString(RandomTime()));
+    EXPECT_FALSE(PathExists(tmp_file));
+    std::ofstream(tmp_file.value());
+    EXPECT_TRUE(PathExists(tmp_file));
 }
 
 TEST(FileUtilTest, DirExists)
 {
-    typedef std::pair<Path, bool> TestPathExistsPair;
-    TestPathExistsPair test_exists[] {
-            {Path(L"C:\\path_exists_test.fuck"), false},
-            {Path(L"C:\\Windows"), true},
-            {Path(L"C:\\Windows\\WindowsUpdate.log"), false}
-    };
+    Path tmp_dir = PathService::Get(DirTemp);
+    ASSERT_TRUE(!tmp_dir.empty());
+    EXPECT_TRUE(DirectoryExists(tmp_dir));
 
-    for (const auto& p : test_exists) {
-        EXPECT_EQ(DirectoryExists(p.first), p.second);
-    }
+    auto fake_dir = tmp_dir.AppendWith(PATH_LITERAL("fake"));
+    EXPECT_FALSE(DirectoryExists(fake_dir));
+
+    auto file = tmp_dir.AppendWith(PATH_LITERAL("notdir.dat"));
+    std::ofstream(file.value());
+    ASSERT_TRUE(PathExists(file));
+    EXPECT_FALSE(DirectoryExists(file));
 }
 
-TEST(FileUtilTest, RemoveFile)
+TEST(FileUtilTest, MakeDirectory)
 {
-    CreateDirectoryWithFile();
-    ASSERT_TRUE(PathExists(dir));
-    ASSERT_TRUE(PathExists(file_path));
-    RemoveFile(file_path, false);
-    RemoveFile(dir, false);
-    EXPECT_FALSE(PathExists(dir));
-    CreateDirectoryWithFile();
-    RemoveFile(dir, true);
-    EXPECT_FALSE(PathExists(dir));
+    Path tmp_dir = PathService::Get(DirTemp);
+    ASSERT_TRUE(!tmp_dir.empty());
+
+    auto make_dir_test = tmp_dir.AppendWith(ForcePathString(RandomTime()))
+                                .AppendWith(ForcePathString(RandomTime()));
+    ASSERT_FALSE(DirectoryExists(make_dir_test));
+    EXPECT_TRUE(MakeDirectory(make_dir_test));
+    EXPECT_TRUE(DirectoryExists(make_dir_test));
+
+    // Returns true if the directory already exists.
+    EXPECT_TRUE(MakeDirectory(make_dir_test));
 }
 
 TEST(FileUtilTest, IsDirectoryEmpty)
 {
-    CreateDirectoryW(L"C:\\DirTest", nullptr);
-    typedef std::pair<Path, bool> DirProperty;
-    DirProperty dir_pair[] {
-        {Path(L"C:\\Windows"), false},
-        {Path(L"C:\\test"), true},
-        {Path(L"C:\\DirTest"), true}
-    };
+    Path tmp_dir = PathService::Get(DirTemp);
+    ASSERT_TRUE(!tmp_dir.empty());
 
-    for (const auto& p : dir_pair) {
-        EXPECT_EQ(IsDirectoryEmpty(p.first), p.second);
-    }
+    auto test_dir = tmp_dir.AppendWith(PATH_LITERAL("test_dir_empty"));
+    ASSERT_TRUE(MakeDirectory(test_dir));
+    EXPECT_TRUE(IsDirectoryEmpty(test_dir));
+    EXPECT_FALSE(IsDirectoryEmpty(tmp_dir));
+}
 
-    RemoveFile(Path(L"C:\\DirTest"), false);
+TEST(FileUtilTest, GetFileInfo)
+{
+    Path tmp_dir = PathService::Get(DirTemp);
+    ASSERT_TRUE(!tmp_dir.empty());
+
+    FileInfo info;
+    ASSERT_TRUE(GetFileInfo(tmp_dir, info));
+    EXPECT_TRUE(info.is_directory());
+    EXPECT_TRUE(info.last_modified_time().value().time_since_epoch().count() > 0);
+
+    Path tmp_file = tmp_dir.AppendWith(ForcePathString(RandomTime()));
+    std::ofstream out(tmp_file.value());
+    out << "abcdefg";
+    out.close();
+    ASSERT_TRUE(PathExists(tmp_file));
+    EXPECT_TRUE(GetFileInfo(tmp_file, info));
+    EXPECT_FALSE(info.is_directory());
+    EXPECT_TRUE(info.file_size() > 0);
+
+    EXPECT_FALSE(GetFileInfo(tmp_dir.AppendWith(PATH_LITERAL("file_info_none")), info));
+}
+
+TEST(FileUtilTest, RemoveFile)
+{
+    Path tmp_dir = PathService::Get(DirTemp);
+    ASSERT_TRUE(!tmp_dir.empty());
+
+    // Remove an existing file with non-recursive mode.
+    auto remove_test_file = tmp_dir.AppendWith(PATH_LITERAL("for_remove"));
+    CreateEmptyFile(remove_test_file);
+    ASSERT_TRUE(PathExists(remove_test_file));
+    EXPECT_TRUE(RemoveFile(remove_test_file, false));
+    EXPECT_FALSE(PathExists(remove_test_file));
+
+    // Remove an existing file with recursive mode.
+    CreateEmptyFile(remove_test_file);
+    ASSERT_TRUE(PathExists(remove_test_file));
+    EXPECT_TRUE(RemoveFile(remove_test_file, true));
+    EXPECT_FALSE(PathExists(remove_test_file));
+
+    // Remove an empty directory.
+    auto remove_empty_dir = tmp_dir.AppendWith(PATH_LITERAL("for_remove"));
+    ASSERT_TRUE(MakeDirectory(remove_empty_dir));
+    EXPECT_TRUE(RemoveFile(remove_empty_dir, false));
+    EXPECT_FALSE(DirectoryExists(remove_empty_dir));
+
+    auto remove_dir = tmp_dir.AppendWith(PATH_LITERAL("for_remove_recursive"));
+    ASSERT_TRUE(MakeDirectory(remove_dir));
+    std::ofstream(remove_dir.AppendWith(PATH_LITERAL("f1")).value());
+    std::ofstream(remove_dir.AppendWith(PATH_LITERAL("f2")).value());
+    ASSERT_FALSE(IsDirectoryEmpty(remove_dir));
+    // Failed. Because the directory is not empty.
+    EXPECT_FALSE(RemoveFile(remove_dir, false));
+    // Success.
+    EXPECT_TRUE(RemoveFile(remove_dir, true));
+    EXPECT_FALSE(DirectoryExists(remove_dir));
 }
 
 TEST(FileUtilTest, DuplicateFile)
 {
-    CreateDirectoryWithFile();
-    ASSERT_TRUE(PathExists(dir));
-    ASSERT_TRUE(PathExists(file_path));
-    Path new_file = dir.filename().AppendWith(L"new_file.lala");
-    DuplicateFile(file_path, new_file);
-    EXPECT_TRUE(PathExists(new_file));
-    RemoveFile(new_file, false);
-    RemoveFile(dir, true);
+    Path tmp_dir = PathService::Get(DirTemp);
+    ASSERT_TRUE(!tmp_dir.empty());
+
+    auto original = tmp_dir.AppendWith(PATH_LITERAL("new_file.dada"));
+    CreateEmptyFile(original);
+    ASSERT_TRUE(PathExists(original));
+
+    auto duped = tmp_dir.AppendWith(PATH_LITERAL("new_file.lala"));
+    RemoveFile(duped, false);
+    ASSERT_FALSE(PathExists(duped));
+    EXPECT_TRUE(DuplicateFile(original, duped));
+    EXPECT_TRUE(PathExists(duped));
+    EXPECT_TRUE(DuplicateFile(original, duped));
 }
 
 TEST(FileUtilTest, DuplicateDirectory)
 {
-    CreateDirectoryWithFile();
-    ASSERT_TRUE(PathExists(dir));
-    ASSERT_TRUE(PathExists(file_path));
-    Path new_dir(L"C:\\moved_dir");
-    Path new_file = new_dir.AppendWith(file_path.filename());
-    DuplicateDirectory(dir, new_dir, true);
-    EXPECT_TRUE(PathExists(new_dir));
-    EXPECT_TRUE(PathExists(new_file));
-    RemoveFile(new_dir, true);
+    Path tmp_dir = PathService::Get(DirTemp);
+    ASSERT_TRUE(!tmp_dir.empty());
+
+    // Build a complex directory.
+    auto inner_dir = tmp_dir.AppendWith(PATH_LITERAL("dup-outer"))
+                            .AppendWith(PATH_LITERAL("dup-innter"));
+    ASSERT_TRUE(MakeDirectory(inner_dir));
+    CreateEmptyFile(inner_dir.AppendWith(PATH_LITERAL("inner-f1")));
+    CreateEmptyFile(inner_dir.AppendWith(PATH_LITERAL("inner-f2")));
+    CreateEmptyFile(inner_dir.parent_path().AppendWith(PATH_LITERAL("outer-f1")));
+    CreateEmptyFile(inner_dir.parent_path().AppendWith(PATH_LITERAL("outer-f2")));
+
+    auto src = tmp_dir.AppendWith(PATH_LITERAL("dup-outer"));
+    auto dest = tmp_dir.AppendWith(PATH_LITERAL("dup-outer-ex"));
+    EXPECT_TRUE(DuplicateDirectory(src, dest, true));
+
+    FileIterator end;
+    for (FileIterator sit(src, true), dit(dest, true); sit != end && dit != end; ++sit, ++dit) {
+        EXPECT_TRUE(sit->file_path().filename() == dit->file_path().filename());
+    }
 }
 
 TEST(FileUtilTest, MakeFileMove)
 {
-    CreateDirectoryWithFile();
-    ASSERT_TRUE(PathExists(dir));
-    ASSERT_TRUE(PathExists(file_path));
-    Path new_dir(L"C:\\moved_dir");
-    Path new_file = new_dir.AppendWith(file_path.filename());
-    MakeFileMove(dir, new_dir);
-    EXPECT_FALSE(PathExists(dir));
-    EXPECT_FALSE(PathExists(file_path));
-    EXPECT_TRUE(PathExists(new_dir));
-    EXPECT_TRUE(PathExists(new_file));
-    RemoveFile(new_dir, true);
+    Path tmp_dir = PathService::Get(DirTemp);
+    ASSERT_TRUE(!tmp_dir.empty());
+
+    auto mv_file = tmp_dir.AppendWith(PATH_LITERAL("move_from"));
+    CreateEmptyFile(mv_file);
+    ASSERT_TRUE(PathExists(mv_file));
+    auto mved = tmp_dir.AppendWith(PATH_LITERAL("move_to"));
+    EXPECT_TRUE(MakeFileMove(mv_file, mved));
+    EXPECT_TRUE(PathExists(mved));
+
+    CreateEmptyFile(mv_file);
+    EXPECT_TRUE(MakeFileMove(mv_file, mved));
 }
 
 TEST(FileUtilTest, ReadOrWriteFile)
 {
+    Path tmp_dir = PathService::Get(DirTemp);
+    ASSERT_TRUE(!tmp_dir.empty());
+
+    auto file_path = tmp_dir.AppendWith(PATH_LITERAL("read_write_test.txt"));
+
     std::string original_contents = "abc\nblabla\nhelloworld";
-    Path file_path(L"file_io_test");
     WriteStringToFile(file_path, original_contents);
-    ASSERT_TRUE(PathExists(file_path));
+    EXPECT_TRUE(PathExists(file_path));
+
     std::string contents = ReadFileToString(file_path);
+#if defined(OS_WIN)
     EXPECT_NE(original_contents, contents);
-    kbase::RemoveChars(contents, "\r");
+    kbase::EraseChars(contents, "\r");
     EXPECT_EQ(original_contents, contents);
+#else
+    EXPECT_EQ(original_contents, contents);
+#endif
+
     RemoveFile(file_path, false);
 }
+
+}   // namespace kbase
