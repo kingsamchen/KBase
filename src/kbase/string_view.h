@@ -367,7 +367,7 @@ public:
 
     size_type find_first_of(CharT ch, size_type pos = 0) const noexcept
     {
-        return find_first_of(BasicStringView(&ch, 1), 0);
+        return find_first_of(BasicStringView(&ch, 1), pos);
     }
 
     size_type find_first_of(const CharT* str, size_type pos, size_type count) const noexcept
