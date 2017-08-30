@@ -21,19 +21,19 @@
 namespace {
 
 using kbase::Path;
-using kbase::ScopedHandle;
+using kbase::ScopedWinHandle;
 
 constexpr auto kStatusDumping = static_cast<DWORD>(0xE0000001);
 
 bool GenerateMiniDumpFile(const Path& dump_path, EXCEPTION_POINTERS* ex_ptrs)
 {
-    ScopedHandle dump_file(CreateFileW(dump_path.value().c_str(),
-                                       GENERIC_WRITE,
-                                       0,
-                                       nullptr,
-                                       CREATE_ALWAYS,
-                                       FILE_ATTRIBUTE_NORMAL,
-                                       nullptr));
+    ScopedWinHandle dump_file(CreateFileW(dump_path.value().c_str(),
+                                          GENERIC_WRITE,
+                                          0,
+                                          nullptr,
+                                          CREATE_ALWAYS,
+                                          FILE_ATTRIBUTE_NORMAL,
+                                          nullptr));
     if (!dump_file) {
 #if !defined(NDEBUG)
         kbase::LastError error;

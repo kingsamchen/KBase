@@ -13,12 +13,12 @@ namespace kbase {
 TEST(ScopedHandleTest, Normal)
 {
     {
-        ScopedHandle sys_h;
+        ScopedWinHandle sys_h;
         EXPECT_FALSE(sys_h);
     }
 
     {
-        ScopedHandle event_h(CreateEventW(nullptr, TRUE, TRUE, nullptr));
+        ScopedWinHandle event_h(CreateEventW(nullptr, TRUE, TRUE, nullptr));
         EXPECT_TRUE(!!event_h);
         std::cout << "event_h underlying handle: " << event_h.get() << std::endl;
     }
@@ -26,7 +26,7 @@ TEST(ScopedHandleTest, Normal)
 
 TEST(ScopedHandleTest, TestAndNullize)
 {
-    ScopedHandle event_h(CreateEventW(nullptr, TRUE, TRUE, nullptr));
+    ScopedWinHandle event_h(CreateEventW(nullptr, TRUE, TRUE, nullptr));
     if (!event_h) {
         ASSERT_TRUE(false);
     }
@@ -43,9 +43,9 @@ TEST(ScopedHandleTest, TestAndNullize)
 TEST(ScopedHandleTest, MoveSemantics)
 {
     {
-        ScopedHandle event_h(CreateEventW(nullptr, TRUE, TRUE, nullptr));
+        ScopedWinHandle event_h(CreateEventW(nullptr, TRUE, TRUE, nullptr));
         ASSERT_TRUE(static_cast<bool>(event_h));
-        ScopedHandle another_h(CreateEventW(nullptr, TRUE, TRUE, nullptr));
+        ScopedWinHandle another_h(CreateEventW(nullptr, TRUE, TRUE, nullptr));
         ASSERT_TRUE(static_cast<bool>(event_h));
         ASSERT_NE(event_h.get(), another_h.get());
 
@@ -63,7 +63,7 @@ TEST(ScopedHandleTest, MoveSemantics)
     }
 
     {
-        std::vector<ScopedHandle> events;
+        std::vector<ScopedWinHandle> events;
         for (int i = 0; i < 10; ++i) {
             events.emplace_back(CreateEventW(nullptr, TRUE, TRUE, nullptr));
         }

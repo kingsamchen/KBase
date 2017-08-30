@@ -145,7 +145,7 @@ struct WinHandleTraits {
     }
 };
 
-using ScopedHandle = GenericScopedHandle<WinHandleTraits>;
+using ScopedWinHandle = GenericScopedHandle<WinHandleTraits>;
 
 #endif
 
