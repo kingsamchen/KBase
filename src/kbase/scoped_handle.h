@@ -9,6 +9,8 @@
 #ifndef KBASE_SCOPED_HANDLE_H_
 #define KBASE_SCOPED_HANDLE_H_
 
+#include <cstdio>
+
 #include "kbase/basic_macros.h"
 
 #if defined(OS_WIN)
@@ -146,6 +148,31 @@ struct WinHandleTraits {
 using ScopedHandle = GenericScopedHandle<WinHandleTraits>;
 
 #endif
+
+struct FILEHandleTraits {
+    using Handle = FILE*;
+
+    FILEHandleTraits() = delete;
+
+    ~FILEHandleTraits() = delete;
+
+    static Handle NullHandle() noexcept
+    {
+        return nullptr;
+    }
+
+    static bool IsValid(Handle handle) noexcept
+    {
+        return handle != nullptr;
+    }
+
+    static void Close(Handle handle) noexcept
+    {
+        fclose(handle);
+    }
+};
+
+using ScopedFILEHandle = GenericScopedHandle<FILEHandleTraits>;
 
 }   // namespace kbase
 
