@@ -6,9 +6,11 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-set(CXX_FLAGS
-    -g
-    -rdynamic)
+if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+set(CMAKE_CXX_FLAGS_DEBUG "-g -fno-limit-debug-info")
+elseif (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+set(CMAKE_CXX_FLAGS_DEBUG "-g")
+endif()
 
 include_directories(.)
 

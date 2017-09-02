@@ -248,6 +248,7 @@ ModelManifest.xml
 .vscode/
 
 # Mainly for ycm
+.ycm_extra_conf.py
 *.pyc
 
 # KDevelop

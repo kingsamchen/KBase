@@ -30,6 +30,7 @@ def main():
                         default='Debug')
     parser.add_argument('--build-gtest-only', dest='build_gtest_only', type=bool,
                         default=False)
+    parser.add_argument('--build-all', dest='build_all', action='store_true')
     args = parser.parse_args()
 
     build_type = args.build_type.capitalize()
@@ -53,8 +54,13 @@ def main():
         return
 
     if not os.path.exists(os.path.join(project_root, 'build', build_type, 'libkbase.a')):
-        print('No lib kbase found! Please build libkbase first!')
-        return
+        if args.build_all:
+            gen_kbase_path = os.path.join(project_root, 'gen_kbase.py')
+            subprocess.call(str2args('python {} --build-type={}'.
+                                     format(gen_kbase_path, args.build_type)))
+        else:
+            print('No lib kbase found! Please build libkbase first!')
+            return
 
     test_build_dir = os.path.join(project_root, 'build', build_type, 'test')
     test_cmake_path = os.path.join(project_root, 'test')
