@@ -96,6 +96,9 @@
     <ClCompile Include="kbase\file_util_win.cpp">
       <Filter>kbase</Filter>
     </ClCompile>
+    <ClCompile Include="kbase\debugger_win.cpp">
+      <Filter>kbase</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="kbase\at_exit_manager.h">
@@ -204,6 +207,9 @@
       <Filter>kbase</Filter>
     </ClInclude>
     <ClInclude Include="kbase\file_iterator.h">
+      <Filter>kbase</Filter>
+    </ClInclude>
+    <ClInclude Include="kbase\debugger.h">
       <Filter>kbase</Filter>
     </ClInclude>
   </ItemGroup>

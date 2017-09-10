@@ -106,6 +106,7 @@
     <ClCompile Include="kbase\base_path_provider_win.cpp" />
     <ClCompile Include="kbase\chrono_util.cpp" />
     <ClCompile Include="kbase\command_line.cpp" />
+    <ClCompile Include="kbase\debugger_win.cpp" />
     <ClCompile Include="kbase\environment_win.cpp" />
     <ClCompile Include="kbase\error_exception_util.cpp" />
     <ClCompile Include="kbase\file_iterator.cpp" />
@@ -137,6 +138,7 @@
     <ClInclude Include="kbase\basic_types.h" />
     <ClInclude Include="kbase\chrono_util.h" />
     <ClInclude Include="kbase\command_line.h" />
+    <ClInclude Include="kbase\debugger.h" />
     <ClInclude Include="kbase\environment.h" />
     <ClInclude Include="kbase\error_exception_util.h" />
     <ClInclude Include="kbase\file_info.h" />

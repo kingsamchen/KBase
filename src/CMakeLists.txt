@@ -22,6 +22,7 @@ set(SOURCES
     kbase/base64.cpp
     kbase/command_line.cpp
     kbase/chrono_util.cpp
+    kbase/debugger_posix.cpp
     kbase/environment_posix.cpp
     kbase/error_exception_util.cpp
     kbase/file_iterator.cpp

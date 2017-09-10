@@ -104,5 +104,8 @@
     <ClCompile Include="samples\file_iterator_unittest.cpp">
       <Filter>samples</Filter>
     </ClCompile>
+    <ClCompile Include="samples\debugger_unittest.cpp">
+      <Filter>samples</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

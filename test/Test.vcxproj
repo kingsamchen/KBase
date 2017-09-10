@@ -95,6 +95,7 @@
     <ClCompile Include="samples\base64_unittest.cpp" />
     <ClCompile Include="samples\chrono_util_unittest.cpp" />
     <ClCompile Include="samples\command_line_unittest.cpp" />
+    <ClCompile Include="samples\debugger_unittest.cpp" />
     <ClCompile Include="samples\environment_unittest.cpp" />
     <ClCompile Include="samples\error_exception_util_unittest.cpp" />
     <ClCompile Include="samples\file_iterator_unittest.cpp" />

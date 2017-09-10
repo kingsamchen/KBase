@@ -25,6 +25,7 @@ set(SOURCES
     samples/base64_unittest.cpp
     samples/command_line_unittest.cpp
     samples/chrono_util_unittest.cpp
+    samples/debugger_unittest.cpp
     samples/environment_unittest.cpp
     samples/error_exception_util_unittest.cpp
     samples/file_iterator_unittest.cpp
