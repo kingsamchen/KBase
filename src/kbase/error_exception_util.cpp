@@ -4,6 +4,7 @@
 
 #include "kbase/error_exception_util.h"
 
+#include "kbase/debugger.h"
 #include "kbase/scope_guard.h"
 #include "kbase/stack_walker.h"
 
@@ -54,19 +55,21 @@ void Guarantor::Require(StringView msg)
     }
 }
 
-// TODO: Add portable DebugPresent() check and then DebugBreak() if a debugger is attached.
 void Guarantor::DoCheck() const
 {
     std::string description = exception_desc_.str();
 #if defined(OS_WIN)
     std::wstring message = UTF8ToWide(description);
     MessageBoxW(nullptr, message.c_str(), L"Checking Failed", MB_OK | MB_TOPMOST | MB_ICONHAND);
-    __debugbreak();
 #else
     fwrite(description.data(), sizeof(char), description.length(), stderr);
     fflush(stderr);
-    abort();
 #endif
+    if (IsDebuggerPresent()) {
+        BreakDebugger();
+    } else {
+        _Exit(EXIT_FAILURE);
+    }
 }
 
 void Guarantor::DoThrow()
