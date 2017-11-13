@@ -45,9 +45,10 @@ std::string ReadFileToString(const Path& path)
     return data;
 }
 
-void WriteStringToFile(const Path& path, const std::string& data)
+void WriteStringToFile(const Path& path, const std::string& data, OpenMode mode)
 {
-    std::ofstream out(path.value());
+    auto open_mode = (mode == OpenMode::Text) ? std::ios::out : std::ios::out | std::ios::binary;
+    std::ofstream out(path.value(), open_mode);
     if (!out) {
         DLOG(WARNING) << "Create/open file faield for path " << path.AsUTF8();
         return;
@@ -56,9 +57,10 @@ void WriteStringToFile(const Path& path, const std::string& data)
     out.write(data.data(), data.size());
 }
 
-void AppendStringToFile(const Path& path, const std::string& data)
+void AppendStringToFile(const Path& path, const std::string& data, OpenMode mode)
 {
-    std::ofstream out(path.value(), std::ios::app);
+    auto open_mode = (mode == OpenMode::Text) ? std::ios::app : std::ios::app | std::ios::binary;
+    std::ofstream out(path.value(), open_mode);
     if (!out) {
         DLOG(WARNING) << "Create/open file faield for path " << path.AsUTF8();
         return;

@@ -230,19 +230,24 @@ TEST(FileUtilTest, ReadOrWriteFile)
     auto file_path = tmp_dir.AppendWith(PATH_LITERAL("read_write_test.txt"));
 
     std::string original_contents = "abc\nblabla\nhelloworld";
+
     WriteStringToFile(file_path, original_contents);
     EXPECT_TRUE(PathExists(file_path));
 
     std::string contents = ReadFileToString(file_path);
+    EXPECT_EQ(original_contents, contents);
+
+    RemoveFile(file_path, false);
+
 #if defined(OS_WIN)
+    WriteStringToFile(file_path, original_contents, OpenMode::Text);
+    EXPECT_TRUE(PathExists(file_path));
+
+    ReadFileToString(file_path, contents);
     EXPECT_NE(original_contents, contents);
     kbase::EraseChars(contents, "\r");
     EXPECT_EQ(original_contents, contents);
-#else
-    EXPECT_EQ(original_contents, contents);
 #endif
-
-    RemoveFile(file_path, false);
 }
 
 }   // namespace kbase

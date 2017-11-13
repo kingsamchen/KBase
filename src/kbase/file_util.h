@@ -79,15 +79,24 @@ std::string ReadFileToString(const Path& path);
 
 void ReadFileToString(const Path& path, std::string& data);
 
+enum class OpenMode {
+    Binary,
+    Text
+};
+
 // Writes `data` to a file at `path`.
-// Be wary of that in this function, the data is written in text-mode.
+// By default, the data are written in the binary-mode.
 // If failed to create/open the file to write, the function does nothing.
-void WriteStringToFile(const Path& path, const std::string& data);
+void WriteStringToFile(const Path& path,
+                       const std::string& data,
+                       OpenMode mode = OpenMode::Binary);
 
 // Similar to WriteStringToFile, but instead of overwritting the existing contents,
 // this function has data appended.
 // If failed to create/open the file to write, the function does nothing.
-void AppendStringToFile(const Path& path, const std::string& data);
+void AppendStringToFile(const Path& path,
+                        const std::string& data,
+                        OpenMode mode = OpenMode::Binary);
 
 }   // namespace kbase
 
