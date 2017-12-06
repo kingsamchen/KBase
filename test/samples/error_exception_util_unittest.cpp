@@ -109,6 +109,14 @@ TEST_F(ErrorExceptionUtilTest, NoInstanceOnSuccess)
     EXPECT_FALSE(flag);
 }
 
+TEST_F(ErrorExceptionUtilTest, CaptureWideString)
+{
+    std::wstring ws = L"std::wstring";
+    WStringView wsv = ws;
+
+    ENSURE(THROW, true)(ws)(wsv).Require();
+}
+
 #if defined(OS_WIN)
 
 TEST_F(ErrorExceptionUtilTest, AcquireLastError)

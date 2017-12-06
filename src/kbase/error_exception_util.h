@@ -16,6 +16,7 @@
 
 #include "kbase/basic_macros.h"
 #include "kbase/string_encoding_conversions.h"
+#include "kbase/string_view.h"
 
 #if defined(OS_WIN)
 #include <Windows.h>
@@ -116,6 +117,11 @@ public:
     }
 
     Guarantor& CaptureVar(const char* name, const std::wstring& value)
+    {
+        return CaptureVar(name, WideToUTF8(value));
+    }
+
+    Guarantor& CaptureVar(const char* name, WStringView value)
     {
         return CaptureVar(name, WideToUTF8(value));
     }
