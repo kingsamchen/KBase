@@ -12,7 +12,7 @@ namespace kbase {
 TEST(TokenizerTest, TokenIterator)
 {
     std::string str = "hello, world";
-    TokenIterator<char> it(str, str.length() + 2, ", ");
+    TokenIterator<char> it(str, str.length(), ", ");
     EXPECT_TRUE(it->empty());
 }
 
@@ -36,11 +36,32 @@ TEST(TokenizerTest, Iterate)
     Tokenizer tokenizer(str, " .\n\t");
     size_t i = 0;
     for (auto&& token : tokenizer) {
-        if (!token.empty()) {
-            EXPECT_EQ(exp[i], token.ToString());
-            ++i;
-        }
+        EXPECT_TRUE(!token.empty());
+        EXPECT_EQ(exp[i], token.ToString());
+        ++i;
     }
+}
+
+TEST(TokenizerTest, NoneToken)
+{
+    const char str[] = "\r\n\r\n";
+
+    Tokenizer tokenizer(str, "\r\n");
+    EXPECT_TRUE(tokenizer.begin() == tokenizer.end());
+}
+
+TEST(TokenizerTest, DoubleDelimEnd)
+{
+    std::string str =
+        "HTTP/1.0 200 OK\r\n"
+        "Content-Type: text/html; charset=utf-8\r\n"
+        "Content-Length: 30\r\n"
+        "Server: Werkzeug/0.12.2 Python/3.6.3\r\n"
+        "Date: Thu, 14 Dec 2017 13:10:12 GMT\r\n\r\n";
+
+    Tokenizer tokenizer(str, "\r\n");
+    auto count = std::distance(std::next(tokenizer.begin()), tokenizer.end());
+    EXPECT_EQ(4, count);
 }
 
 }   // namespace kbase

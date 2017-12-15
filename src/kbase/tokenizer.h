@@ -29,9 +29,9 @@ public:
     using reference = const value_type&;
 
     TokenIterator(token_type data, size_t offset, token_type delim) noexcept
-        : data_(data), delim_(delim), offset_(offset), next_offset_(offset)
+        : data_(data), delim_(delim), offset_(offset), offset_end_(offset)
     {
-        SeekToken();
+        SeekNextToken();
     }
 
     ~TokenIterator() = default;
@@ -43,8 +43,7 @@ public:
     TokenIterator& operator++()
     {
         ENSURE(CHECK, offset_ < data_.length()).Require("iterator now is not incrementable");
-        offset_ = next_offset_;
-        SeekToken();
+        SeekNextToken();
         return *this;
     }
 
@@ -78,28 +77,42 @@ public:
     }
 
 private:
-    void SeekToken() noexcept
+    void SeekNextToken() noexcept
     {
-        if (offset_ >= data_.length()) {
+        // Reset our probe begin pos.
+        auto token_begin_pos = offset_end_;
+
+        // Already scanned the entire string.
+        if (token_begin_pos >= data_.length()) {
+            ENSURE(CHECK, token_begin_pos == data_.length())(token_begin_pos).Require();
             current_token_ = token_type();
-            next_offset_ = data_.length();
+            offset_ = data_.length();
+            offset_end_ = data_.length();
             return;
         }
 
-        size_t token_begin = data_.find_first_not_of(delim_, offset_);
-        if (token_begin == token_type::npos) {
+        token_begin_pos = data_.find_first_not_of(delim_, token_begin_pos);
+
+        // No token can be found in the rest sequence.
+        if (token_begin_pos == token_type::npos) {
             current_token_ = token_type();
-            next_offset_ = data_.length();
+            offset_ = data_.length();
+            offset_end_ = data_.length();
             return;
         }
 
-        size_t token_end = data_.find_first_of(delim_, token_begin);
-        if (token_end == token_type::npos) {
-            token_end = data_.length();
+        offset_ = token_begin_pos;
+
+        auto token_end_pos = data_.find_first_of(delim_, token_begin_pos);
+
+        if (token_end_pos == token_type::npos) {
+            token_end_pos = data_.length();
         }
 
-        current_token_ = token_type(data_.data() + token_begin, token_end - token_begin);
-        next_offset_ = token_end;
+        current_token_ =
+            token_type(data_.data() + token_begin_pos, token_end_pos - token_begin_pos);
+
+        offset_end_ = token_end_pos;
     }
 
 private:
@@ -107,7 +120,7 @@ private:
     token_type delim_;
     token_type current_token_;
     size_t offset_;
-    size_t next_offset_;
+    size_t offset_end_;
 };
 
 template<typename CharT>
