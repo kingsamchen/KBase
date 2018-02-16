@@ -158,8 +158,15 @@ TEST(PathTest, IsAbsolutePath)
     EXPECT_EQ(false, Path(PATH_LITERAL("./abc")).IsAbsolute());
     EXPECT_EQ(false, Path(PATH_LITERAL("..")).IsAbsolute());
     EXPECT_EQ(false, Path(PATH_LITERAL("../abc")).IsAbsolute());
+
+#if defined(OS_WIN)
     EXPECT_EQ(false, Path(PATH_LITERAL("C:abc")).IsAbsolute());
     EXPECT_EQ(true, Path(PATH_LITERAL("C://abc")).IsAbsolute());
+    EXPECT_EQ(true, Path(PATH_LITERAL("\\\\KINGSLEYCHEN-PC\test")).IsAbsolute());
+#else
+    EXPECT_EQ(true, Path(PATH_LITERAL("/")).IsAbsolute());
+    EXPECT_EQ(true, Path(PATH_LITERAL("/home/kingsamchen")).IsAbsolute());
+#endif
 }
 
 TEST(PathTest, PathAppend)

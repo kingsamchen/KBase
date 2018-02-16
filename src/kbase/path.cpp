@@ -58,6 +58,7 @@ bool EqualPathValue(const string_type& lhs, const string_type& rhs)
 
 bool IsPathAbsolute(const string_type& path)
 {
+#if defined(OS_WIN)
     string_type::size_type drive_letter = FindDriveLetter(path);
 
     // Such as c:\foo or \\foo .etc
@@ -66,6 +67,9 @@ bool IsPathAbsolute(const string_type& path)
     }
 
     return (path.length() > 1) && (Path::IsSeparator(path[0]) && Path::IsSeparator(path[1]));
+#else
+    return (path.length() > 0) && (Path::IsSeparator(path[0]));
+#endif
 }
 
 string_type::size_type GetExtensionSeparatorPosition(const string_type& path)
