@@ -27,6 +27,7 @@ Path MakeAbsolutePath(const Path& path)
     auto full_path = realpath(path.value().c_str(), buf);
 
     if (!full_path) {
+        DLOG(WARNING) << "realpath() failed for " << path.AsUTF8() << "; " << errno;
         return Path();
     }
 

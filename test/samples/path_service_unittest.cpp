@@ -20,7 +20,7 @@ enum PathProviderForTest : PathKey {
 
 Path GetTestDirectory()
 {
-    return Path(PATH_LITERAL("kbase_test"));
+    return Path(PATH_LITERAL("/home"));
 }
 
 enum PathProviderForRecursive : PathKey {
