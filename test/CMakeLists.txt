@@ -1,24 +1,5 @@
-cmake_minimum_required(VERSION 3.1)
 
-project(Test CXX)
-
-set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
-
-if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-set(CMAKE_CXX_FLAGS_DEBUG "-g -fno-limit-debug-info")
-elseif (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-set(CMAKE_CXX_FLAGS_DEBUG "-g")
-endif()
-
-include_directories("third-party/gtest/include" "../src")
-
-set(PROJECT_LINK_LIBS "libkbase.a" "libgtest.a" "pthread")
-link_directories(${CMAKE_BINARY_DIR}/../)
-
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/../")
-set(SOURCES
+set(test_SRCS
     main.cpp
     samples/at_exit_manager_unittest.cpp
     samples/auto_reset_unittest.cpp
@@ -49,7 +30,8 @@ set(SOURCES
     samples/string_util_unittest.cpp
     samples/string_view_unittest.cpp
     samples/tokenizer_unittest.cpp
-    )
+)
 
-add_executable(kbase_test ${SOURCES})
-target_link_libraries(kbase_test ${PROJECT_LINK_LIBS})
+add_executable(kbase_test ${test_SRCS})
+
+target_link_libraries(kbase_test PUBLIC kbase gtest pthread)

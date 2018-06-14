@@ -1,22 +1,5 @@
-cmake_minimum_required(VERSION 3.1)
 
-project(KBase CXX)
-
-set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
-
-if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-set(CMAKE_CXX_FLAGS_DEBUG "-g -fno-limit-debug-info")
-elseif (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-set(CMAKE_CXX_FLAGS_DEBUG "-g")
-endif()
-
-include_directories(.)
-
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY  "${CMAKE_BINARY_DIR}/../")
-
-set(SOURCES
+set(kbase_SRCS
     kbase/at_exit_manager.cpp
     kbase/base_path_provider_posix.cpp
     kbase/base64.cpp
@@ -40,6 +23,11 @@ set(SOURCES
     kbase/stack_walker_posix.cpp
     kbase/string_encoding_conversions.cpp
     kbase/string_format.cpp
-    kbase/string_util.cpp)
+    kbase/string_util.cpp
+)
 
-add_library(kbase STATIC ${SOURCES})
+add_library(kbase ${kbase_SRCS})
+
+target_include_directories(kbase
+    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
+)
