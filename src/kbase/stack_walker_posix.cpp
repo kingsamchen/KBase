@@ -65,7 +65,7 @@ void ResolveCallstackSymbols(void* const* stack_frames, int frame_count, std::os
 
 namespace kbase {
 
-StackWalker::StackWalker()
+StackWalker::StackWalker() noexcept
 {
     auto captured_frame_count = backtrace(stack_frames_.data(),
                                           static_cast<int>(stack_frames_.size()));

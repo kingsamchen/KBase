@@ -62,7 +62,7 @@ long GetNumberOfCores()
 
 namespace kbase {
 
-OSInfo::OSInfo()
+OSInfo::OSInfo() noexcept
     : architecture_(GetSystemArchitecture()),
       core_count_(GetNumberOfCores()),
       vm_granularity_(getpagesize())
