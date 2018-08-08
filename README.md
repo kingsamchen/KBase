@@ -32,20 +32,22 @@ Besides, all these projects originally are built with `/MD(d)` flags.
 
 - 14.04 LTS x64, or later
 - Clang 3.8, or G++ 6 (higher versions should also work)
-- CMake 3.1, or later
-- Python 2.7+
+- CMake 3.5, or later
+- Python 3.5, or later
+- Ninja
 
-Note: G++ 5 has bugs which cause compilation errors.
+Note:
+- G++ 5 has bugs which cause compilation errors.
+- If you don't want to use ninja as the build system, you can edit `gen.py` to change back to makefile.
 
 **Build Steps**
 
 1. Clone the repository, and `cd` to `KBase` directory
-2. Execute `gen_kbase.py` to build the project `KBase`, it will end up with the static library `libkbase.a` in the directory `KBase/build/<BuildType>/`
-   use `--build-type={Debug|Release}` to specify build mode, and *Debug* is the default mode.
-3. If you want to build the `Test` project, run `gen_test.py`
-   switch `--build-type` is also available here; moreover, if you want to build the `Test` project altogether with `KBase`, run `gen_test.py` with switch `--build-all`.
+2. Run `gen.py` to build the lib and tests.
+   Use `--build-type={Debug|Release}` to specify build mode, and *Debug* is the default mode.
+3. If you want to skip building tests, just specify `--build-test=False`
 
-Please be noted that, building `KBase` project would not install any of its files into system's include directory.
+Please be noted that, building the project would not install any of its files into your system's include directory.
 
 
 ## Usages and Samples
