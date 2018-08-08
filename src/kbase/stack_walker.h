@@ -22,7 +22,7 @@ namespace kbase {
 
 class StackWalker {
 public:
-    StackWalker();
+    StackWalker() noexcept;
 
 #if defined(OS_WIN)
     // Dumps a callstack for an exception case.

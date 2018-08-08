@@ -46,7 +46,7 @@ void AppendPrintfT(std::string& str, char* buf, size_t max_count_including_null,
         return;
     }
 
-    std::vector<char> backup_buf(real_size + 1);
+    std::vector<char> backup_buf(static_cast<size_t>(real_size) + 1);
     va_copy(args_copy, args);
     vsnprintf(backup_buf.data(), backup_buf.size(), fmt, args_copy);
     va_end(args_copy);

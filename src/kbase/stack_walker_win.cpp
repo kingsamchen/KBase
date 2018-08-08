@@ -67,6 +67,7 @@ public:
 
 private:
     SymbolContext()
+        : init_error_code_(0)
     {
         InitSymbolHandler();
     }
@@ -160,7 +161,7 @@ namespace kbase {
 
 // Prevent stack frames getting messed by FPO.
 #pragma optimize("", off)
-StackWalker::StackWalker()
+StackWalker::StackWalker() noexcept
 {
     auto captured_frame_count = RtlCaptureStackBackTrace(0,
                                                          static_cast<DWORD>(stack_frames_.size()),

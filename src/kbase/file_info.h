@@ -54,7 +54,7 @@ private:
 
 class FileInfo {
 public:
-    FileInfo()
+    FileInfo() noexcept
         : size_(0), is_directory_(false)
     {}
 

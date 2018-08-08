@@ -31,6 +31,7 @@ struct FileIterator::WalkingHandleTraits {
 
 FileIterator::FileIterator() noexcept
     : dir_walking_handle_(std::make_shared<DirWalkingHandle>()),
+      find_data_(),
       recursive_(false)
 {}
 

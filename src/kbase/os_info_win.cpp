@@ -43,7 +43,7 @@ void GetSystemVersion(VersionNumber& version_number) noexcept
 
 namespace kbase {
 
-OSInfo::OSInfo()
+OSInfo::OSInfo() noexcept
     : architecture_(SystemArchitecture::Unknown)
 {
     GetSystemVersion(version_number_);

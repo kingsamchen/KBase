@@ -109,7 +109,7 @@ public:
     }
 
 private:
-    OSInfo();
+    OSInfo() noexcept;
 
 private:
     SystemArchitecture architecture_;
