@@ -10,6 +10,7 @@
 #define KBASE_SCOPED_HANDLE_H_
 
 #include <cstdio>
+#include <utility>
 
 #include "kbase/basic_macros.h"
 
