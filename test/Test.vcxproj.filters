@@ -1,114 +1,110 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
-    </Filter>
-    <Filter Include="samples">
-      <UniqueIdentifier>{b5395c7e-7aec-46fa-99c9-04676d31a992}</UniqueIdentifier>
+    <Filter Include="tests">
+      <UniqueIdentifier>{e924c833-31d6-4c9a-90d9-90642b02c267}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="samples\error_exception_util_unittest.cpp">
-      <Filter>samples</Filter>
-    </ClCompile>
-    <ClCompile Include="samples\pickle_unittest.cpp">
-      <Filter>samples</Filter>
-    </ClCompile>
-    <ClCompile Include="samples\path_service_unittest.cpp">
-      <Filter>samples</Filter>
-    </ClCompile>
-    <ClCompile Include="samples\file_util_unittest.cpp">
-      <Filter>samples</Filter>
-    </ClCompile>
-    <ClCompile Include="samples\auto_reset_unittest.cpp">
-      <Filter>samples</Filter>
-    </ClCompile>
-    <ClCompile Include="samples\string_util_unittest.cpp">
-      <Filter>samples</Filter>
-    </ClCompile>
-    <ClCompile Include="samples\logging_unittest.cpp">
-      <Filter>samples</Filter>
-    </ClCompile>
-    <ClCompile Include="samples\scoped_handle_unittest.cpp">
-      <Filter>samples</Filter>
-    </ClCompile>
-    <ClCompile Include="samples\singleton_unittest.cpp">
-      <Filter>samples</Filter>
-    </ClCompile>
-    <ClCompile Include="samples\lazy_unittest.cpp">
-      <Filter>samples</Filter>
-    </ClCompile>
-    <ClCompile Include="samples\command_line_unittest.cpp">
-      <Filter>samples</Filter>
-    </ClCompile>
-    <ClCompile Include="samples\registry_unittest.cpp">
-      <Filter>samples</Filter>
-    </ClCompile>
-    <ClCompile Include="samples\lru_cache_unittest.cpp">
-      <Filter>samples</Filter>
-    </ClCompile>
-    <ClCompile Include="samples\file_version_info_unittest.cpp">
-      <Filter>samples</Filter>
-    </ClCompile>
-    <ClCompile Include="samples\environment_unittest.cpp">
-      <Filter>samples</Filter>
-    </ClCompile>
-    <ClCompile Include="samples\base64_unittest.cpp">
-      <Filter>samples</Filter>
-    </ClCompile>
-    <ClCompile Include="samples\guid_unittest.cpp">
-      <Filter>samples</Filter>
-    </ClCompile>
-    <ClCompile Include="samples\md5_unittest.cpp">
-      <Filter>samples</Filter>
-    </ClCompile>
-    <ClCompile Include="samples\string_format_unittest.cpp">
-      <Filter>samples</Filter>
-    </ClCompile>
-    <ClCompile Include="samples\at_exit_manager_unittest.cpp">
-      <Filter>samples</Filter>
-    </ClCompile>
-    <ClCompile Include="samples\signals_unittest.cpp">
-      <Filter>samples</Filter>
-    </ClCompile>
-    <ClCompile Include="samples\path_unittest.cpp">
-      <Filter>samples</Filter>
-    </ClCompile>
-    <ClCompile Include="samples\string_view_unittest.cpp">
-      <Filter>samples</Filter>
-    </ClCompile>
-    <ClCompile Include="samples\tokenizer_unittest.cpp">
-      <Filter>samples</Filter>
-    </ClCompile>
-    <ClCompile Include="samples\os_info_unittest.cpp">
-      <Filter>samples</Filter>
-    </ClCompile>
-    <ClCompile Include="samples\string_encoding_conversions_unittest.cpp">
-      <Filter>samples</Filter>
-    </ClCompile>
-    <ClCompile Include="samples\scope_guard_unittest.cpp">
-      <Filter>samples</Filter>
-    </ClCompile>
-    <ClCompile Include="samples\stack_walker_unittest.cpp">
-      <Filter>samples</Filter>
-    </ClCompile>
-    <ClCompile Include="samples\minidump_unittest.cpp">
-      <Filter>samples</Filter>
-    </ClCompile>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="samples\chrono_util_unittest.cpp">
-      <Filter>samples</Filter>
+    <ClCompile Include="tests\at_exit_manager_unittest.cpp">
+      <Filter>tests</Filter>
     </ClCompile>
-    <ClCompile Include="samples\file_iterator_unittest.cpp">
-      <Filter>samples</Filter>
+    <ClCompile Include="tests\auto_reset_unittest.cpp">
+      <Filter>tests</Filter>
     </ClCompile>
-    <ClCompile Include="samples\debugger_unittest.cpp">
-      <Filter>samples</Filter>
+    <ClCompile Include="tests\base64_unittest.cpp">
+      <Filter>tests</Filter>
     </ClCompile>
-    <ClCompile Include="samples\enum_ops_unittest.cpp">
-      <Filter>samples</Filter>
+    <ClCompile Include="tests\chrono_util_unittest.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\command_line_unittest.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\debugger_unittest.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\enum_ops_unittest.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\environment_unittest.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\error_exception_util_unittest.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\file_iterator_unittest.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\file_util_unittest.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\file_version_info_unittest.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\guid_unittest.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\lazy_unittest.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\logging_unittest.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\lru_cache_unittest.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\md5_unittest.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\minidump_unittest.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\os_info_unittest.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\path_service_unittest.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\path_unittest.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\pickle_unittest.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\registry_unittest.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\scope_guard_unittest.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\scoped_handle_unittest.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\signals_unittest.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\singleton_unittest.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\stack_walker_unittest.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\string_encoding_conversions_unittest.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\string_format_unittest.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\string_util_unittest.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\string_view_unittest.cpp">
+      <Filter>tests</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\tokenizer_unittest.cpp">
+      <Filter>tests</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

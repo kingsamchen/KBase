@@ -38,6 +38,5 @@ add_subdirectory(src)
 message(STATUS "BUILD_NO_UNITTEST = " ${CMAKE_BUILD_NO_UNITTEST})
 
 if (NOT CMAKE_BUILD_NO_UNITTEST)
-    add_subdirectory(test/third-party)
     add_subdirectory(test)
 endif()

@@ -1,37 +1,41 @@
 
 set(test_SRCS
     main.cpp
-    samples/at_exit_manager_unittest.cpp
-    samples/auto_reset_unittest.cpp
-    samples/base64_unittest.cpp
-    samples/command_line_unittest.cpp
-    samples/chrono_util_unittest.cpp
-    samples/debugger_unittest.cpp
-    samples/enum_ops_unittest.cpp
-    samples/environment_unittest.cpp
-    samples/error_exception_util_unittest.cpp
-    samples/file_iterator_unittest.cpp
-    samples/file_util_unittest.cpp
-    samples/guid_unittest.cpp
-    samples/lazy_unittest.cpp
-    samples/logging_unittest.cpp
-    samples/lru_cache_unittest.cpp
-    samples/md5_unittest.cpp
-    samples/os_info_unittest.cpp
-    samples/path_service_unittest.cpp
-    samples/path_unittest.cpp
-    samples/pickle_unittest.cpp
-    samples/scope_guard_unittest.cpp
-    samples/signals_unittest.cpp
-    samples/singleton_unittest.cpp
-    samples/stack_walker_unittest.cpp
-    samples/string_encoding_conversions_unittest.cpp
-    samples/string_format_unittest.cpp
-    samples/string_util_unittest.cpp
-    samples/string_view_unittest.cpp
-    samples/tokenizer_unittest.cpp
+    tests/at_exit_manager_unittest.cpp
+    tests/auto_reset_unittest.cpp
+    tests/base64_unittest.cpp
+    tests/chrono_util_unittest.cpp
+    tests/command_line_unittest.cpp
+    tests/debugger_unittest.cpp
+    tests/enum_ops_unittest.cpp
+    tests/environment_unittest.cpp
+    tests/error_exception_util_unittest.cpp
+    tests/file_iterator_unittest.cpp
+    tests/file_util_unittest.cpp
+    tests/guid_unittest.cpp
+    tests/lazy_unittest.cpp
+    tests/logging_unittest.cpp
+    tests/lru_cache_unittest.cpp
+    tests/md5_unittest.cpp
+    tests/os_info_unittest.cpp
+    tests/path_service_unittest.cpp
+    tests/path_unittest.cpp
+    tests/pickle_unittest.cpp
+    tests/scope_guard_unittest.cpp
+    tests/signals_unittest.cpp
+    tests/singleton_unittest.cpp
+    tests/stack_walker_unittest.cpp
+    tests/string_encoding_conversions_unittest.cpp
+    tests/string_format_unittest.cpp
+    tests/string_util_unittest.cpp
+    tests/string_view_unittest.cpp
+    tests/tokenizer_unittest.cpp
 )
 
 add_executable(kbase_test ${test_SRCS})
 
-target_link_libraries(kbase_test PUBLIC kbase gtest pthread)
+target_include_directories(kbase_test
+    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/Catch2/single_include
+)
+
+target_link_libraries(kbase_test PUBLIC kbase pthread)
