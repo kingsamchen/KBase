@@ -300,8 +300,12 @@ TEST_CASE("Finding operations", "[StringView]")
             REQUIRE(StringView::npos == view_2.find_last_not_of("B-1"));
 
             StringView view_3 = "444-555-GGG";
-            REQUIRE(7 == view_3.find_last_not_of("45G"));
-            REQUIRE(3 == view_3.find_last_not_of("45G", 6, 6));
+            auto pos1 = view_3.find_last_not_of("45G");
+            INFO("pos1 = " << pos1);
+            REQUIRE(7 == pos1);
+            auto pos2 = view_3.find_last_not_of("45G", 6, 3);
+            INFO("pos2 = " << pos2);
+            REQUIRE(3 == pos2);
 
             StringView view_4 = "12-ab-12-ab";
             REQUIRE(1 == view_4.find_last_not_of("b-a", 5));
