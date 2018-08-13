@@ -5,6 +5,8 @@
 #include "catch2/catch.hpp"
 
 #include "kbase/base_path_provider.h"
+#include "kbase/error_exception_util.h"
+#include "kbase/guid.h"
 #include "kbase/minidump.h"
 #include "kbase/path_service.h"
 
@@ -12,8 +14,9 @@ namespace {
 
 void Logging(int i)
 {
-    INFO("Logging input value: " << i << "\n");
-    auto dump_file_path = kbase::PathService::Get(kbase::DirTemp).AppendASCII("kbase_test.dmp");
+    UNUSED_VAR(i);
+    std::string filename = kbase::GenerateGUID() + "_kbase_test.dmp";
+    auto dump_file_path = kbase::PathService::Get(kbase::DirTemp).AppendASCII(filename);
     auto rv = kbase::CreateMiniDump(dump_file_path);
     REQUIRE(rv);
 }

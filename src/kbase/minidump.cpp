@@ -68,7 +68,7 @@ bool GenerateMiniDumpFile(const Path& dump_path, EXCEPTION_POINTERS* ex_ptrs)
 int HandleException(const Path& dump_path, EXCEPTION_POINTERS* ex_ptrs, bool& succeeded)
 {
     succeeded = GenerateMiniDumpFile(dump_path, ex_ptrs);
-    return EXCEPTION_CONTINUE_EXECUTION;
+    return EXCEPTION_EXECUTE_HANDLER;
 }
 
 }   // namespace
@@ -83,8 +83,8 @@ bool CreateMiniDump(const Path& dump_path)
     // issue an exception on-the-fly.
     __try {
         RaiseException(kStatusDumping, 0, 0, nullptr);
-    } __except (HandleException(dump_path, GetExceptionInformation(), succeeded))
-    {}
+    } __except (HandleException(dump_path, GetExceptionInformation(), succeeded)) {
+    }
 
     return succeeded;
 }
