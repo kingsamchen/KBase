@@ -112,6 +112,17 @@ TEST_CASE("General usages of ENSURE macro", "[ErrorExceptionUtil]")
 
         ENSURE(THROW, true)(ws)(wsv).Require();
     }
+
+    SECTION("able to capture enum types")
+    {
+        enum class E : unsigned int {
+            A = 0xDEADBEEF,
+        };
+
+        E e = E::A;
+
+        ENSURE(THROW, true)(e).Require();
+    }
 }
 
 #if defined(OS_WIN)

@@ -15,6 +15,7 @@
 #include <stdexcept>
 
 #include "kbase/basic_macros.h"
+#include "kbase/basic_types.h"
 #include "kbase/string_encoding_conversions.h"
 #include "kbase/string_view.h"
 
@@ -35,6 +36,26 @@ constexpr bool NotReached() noexcept
 }
 
 namespace internal {
+
+struct general_category_tag {};
+struct wide_string_category_tag {};
+struct enum_category_tag {};
+
+template<typename T, typename = void>
+struct map_type_to_category
+    : general_category_tag
+{};
+
+template<typename T>
+struct map_type_to_category<T, std::enable_if_t<std::is_enum<T>::value>>
+    : enum_category_tag
+{};
+
+template<typename T>
+struct map_type_to_category<T, std::enable_if_t<std::is_same<T, std::wstring>::value ||
+                                                std::is_same<T, kbase::WStringView>::value>>
+    : wide_string_category_tag
+{};
 
 class ExceptionPump {
 public:
@@ -112,18 +133,8 @@ public:
     template<typename T>
     Guarantor& CaptureVar(const char* name, const T& value)
     {
-        exception_desc_ << "    " << name << " = " << value << "\n";
+        HandleCapturedVar(name, value, internal::map_type_to_category<T>{});
         return *this;
-    }
-
-    Guarantor& CaptureVar(const char* name, const std::wstring& value)
-    {
-        return CaptureVar(name, WideToUTF8(value));
-    }
-
-    Guarantor& CaptureVar(const char* name, WStringView value)
-    {
-        return CaptureVar(name, WideToUTF8(value));
     }
 
     template<typename E>
@@ -144,6 +155,30 @@ private:
     void DoCheck() const;
 
     void DoThrow();
+
+    template<typename T>
+    void HandleCapturedVar(const char* name, const T& value, internal::general_category_tag)
+    {
+        RecordCapturedVar(name, value);
+    }
+
+    template<typename T>
+    void HandleCapturedVar(const char* name, const T& value, internal::wide_string_category_tag)
+    {
+        RecordCapturedVar(name, WideToUTF8(value));
+    }
+
+    template<typename T>
+    void HandleCapturedVar(const char* name, T value, internal::enum_category_tag)
+    {
+        RecordCapturedVar(name, enum_cast(value));
+    }
+
+    template<typename T>
+    void RecordCapturedVar(const char* name, const T& value)
+    {
+        exception_desc_ << "    " << name << " = " << value << "\n";
+    }
 
 private:
     EnsureAction action_;

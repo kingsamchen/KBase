@@ -139,7 +139,7 @@ bool StartsWithT(BasicStringView<CharT> str, BasicStringView<CharT> token, CaseM
         }
             break;
         default:
-            ENSURE(CHECK, kbase::NotReached())(kbase::enum_cast(mode)).Require();
+            ENSURE(CHECK, kbase::NotReached())(mode).Require();
     }
 
     return rv;
@@ -171,7 +171,7 @@ bool EndsWithT(BasicStringView<CharT> str, BasicStringView<CharT> token, CaseMod
         }
             break;
         default:
-            ENSURE(CHECK, kbase::NotReached())(kbase::enum_cast(mode)).Require();
+            ENSURE(CHECK, kbase::NotReached())(mode).Require();
     }
 
     return rv;
