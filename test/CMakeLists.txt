@@ -22,6 +22,7 @@ set(test_SRCS
     tests/path_unittest.cpp
     tests/pickle_unittest.cpp
     tests/scope_guard_unittest.cpp
+    tests/scoped_handle_unittest.cpp
     tests/signals_unittest.cpp
     tests/singleton_unittest.cpp
     tests/stack_walker_unittest.cpp

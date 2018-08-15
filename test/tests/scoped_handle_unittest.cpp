@@ -6,11 +6,19 @@
 
 #include "catch2/catch.hpp"
 
+#include "kbase/basic_macros.h"
 #include "kbase/scoped_handle.h"
+
+#if defined(OS_POSIX)
+#include <fcntl.h>
+#include <sys/stat.h>
+#endif
 
 namespace kbase {
 
-TEST_CASE("General class traits", "[ScopedHandle]")
+#if defined(OS_WIN)
+
+TEST_CASE("General class traits for Windows HANDLE", "[ScopedHandle]")
 {
     SECTION("Normal")
     {
@@ -72,5 +80,18 @@ TEST_CASE("General class traits", "[ScopedHandle]")
         }
     }
 }
+
+#else
+
+TEST_CASE("ScopedHandle for file descriptor on POSIX", "[ScopedHandle]")
+{
+    ScopedFD fd(open("/proc/cpuinfo", O_RDONLY));
+    REQUIRE(!!fd);
+
+    fd = nullptr;
+    REQUIRE(!fd);
+}
+
+#endif
 
 }   // namespace kbase

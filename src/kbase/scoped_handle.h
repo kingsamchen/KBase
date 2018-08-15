@@ -16,6 +16,8 @@
 
 #if defined(OS_WIN)
 #include <Windows.h>
+#else
+#include <unistd.h>
 #endif
 
 namespace kbase {
@@ -147,6 +149,33 @@ struct WinHandleTraits {
 };
 
 using ScopedWinHandle = GenericScopedHandle<WinHandleTraits>;
+
+#else
+
+struct FDTraits {
+    using Handle = int;
+
+    FDTraits() = delete;
+
+    ~FDTraits() = delete;
+
+    static Handle NullHandle() noexcept
+    {
+        return -1;
+    }
+
+    static bool IsValid(Handle handle) noexcept
+    {
+        return handle != -1;
+    }
+
+    static void Close(Handle handle) noexcept
+    {
+        close(handle);
+    }
+};
+
+using ScopedFD = GenericScopedHandle<FDTraits>;
 
 #endif
 
