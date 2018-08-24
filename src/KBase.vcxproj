@@ -71,6 +71,7 @@
       <ForcedIncludeFiles>..\build\pch\precompile.h</ForcedIncludeFiles>
       <EnablePREfast>true</EnablePREfast>
       <ConformanceMode>true</ConformanceMode>
+      <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -92,6 +93,7 @@
       <ForcedIncludeFiles>..\build\pch\precompile.h</ForcedIncludeFiles>
       <ConformanceMode>true</ConformanceMode>
       <EnablePREfast>true</EnablePREfast>
+      <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
