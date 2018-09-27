@@ -66,12 +66,12 @@ RegKey RegKey::Create(HKEY rootkey, const wchar_t* subkey, REGSAM access, DWORD&
     return RegKey(rootkey, subkey, access, disposition);
 }
 
-void RegKey::Open(const wchar_t* subkey, REGSAM access)
+void RegKey::Open(NOT_NULL const wchar_t* subkey, REGSAM access)
 {
     Open(key_, subkey, access);
 }
 
-void RegKey::Open(HKEY rootkey, const wchar_t* subkey, REGSAM access)
+void RegKey::Open(NOT_NULL HKEY rootkey, NOT_NULL const wchar_t* subkey, REGSAM access)
 {
     ENSURE(CHECK, rootkey != nullptr && subkey != nullptr).Require();
 

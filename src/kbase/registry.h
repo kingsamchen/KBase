@@ -52,9 +52,9 @@ public:
     static RegKey Create(HKEY rootkey, const wchar_t* subkey, REGSAM access, DWORD& disposition);
 
     // `subkey` here is relative to the current registry key.
-    void Open(const wchar_t* subkey, REGSAM access);
+    void Open(NOT_NULL const wchar_t* subkey, REGSAM access);
 
-    void Open(HKEY rootkey, const wchar_t* subkey, REGSAM access);
+    void Open(NOT_NULL HKEY rootkey, NOT_NULL const wchar_t* subkey, REGSAM access);
 
     HKEY Get() const noexcept;
 

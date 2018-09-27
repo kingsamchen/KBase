@@ -35,15 +35,15 @@
     classname(classname&&) = delete;                    \
     classname& operator=(classname&&) = delete
 
-// Default function is implicitly constexpr and noexcept, whenever it can be.
-
 #define DEFAULT_COPY(classname)                         \
     classname(const classname&) = default;              \
     classname& operator=(const classname&) = default
 
-#define DEFAULT_MOVE(classname)                         \
-    classname(classname&&) = default;                   \
-    classname& operator=(classname&&) = default
+// Force default move constructor / assignment to be noexcept.
+
+#define DEFAULT_MOVE(classname)                          \
+    classname(classname&&) noexcept = default;           \
+    classname& operator=(classname&&) noexcept = default
 
 #define UNUSED_VAR(x)                                   \
     ::kbase::internal::SilenceUnusedVariableWarning(x)
@@ -63,6 +63,14 @@
     auto ANONYMOUS_VAR(_module_) = GetModuleHandleW(L##dll);    \
     auto fn = ANONYMOUS_VAR(_module_) ?                         \
                 reinterpret_cast<type>(GetProcAddress(ANONYMOUS_VAR(_module_), #fn)) : nullptr
+#endif
+
+// Suppress some code analysis warnings.
+
+#if defined(COMPILER_MSVC)
+#define NOT_NULL __notnull
+#else
+#define NOT_NULL
 #endif
 
 // Put complicated implementation below.

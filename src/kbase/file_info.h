@@ -19,7 +19,7 @@ class FileTime {
 public:
     using time_type = TimePoint;
 
-    FileTime() = default;
+    constexpr FileTime() = default;
 
     explicit FileTime(time_type time)
         : time_(time)
