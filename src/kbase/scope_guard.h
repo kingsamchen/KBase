@@ -27,12 +27,12 @@ private:
 
 public:
     template<typename F>
-    explicit ScopeGuard(F&& fn) noexcept(std::is_nothrow_constructible<ExitCallback, F>::value)
+    explicit ScopeGuard(F&& fn) noexcept
         : exit_callback_(std::forward<F>(fn)), dismissed_(false)
     {}
 
     // Overloaded operator+ on ScopeGuardDriver relies move-ctor.
-    ScopeGuard(ScopeGuard&& other) noexcept(std::is_nothrow_move_constructible<ExitCallback>::value)
+    ScopeGuard(ScopeGuard&& other) noexcept
         : exit_callback_(std::move(other.exit_callback_)), dismissed_(other.dismissed_)
     {
         other.dismissed_ = true;
