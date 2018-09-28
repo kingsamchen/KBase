@@ -41,9 +41,9 @@
 
 // Force default move constructor / assignment to be noexcept.
 
-#define DEFAULT_MOVE(classname)                          \
-    classname(classname&&) noexcept = default;           \
-    classname& operator=(classname&&) noexcept = default
+#define DEFAULT_MOVE(classname)                         \
+    classname(classname&&) = default;                   \
+    classname& operator=(classname&&) = default
 
 #define UNUSED_VAR(x)                                   \
     ::kbase::internal::SilenceUnusedVariableWarning(x)
