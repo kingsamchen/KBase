@@ -78,6 +78,7 @@ void CachePathWithKey(PathKey key, const Path& path)
     }
 }
 
+#if !defined(NDEBUG)
 void EnsureNoPathKeyOverlapped(PathKey start, PathKey end, const PathContext& path_data)
 {
     for (const PathProvider& provider : path_data.providers) {
@@ -85,6 +86,7 @@ void EnsureNoPathKeyOverlapped(PathKey start, PathKey end, const PathContext& pa
             (start)(end)(provider.start)(provider.end).Require();
     }
 }
+#endif
 
 }   // namespace
 

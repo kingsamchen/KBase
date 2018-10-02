@@ -67,14 +67,14 @@ struct Placeholder {
 
     // For std::equal_range.
     struct RangeCompare {
-        bool operator()(size_t index, const Placeholder& rhs) const noexcept
+        bool operator()(size_t self_index, const Placeholder& rhs) const noexcept
         {
-            return index < rhs.index;
+            return self_index < rhs.index;
         }
 
-        bool operator()(const Placeholder& lhs, size_t index) const noexcept
+        bool operator()(const Placeholder& lhs, size_t self_index) const noexcept
         {
-            return lhs.index < index;
+            return lhs.index < self_index;
         }
     };
 };

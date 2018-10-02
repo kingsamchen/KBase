@@ -33,8 +33,6 @@ bool EqualFileTime(const FILETIME& lhs, const FILETIME& rhs)
            lhs.dwHighDateTime == rhs.dwHighDateTime;
 }
 
-#endif
-
 void PrintTimePoint(kbase::TimePoint tp)
 {
     auto time = std::chrono::system_clock::to_time_t(tp);
@@ -42,6 +40,8 @@ void PrintTimePoint(kbase::TimePoint tp)
     kbase::SecureLocalTime(&time, &local_time);
     std::cout << std::put_time(&local_time, "%c") << std::endl;
 }
+
+#endif
 
 }   // namespace
 

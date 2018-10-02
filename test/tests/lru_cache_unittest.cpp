@@ -94,7 +94,7 @@ TEST_CASE("Put, get and eviction", "[LRUCache]")
 
         // case: LRU replacement when running out of free space
 
-        for (int i = 3; i < array_size(candidates); ++i) {
+        for (size_t i = 3; i < array_size(candidates); ++i) {
             alphabet.Put(candidates[i].first, candidates[i].second);
         }
 

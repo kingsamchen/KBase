@@ -77,7 +77,7 @@ using kbase::MD5Context;
 // doesn't work.
 #if defined(_M_IX86) || defined(_M_X64) || defined(__i386__) || defined(__x86_64__)
 #define SET(n) \
-    (*(MD5uint *)&ptr[(n) * 4])
+    (*reinterpret_cast<const MD5uint*>(&ptr[(n) * 4]))
 #define GET(n) \
     SET(n)
 #else

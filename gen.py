@@ -6,6 +6,7 @@ import os
 import shlex
 import subprocess
 
+from distutils.util import strtobool
 from os import path
 
 PROJECT_ROOT = path.dirname(path.abspath(__file__))
@@ -18,7 +19,8 @@ def run(cmd):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--build-type', dest='build_type', type=str, default='Debug')
-    parser.add_argument('--build-test', dest='build_test', type=bool, default=True)
+    parser.add_argument('--build-test', dest='build_test',
+                        type=lambda opt: bool(strtobool(opt)), default=True)
     args = parser.parse_args()
 
     build_type = args.build_type.capitalize()

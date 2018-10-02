@@ -8,6 +8,14 @@ endif()
 
 set(CXX_FLAGS
  -g
+ -Wall
+ -Wextra
+ -Werror
+ -Wno-unused-parameter
+ -Wold-style-cast
+ -Woverloaded-virtual
+ -Wpointer-arith
+ -Wshadow
 )
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")

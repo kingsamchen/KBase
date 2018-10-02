@@ -7,10 +7,14 @@
 
 namespace {
 
+#if defined(OS_WIN)
+
 using WinFileTimeTickRate = std::ratio<1, 10'000'000>;
 using WinFileTimeTick = std::chrono::duration<long long, WinFileTimeTickRate>;
 
 constexpr WinFileTimeTick kEpochDifference(11644473600'000'000'0);
+
+#endif
 
 }   // namespace
 
@@ -80,7 +84,7 @@ SYSTEMTIME TimePointToWindowsSystemTime(TimePoint time_point)
     return sys_time;
 }
 
-#else   // OS_WIN
+#elif defined(OS_POSIX)
 
 TimePoint TimePointFromTimespec(const timespec& timespec)
 {
