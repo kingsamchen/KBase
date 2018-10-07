@@ -41,7 +41,7 @@ public:
 
 private:
     static constexpr size_t kMaxStackFrames = 64U;
-    std::array<void*, kMaxStackFrames> stack_frames_ { nullptr };
+    std::array<void*, kMaxStackFrames> stack_frames_ {{nullptr}};
     size_t valid_frame_count_ = 0;
 };
 
