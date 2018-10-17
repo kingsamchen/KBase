@@ -73,6 +73,9 @@
 #define NOT_NULL
 #endif
 
+#define RETAIN_LIFETIME_TO_HERE(x)                      \
+    UNUSED_VAR(x)
+
 // Put complicated implementation below.
 
 namespace kbase {
