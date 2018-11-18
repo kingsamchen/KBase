@@ -68,7 +68,7 @@ public:
     // Initializes the singleton CommandLine instance for the current process. On Windows,
     // be sure to ignore its arguments, we internally use GetCommandLineW() instead, because
     // CRT's parsing algorithm on Windows is not reliable.
-    static void Init(int argc, const CharType* const* argv);
+    static void Init(int argc, const char* const* argv);
 
     // Returns the current process's singleton CommandLine instance.
     static const CommandLine& ForCurrentProcess();

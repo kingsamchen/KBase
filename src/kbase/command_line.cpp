@@ -142,7 +142,7 @@ CommandLine::CommandLine(const StringType& cmdline)
 #endif
 
 // static
-void CommandLine::Init(int argc, const CharType* const* argv)
+void CommandLine::Init(int argc, const char* const* argv)
 {
     if (current_process_cmdline_) {
         ENSURE(CHECK, NotReached()).Require();
