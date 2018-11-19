@@ -297,7 +297,7 @@ LogMessage::~LogMessage()
         WriteFile(g_log_file, msg.data(), static_cast<DWORD>(msg.length()), &bytes_written,
                   nullptr);
 #else
-        write(g_log_file, msg.data(), msg.length());
+        IGNORE_RESULT(write(g_log_file, msg.data(), msg.length()));
 #endif
     }
 }

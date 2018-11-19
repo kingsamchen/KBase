@@ -118,9 +118,9 @@ public:
     // If current path is parent of the `child`, appends to `path` the relative
     // path to child, and returns true.
     // otherwise, returns false.
-    // Example: current path: C:\user\kingsley chen\
+    // Example: current path: C:\user\kingsley chen
     //          child path:   C:\user\kingsley chen\app data\test
-    //          *path:        C:\user\kingsley chen\documents\
+    //          *path:        C:\user\kingsley chen\documents
     // After the calling of this function, *path becomes
     // C:\user\kingsley chen\documents\app data\test
     bool AppendRelativePath(const Path& child, Path* path) const;

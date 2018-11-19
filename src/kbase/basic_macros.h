@@ -48,6 +48,9 @@
 #define UNUSED_VAR(x)                                   \
     ::kbase::internal::SilenceUnusedVariableWarning(x)
 
+#define IGNORE_RESULT(x)                                \
+    ::kbase::internal::IgnoreUnusedResult(x)
+
 #define CONCATENATE_IMPL(part1, part2) part1##part2
 #define CONCATENATE(part1, part2) CONCATENATE_IMPL(part1, part2)
 #define ANONYMOUS_VAR(tag) CONCATENATE(tag, __LINE__)
@@ -84,6 +87,10 @@ namespace internal {
 
 template<typename T>
 void SilenceUnusedVariableWarning(T&&)
+{}
+
+template<typename T>
+void IgnoreUnusedResult(T&&)
 {}
 
 }   // namespace internal
