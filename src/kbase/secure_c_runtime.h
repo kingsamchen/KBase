@@ -15,9 +15,7 @@
 
 #if defined(OS_POSIX)
 #include <cstring>
-#endif
 
-#if defined(OS_POSIX)
 #include "kbase/error_exception_util.h"
 #endif
 
@@ -49,19 +47,19 @@ inline wchar_t* SecureMemcpy(wchar_t* dest, size_t dest_size_in_cch, const wchar
 
 inline void SecureLocalTime(const time_t* time, tm* tm)
 {
-#if defined(COMPILER_MSVC)
+#if defined(OS_WIN)
     localtime_s(tm, time);
-#else
-    memset(tm, 0, sizeof(struct tm));
+#elif defined(OS_POSIX)
+    localtime_r(time, tm);
+#endif
+}
 
-    auto rv = localtime(time);
-
-    if (!rv) {
-        ENSURE(CHECK, NotReached())(errno).Require();
-        return;
-    }
-
-    *tm = *rv;
+inline void SecureUTCTime(const time_t* time, tm* tm)
+{
+#if defined(OS_WIN)
+    gmtime_s(tm, time);
+#elif defined(OS_POSIX)
+    gmtime_r(time, tm);
 #endif
 }
 

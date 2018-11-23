@@ -43,6 +43,19 @@ void PrintTimePoint(kbase::TimePoint tp)
 
 #endif
 
+bool EqualTM(const struct tm& lhs, const struct tm& rhs)
+{
+    return lhs.tm_year == rhs.tm_year &&
+           lhs.tm_mon == rhs.tm_mon &&
+           lhs.tm_mday == rhs.tm_mday &&
+           lhs.tm_yday == rhs.tm_yday &&
+           lhs.tm_hour == rhs.tm_hour &&
+           lhs.tm_min == rhs.tm_min &&
+           lhs.tm_sec == rhs.tm_sec &&
+           lhs.tm_wday == rhs.tm_wday &&
+           lhs.tm_isdst == rhs.tm_isdst;
+}
+
 }   // namespace
 
 namespace kbase {
@@ -82,5 +95,27 @@ TEST_CASE("Convertions on windows", "[ChronoUtil]")
 }
 
 #endif
+
+TEST_CASE("Convert TimePoint to tm and remainder as local time", "[ChronoUtil]")
+{
+    auto now = std::chrono::system_clock::now();
+    auto result_sec = TimePointToLocalTime(now);
+    auto result_ms = TimePointToLocalTime<std::chrono::milliseconds>(now);
+    REQUIRE(EqualTM(result_sec.first, result_ms.first));
+    REQUIRE(result_sec.second.count() == 0);
+    REQUIRE(result_ms.second.count() > 0);
+    std::cout << std::put_time(&result_ms.first, "%c") << ", " << result_ms.second.count() << "\n";
+}
+
+TEST_CASE("Convert TimePoint to tm and remainder as utc", "[ChronoUtil]")
+{
+    auto now = std::chrono::system_clock::now();
+    auto result_sec = TimePointToUTCTime(now);
+    auto result_us = TimePointToUTCTime<std::chrono::microseconds>(now);
+    REQUIRE(EqualTM(result_sec.first, result_us.first));
+    REQUIRE(result_sec.second.count() == 0);
+    REQUIRE(result_us.second.count() > 0);
+    std::cout << std::put_time(&result_us.first, "%c") << ", " << result_us.second.count() << "\n";
+}
 
 }   // namespace kbase

@@ -43,8 +43,8 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
 
 add_subdirectory(src)
 
-message(STATUS "BUILD_NO_UNITTEST = " ${CMAKE_BUILD_NO_UNITTEST})
+message(STATUS "BUILD_NO_UNITTEST = " ${BUILD_NO_UNITTEST})
 
-if (NOT CMAKE_BUILD_NO_UNITTEST)
+if (NOT BUILD_NO_UNITTEST)
     add_subdirectory(test)
 endif()

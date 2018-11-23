@@ -4,19 +4,17 @@
 
 #include "kbase/logging.h"
 
+#include <cstdio>
 #include <chrono>
-#include <iomanip>
 #include <thread>
 
 #include "kbase/basic_macros.h"
-#include "kbase/secure_c_runtime.h"
+#include "kbase/chrono_util.h"
 #include "kbase/stack_walker.h"
 
 #if defined(OS_WIN)
 #include <Windows.h>
-#endif
-
-#if defined(OS_POSIX)
+#elif defined(OS_POSIX)
 #include <fcntl.h>
 #include <unistd.h>
 #endif
@@ -54,19 +52,15 @@ FileHandle g_log_file = kInvalidFileHandle;
 // Ouputs timestamp in the form like "20160126 09:14:38,456".
 void OutputNowTimestamp(std::ostream& stream)
 {
-    namespace chrono = std::chrono;
-
-    // Because c-style date & time don't support microsecond precison, we have to
-    // handle it on our own.
-    auto time_now = chrono::system_clock::now();
-    auto duration_in_ms = chrono::duration_cast<chrono::milliseconds>(time_now.time_since_epoch());
-    auto ms_part = duration_in_ms - chrono::duration_cast<chrono::seconds>(duration_in_ms);
-
-    tm local_time_now;
-    time_t raw_time = chrono::system_clock::to_time_t(time_now);
-    kbase::SecureLocalTime(&raw_time, &local_time_now);
-    stream << std::put_time(&local_time_now, "%Y%m%d %H:%M:%S,")
-           << std::setfill('0') << std::setw(3) << ms_part.count();
+    auto timestamp = kbase::TimePointToLocalTime<std::chrono::milliseconds>(
+        std::chrono::system_clock::now());
+    const auto& tm_time = timestamp.first;
+    char buf[32] {0};
+    snprintf(buf, sizeof(buf), "%4d%02d%02d %02d:%02d:%02d,%03d",
+             tm_time.tm_year + 1900, tm_time.tm_mon + 1, tm_time.tm_mday,
+             tm_time.tm_hour, tm_time.tm_min, tm_time.tm_sec,
+             static_cast<int>(timestamp.second.count()));
+    stream << buf;
 }
 
 template<typename charT>
