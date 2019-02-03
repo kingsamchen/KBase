@@ -65,9 +65,8 @@ void FileIterator::GetNext()
             }
         }
 
-        dirent* entry = nullptr;
-        int rv = readdir_r(dir_walking_handle_->get(), &dir_entry_buf_, &entry);
-        if (rv != 0 || !entry) {
+        dirent* entry = readdir(dir_walking_handle_->get());
+        if (!entry) {
             dir_walking_handle_->reset();
             continue;
         }
@@ -78,8 +77,8 @@ void FileIterator::GetNext()
 
         auto entry_path = walking_track_data_->first.AppendWith(entry->d_name);
 
-        struct stat entry_stat;
-        rv = lstat(entry_path.value().c_str(), &entry_stat);
+        struct stat entry_stat {};
+        int rv = lstat(entry_path.value().c_str(), &entry_stat);
         if (rv < 0) {
             // Clear stat info on failure.
             memset(&entry_stat, 0, sizeof(entry_stat));
@@ -109,8 +108,8 @@ bool FileIterator::ReachedEnd() const noexcept
 bool FileIterator::Equal(const FileIterator& other) const noexcept
 {
     return dir_walking_handle_ != nullptr && other.dir_walking_handle_!= nullptr ?
-            dir_walking_handle_->get() == other.dir_walking_handle_->get() :
-            dir_walking_handle_ == nullptr && other.dir_walking_handle_ == nullptr;
+           dir_walking_handle_->get() == other.dir_walking_handle_->get() :
+           dir_walking_handle_ == nullptr && other.dir_walking_handle_ == nullptr;
 }
 
 }   // namespace kbase

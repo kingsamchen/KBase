@@ -5,6 +5,7 @@
 #include "kbase/string_util.h"
 
 #include <algorithm>
+#include <iterator>
 
 #include "kbase/basic_types.h"
 #include "kbase/error_exception_util.h"

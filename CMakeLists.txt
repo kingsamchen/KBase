@@ -1,50 +1,52 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.11)
+
+# Detect if being bundled via sub-directory.
+if(NOT DEFINED PROJECT_NAME)
+  set(KBASE_NOT_SUBPROJECT ON)
+endif()
 
 project(KBase CXX)
 
-if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE "Release")
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+
+if(KBASE_NOT_SUBPROJECT)
+  set(ROOT_DIR ${CMAKE_SOURCE_DIR})
+  set(DEPS_SOURCE_DIR ${ROOT_DIR}/build/deps)
+  set(DEPS_DEPLOY_DIR ${CMAKE_BINARY_DIR})
 endif()
 
-set(CXX_FLAGS
- -g
- -Wall
- -Wextra
- -Werror
- -Wno-unused-parameter
- -Wold-style-cast
- -Woverloaded-virtual
- -Wpointer-arith
- -Wshadow
-)
+option(KBASE_BUILD_UNITTESTS "Build kbase unittests" ON)
 
-if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    list(APPEND CXX_FLAGS "-fno-limit-debug-info")
-endif()
+set(KBASE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+set(KBASE_DEPS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/deps)
+set(KBASE_CMAKE_DIR ${KBASE_DIR}/cmake)
 
-string(REPLACE ";" " " CMAKE_CXX_FLAGS "${CXX_FLAGS}")
-
-set(CMAKE_CXX_FLAGS_DEBUG "-O0")
-set(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG")
-
-set(CMAKE_EXE_LINKER_FLAGS "-rdynamic")
+include(FetchContent)
+set(FETCHCONTENT_BASE_DIR ${DEPS_DEPLOY_DIR})
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-string(TOUPPER ${CMAKE_BUILD_TYPE} BUILD_TYPE)
-message(STATUS "BUILD_TYPE = " ${BUILD_TYPE})
-message(STATUS "CXX_FLAGS = " ${CMAKE_CXX_FLAGS})
-message(STATUS "CXX_FLAGS_${BUILD_TYPE} = " ${CMAKE_CXX_FLAGS_${BUILD_TYPE}})
+if(MSVC)
+  include(${KBASE_CMAKE_DIR}/CompilerMSVC.cmake)
 
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
+  foreach(OUTPUTCONFIG_TYPE ${CMAKE_CONFIGURATION_TYPES})
+    string(TOUPPER ${OUTPUTCONFIG_TYPE} OUTPUTCONFIG)
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${CMAKE_BINARY_DIR}/${OUTPUTCONFIG_TYPE}/bin)
+    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${CMAKE_BINARY_DIR}/${OUTPUTCONFIG_TYPE}/lib)
+  endforeach()
+else()
+  include(${KBASE_CMAKE_DIR}/CompilerUnix.cmake)
 
-add_subdirectory(src)
+  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+  set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+endif()
 
-message(STATUS "BUILD_NO_UNITTEST = " ${BUILD_NO_UNITTEST})
+add_subdirectory(kbase)
 
-if (NOT BUILD_NO_UNITTEST)
-    add_subdirectory(test)
+message(STATUS "KBASE_BUILD_UNITTESTS = " ${KBASE_BUILD_UNITTESTS})
+
+if (KBASE_BUILD_UNITTESTS AND KBASE_NOT_SUBPROJECT)
+  add_subdirectory(tests)
 endif()

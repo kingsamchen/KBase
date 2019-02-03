@@ -1,0 +1,42 @@
+
+set(CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "limited configs" FORCE)
+
+function(apply_common_compile_properties_to_target TARGET)
+  target_compile_definitions(${TARGET}
+    PUBLIC
+      _UNICODE
+      UNICODE
+      NOMINMAX
+
+      $<$<CONFIG:DEBUG>:
+        _DEBUG
+      >
+
+      $<$<NOT:$<CONFIG:DEBUG>>:
+        NDEBUG
+      >
+  )
+
+  target_compile_options(${TARGET}
+    PUBLIC
+      /W4
+      /WX # Treat warning as error.
+
+      /Zc:referenceBinding # Disallow temporaries from binding to non-const lvalue references.
+      /Zc:rvalueCast # Enforce the standard rules for explicit type conversion.
+      /Zc:implicitNoexcept # Enable implicit noexcept specifications where required, such as destructors.
+      /Zc:strictStrings # Don't allow conversion from a string literal to mutable characters.
+      /Zc:threadSafeInit # Enable thread-safe function-local statics initialization.
+      /Zc:throwingNew # Assume operator new throws on failure.
+
+      /permissive- # Be mean, don't allow bad non-standard stuff (C++/CLI, __declspec, etc. are all left intact).
+
+    PRIVATE
+      /Zc:inline # Have the compiler eliminate unreferenced COMDAT functions and data before emitting the object file.
+  )
+
+  target_compile_options(${TARGET}
+    PUBLIC
+      /wd4819 # source characters not in current code page.
+  )
+endfunction(apply_common_compile_properties_to_target)

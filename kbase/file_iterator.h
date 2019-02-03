@@ -88,8 +88,6 @@ private:
 
 #if defined(OS_WIN)
     WIN32_FIND_DATA find_data_;
-#else
-    dirent dir_entry_buf_;
 #endif
 
     bool recursive_;

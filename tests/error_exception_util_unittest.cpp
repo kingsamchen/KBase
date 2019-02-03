@@ -72,7 +72,7 @@ TEST_CASE("General usages of ENSURE macro", "[ErrorExceptionUtil]")
         std::vector<int> v {1, 2, 3, 4, 5, 6, 7, 8, 9};
 
         auto foo = [&] {
-            ENSURE(THROW, v.size() >= 0 && v.size() <= 5)(v.size()).Require();
+            ENSURE(THROW, v.size() > 0 && v.size() <= 5)(v.size()).Require();
         };
 
         REQUIRE_THROWS_AS(foo(), EnsureFailure);
