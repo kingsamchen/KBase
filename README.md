@@ -14,40 +14,48 @@ A light-weight base library for C++.
 **Requirements**
 
 - Windows 7, or later
-- Visual Studio 2015, or later
+- Visual Studio 2015, or later (C++ 14 is required)
+- CMake 3.11 or later
+- Python 3
+
+Note:
+
+- If python 3 was not installed, you should run cmake configuration and build targets manually.
+- We will use latest version of Visual Studio as possible and use x64 as the default target platform.
 
 **Build Steps**
 
-1. Clone the repository
-2. Open the `KBase.sln` file, then build the project `KBase`, it will end up with the static library `kbase.lib` in the directory `KBase/build/<Configuration>/`
-3. Build the `Test` project if you want to run any unittests (optional).
-
-Please be noted that, only x64 mode compilation is officially supported, though compiling on 32-bit should also work.
-
-Besides, all these projects originally are built with `/MD(d)` flags.
+1. Clone the repository and `cd` to the `KBase` directory
+2. Run `python ./gen.py`
+3. It will run cmake configuration and build `kbase` and its `tests` automatically.
+4. By default, generated files are located in folder `build/Windows/{build-type}`.
 
 ### Ubuntu
 
 **Requirements**
 
 - 14.04 LTS x64, or later
-- Clang 3.8, or G++ 6 (higher versions should also work)
-- CMake 3.5, or later
-- Python 3.5, or later
-- Ninja
+- Clang 3.8, or G++ as the minimum (C++ 14 is required)
+- CMake 3.11, or later
+- Python 3
+- Ninja (optional)
 
 Note:
-- G++ 5 has bugs which cause compilation errors.
-- If you don't want to use ninja as the build system, you can edit `gen.py` to change back to makefile.
+- If python 3 was not installed, you should run cmake configuration and build targets manually.
+- If Ninja was not installed, the `gen.py` would automatically fallback to using makefile.
 
 **Build Steps**
 
 1. Clone the repository, and `cd` to `KBase` directory
 2. Run `gen.py` to build the lib and tests.
    Use `--build-type={Debug|Release}` to specify build mode, and *Debug* is the default mode.
-3. If you want to skip building tests, just specify `--build-test=False`
+3. By default, generated files are located in `build/{build-type}`
 
 Please be noted that, building the project would not install any of its files into your system's include directory.
+
+### Misc
+
+Run `gen.py --help` to check command flags in details.
 
 
 ## Usages and Samples
