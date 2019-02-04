@@ -101,7 +101,7 @@ enum class SpecifierCategory {
 
 inline bool IsDigit(char ch)
 {
-    return isdigit(ch) != 0;
+    return isdigit(static_cast<int>(ch)) != 0;
 }
 
 inline bool IsDigit(wchar_t ch)

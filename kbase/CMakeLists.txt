@@ -101,6 +101,10 @@ add_library(kbase ${kbase_FILES})
 
 apply_common_compile_properties_to_target(kbase)
 
+if(MSVC)
+  enable_msvc_static_analysis_for_target(kbase)
+endif()
+
 target_include_directories(kbase
   PUBLIC ${CMAKE_CURRENT_LIST_DIR}/../
 )

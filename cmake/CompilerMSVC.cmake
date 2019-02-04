@@ -1,4 +1,6 @@
 
+option(MSVC_ENABLE_PARALLEL_BUILD "If enabled, build multiple files in parallel." ON)
+
 set(CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "limited configs" FORCE)
 
 function(apply_common_compile_properties_to_target TARGET)
@@ -33,6 +35,8 @@ function(apply_common_compile_properties_to_target TARGET)
 
     PRIVATE
       /Zc:inline # Have the compiler eliminate unreferenced COMDAT functions and data before emitting the object file.
+
+      $<$<BOOL:${MSVC_ENABLE_PARALLEL_BUILD}>:/MP>
   )
 
   target_compile_options(${TARGET}
@@ -40,3 +44,13 @@ function(apply_common_compile_properties_to_target TARGET)
       /wd4819 # source characters not in current code page.
   )
 endfunction(apply_common_compile_properties_to_target)
+
+# Enable static analysis for all targets could result in excessive warnings.
+# Thus we decided to enable for only targets we explicitly specify.
+function(enable_msvc_static_analysis_for_target TARGET)
+  target_compile_options(${TARGET}
+    PRIVATE
+      /analyze:ruleset NativeRecommendedRules.ruleset
+      /analyze:WX-
+  )
+endfunction(enable_msvc_static_analysis_for_target)
