@@ -52,4 +52,10 @@ add_executable(kbase_test ${tests_SRCS})
 
 apply_common_compile_properties_to_target(kbase_test)
 
+set_target_properties(kbase_test PROPERTIES
+  COTIRE_CXX_PREFIX_HEADER_INIT "${KBASE_PCH_HEADER}"
+)
+
+cotire(kbase_test)
+
 target_link_libraries(kbase_test PRIVATE kbase Catch2)

@@ -5,6 +5,7 @@ FetchContent_Declare(
   Catch2
   GIT_REPOSITORY  https://github.com/catchorg/Catch2.git
   GIT_TAG         v2.5.0
+  GIT_SHALLOW     TRUE
   SOURCE_DIR      ${CATCH2_SOURCE_DIR}
 )
 

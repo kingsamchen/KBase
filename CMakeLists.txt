@@ -24,6 +24,9 @@ set(KBASE_CMAKE_DIR ${KBASE_DIR}/cmake)
 include(FetchContent)
 set(FETCHCONTENT_BASE_DIR ${DEPS_DEPLOY_DIR})
 
+include(${KBASE_CMAKE_DIR}/cotire.cmake)
+set(KBASE_PCH_HEADER ${KBASE_DIR}/build/pch/precompile.h)
+
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)

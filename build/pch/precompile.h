@@ -11,17 +11,19 @@
 
 #define BUILD_PCH_PRECOMPILE_H_
 
-// The Windows header needs to come before almost all the other
-// Windows-specific headers.
-#include <Windows.h>
-#include <dwmapi.h>
-#include <shellapi.h>
-#include <wincrypt.h>
-#include <wtypes.h>
-
 // C-Runtime headers.
+#include <errno.h>
 #include <fcntl.h>
+#include <limits.h>
+#include <math.h>
 #include <memory.h>
+#include <signal.h>
+#include <stdarg.h>
+#include <stddef.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
 
 // CPP-Runtime headers.
 #include <algorithm>
