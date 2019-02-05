@@ -11,10 +11,6 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG")
 
 set(CMAKE_EXE_LINKER_FLAGS "-rdynamic")
 
-if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  list(APPEND CMAKE_CXX_FLAGS "-fno-limit-debug-info")
-endif()
-
 function(apply_common_compile_properties_to_target TARGET)
   target_compile_options(${TARGET}
     PRIVATE
@@ -27,5 +23,7 @@ function(apply_common_compile_properties_to_target TARGET)
       -Woverloaded-virtual
       -Wpointer-arith
       -Wshadow
+
+      $<$<STREQUAL:${CMAKE_CXX_COMPILER_ID},"Clang">:-fno-limit-debug-info>
   )
 endfunction(apply_common_compile_properties_to_target)
