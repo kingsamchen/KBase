@@ -4,14 +4,15 @@ KBase
 
 ## Introduction
 
-A light-weight base library for C++.
+A light-weight base library for modern C++.
+
 
 
 ## Build Instructions
 
-### Windows
+### Platform Requirements
 
-**Requirements**
+#### Windows
 
 - Windows 7, or later
 - Visual Studio 2015, or later (C++ 14 is required)
@@ -21,18 +22,9 @@ A light-weight base library for C++.
 Note:
 
 - If python 3 was not installed, you should run cmake configuration and build targets manually.
-- We will use latest version of Visual Studio as possible and use x64 as the default target platform.
+- We will use the latest version of Visual Studio as possible and use x64 as the default target architecture.
 
-**Build Steps**
-
-1. Clone the repository and `cd` to the `KBase` directory
-2. Run `python ./gen.py`
-3. It will run cmake configuration and build `kbase` and its `tests` automatically.
-4. By default, generated files are located in folder `build/Windows/{build-type}`.
-
-### Ubuntu
-
-**Requirements**
+#### Ubuntu
 
 - 14.04 LTS x64, or later
 - Clang 3.8, or G++ as the minimum (C++ 14 is required)
@@ -42,20 +34,16 @@ Note:
 
 Note:
 - If python 3 was not installed, you should run cmake configuration and build targets manually.
-- If Ninja was not installed, the `gen.py` would automatically fallback to using makefile.
+- If Ninja was not installed, you can use the traditional Makefile
 
-**Build Steps**
+### Generate & Build
 
-1. Clone the repository, and `cd` to `KBase` directory
-2. Run `gen.py` to build the lib and tests.
-   Use `--build-type={Debug|Release}` to specify build mode, and *Debug* is the default mode.
-3. By default, generated files are located in `build/{build-type}`
+KBase uses [anvil](https://github.com/kingsamchen/anvil) to assist in generating build system files and running builds.
 
-Please be noted that, building the project would not install any of its files into your system's include directory.
+Please be noted that, building the project on Linux platforms would not install any of its files into your system's include directory.
 
-### Misc
+Run `anvil --help` to check command flags in details.
 
-Run `gen.py --help` to check command flags in details.
 
 
 ## Usages and Samples
@@ -63,6 +51,7 @@ Run `gen.py --help` to check command flags in details.
 The project `Test` contains a set of unit test files, which can also be regarded as code samples in a certain of extend.
 
 Documentation files in `docs` are far more outdated, and it will take a lot of work to make it consistent with newest version of the codebase.
+
 
 
 ## Disclaimers

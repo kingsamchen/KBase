@@ -1,5 +1,9 @@
 
-include(${KBASE_DEPS_DIR}/FetchCatch2.cmake)
+declare_dep_module(Catch2
+  VERSION         2.5.0
+  GIT_REPOSITORY  https://github.com/catchorg/Catch2.git
+  GIT_TAG         v2.5.0
+)
 
 set(tests_SRCS
   main.cpp

@@ -46,11 +46,17 @@ function(apply_common_compile_properties_to_target TARGET)
 endfunction(apply_common_compile_properties_to_target)
 
 # Enable static analysis for all targets could result in excessive warnings.
-# Thus we decided to enable for only targets we explicitly specify.
+# Thus we decided to enable it for targets only we explicitly specify.
+# Use /wd args to suppress analysis warnings we cannot resolve.
 function(enable_msvc_static_analysis_for_target TARGET)
+  set(multiValueArgs WDL)
+  cmake_parse_arguments(ARG "" "" "${multiValueArgs}" ${ARGN})
+
   target_compile_options(${TARGET}
     PRIVATE
-      /analyze:ruleset NativeRecommendedRules.ruleset
-      /analyze:WX-
+      /analyze
+
+    PRIVATE
+      ${ARG_WDL}
   )
 endfunction(enable_msvc_static_analysis_for_target)

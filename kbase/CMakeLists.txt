@@ -101,8 +101,11 @@ add_library(kbase ${kbase_FILES})
 
 apply_common_compile_properties_to_target(kbase)
 
-if(MSVC)
-  enable_msvc_static_analysis_for_target(kbase)
+if(MSVC AND KBASE_ENABLE_CODE_ANALYSIS)
+  enable_msvc_static_analysis_for_target(kbase
+    WDL
+      /wd6011
+  )
 endif()
 
 target_include_directories(kbase
