@@ -33,7 +33,12 @@ std::wstring ASCIIToWide(StringView ascii_str)
 std::string WideToASCII(WStringView wide_str)
 {
     ENSURE(CHECK, IsStringASCIIOnly(wide_str)).Require();
-    return std::string(wide_str.begin(), wide_str.end());
+    return [wide_str] {
+        std::string result;
+        std::transform(wide_str.begin(), wide_str.end(), std::back_inserter(result),
+                       [](wchar_t w) { return static_cast<char>(w); });
+        return result;
+    }();
 }
 
 }   // namespace kbase

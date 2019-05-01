@@ -81,10 +81,13 @@ bool CreateMiniDump(const Path& dump_path)
 
     // To make sure we end up with a valid stack trace for the calling thread, we force to
     // issue an exception on-the-fly.
+#pragma warning(push)
+#pragma warning(disable: 6322)
     __try {
         RaiseException(kStatusDumping, 0, 0, nullptr);
     } __except (HandleException(dump_path, GetExceptionInformation(), succeeded)) {
     }
+#pragma warning(pop)
 
     return succeeded;
 }

@@ -27,4 +27,22 @@ TEST_CASE("Convert utf-8 to wide", "[StringEncodingConversion]")
     REQUIRE(ws == wss);
 }
 
+TEST_CASE("Conversion between ASCII and Wide", "[StringEncodingConversion]")
+{
+    std::string ascii = "hello there";
+    std::wstring wide = L"hello there";
+
+    SECTION("when convert ascii string to wide string")
+    {
+        auto result = ASCIIToWide(ascii);
+        REQUIRE(result == wide);
+    }
+
+    SECTION("when convert wide string to ascii")
+    {
+        auto result = WideToASCII(wide);
+        REQUIRE(result == ascii);
+    }
+}
+
 }   // namespace kbase
