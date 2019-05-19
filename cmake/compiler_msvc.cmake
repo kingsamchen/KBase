@@ -1,7 +1,7 @@
 
 option(MSVC_ENABLE_PARALLEL_BUILD "If enabled, build multiple files in parallel." ON)
 
-set(CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "limited configs" FORCE)
+set(CMAKE_CONFIGURATION_TYPES "Debug;Release;RelWithDebInfo" CACHE STRING "limited configs" FORCE)
 
 function(apply_common_compile_properties_to_target TARGET)
   target_compile_definitions(${TARGET}

@@ -42,8 +42,9 @@ include(${KBASE_CMAKE_DIR}/dependency_manager.cmake)
 include(${KBASE_CMAKE_DIR}/cotire.cmake)
 set(KBASE_PCH_HEADER ${KBASE_DIR}/build/pch/precompile.h)
 
-#Compiler and output configurations.
+# Compiler and output configurations.
 if(MSVC)
+  string (REGEX REPLACE "/W[0-4]" "/W4" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
   include(${KBASE_CMAKE_DIR}/compiler_msvc.cmake)
   foreach(OUTPUTCONFIG_TYPE ${CMAKE_CONFIGURATION_TYPES})
     string(TOUPPER ${OUTPUTCONFIG_TYPE} OUTPUTCONFIG)
