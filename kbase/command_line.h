@@ -2,26 +2,16 @@
  @ 0xCCCCCCCC
 */
 
-#if defined(_MSC_VER)
-#pragma once
-#endif
-
 #ifndef KBASE_COMMAND_LINE_H_
 #define KBASE_COMMAND_LINE_H_
 
-#include <map>
+#include <unordered_map>
 #include <vector>
 
 #include "kbase/basic_macros.h"
 #include "kbase/path.h"
 
 namespace kbase {
-
-#if defined(OS_WIN)
-#define CMDLINE_LITERAL(x) L##x
-#else
-#define CMDLINE_LITERAL(x) x
-#endif
 
 // A command line consists of one or more arguments, which are tokens separated by
 // one or more spaces or tabs.
@@ -33,31 +23,20 @@ namespace kbase {
 // path of the program.
 class CommandLine {
 public:
-#if defined(OS_WIN)
-    using StringType = std::wstring;
-#else
-    using StringType = std::string;
-#endif
-    using CharType = StringType::value_type;
-    using ArgList = std::vector<StringType>;
-    using SwitchTable = std::map<StringType, StringType>;
+    using ArgList = std::vector<std::string>;
+    using SwitchTable = std::unordered_map<std::string, std::string>;
 
-    enum SwitchPrefix : unsigned int {
-        PrefixDoubleDash = 0,
-        PrefixDash,
-        PrefixSlash
+    enum class SwitchPrefix : unsigned int {
+        DoubleDash = 0,
+        Dash,
+        Slash
     };
+
+    CommandLine(int argc, const char* const* argv);
 
     explicit CommandLine(const Path& program);
 
     explicit CommandLine(const ArgList& args);
-
-    CommandLine(int argc, const CharType* const* argv);
-
-#if defined(OS_WIN)
-    // `cmdline` has same requirement as in ParseFromString.
-    explicit CommandLine(const StringType& cmdline);
-#endif
 
     DEFAULT_COPY(CommandLine);
 
@@ -73,16 +52,6 @@ public:
     // Returns the current process's singleton CommandLine instance.
     static const CommandLine& ForCurrentProcess();
 
-    void ParseFromArgs(int argc, const CharType* const* argv);
-
-    void ParseFromArgs(const ArgList& args);
-
-#if defined(OS_WIN)
-    // Make sure that file path of the program, i.e. argv[0], is enclosed with
-    // quotation marks, if the path may contain spaces.
-    void ParseFromString(const StringType& cmdline);
-#endif
-
     SwitchPrefix switch_prefix() const noexcept;
 
     void set_switch_prefix(SwitchPrefix prefix) noexcept;
@@ -92,35 +61,48 @@ public:
     void SetProgram(const Path& program);
 
     // `name` should not be preceded with prefix.
-    CommandLine& AppendSwitch(const StringType& name, const StringType& value = StringType());
+    CommandLine& AppendSwitch(const std::string& name, const std::string& value = std::string());
 
-    CommandLine& AppendParameter(const StringType& arg);
+    CommandLine& AppendParameter(const std::string& param);
 
     // `name` should not be preceded with prefix.
-    bool HasSwitch(const StringType& name) const;
+    bool HasSwitch(const std::string& name) const;
 
     // Returns true if succeeded in querying the value associated with the switch.
     // Returns false if no such switch was found, and `value` remains unchanged.
-    bool GetSwitchValue(const StringType& name, StringType& value) const;
-
-    bool GetSwitchValueASCII(const StringType& name, std::string& value) const;
+    bool GetSwitchValue(const std::string& name, std::string& value) const;
 
     const SwitchTable& GetSwitches() const noexcept
     {
         return switches_;
     }
 
-    ArgList GetParameters() const;
+    size_t parameter_count() const noexcept
+    {
+        return args_.size() - arg_not_param_count_;
+    }
 
-    const ArgList& GetArgs() const noexcept;
+    const std::string& GetParameter(size_t idx) const;
+
+    const ArgList& GetArgs() const noexcept
+    {
+        return args_;
+    }
 
     // The general order of arguments in output string is as follows:
     // { program, [(-|--|/)switch[=value]], [parameter] }
     // that is, switches always precede with arguments.
-    StringType GetCommandLineString() const;
+    std::string GetCommandLineString() const;
 
     // Similar with GetCommandLineString() but without including program.
-    StringType GetArgsStringWithoutProgram() const;
+    std::string GetCommandLineStringWithoutProgram() const;
+
+private:
+    void ParseFromArgs(int argc, const char* const* argv);
+
+    void ParseFromArgs(const ArgList& args);
+
+    void AddArguments(const ArgList& args);
 
 private:
     ArgList args_;

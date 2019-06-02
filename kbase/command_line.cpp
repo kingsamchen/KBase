@@ -9,13 +9,12 @@
 
 #include "kbase/basic_types.h"
 #include "kbase/error_exception_util.h"
-#include "kbase/logging.h"
-#include "kbase/scope_guard.h"
 #include "kbase/string_util.h"
 
 #if defined(OS_WIN)
 #include <Windows.h>
 
+#include "kbase/scope_guard.h"
 #include "kbase/string_encoding_conversions.h"
 #endif
 
@@ -24,32 +23,28 @@ namespace {
 using kbase::CommandLine;
 
 using ArgList = CommandLine::ArgList;
-using CharType = CommandLine::CharType;
-using StringType = CommandLine::StringType;
 using SwitchPrefix = CommandLine::SwitchPrefix;
-using SwitchPair = std::pair<StringType, StringType>;
+using SwitchPair = std::pair<std::string, std::string>;
 
-constexpr const CharType* kSwitchPrefixes[] {
-    CMDLINE_LITERAL("--"), CMDLINE_LITERAL("-"), CMDLINE_LITERAL("/")
-};
+constexpr const char* kSwitchPrefixes[] {"--", "-", "/"};
 
-constexpr CharType kSwitchValueDelimiter[] = CMDLINE_LITERAL("=");
+constexpr char kSwitchValueDelimiter[] = "=";
 
-constexpr SwitchPrefix kDefaultSwitchPrefix = SwitchPrefix::PrefixDoubleDash;
+constexpr SwitchPrefix kDefaultSwitchPrefix = SwitchPrefix::DoubleDash;
 
-bool IsArgumentSwitch(const StringType& arg)
+bool IsArgumentSwitch(const std::string& arg)
 {
     return std::any_of(std::begin(kSwitchPrefixes), std::end(kSwitchPrefixes),
-                       [&arg](const CharType* prefix) {
+                       [&arg](const char* prefix) {
                            return kbase::StartsWith(arg, prefix);
                        });
 }
 
-SwitchPair UnstickSwitch(StringType& switch_token)
+SwitchPair UnstickSwitch(std::string& switch_token)
 {
-    kbase::TrimLeadingString(switch_token, CMDLINE_LITERAL("-/"));
+    kbase::TrimLeadingString(switch_token, "-/");
 
-    std::vector<StringType> members;
+    std::vector<std::string> members;
     kbase::SplitString(switch_token, kSwitchValueDelimiter, members);
 
     // Note that the switch may not carry a value.
@@ -58,88 +53,97 @@ SwitchPair UnstickSwitch(StringType& switch_token)
     return {members[0], members[1]};
 }
 
-void AddArguments(CommandLine& cmdline, const ArgList& args)
+#if defined(OS_WIN)
+
+ArgList ParseCommandLineString(std::wstring cmdline)
 {
-    for (auto arg = std::next(args.cbegin()); arg != args.cend(); ++arg) {
-        StringType sanitized_arg = *arg;
-        kbase::TrimString(sanitized_arg, CMDLINE_LITERAL(" \t"));
-        if (IsArgumentSwitch(sanitized_arg)) {
-            auto switch_member = UnstickSwitch(sanitized_arg);
-            cmdline.AppendSwitch(switch_member.first, switch_member.second);
-        } else {
-            cmdline.AppendParameter(sanitized_arg);
-        }
+    std::wstring sanitized_cmdline_str(std::move(kbase::TrimString(cmdline, L" \t")));
+
+    int argc = 0;
+    auto argv = CommandLineToArgvW(sanitized_cmdline_str.c_str(), &argc);
+    if (!argv) {
+        auto last_err = kbase::LastError();
+        ENSURE(THROW, kbase::NotReached())(last_err)(sanitized_cmdline_str).Require(
+            "CommandLineToArgvW() failed");
     }
+
+    ON_SCOPE_EXIT { LocalFree(argv); };
+
+    ArgList args;
+    for (int i = 0; i < argc; ++i) {
+        args.push_back(kbase::WideToUTF8(argv[i]));
+    }
+
+    return args;
 }
 
-#if defined(OS_WIN)
 // Quotes the `arg` if necessary.
 // Algorithm comes from http://goo.gl/mxKhoj
-StringType QuoteArg(const StringType& arg)
+std::string QuoteArg(const std::string& arg)
 {
-    if (arg.find_first_of(L" \t\"") == arg.npos) {
+    if (arg.find_first_of(" \t\"") == arg.npos) {
         return arg;
     }
 
-    StringType quoted_arg(1, L'"');
+    std::string quoted_arg(1, '"');
     for (auto it = arg.cbegin(); ; ++it) {
         size_t number_of_backslash = 0U;
 
         // Count number adjacent backslashes.
-        while (it != arg.cend() && *it == L'\\') {
+        while (it != arg.cend() && *it == '\\') {
             ++it;
             ++number_of_backslash;
         }
 
         if (it == arg.cend()) {
-            quoted_arg.append(2 * number_of_backslash, L'\\');
+            quoted_arg.append(2 * number_of_backslash, '\\');
             break;
-        } else if (*it == L'"') {
-            quoted_arg.append(2 * number_of_backslash + 1, L'\\');
+        }
+
+        if (*it == '"') {
+            quoted_arg.append(2 * number_of_backslash + 1, '\\');
             quoted_arg.push_back(*it);
         } else {
-            quoted_arg.append(number_of_backslash, L'\\');
+            quoted_arg.append(number_of_backslash, '\\');
             quoted_arg.push_back(*it);
         }
     }
 
-    quoted_arg.push_back(L'"');
+    quoted_arg.push_back('"');
 
     return quoted_arg;
 }
 #endif
 
-}   // namespace
+} // namespace
 
 namespace kbase {
 
 CommandLine* CommandLine::current_process_cmdline_ = nullptr;
 
 CommandLine::CommandLine(const Path& program)
-    : args_(1), arg_not_param_count_(1), switch_prefix_(kDefaultSwitchPrefix)
+    : args_(1),
+      arg_not_param_count_(1),
+      switch_prefix_(kDefaultSwitchPrefix)
 {
     SetProgram(program);
 }
 
 CommandLine::CommandLine(const ArgList& args)
-    : args_(1), arg_not_param_count_(1), switch_prefix_(kDefaultSwitchPrefix)
+    : args_(1),
+      arg_not_param_count_(1),
+      switch_prefix_(kDefaultSwitchPrefix)
 {
     ParseFromArgs(args);
 }
 
-CommandLine::CommandLine(int argc, const CharType* const* argv)
-    : args_(1), arg_not_param_count_(1), switch_prefix_(kDefaultSwitchPrefix)
+CommandLine::CommandLine(int argc, const char* const* argv)
+    : args_(1),
+      arg_not_param_count_(1),
+      switch_prefix_(kDefaultSwitchPrefix)
 {
     ParseFromArgs(argc, argv);
 }
-
-#if defined(OS_WIN)
-CommandLine::CommandLine(const StringType& cmdline)
-    : args_(1), arg_not_param_count_(1), switch_prefix_(kDefaultSwitchPrefix)
-{
-    ParseFromString(cmdline);
-}
-#endif
 
 // static
 void CommandLine::Init(int argc, const char* const* argv)
@@ -152,10 +156,12 @@ void CommandLine::Init(int argc, const char* const* argv)
 #if defined(OS_WIN)
     UNUSED_VAR(argc);
     UNUSED_VAR(argv);
-    current_process_cmdline_ = new CommandLine(GetCommandLineW());
-#else
-    current_process_cmdline_ = new CommandLine(argc, argv);
+    auto args = ParseCommandLineString(GetCommandLineW());
+    static CommandLine instance(args);
+#elif defined(OS_POSIX)
+    static CommandLine instance(argc, argv);
 #endif
+    current_process_cmdline_ = &instance;
 }
 
 // static
@@ -177,22 +183,18 @@ void CommandLine::set_switch_prefix(SwitchPrefix prefix) noexcept
 
 Path CommandLine::GetProgram() const
 {
-    return Path(args_[0]);
+    return Path::FromUTF8(args_[0]);
 }
 
 void CommandLine::SetProgram(const Path& program)
 {
-    args_[0] = program.value();
-    TrimString(args_[0], CMDLINE_LITERAL(" \t"));
+    args_[0] = program.AsUTF8();
+    TrimString(args_[0], " \t");
 }
 
-void CommandLine::ParseFromArgs(int argc, const CharType* const* argv)
+void CommandLine::ParseFromArgs(int argc, const char* const* argv)
 {
-    ArgList bundled_args;
-    for (int i = 0; i < argc; ++i) {
-        bundled_args.emplace_back(argv[i]);
-    }
-
+    ArgList bundled_args(argv, argv + argc);
     ParseFromArgs(bundled_args);
 }
 
@@ -203,37 +205,31 @@ void CommandLine::ParseFromArgs(const ArgList& args)
     arg_not_param_count_ = 1;
     switches_.clear();
 
-    SetProgram(Path(args[0]));
-    AddArguments(*this, args);
+    SetProgram(Path::FromUTF8(args[0]));
+    AddArguments(args);
 }
 
-#if defined(OS_WIN)
-void CommandLine::ParseFromString(const StringType& cmdline)
+void CommandLine::AddArguments(const ArgList& args)
 {
-    StringType sanitized_cmdline_str = cmdline;
-    TrimString(sanitized_cmdline_str, CMDLINE_LITERAL(" \t"));
-
-    int argc = 0;
-    wchar_t** argv = nullptr;
-    argv = CommandLineToArgvW(sanitized_cmdline_str.c_str(), &argc);
-    ON_SCOPE_EXIT { if (argv) LocalFree(argv); };
-
-    if (!argv) {
-        auto last_err = LastError();
-        LOG(ERROR) << "CommandLineToArgvW failed on " << WideToUTF8(cmdline) << "; " << last_err;
+    for (auto arg = std::next(args.cbegin()); arg != args.cend(); ++arg) {
+        std::string sanitized_arg = *arg;
+        kbase::TrimString(sanitized_arg, " \t");
+        if (IsArgumentSwitch(sanitized_arg)) {
+            auto switch_member = UnstickSwitch(sanitized_arg);
+            AppendSwitch(switch_member.first, switch_member.second);
+        } else {
+            AppendParameter(sanitized_arg);
+        }
     }
-
-    ParseFromArgs(argc, argv);
 }
-#endif
 
-CommandLine& CommandLine::AppendSwitch(const StringType& name, const StringType& value)
+CommandLine& CommandLine::AppendSwitch(const std::string& name, const std::string& value)
 {
     switches_[name] = value;
 
     // Since we have `last_arg_not_param_` to demarcate switches and parameters, we here
     // leave switch prefix unprepended.
-    StringType switch_arg(name);
+    std::string switch_arg(name);
     if (!value.empty()) {
         switch_arg.append(1, '=').append(value);
     }
@@ -244,18 +240,18 @@ CommandLine& CommandLine::AppendSwitch(const StringType& name, const StringType&
     return *this;
 }
 
-CommandLine& CommandLine::AppendParameter(const StringType& parameter)
+CommandLine& CommandLine::AppendParameter(const std::string& param)
 {
-    args_.push_back(parameter);
+    args_.push_back(param);
     return *this;
 }
 
-bool CommandLine::HasSwitch(const StringType& name) const
+bool CommandLine::HasSwitch(const std::string& name) const
 {
     return switches_.find(name) != switches_.end();
 }
 
-bool CommandLine::GetSwitchValue(const StringType& name, StringType& value) const
+bool CommandLine::GetSwitchValue(const std::string& name, std::string& value) const
 {
     auto it = switches_.find(name);
     if (it == switches_.end()) {
@@ -266,62 +262,42 @@ bool CommandLine::GetSwitchValue(const StringType& name, StringType& value) cons
     return true;
 }
 
-bool CommandLine::GetSwitchValueASCII(const StringType& name, std::string& value) const
+const std::string& CommandLine::GetParameter(size_t idx) const
 {
-    StringType switch_value;
-    if (!GetSwitchValue(name, switch_value)) {
-        return false;
-    }
-
-#if defined(OS_WIN)
-    value = WideToASCII(switch_value);
-#else
-    value = switch_value;
-#endif
-
-    return true;
+    size_t arg_idx = arg_not_param_count_ + idx;
+    ENSURE(THROW, arg_idx < args_.size())(arg_not_param_count_)(idx).Require();
+    return args_[arg_idx];
 }
 
-ArgList CommandLine::GetParameters() const
-{
-    auto params_begin = std::next(args_.cbegin(), arg_not_param_count_);
-    return ArgList(params_begin, args_.cend());
-}
-
-const ArgList& CommandLine::GetArgs() const noexcept
-{
-    return args_;
-}
-
-StringType CommandLine::GetCommandLineString() const
+std::string CommandLine::GetCommandLineString() const
 {
 #if defined(OS_WIN)
-    StringType cmdline_str(QuoteArg(args_[0]));
-#else
-    StringType cmdline_str(args_[0]);
+    std::string cmdline_str(QuoteArg(args_[0]));
+#elif defined(OS_POSIX)
+    std::string cmdline_str(args_[0]);
 #endif
-    cmdline_str.append(1, ' ').append(GetArgsStringWithoutProgram());
+    cmdline_str.append(1, ' ').append(GetCommandLineStringWithoutProgram());
 
     return cmdline_str;
 }
 
-StringType CommandLine::GetArgsStringWithoutProgram() const
+std::string CommandLine::GetCommandLineStringWithoutProgram() const
 {
     ArgList stringified_args;
     stringified_args.reserve(args_.size());
 
     auto prefix = kSwitchPrefixes[enum_cast(switch_prefix())];
     for (size_t i = 1; i < args_.size(); ++i) {
-        StringType arg_str = i + 1 <= arg_not_param_count_ ? StringType(prefix) : StringType();
+        std::string arg_str = i + 1 <= arg_not_param_count_ ? std::string(prefix) : std::string();
         arg_str.append(args_[i]);
 #if defined(OS_WIN)
         stringified_args.push_back(QuoteArg(arg_str));
-#else
+#elif defined(OS_POSIX)
         stringified_args.push_back(arg_str);
 #endif
     }
 
-    return JoinString(stringified_args, StringType(1, ' '));
+    return JoinString(stringified_args, std::string(1, ' '));
 }
 
-}   // namespace kbase
+} // namespace kbase
