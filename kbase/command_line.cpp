@@ -188,8 +188,8 @@ Path CommandLine::GetProgram() const
 
 void CommandLine::SetProgram(const Path& program)
 {
-    args_[0] = program.AsUTF8();
-    TrimString(args_[0], " \t");
+    auto arg = program.AsUTF8();
+    args_[0] = TrimString(arg, " \t");
 }
 
 void CommandLine::ParseFromArgs(int argc, const char* const* argv)
@@ -234,7 +234,7 @@ CommandLine& CommandLine::AppendSwitch(const std::string& name, const std::strin
         switch_arg.append(1, '=').append(value);
     }
 
-    args_.insert(std::next(args_.begin(), arg_not_param_count_), switch_arg);
+    args_.insert(std::next(args_.begin(), arg_not_param_count_), std::move(switch_arg));
     ++arg_not_param_count_;
 
     return *this;
@@ -251,15 +251,11 @@ bool CommandLine::HasSwitch(const std::string& name) const
     return switches_.find(name) != switches_.end();
 }
 
-bool CommandLine::GetSwitchValue(const std::string& name, std::string& value) const
+const std::string& CommandLine::GetSwitchValue(const std::string& name,
+                                               const std::string& default_value) const
 {
     auto it = switches_.find(name);
-    if (it == switches_.end()) {
-        return false;
-    }
-
-    value = it->second;
-    return true;
+    return it == switches_.end() ? default_value : it->second;
 }
 
 const std::string& CommandLine::GetParameter(size_t idx) const

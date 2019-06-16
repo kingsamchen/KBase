@@ -112,18 +112,34 @@ TEST_CASE("Use of switches", "[CommandLine]")
             "123",
             "--t=1024",
             "--maxmize",
-            "test.txt"
+            "test.txt",
+            "--on-the-fly=True"
         };
 
         CommandLine cmdline(args);
 
-        std::string value;
-        CHECK(cmdline.GetSwitchValue("a", value));
-        CHECK(value == std::string("1"));
+        // Get switch values (in string), and use default value when switch not present.
+        CHECK(cmdline.GetSwitchValue("a", "0") == std::string("1"));
+        CHECK(cmdline.GetSwitchValue("ta", "none") == std::string("none"));
 
-        CHECK(cmdline.GetSwitchValue("maxmize", value));
-        CHECK(value.empty());
-        CHECK_FALSE(cmdline.GetSwitchValue("ta", value));
+        // With data conversion
+        CHECK(cmdline.GetSwitchValueAs<int>("t") == 1024);
+        CHECK(cmdline.GetSwitchValueAs<bool>("on-the-fly", false));
+        // Throws an exception when conversion failed.
+        CHECK_THROWS_AS(cmdline.GetSwitchValueAs<bool>("maxmize"), CommandLineValueParseError);
+
+        // Use default value & customized converter.
+        auto cvt = [](const auto& v) { return static_cast<unsigned short>(std::stoi(v)); };
+        CHECK(cmdline.GetSwitchValueAs<unsigned short>("port", 9876, cvt) == 9876);
+
+        SECTION("try what exception message might be") {
+            cmdline.AppendSwitch("seq", "asdf");
+            try {
+                IGNORE_RESULT(cmdline.GetSwitchValueAs<int>("seq"));
+            } catch (const CommandLineValueParseError& ex) {
+                printf("%s\n", ex.what());
+            }
+        }
     }
 
     SECTION("change switch prefix for outputing commandline string") {
@@ -186,12 +202,28 @@ TEST_CASE("Use of parameters", "[CommandLine]")
         CommandLine cmdline(args);
         REQUIRE(cmdline.parameter_count() == 3);
 
-        CHECK(cmdline.GetParameter(0) == "123");
-        CHECK(cmdline.GetParameter(1) == "1970/01/01");
-        CHECK(cmdline.GetParameter(2) == "test.txt");
+        SECTION("access to parameter values") {
+            CHECK(cmdline.GetParameter(0) == "123");
+            CHECK(cmdline.GetParameter(1) == "1970/01/01");
+            CHECK(cmdline.GetParameter(2) == "test.txt");
 
-        SECTION("access to a invalid parameter would cause an exception thrown") {
-            CHECK_THROWS(cmdline.GetParameter(9));
+            SECTION("out of index access would cause an exception thrown") {
+                CHECK_THROWS(cmdline.GetParameter(9));
+            }
+        }
+
+        SECTION("access to parameter values with data conversions") {
+            CHECK(cmdline.GetParameterAs<int>(0) == 123);
+            CHECK(cmdline.GetParameterAs<Path>(2, [](const auto& v) { return Path::FromUTF8(v); }) ==
+                  Path::FromUTF8("test.txt"));
+
+            SECTION("cases that throw an exception") {
+                // Data conversion failure.
+                CHECK_THROWS_AS(cmdline.GetParameterAs<bool>(0), CommandLineValueParseError);
+
+                // Out of index.
+                CHECK_THROWS(cmdline.GetParameter(9));
+            }
         }
     }
 }

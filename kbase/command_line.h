@@ -5,13 +5,77 @@
 #ifndef KBASE_COMMAND_LINE_H_
 #define KBASE_COMMAND_LINE_H_
 
+#include <string>
 #include <unordered_map>
 #include <vector>
 
 #include "kbase/basic_macros.h"
 #include "kbase/path.h"
+#include "kbase/string_util.h"
 
 namespace kbase {
+
+class CommandLineValueParseError : public std::invalid_argument {
+public:
+    explicit CommandLineValueParseError(const std::string& what)
+        : invalid_argument(what)
+    {}
+};
+
+namespace internal {
+
+template<typename C>
+struct ValueConverter;
+
+template<>
+struct ValueConverter<int> {
+    int operator()(const std::string& value) const
+    {
+        return std::stoi(value);
+    }
+};
+
+template<>
+struct ValueConverter<long> {
+    long operator()(const std::string& value) const
+    {
+        return std::stol(value);
+    }
+};
+
+template<>
+struct ValueConverter<long long> {
+    long long operator()(const std::string& value) const
+    {
+        return std::stoll(value);
+    }
+};
+
+template<>
+struct ValueConverter<double> {
+    double operator()(const std::string& value) const
+    {
+        return std::stod(value);
+    }
+};
+
+template<>
+struct ValueConverter<bool> {
+    bool operator()(const std::string& value) const
+    {
+        if ((value == "1") || kbase::ASCIIStringEqualCaseInsensitive(value, "true")) {
+            return true;
+        }
+
+        if ((value == "0") || kbase::ASCIIStringEqualCaseInsensitive(value, "false")) {
+            return false;
+        }
+
+        throw std::invalid_argument("inconvertible to bool");
+    }
+};
+
+}   // namespace internal
 
 // A command line consists of one or more arguments, which are tokens separated by
 // one or more spaces or tabs.
@@ -66,23 +130,74 @@ public:
     CommandLine& AppendParameter(const std::string& param);
 
     // `name` should not be preceded with prefix.
+    // Returns true if a switch that matches the given `name` is found.
     bool HasSwitch(const std::string& name) const;
 
-    // Returns true if succeeded in querying the value associated with the switch.
-    // Returns false if no such switch was found, and `value` remains unchanged.
-    bool GetSwitchValue(const std::string& name, std::string& value) const;
+    // Returns value of the switch matching the given `name`.
+    // The function uses the `default_value` if the target switch is not present.
+    const std::string& GetSwitchValue(const std::string& name,
+                                      const std::string& default_value = std::string()) const;
+
+    // Returns value of the switch matching the given `name` in specified data type.
+    // The function uses the `default_value` if the target switch is not present.
+    // If the data conversion failed, the function throws a CommandLineValueParseError exception.
+    template<typename T, typename Cvt>
+    T GetSwitchValueAs(const std::string& name, const T& default_value, Cvt cvt) const
+    {
+        auto it = switches_.find(name);
+        if (it == switches_.end()) {
+            return T(default_value);
+        }
+
+        try {
+            return cvt(it->second);
+        } catch (const std::exception& ex) {
+            std::string what = "failed to convert ";
+            what.append(it->second).append(": ").append(ex.what());
+            throw CommandLineValueParseError(what);
+        }
+    }
+
+    // Similar with the above version except using predefined value converters, and default
+    // value is optional.
+    template<typename T>
+    T GetSwitchValueAs(const std::string& name, const T& default_value = T()) const
+    {
+        return GetSwitchValueAs<T>(name, default_value, internal::ValueConverter<T>());
+    }
 
     const SwitchTable& GetSwitches() const noexcept
     {
         return switches_;
     }
 
+    // Count does not include the program part and switches.
     size_t parameter_count() const noexcept
     {
         return args_.size() - arg_not_param_count_;
     }
 
     const std::string& GetParameter(size_t idx) const;
+
+    template<typename T, typename Cvt>
+    T GetParameterAs(size_t idx, Cvt cvt) const
+    {
+        const auto& value = GetParameter(idx);
+        try {
+            return cvt(value);
+        } catch (const std::exception& ex) {
+            std::string what = "failed to convert ";
+            what.append(value).append(": ").append(ex.what());
+            throw CommandLineValueParseError(what);
+        }
+    }
+
+    // Similar with the above version except using predefined value converters internally.
+    template<typename T>
+    T GetParameterAs(size_t idx) const
+    {
+        return GetParameterAs<T>(idx, internal::ValueConverter<T>());
+    }
 
     const ArgList& GetArgs() const noexcept
     {
