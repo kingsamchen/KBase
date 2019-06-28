@@ -57,7 +57,8 @@ SwitchPair UnstickSwitch(std::string& switch_token)
 
 ArgList ParseCommandLineString(std::wstring cmdline)
 {
-    std::wstring sanitized_cmdline_str(std::move(kbase::TrimString(cmdline, L" \t")));
+    kbase::TrimString(cmdline, L" \t");
+    std::wstring sanitized_cmdline_str(std::move(cmdline));
 
     int argc = 0;
     auto argv = CommandLineToArgvW(sanitized_cmdline_str.c_str(), &argc);
@@ -188,8 +189,8 @@ Path CommandLine::GetProgram() const
 
 void CommandLine::SetProgram(const Path& program)
 {
-    auto arg = program.AsUTF8();
-    args_[0] = TrimString(arg, " \t");
+    args_[0] = program.AsUTF8();
+    TrimString(args_[0], " \t");
 }
 
 void CommandLine::ParseFromArgs(int argc, const char* const* argv)
@@ -212,8 +213,7 @@ void CommandLine::ParseFromArgs(const ArgList& args)
 void CommandLine::AddArguments(const ArgList& args)
 {
     for (auto arg = std::next(args.cbegin()); arg != args.cend(); ++arg) {
-        std::string sanitized_arg = *arg;
-        kbase::TrimString(sanitized_arg, " \t");
+        std::string sanitized_arg = kbase::TrimStringCopy(*arg, " \t");
         if (IsArgumentSwitch(sanitized_arg)) {
             auto switch_member = UnstickSwitch(sanitized_arg);
             AppendSwitch(switch_member.first, switch_member.second);

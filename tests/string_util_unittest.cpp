@@ -28,7 +28,7 @@ TEST_CASE("Erasing and removing", "[StringUtil]")
     REQUIRE(str == new_str);
 
     std::wstring ws = L"hello $%^& world";
-    std::wstring nws = RemoveChars(ws, L"$%^&");
+    std::wstring nws = EraseCharsCopy(ws, L"$%^&");
     REQUIRE(ws == L"hello $%^& world");
     REQUIRE(nws == L"hello  world");
 }
@@ -37,10 +37,7 @@ TEST_CASE("Replacing substring", "[StringUtil]")
 {
     std::string str = "This is a test text for string replacing unittest";
 
-    {
-        AutoReset<std::string> guard(&str);
-        UNUSED_VAR(guard);
-
+    SECTION("replace all is by default") {
         ReplaceString(str, "test", "t-e-s-t");
         REQUIRE(str == std::string("This is a t-e-s-t text for string replacing unitt-e-s-t"));
         ReplaceString(str, "t-e-s-t", "");
@@ -49,8 +46,10 @@ TEST_CASE("Replacing substring", "[StringUtil]")
         REQUIRE(str == std::string("This was a  text for string replacing unit"));
     }
 
-    ReplaceString(str, "is", "ere", 0, false);
-    REQUIRE(str == std::string("There is a test text for string replacing unittest"));
+    SECTION("replace only the first ocurrence") {
+        ReplaceString(str, "is", "ere", 0, false);
+        REQUIRE(str == std::string("There is a test text for string replacing unittest"));
+    }
 }
 
 TEST_CASE("Triming", "[StringUtil]")
@@ -81,7 +80,7 @@ TEST_CASE("Triming", "[StringUtil]")
     {
         std::string str1 = "!$$||hello-world##@@||$$";
         std::string str2 = "!$$||hello-world##@@||$$";
-        TrimTailingString(TrimLeadingString(str1, "!$|@#"), "!$|@#");
+        str1 = TrimTailingStringCopy(TrimLeadingStringCopy(str1, "!$|@#"), "!$|@#");
         TrimString(str2, "!$|@#");
         REQUIRE(str1 == str2);
     }
@@ -99,9 +98,9 @@ TEST_CASE("Contains only", "[StringUtil]")
 TEST_CASE("Toggling case for ASCII characters", "[StringUtil]")
 {
     std::string org_str = "HELLO, world";
-    std::string turned = ASCIIStringToLower(org_str);
+    std::string turned = ASCIIStringToLowerCopy(org_str);
     REQUIRE(std::string("hello, world") == turned);
-    REQUIRE(std::string("HELLO, WORLD") == ASCIIStringToUpper(turned));
+    REQUIRE(std::string("HELLO, WORLD") == ASCIIStringToUpperCopy(turned));
 }
 
 TEST_CASE("Case-insensitive comparison for ASCII characters", "[StringUtil]")

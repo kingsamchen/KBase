@@ -121,7 +121,8 @@ std::wstring LastError::GetDescriptiveMessage() const
 
     if (len) {
         std::wstring msg(message_buf);
-        return TrimTailingString(msg, L"\r\n");
+        TrimTailingString(msg, L"\r\n");
+        return msg;
     }
 
     return StringPrintf(L"Error (0x%X) while retrieve message for 0x%X", GetLastError(),

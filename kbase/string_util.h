@@ -16,40 +16,60 @@
 
 namespace kbase {
 
-// Eliminate any given characters from string `str`.
+// Remove every given character from the string `str`.
 
-std::string& EraseChars(std::string& str, StringView chars);
-std::wstring& EraseChars(std::wstring& str, WStringView chars);
+void EraseChars(std::string& str, StringView chars);
+void EraseChars(std::wstring& str, WStringView chars);
 
-std::string RemoveChars(const std::string& str, StringView chars);
-std::wstring RemoveChars(const std::wstring& str, WStringView chars);
+std::string EraseCharsCopy(const std::string& str, StringView chars);
+std::wstring EraseCharsCopy(const std::wstring& str, WStringView chars);
 
 // Replace `find_with` with `replace_with` in `str`.
 // `pos` indicates where the search begins. if `pos` equals to `npos` or is greater
 // than the length of `str`, these functions do nothing.
 // If `relace_all` is not true, then only the first occurrence would be replaced.
 
-std::string& ReplaceString(std::string& str,
-                           StringView find_with,
-                           StringView replace_with,
-                           std::string::size_type pos = 0,
-                           bool replace_all = true);
-std::wstring& ReplaceString(std::wstring& str,
-                            WStringView find_with,
-                            WStringView replace_with,
-                            std::wstring::size_type pos = 0,
-                            bool replace_all = true);
+void ReplaceString(std::string& str,
+                   StringView find_with,
+                   StringView replace_with,
+                   std::string::size_type pos = 0,
+                   bool replace_all = true);
+void ReplaceString(std::wstring& str,
+                   WStringView find_with,
+                   WStringView replace_with,
+                   std::wstring::size_type pos = 0,
+                   bool replace_all = true);
 
-// Eliminate characters in `chars` in a certain range of `str`.
+std::string ReplaceStringCopy(const std::string& str,
+                              StringView find_with,
+                              StringView replace_with,
+                              std::string::size_type pos = 0,
+                              bool replace_all = true);
+std::wstring ReplaceStringCopy(const std::wstring& str,
+                               WStringView find_with,
+                               WStringView replace_with,
+                               std::wstring::size_type pos = 0,
+                               bool replace_all = true);
 
-std::string& TrimString(std::string& str, StringView chars);
-std::wstring& TrimString(std::wstring& str, WStringView chars);
+// Remove characters in `chars` in a certain range of `str`.
 
-std::string& TrimLeadingString(std::string& str, StringView chars);
-std::wstring& TrimLeadingString(std::wstring& str, WStringView chars);
+void TrimString(std::string& str, StringView chars);
+void TrimString(std::wstring& str, WStringView chars);
 
-std::string& TrimTailingString(std::string& str, StringView chars);
-std::wstring& TrimTailingString(std::wstring& str, WStringView chars);
+std::string TrimStringCopy(const std::string& str, StringView chars);
+std::wstring TrimStringCopy(const std::wstring& str, WStringView chars);
+
+void TrimLeadingString(std::string& str, StringView chars);
+void TrimLeadingString(std::wstring& str, WStringView chars);
+
+std::string TrimLeadingStringCopy(const std::string& str, StringView chars);
+std::wstring TrimLeadingStringCopy(const std::wstring& str, WStringView chars);
+
+void TrimTailingString(std::string& str, StringView chars);
+void TrimTailingString(std::wstring& str, WStringView chars);
+
+std::string TrimTailingStringCopy(const std::string& str, StringView chars);
+std::wstring TrimTailingStringCopy(const std::wstring& str, WStringView chars);
 
 // Return true, if the `str` is empty or contains only characters in `chars`;
 // Return false, otherwise.
@@ -57,13 +77,24 @@ std::wstring& TrimTailingString(std::wstring& str, WStringView chars);
 bool ContainsOnlyChars(StringView str, StringView chars);
 bool ContainsOnlyChars(WStringView str, WStringView chars);
 
+// Determines if all characters in `str` are defined in ASCII code page.
+bool IsStringASCIIOnly(StringView str);
+bool IsStringASCIIOnly(WStringView str);
+
 // Toggle the string to it's ASCII-lowercase or ASCII-uppercase equivalent.
+// The `str` should contain ASCII characters only.
 
-std::string& ASCIIStringToLower(std::string& str);
-std::wstring& ASCIIStringToLower(std::wstring& str);
+void ASCIIStringToLower(std::string& str);
+void ASCIIStringToLower(std::wstring& str);
 
-std::string& ASCIIStringToUpper(std::string& str);
-std::wstring& ASCIIStringToUpper(std::wstring& str);
+std::string ASCIIStringToLowerCopy(const std::string& str);
+std::wstring ASCIIStringToLowerCopy(const std::wstring& str);
+
+void ASCIIStringToUpper(std::string& str);
+void ASCIIStringToUpper(std::wstring& str);
+
+std::string ASCIIStringToUpperCopy(const std::string& str);
+std::wstring ASCIIStringToUpperCopy(const std::wstring& str);
 
 // Compares two strings for case-insensitive ASCII characters only.
 // And results are
@@ -137,10 +168,6 @@ std::wstring JoinString(const std::vector<std::wstring>& tokens, WStringView sep
 // metacharacter `*` matches any sequence of zero or more characters.
 bool MatchPattern(const std::string& str, const std::string& pat);
 bool MatchPattern(const std::wstring& str, const std::wstring& pat);
-
-// Determines if all characters in string are defined in ASCII code page.
-bool IsStringASCIIOnly(StringView str);
-bool IsStringASCIIOnly(WStringView str);
 
 }   // namespace kbase
 

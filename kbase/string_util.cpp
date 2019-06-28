@@ -7,7 +7,6 @@
 #include <algorithm>
 #include <iterator>
 
-#include "kbase/basic_types.h"
 #include "kbase/error_exception_util.h"
 
 namespace {
@@ -294,86 +293,141 @@ bool StringASCIIOnlyCheck(StringViewT str)
 
 namespace kbase {
 
-std::string& EraseChars(std::string& str, StringView chars)
+void EraseChars(std::string& str, StringView chars)
 {
     EraseCharsT(str, chars);
-    return str;
 }
 
-std::wstring& EraseChars(std::wstring& str, WStringView chars)
+void EraseChars(std::wstring& str, WStringView chars)
 {
     EraseCharsT(str, chars);
-    return str;
 }
 
-std::string RemoveChars(const std::string& str, StringView chars)
+std::string EraseCharsCopy(const std::string& str, StringView chars)
 {
     std::string new_str(str);
     EraseChars(new_str, chars);
     return new_str;
 }
 
-std::wstring RemoveChars(const std::wstring& str, WStringView chars)
+std::wstring EraseCharsCopy(const std::wstring& str, WStringView chars)
 {
     std::wstring new_str(str);
     EraseChars(new_str, chars);
     return new_str;
 }
 
-std::string& ReplaceString(std::string& str,
-                           StringView find_with,
-                           StringView replace_with,
-                           std::string::size_type pos,
-                           bool replace_all)
+void ReplaceString(std::string& str,
+                   StringView find_with,
+                   StringView replace_with,
+                   std::string::size_type pos,
+                   bool replace_all)
 {
     ReplaceStringT(str, find_with, replace_with, pos, replace_all);
-    return str;
 }
 
-std::wstring& ReplaceString(std::wstring& str,
-                            WStringView find_with,
-                            WStringView replace_with,
-                            std::wstring::size_type pos,
-                            bool replace_all)
+void ReplaceString(std::wstring& str,
+                   WStringView find_with,
+                   WStringView replace_with,
+                   std::wstring::size_type pos,
+                   bool replace_all)
 {
     ReplaceStringT(str, find_with, replace_with, pos, replace_all);
-    return str;
 }
 
-std::string& TrimString(std::string& str, StringView chars)
+std::string ReplaceStringCopy(const std::string& str,
+                              StringView find_with,
+                              StringView replace_with,
+                              std::string::size_type pos,
+                              bool replace_all)
+{
+    std::string new_str(str);
+    ReplaceString(new_str, find_with, replace_with, pos, replace_all);
+    return new_str;
+}
+
+std::wstring ReplaceStringCopy(const std::wstring& str,
+                               WStringView find_with,
+                               WStringView replace_with,
+                               std::wstring::size_type pos,
+                               bool replace_all)
+{
+    std::wstring new_str(str);
+    ReplaceString(new_str, find_with, replace_with, pos, replace_all);
+    return new_str;
+}
+
+void TrimString(std::string& str, StringView chars)
 {
     TrimStringT(str, chars, TrimPosition::TrimAll);
-    return str;
 }
 
-std::wstring& TrimString(std::wstring& str, WStringView chars)
+void TrimString(std::wstring& str, WStringView chars)
 {
     TrimStringT(str, chars, TrimPosition::TrimAll);
-    return str;
 }
 
-std::string& TrimLeadingString(std::string& str, StringView chars)
+std::string TrimStringCopy(const std::string& str, StringView chars)
+{
+    std::string new_str(str);
+    TrimString(new_str, chars);
+    return new_str;
+}
+
+std::wstring TrimStringCopy(const std::wstring& str, WStringView chars)
+{
+    std::wstring new_str(str);
+    TrimString(new_str, chars);
+    return new_str;
+}
+
+void TrimLeadingString(std::string& str, StringView chars)
 {
     TrimStringT(str, chars, TrimPosition::TrimLeading);
-    return str;
 }
 
-std::wstring& TrimLeadingString(std::wstring& str, WStringView chars)
+void TrimLeadingString(std::wstring& str, WStringView chars)
 {
     TrimStringT(str, chars, TrimPosition::TrimLeading);
-    return str;
 }
 
-std::string& TrimTailingString(std::string& str, StringView chars)
+std::string TrimLeadingStringCopy(const std::string& str, StringView chars)
 {
-    TrimStringT(str, chars, TrimPosition::TrimTailing);
-    return str;
+    std::string new_str(str);
+    TrimLeadingString(new_str, chars);
+    return new_str;
 }
 
-std::wstring& TrimTailingString(std::wstring& str, WStringView chars)
+std::wstring TrimLeadingStringCopy(const std::wstring& str, WStringView chars)
+{
+    std::wstring new_str(str);
+    TrimLeadingString(new_str, chars);
+    return new_str;
+}
+
+void TrimTailingString(std::string& str, StringView chars)
 {
     TrimStringT(str, chars, TrimPosition::TrimTailing);
-    return str;
+}
+
+void TrimTailingString(std::wstring& str, WStringView chars)
+{
+    TrimStringT(str, chars, TrimPosition::TrimTailing);
+}
+
+
+std::string TrimTailingStringCopy(const std::string& str, StringView chars)
+{
+    std::string new_str(str);
+    TrimTailingString(new_str, chars);
+    return new_str;
+}
+
+std::wstring TrimTailingStringCopy(const std::wstring& str, WStringView chars)
+{
+    std::wstring new_str(str);
+    TrimTailingString(new_str, chars);
+    return new_str;
 }
 
 bool ContainsOnlyChars(StringView str, StringView chars)
@@ -386,28 +440,52 @@ bool ContainsOnlyChars(WStringView str, WStringView chars)
     return ContainsOnlyCharsT(str, chars);
 }
 
-std::string& ASCIIStringToLower(std::string& str)
+void ASCIIStringToLower(std::string& str)
 {
     std::transform(str.begin(), str.end(), str.begin(), ToLowerASCII<char>);
-    return str;
 }
 
-std::wstring& ASCIIStringToLower(std::wstring& str)
+void ASCIIStringToLower(std::wstring& str)
 {
     std::transform(str.begin(), str.end(), str.begin(), ToLowerASCII<wchar_t>);
-    return str;
 }
 
-std::string& ASCIIStringToUpper(std::string& str)
+std::string ASCIIStringToLowerCopy(const std::string& str)
+{
+    std::string new_str(str);
+    ASCIIStringToLower(new_str);
+    return new_str;
+}
+
+std::wstring ASCIIStringToLowerCopy(const std::wstring& str)
+{
+    std::wstring new_str(str);
+    ASCIIStringToLower(new_str);
+    return new_str;
+}
+
+void ASCIIStringToUpper(std::string& str)
 {
     std::transform(str.begin(), str.end(), str.begin(), ToUpperASCII<char>);
-    return str;
 }
 
-std::wstring& ASCIIStringToUpper(std::wstring& str)
+void ASCIIStringToUpper(std::wstring& str)
 {
     std::transform(str.begin(), str.end(), str.begin(), ToUpperASCII<wchar_t>);
-    return str;
+}
+
+std::string ASCIIStringToUpperCopy(const std::string& str)
+{
+    std::string new_str(str);
+    ASCIIStringToUpper(new_str);
+    return new_str;
+}
+
+std::wstring ASCIIStringToUpperCopy(const std::wstring& str)
+{
+    std::wstring new_str(str);
+    ASCIIStringToUpper(new_str);
+    return new_str;
 }
 
 int ASCIIStringCompareCaseInsensitive(StringView lhs, StringView rhs)
