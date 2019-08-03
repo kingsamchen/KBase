@@ -52,14 +52,12 @@ FileHandle g_log_file = kInvalidFileHandle;
 // Ouputs timestamp in the form like "20160126 09:14:38,456".
 void OutputNowTimestamp(std::ostream& stream)
 {
-    auto timestamp = kbase::TimePointToLocalTime<std::chrono::milliseconds>(
+    auto explode = kbase::TimePointToLocalTimeExplode<std::chrono::milliseconds>(
         std::chrono::system_clock::now());
-    const auto& tm_time = timestamp.first;
     char buf[32] {0};
-    snprintf(buf, sizeof(buf), "%4d%02d%02d %02d:%02d:%02d,%03d",
-             tm_time.tm_year + 1900, tm_time.tm_mon + 1, tm_time.tm_mday,
-             tm_time.tm_hour, tm_time.tm_min, tm_time.tm_sec,
-             static_cast<int>(timestamp.second.count()));
+    snprintf(buf, sizeof(buf), "%4d%02d%02d %02d:%02d:%02d,%03d", explode.year, explode.month,
+             explode.day_of_month, explode.hour, explode.minute, explode.second,
+             static_cast<int>(explode.remainder));
     stream << buf;
 }
 

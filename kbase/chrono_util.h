@@ -11,7 +11,6 @@
 
 #include <chrono>
 #include <ctime>
-#include <utility>
 
 #include "kbase/basic_macros.h"
 #include "kbase/secure_c_runtime.h"
@@ -23,11 +22,22 @@
 #endif
 
 namespace kbase {
+
+struct TimeExplode {
+    int year;           // 4-digit year like 2019
+    int month;          // 1-based month (1 ~ 12 represent January ~ December)
+    int day_of_month;   // 1-based day of month (1 ~ 31)
+    int day_of_week;    // 0-based day of week (0 ~ 6 represent Sunday ~ Saturday)
+    int hour;           // Hours in 24-hour clock since midnight (0 ~ 23)
+    int minute;         // Minutes after the hour (0 ~ 59)
+    int second;         // Seconds after the minute (0 ~ 60 and leap seconds considered)
+    int64_t remainder;  // Sub-second resolution value
+};
+
 namespace internal {
 
 template<typename Resolution = std::chrono::seconds, typename Clock, typename Duration, typename F>
-std::pair<tm, Resolution> TimePointToDateTime(std::chrono::time_point<Clock, Duration> time_point,
-                                              F cvt)
+TimeExplode TimePointToDateTime(std::chrono::time_point<Clock, Duration> time_point, F cvt)
 {
     namespace chrono = std::chrono;
 
@@ -35,10 +45,19 @@ std::pair<tm, Resolution> TimePointToDateTime(std::chrono::time_point<Clock, Dur
     auto remainder = in_resolution - chrono::duration_cast<chrono::seconds>(in_resolution);
 
     time_t raw_time = Clock::to_time_t(time_point);
-    tm date_time;
-    cvt(&raw_time, &date_time);
+    tm tm;
+    cvt(&raw_time, &tm);
 
-    return {date_time, remainder};
+    return {
+        tm.tm_year + 1900,
+        tm.tm_mon + 1,
+        tm.tm_mday,
+        tm.tm_wday,
+        tm.tm_hour,
+        tm.tm_min,
+        tm.tm_sec,
+        remainder.count()
+    };
 }
 
 }   // namespace internal
@@ -63,13 +82,13 @@ TimePoint TimePointFromTimespec(const timespec& timespec);
 #endif
 
 template<typename Resolution = std::chrono::seconds, typename Clock, typename Duration>
-std::pair<tm, Resolution> TimePointToLocalTime(std::chrono::time_point<Clock, Duration> time_point)
+TimeExplode TimePointToLocalTimeExplode(std::chrono::time_point<Clock, Duration> time_point)
 {
     return internal::TimePointToDateTime<Resolution>(time_point, kbase::SecureLocalTime);
 }
 
 template<typename Resolution = std::chrono::seconds, typename Clock, typename Duration>
-std::pair<tm, Resolution> TimePointToUTCTime(std::chrono::time_point<Clock, Duration> time_point)
+TimeExplode TimePointToUTCTimeExplode(std::chrono::time_point<Clock, Duration> time_point)
 {
     return internal::TimePointToDateTime<Resolution>(time_point, kbase::SecureUTCTime);
 }
