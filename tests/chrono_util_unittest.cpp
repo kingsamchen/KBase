@@ -4,7 +4,6 @@
 
 #include "catch2/catch.hpp"
 
-#include <iomanip>
 #include <iostream>
 
 #include "kbase/chrono_util.h"
@@ -79,13 +78,40 @@ TEST_CASE("Convertions on windows", "[ChronoUtil]")
     }
 }
 
+#elif defined(OS_POSIX)
+
+TEST_CASE("Conversions on POSIX", "[ChronoUtil]")
+{
+    SECTION("time_point to timespec") {
+        auto now = std::chrono::system_clock::now();
+        auto now_spec = TimePointToTimespec(now);
+        auto sec_part = std::chrono::system_clock::to_time_t(now);
+        CHECK(sec_part == now_spec.tv_sec);
+        // nsec part
+        auto ns_part = std::chrono::duration_cast<std::chrono::nanoseconds>(
+            now.time_since_epoch()).count() - sec_part * 1000'000'000;
+        CHECK(ns_part == now_spec.tv_nsec);
+    }
+
+    SECTION("timespec to time_point") {
+        timespec ts {};
+        clock_gettime(CLOCK_REALTIME, &ts);
+        auto tp = TimePointFromTimespec(ts);
+        auto sec = std::chrono::system_clock::to_time_t(tp);
+        auto ns_part = std::chrono::duration_cast<std::chrono::nanoseconds>(
+            tp.time_since_epoch()).count() - sec * 1000'000'000;
+        CHECK(ts.tv_sec == sec);
+        CHECK(ts.tv_nsec == ns_part);
+    }
+}
+
 #endif
 
 TEST_CASE("Convert TimePoint to local time explode", "[ChronoUtil]")
 {
     auto now = std::chrono::system_clock::now();
 
-    struct tm tm;
+    struct tm tm {};
     auto t = std::chrono::system_clock::to_time_t(now);
     kbase::SecureLocalTime(&t, &tm);
 
@@ -119,7 +145,7 @@ TEST_CASE("Convert TimePoint to utc time explode", "[ChronoUtil]")
 {
     auto now = std::chrono::system_clock::now();
 
-    struct tm tm;
+    struct tm tm {};
     auto t = std::chrono::system_clock::to_time_t(now);
     kbase::SecureUTCTime(&t, &tm);
 

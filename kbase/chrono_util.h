@@ -79,6 +79,8 @@ SYSTEMTIME TimePointToWindowsSystemTime(TimePoint time_point);
 
 TimePoint TimePointFromTimespec(const timespec& timespec);
 
+timespec TimePointToTimespec(TimePoint time_point);
+
 #endif
 
 template<typename Resolution = std::chrono::seconds, typename Clock, typename Duration>

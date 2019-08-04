@@ -91,6 +91,15 @@ TimePoint TimePointFromTimespec(const timespec& timespec)
     return Clock::from_time_t(timespec.tv_sec) + std::chrono::nanoseconds(timespec.tv_nsec);
 }
 
+timespec TimePointToTimespec(TimePoint time_point)
+{
+    auto tp_nsec = std::chrono::duration_cast<std::chrono::nanoseconds>(
+        time_point.time_since_epoch());
+    auto tp_sec = std::chrono::duration_cast<std::chrono::seconds>(tp_nsec);
+    auto nsec_part = (tp_nsec - tp_sec).count();
+    return {time_t(tp_sec.count()), nsec_part};
+}
+
 #endif
 
 }   // namespace kbase
