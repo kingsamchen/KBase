@@ -28,26 +28,65 @@ template<typename C>
 struct ValueConverter;
 
 template<>
-struct ValueConverter<int> {
-    int operator()(const std::string& value) const
+struct ValueConverter<int32_t> {
+    int32_t operator()(const std::string& value) const
     {
-        return std::stoi(value);
+        return std::stoi(value, nullptr, 0);
     }
 };
 
 template<>
-struct ValueConverter<long> {
-    long operator()(const std::string& value) const
+struct ValueConverter<uint32_t> {
+    uint32_t operator()(const std::string& value) const
     {
-        return std::stol(value);
+        long long n = std::stoll(value, nullptr, 0);
+        if (n > UINT32_MAX || n < INT32_MIN) {
+            throw std::out_of_range("convert to uint32_t: out of range");
+        }
+
+        return static_cast<uint32_t>(n);
     }
 };
 
 template<>
-struct ValueConverter<long long> {
-    long long operator()(const std::string& value) const
+struct ValueConverter<int64_t> {
+    int64_t operator()(const std::string& value) const
     {
-        return std::stoll(value);
+        return std::stoll(value, nullptr, 0);
+    }
+};
+
+template<>
+struct ValueConverter<uint64_t> {
+    uint64_t operator()(const std::string& value) const
+    {
+        return std::stoull(value, nullptr, 0);
+    }
+};
+
+template<>
+struct ValueConverter<int16_t> {
+    int16_t operator()(const std::string& value) const
+    {
+        int n = std::stoi(value, nullptr, 0);
+        if (n > INT16_MAX || n < INT16_MIN) {
+            throw std::out_of_range("convert to int16_t: out of range");
+        }
+
+        return static_cast<int16_t>(n);
+    }
+};
+
+template<>
+struct ValueConverter<uint16_t> {
+    uint16_t operator()(const std::string& value) const
+    {
+        int n = std::stoi(value, nullptr, 0);
+        if (n > UINT16_MAX || n < INT16_MIN) {
+            throw std::out_of_range("convert to uint16_t: out of range");
+        }
+
+        return static_cast<uint16_t>(n);
     }
 };
 

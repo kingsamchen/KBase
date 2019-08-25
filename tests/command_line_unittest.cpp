@@ -256,4 +256,105 @@ TEST_CASE("Get full commandline in string", "[CommandLine]")
     CHECK(cmdstr == expected);
 }
 
+TEST_CASE("Value converters", "[CommandLine]")
+{
+#define XSTR(x) std::to_string(x)
+
+    SECTION("to int32_t") {
+        auto cvt = internal::ValueConverter<int32_t>();
+
+        // Normal decimal
+        CHECK(INT32_MAX == cvt(XSTR(INT32_MAX)));
+        CHECK(INT32_MIN == cvt(XSTR(INT32_MIN)));
+        CHECK(0 == cvt("0"));
+        CHECK(-1 == cvt("-1"));
+
+        // Hex support
+        CHECK(65535 == cvt("0xffff"));
+        CHECK(65535 == cvt("0XFFFF"));
+
+        // Out of range
+        CHECK_THROWS_AS(cvt(XSTR(INT32_MAX + 1ll)), std::out_of_range);
+        CHECK_THROWS_AS(cvt(XSTR(INT32_MIN - 1ll)), std::out_of_range);
+    }
+
+    SECTION("to uint32_t") {
+        auto cvt = internal::ValueConverter<uint32_t>();
+
+        CHECK(UINT32_MAX == cvt(XSTR(UINT32_MAX)));
+        CHECK(INT32_MAX + 1u == cvt(XSTR(INT32_MAX + 1u)));
+        CHECK(UINT32_MAX == cvt("-1"));
+        CHECK(INT32_MAX + 1u == cvt(XSTR(INT32_MIN)));
+        CHECK(0 == cvt("0x00"));
+
+        CHECK_THROWS_AS(cvt(XSTR(UINT32_MAX + 1ull)), std::out_of_range);
+    }
+
+    SECTION("to int64_t") {
+        auto cvt = internal::ValueConverter<int64_t>();
+
+        // Normal decimal
+        CHECK(INT64_MAX == cvt(XSTR(INT64_MAX)));
+        CHECK(INT64_MIN == cvt(XSTR(INT64_MIN)));
+        CHECK(0 == cvt("0"));
+        CHECK(-1 == cvt("-1"));
+
+        // Hex support
+        CHECK(65535 == cvt("0xffff"));
+        CHECK(65535 == cvt("0XFFFF"));
+
+        // Out of range
+        CHECK_THROWS_AS(cvt("9223372036854775808"), std::out_of_range);
+        CHECK_THROWS_AS(cvt("-9223372036854775809"), std::out_of_range);
+    }
+
+    SECTION("to uint64_t") {
+        auto cvt = internal::ValueConverter<uint64_t>();
+
+        // Normal decimal
+        CHECK(UINT64_MAX == cvt(XSTR(UINT64_MAX)));
+        CHECK(0 == cvt("0"));
+        CHECK(UINT64_MAX == cvt("-1"));
+
+        // Hex support
+        CHECK(65535 == cvt("0xffff"));
+        CHECK(65535 == cvt("0XFFFF"));
+
+        // Out of range
+        CHECK_THROWS_AS(cvt("170141183460469231731687303715884105727"), std::out_of_range);
+    }
+
+    SECTION("to int16_t") {
+        auto cvt = internal::ValueConverter<int16_t>();
+
+        CHECK(INT16_MAX == cvt(XSTR(INT16_MAX)));
+        CHECK(INT16_MIN == cvt(XSTR(INT16_MIN)));
+        CHECK(0 == cvt("0"));
+        CHECK(-1 == cvt("-1"));
+
+        CHECK(255 == cvt("0xff"));
+        CHECK(255 == cvt("0XFF"));
+
+        CHECK_THROWS_AS(cvt(XSTR(INT16_MAX + 1)), std::out_of_range);
+        CHECK_THROWS_AS(cvt(XSTR(INT16_MIN - 1)), std::out_of_range);
+    }
+
+    SECTION("to uint16_t") {
+        auto cvt = internal::ValueConverter<uint16_t>();
+
+        CHECK(UINT16_MAX == cvt(XSTR(UINT16_MAX)));
+        CHECK(0 == cvt("0"));
+        CHECK(UINT16_MAX == cvt("-1"));
+        CHECK(INT16_MAX + static_cast<uint16_t>(1) == cvt(XSTR(INT16_MIN)));
+
+        CHECK(255 == cvt("0xff"));
+        CHECK(255 == cvt("0XFF"));
+
+        CHECK_THROWS_AS(cvt(XSTR(UINT16_MAX + 1)), std::out_of_range);
+        CHECK_THROWS_AS(cvt(XSTR(INT16_MIN - 1)), std::out_of_range);
+    }
+
+#undef XSTR
+}
+
 }   // namespace kbase
