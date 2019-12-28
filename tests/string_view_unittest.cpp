@@ -314,7 +314,7 @@ TEST_CASE("Finding operations", "[StringView]")
     }
 }
 
-TEST_CASE("Operator comparisons", "[StringUtil]")
+TEST_CASE("Operator comparisons", "[StringView]")
 {
     StringView view_1 = "abc";
     StringView view_2 = "adc";
@@ -327,7 +327,7 @@ TEST_CASE("Operator comparisons", "[StringUtil]")
     REQUIRE(view_2 != kStr);
 }
 
-TEST_CASE("Output to stream", "[StringUtil]")
+TEST_CASE("Output to stream", "[StringView]")
 {
     StringView v = "hello world";
     WStringView w = L"test text";
@@ -335,7 +335,7 @@ TEST_CASE("Output to stream", "[StringUtil]")
     std::wcout << w << std::endl;
 }
 
-TEST_CASE("Hash support", "[StringUtil]")
+TEST_CASE("Hash support", "[StringView]")
 {
     StringView v = "hello world";
     WStringView w = L"hello world";
@@ -346,6 +346,21 @@ TEST_CASE("Hash support", "[StringUtil]")
     REQUIRE(std::hash<WStringView>()(w) == std::hash<WStringView>()(w));
     REQUIRE(std::hash<StringView>()(v) != std::hash<StringView>()(vx));
     REQUIRE(std::hash<WStringView>()(w) != std::hash<WStringView>()(wx));
+}
+
+TEST_CASE("Constexpr function StringLength", "[StringView]")
+{
+    SECTION("Constexpr whenever possible") {
+        constexpr const char* s = "123456789";
+        constexpr auto len = internal::StringLength(s);
+        static_assert(len == 9, "Length should be equal");
+    }
+
+    SECTION("Will not overflow for runtime big c-style string") {
+        std::string str(1024*1024, 'C');
+        auto len = internal::StringLength(str.c_str());
+        REQUIRE(len == str.length());
+    }
 }
 
 }   // namespace kbase

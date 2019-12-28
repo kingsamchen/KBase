@@ -50,7 +50,9 @@ inline size_t HashByteSequence(const unsigned char* data, size_t length) noexcep
 template<typename CharT>
 constexpr size_t StringLength(const CharT* str)
 {
-    return *str ? StringLength(str + 1) + 1 : 0;
+    size_t len = 0;
+    for (; *str++; ++len) {}
+    return len;
 }
 
 }   // namespace internal
