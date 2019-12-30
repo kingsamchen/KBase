@@ -112,11 +112,9 @@ target_include_directories(kbase
   PUBLIC ${CMAKE_CURRENT_LIST_DIR}/../
 )
 
-set_target_properties(kbase PROPERTIES
-  COTIRE_CXX_PREFIX_HEADER_INIT "${KBASE_PCH_HEADER}"
+target_precompile_headers(kbase
+  PRIVATE "${KBASE_PCH_HEADER}"
 )
-
-cotire(kbase)
 
 if(WIN32)
   target_link_libraries(kbase INTERFACE Shlwapi)

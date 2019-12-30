@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.11)
+cmake_minimum_required(VERSION 3.16)
 
 # Detect if being bundled via sub-directory.
 if(NOT DEFINED PROJECT_NAME)
@@ -39,7 +39,6 @@ set(KBASE_CMAKE_DIR ${KBASE_DIR}/cmake)
 
 include(${KBASE_CMAKE_DIR}/dependency_manager.cmake)
 
-include(${KBASE_CMAKE_DIR}/cotire.cmake)
 set(KBASE_PCH_HEADER ${KBASE_DIR}/build/pch/precompile.h)
 
 # Compiler and output configurations.
