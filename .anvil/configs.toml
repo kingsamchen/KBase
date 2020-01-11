@@ -47,3 +47,20 @@
     [[clang-ninja.build]]
         mode = ""
         args = "-- -j 8"
+
+[clang-makefile]
+    generator = "Unix Makefiles"
+
+    [[clang-makefile.gen]]
+        target = "Debug"
+        out_dir = "build/mk/Debug"
+        args = "-DCMAKE_BUILD_TYPE=Debug"
+
+    [[clang-makefile.gen]]
+        target = "Release"
+        out_dir = "build/mk/Release"
+        args = "-DCMAKE_BUILD_TYPE=Release"
+
+    [[clang-makefile.build]]
+        mode = ""
+        args = "-- -j 8"

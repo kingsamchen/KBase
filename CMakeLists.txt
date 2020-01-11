@@ -1,11 +1,15 @@
-cmake_minimum_required(VERSION 3.11)
+cmake_minimum_required(VERSION 3.12)
+
+if(POLICY CMP0076)
+  cmake_policy(SET CMP0076 NEW)
+endif()
 
 # Detect if being bundled via sub-directory.
 if(NOT DEFINED PROJECT_NAME)
   set(KBASE_NOT_SUBPROJECT ON)
 endif()
 
-project(KBase CXX)
+project(KBase LANGUAGES CXX VERSION 0.1.5)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
@@ -55,6 +59,10 @@ else()
   include(${KBASE_CMAKE_DIR}/compiler_posix.cmake)
   set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
   set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+endif()
+
+if(NOT MSVC)
+  message(STATUS "BUILD_TYPE = " ${CMAKE_BUILD_TYPE})
 endif()
 
 add_subdirectory(kbase)
