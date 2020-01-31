@@ -1,8 +1,8 @@
 
-declare_dep_module(Catch2
-  VERSION         2.5.0
-  GIT_REPOSITORY  https://github.com/catchorg/Catch2.git
-  GIT_TAG         v2.5.0
+CPMAddPackage(
+  NAME Catch2
+  GITHUB_REPOSITORY catchorg/Catch2
+  VERSION 2.5.0
 )
 
 add_executable(kbase_test)

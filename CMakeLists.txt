@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.14)
 
 if(POLICY CMP0076)
   cmake_policy(SET CMP0076 NEW)
@@ -38,10 +38,9 @@ if(KBASE_NOT_SUBPROJECT)
 endif()
 
 set(KBASE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
-set(KBASE_DEPS_DIR ${KBASE_DIR}/deps)
 set(KBASE_CMAKE_DIR ${KBASE_DIR}/cmake)
 
-include(${KBASE_CMAKE_DIR}/dependency_manager.cmake)
+include(${KBASE_CMAKE_DIR}/CPM.cmake)
 
 include(${KBASE_CMAKE_DIR}/cotire.cmake)
 set(KBASE_PCH_HEADER ${KBASE_DIR}/build/pch/precompile.h)
