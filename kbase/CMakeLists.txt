@@ -1,4 +1,6 @@
 
+find_package(Threads REQUIRED)
+
 add_library(kbase STATIC)
 
 target_sources(kbase
@@ -89,9 +91,9 @@ target_include_directories(kbase
 
 target_link_libraries(kbase
   INTERFACE
-    $<$<BOOL:${WIN32}>:Shlwapi>
+    Threads::Threads
 
-    $<$<NOT:$<BOOL:${WIN32}>>:pthread>
+    $<$<BOOL:${WIN32}>:Shlwapi>
 )
 
 apply_kbase_compile_conf(kbase)
