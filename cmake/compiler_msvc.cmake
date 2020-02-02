@@ -1,7 +1,9 @@
 
 option(MSVC_ENABLE_PARALLEL_BUILD "If enabled, build multiple files in parallel." ON)
 
-set(CMAKE_CONFIGURATION_TYPES "Debug;Release;RelWithDebInfo" CACHE STRING "limited configs" FORCE)
+# Force generating debugging symbols in Release build.
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Zi")
+set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /DEBUG /OPT:REF /OPT:ICF")
 
 function(apply_kbase_compile_conf TARGET)
   target_compile_definitions(${TARGET}
