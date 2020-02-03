@@ -16,43 +16,81 @@ A light-weight base library for modern C++.
 
 - Windows 7, or later
 - Visual Studio 2015, or later (C++ 14 is required)
-- CMake 3.11 or later
-- Python 3
+- CMake 3.14 or later
 
 Note:
 
-- If python 3 was not installed, you should run cmake configuration and build targets manually.
-- We will use the latest version of Visual Studio as possible and use x64 as the default target architecture.
+- We will use the latest version of Visual Studio by default, and use x64 as the default target architecture.
 
 #### Ubuntu
 
 - 14.04 LTS x64, or later
-- Clang 3.8, or G++ as the minimum (C++ 14 is required)
-- CMake 3.11, or later
-- Python 3
+- Clang 3.8, or G++ 5 as the minimum (C++ 14 is required)
+- CMake 3.14 or later
 - Ninja (optional)
 
 Note:
-- If python 3 was not installed, you should run cmake configuration and build targets manually.
-- If Ninja was not installed, you can use the traditional Makefile
+
+- If Ninja was not found, the traditional Makefile would be used.
 
 ### Generate & Build
 
-KBase uses [anvil](https://github.com/kingsamchen/anvil) to assist in generating build system files and running builds.
+#### For Windows / MSVC
+
+```
+$ cd KBase
+$ ./anvil.ps1 [-build-type <Debug|Release>] [-no-build]
+```
+
+If not specified, default build is in `Release` mode; and if `-no-build` is specified, generate Visual Studio solution project only.
+
+#### For Linux
+
+```
+$ cd KBase
+$ ./anvil.sh [--build-type=<Debug|Release>] [--no-build]
+```
+
+If not specified, default build is in `Release` mode; and if `-no-build` is specified, generate makefile or build.ninja files only.
+
+You can force using generator by:
+
+```
+$ GENERATOR="Unix Makefiles" ./anvil.sh
+```
 
 Please be noted that, building the project on Linux platforms would not install any of its files into your system's include directory.
 
-Run `anvil --help` to check command flags in details.
+#### Addendum
 
+Release build would contain debugging symbols, which is controlled by `compiler_*.cmake` files.
 
+If you need to tailor build script to meet your needs, feel free to edit it.
+
+## As Dependency of a CMake Project
+
+KBase is _sub-project-aware_, which means you can include it into your CMake project by using `add_subdirectory()` command.
+
+CMake's [FetchContent](https://cmake.org/cmake/help/latest/module/FetchContent.html) module maybe a good start to automate populating dependencies.
+
+Or just use [CPM](https://github.com/TheLartians/CPM.cmake) to simplify the entire process; KBase itself uses CPM to manages the Catch2 library.
+
+Once complete integration, use `target_link_libraries()` command to declare dependency for your executable or library target.
+
+```cmake
+add_executable(my_exe main.cpp)
+target_link_libraries(my_exe
+  PRIVATE kbase
+)
+```
+
+NOTE: Building & installing then using `find_package()` to introduce dependency of KBase is currently not supported.
 
 ## Usages and Samples
 
 The project `Test` contains a set of unit test files, which can also be regarded as code samples in a certain of extend.
 
 Documentation files in `docs` are far more outdated, and it will take a lot of work to make it consistent with newest version of the codebase.
-
-
 
 ## Disclaimers
 
