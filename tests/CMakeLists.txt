@@ -16,6 +16,7 @@ target_sources(kbase_test
     chrono_util_unittest.cpp
     command_line_unittest.cpp
     debugger_unittest.cpp
+    endian_utils_unittest.cpp
     enum_ops_unittest.cpp
     environment_unittest.cpp
     error_exception_util_unittest.cpp

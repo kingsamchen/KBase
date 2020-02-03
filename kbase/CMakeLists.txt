@@ -18,6 +18,7 @@ target_sources(kbase
     command_line.cpp
     command_line.h
     debugger.h
+    endian_utils.h
     environment.h
     error_exception_util.cpp
     error_exception_util.h
