@@ -10,6 +10,7 @@
 #define KBASE_STACK_WALKER_H_
 
 #include <array>
+#include <string>
 
 #include "kbase/basic_macros.h"
 
