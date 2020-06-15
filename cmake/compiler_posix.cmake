@@ -18,7 +18,6 @@ function(apply_kbase_compile_conf TARGET)
     PRIVATE
       -Wall
       -Wextra
-      -Werror
       -Wno-unused-parameter
       -Wold-style-cast
       -Woverloaded-virtual

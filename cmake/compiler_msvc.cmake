@@ -20,7 +20,6 @@ function(apply_kbase_compile_conf TARGET)
   target_compile_options(${TARGET}
     PRIVATE
       /W4
-      /WX # Treat warning as error.
       /wd4819 # source characters not in current code page.
 
       /Zc:inline # Have the compiler eliminate unreferenced COMDAT functions and data before emitting the object file.
