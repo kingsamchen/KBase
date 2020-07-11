@@ -76,7 +76,7 @@
 #define NOT_NULL
 #endif
 
-#define RETAIN_LIFETIME_TO_HERE(x)                      \
+#define RETAIN_LIFETIME_TO_SCOPE(x)                      \
     UNUSED_VAR(x)
 
 // Put complicated implementation below.
