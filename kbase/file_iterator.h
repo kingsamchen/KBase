@@ -43,9 +43,13 @@ public:
 
     ~FileIterator() = default;
 
-    DEFAULT_COPY(FileIterator);
+    FileIterator(const FileIterator&) = default;
 
-    DEFAULT_MOVE(FileIterator);
+    FileIterator& operator=(const FileIterator&) = default;
+
+    FileIterator(FileIterator&&) = default;
+
+    FileIterator& operator=(FileIterator&&) = default;
 
     reference operator*() const noexcept
     {

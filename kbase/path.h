@@ -45,9 +45,13 @@ public:
 
     ~Path() = default;
 
-    DEFAULT_COPY(Path);
+    Path(const Path&) = default;
 
-    DEFAULT_MOVE(Path);
+    Path& operator=(const Path&) = default;
+
+    Path(Path&&) = default;
+
+    Path& operator=(Path&&) = default;
 
     const string_type& value() const noexcept
     {

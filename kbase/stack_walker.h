@@ -32,9 +32,13 @@ public:
 
     ~StackWalker() = default;
 
-    DEFAULT_COPY(StackWalker);
+    StackWalker(const StackWalker&) = default;
 
-    DEFAULT_MOVE(StackWalker);
+    StackWalker& operator=(const StackWalker&) = default;
+
+    StackWalker(StackWalker&&) = default;
+
+    StackWalker& operator=(StackWalker&&) = default;
 
     void DumpCallStack(std::ostream& stream);
 

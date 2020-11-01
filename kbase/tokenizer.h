@@ -36,9 +36,13 @@ public:
 
     ~TokenIterator() = default;
 
-    DEFAULT_COPY(TokenIterator);
+    TokenIterator(const TokenIterator&) = default;
 
-    DEFAULT_MOVE(TokenIterator);
+    TokenIterator& operator=(const TokenIterator&) = default;
+
+    TokenIterator(TokenIterator&&) = default;
+
+    TokenIterator& operator=(TokenIterator&&) = default;
 
     TokenIterator& operator++()
     {
@@ -136,9 +140,13 @@ public:
 
     ~BasicTokenizer() = default;
 
-    DEFAULT_COPY(BasicTokenizer);
+    BasicTokenizer(const BasicTokenizer&) = default;
 
-    DEFAULT_MOVE(BasicTokenizer);
+    BasicTokenizer& operator=(const BasicTokenizer&) = default;
+
+    BasicTokenizer(BasicTokenizer&&) = default;
+
+    BasicTokenizer& operator=(BasicTokenizer&&) = default;
 
     iterator begin() const noexcept
     {

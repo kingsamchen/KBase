@@ -9,7 +9,6 @@
 #include <unordered_map>
 #include <vector>
 
-#include "kbase/basic_macros.h"
 #include "kbase/path.h"
 #include "kbase/string_util.h"
 
@@ -141,11 +140,15 @@ public:
 
     explicit CommandLine(const ArgList& args);
 
-    DEFAULT_COPY(CommandLine);
-
-    DEFAULT_MOVE(CommandLine);
-
     ~CommandLine() = default;
+
+    CommandLine(const CommandLine&) = default;
+
+    CommandLine& operator=(const CommandLine&) = default;
+
+    CommandLine(CommandLine&&) = default;
+
+    CommandLine& operator=(CommandLine&&) = default;
 
     // Initializes the singleton CommandLine instance for the current process. On Windows,
     // be sure to ignore its arguments, we internally use GetCommandLineW() instead, because

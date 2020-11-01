@@ -31,11 +31,15 @@ public:
 
     explicit PickleReader(const Pickle& pickle) noexcept;
 
-    DEFAULT_COPY(PickleReader);
-
-    DEFAULT_MOVE(PickleReader);
-
     ~PickleReader() = default;
+
+    PickleReader(const PickleReader&) = default;
+
+    PickleReader& operator=(const PickleReader&) = default;
+
+    PickleReader(PickleReader&&) = default;
+
+    PickleReader& operator=(PickleReader&&) = default;
 
     explicit operator bool() const noexcept
     {

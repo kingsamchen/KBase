@@ -164,9 +164,13 @@ public:
 
     ~RegKeyIterator() = default;
 
-    DEFAULT_COPY(RegKeyIterator);
+    RegKeyIterator(const RegKeyIterator&) = default;
 
-    DEFAULT_MOVE(RegKeyIterator);
+    RegKeyIterator& operator=(const RegKeyIterator&) = default;
+
+    RegKeyIterator(RegKeyIterator&&) = default;
+
+    RegKeyIterator& operator=(RegKeyIterator&&) = default;
 
     RegKeyIterator& operator++();
 

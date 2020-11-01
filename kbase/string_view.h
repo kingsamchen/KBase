@@ -95,7 +95,9 @@ public:
 
     ~BasicStringView() = default;
 
-    DEFAULT_COPY(BasicStringView);
+    BasicStringView(const BasicStringView&) = default;
+
+    BasicStringView& operator=(const BasicStringView&) = default;
 
     constexpr const_iterator begin() const noexcept
     {

@@ -35,16 +35,6 @@
     classname(classname&&) = delete;                    \
     classname& operator=(classname&&) = delete
 
-#define DEFAULT_COPY(classname)                         \
-    classname(const classname&) = default;              \
-    classname& operator=(const classname&) = default
-
-// Force default move constructor / assignment to be noexcept.
-
-#define DEFAULT_MOVE(classname)                         \
-    classname(classname&&) = default;                   \
-    classname& operator=(classname&&) = default
-
 #define UNUSED_VAR(x)                                   \
     ::kbase::internal::SilenceUnusedVariableWarning(x)
 
