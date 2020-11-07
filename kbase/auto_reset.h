@@ -11,8 +11,6 @@
 
 #include <type_traits>
 
-#include "kbase/basic_macros.h"
-
 namespace kbase {
 
 // Be cautious of that an AutoReset object must have shorter lifetime than
@@ -30,9 +28,13 @@ public:
         *scoped_var_ = original_value_;
     }
 
-    DISALLOW_COPY(AutoReset);
+    AutoReset(const AutoReset&) = delete;
 
-    DISALLOW_MOVE(AutoReset);
+    AutoReset& operator=(const AutoReset&) = delete;
+
+    AutoReset(AutoReset&&) = delete;
+
+    AutoReset& operator=(AutoReset&&) = delete;
 
 private:
     T* scoped_var_;

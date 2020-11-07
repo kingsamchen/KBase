@@ -11,7 +11,6 @@
 
 #include <functional>
 
-#include "kbase/basic_macros.h"
 #include "kbase/basic_types.h"
 #include "kbase/path.h"
 
@@ -27,10 +26,6 @@ public:
     PathService() = delete;
 
     ~PathService() = delete;
-
-    DISALLOW_COPY(PathService);
-
-    DISALLOW_MOVE(PathService);
 
     // Returns the absolute path corresponding to the key if the function succeeds.
     // Returns an empty file path if no matching was found.

@@ -14,7 +14,6 @@
 
 #include <Windows.h>
 
-#include "kbase/basic_macros.h"
 #include "kbase/basic_types.h"
 #include "kbase/path.h"
 
@@ -24,9 +23,13 @@ class FileVersionInfo {
 public:
     ~FileVersionInfo() = default;
 
-    DISALLOW_COPY(FileVersionInfo);
+    FileVersionInfo(const FileVersionInfo&) = delete;
 
-    DISALLOW_MOVE(FileVersionInfo);
+    FileVersionInfo& operator=(const FileVersionInfo&) = delete;
+
+    FileVersionInfo(FileVersionInfo&&) = delete;
+
+    FileVersionInfo& operator=(FileVersionInfo&&) = delete;
 
     static std::unique_ptr<FileVersionInfo> CreateForFile(const Path& file);
 

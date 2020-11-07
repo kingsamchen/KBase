@@ -340,9 +340,13 @@ public:
 
     ~Impl();
 
-    DISALLOW_COPY(Impl);
+    Impl(const Impl&) = delete;
 
-    DISALLOW_MOVE(Impl);
+    Impl& operator=(const Impl&) = delete;
+
+    Impl(Impl&&) = delete;
+
+    Impl& operator=(Impl&&) = delete;
 
     // Returns true, if successfully advanced to the next key.
     // Returns false, if there is no more key to iterate.

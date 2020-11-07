@@ -44,7 +44,9 @@ struct PathContext {
           cache_disabled(false)
     {}
 
-    DISALLOW_COPY(PathContext);
+    PathContext(const PathContext&) = delete;
+
+    PathContext& operator=(const PathContext&) = delete;
 };
 
 PathContext& GetPathContext()

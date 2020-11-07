@@ -12,7 +12,6 @@
 #include <mutex>
 
 #include "kbase/at_exit_manager.h"
-#include "kbase/basic_macros.h"
 
 namespace kbase {
 
@@ -56,10 +55,6 @@ public:
     Singleton() = delete;
 
     ~Singleton() = delete;
-
-    DISALLOW_COPY(Singleton);
-
-    DISALLOW_MOVE(Singleton);
 
     static T* instance()
     {

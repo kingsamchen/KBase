@@ -124,9 +124,13 @@ public:
 
     ~Guarantor() = default;
 
-    DISALLOW_COPY(Guarantor);
+    Guarantor(const Guarantor&) = delete;
 
-    DISALLOW_MOVE(Guarantor);
+    Guarantor& operator=(const Guarantor&) = delete;
+
+    Guarantor(Guarantor&&) = delete;
+
+    Guarantor& operator=(Guarantor&&) = delete;
 
     // Capture diagnostic variables.
 

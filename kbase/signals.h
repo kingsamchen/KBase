@@ -15,8 +15,6 @@
 #include <mutex>
 #include <vector>
 
-#include "kbase/basic_macros.h"
-
 namespace kbase {
 
 namespace internal {
@@ -47,9 +45,13 @@ struct SlotImpl : std::enable_shared_from_this<SlotImpl<Func, Args...>>, IDispos
 
     ~SlotImpl() = default;
 
-    DISALLOW_COPY(SlotImpl);
+    SlotImpl(const SlotImpl&) = delete;
 
-    DISALLOW_MOVE(SlotImpl);
+    SlotImpl& operator=(const SlotImpl&) = delete;
+
+    SlotImpl(SlotImpl&&) = delete;
+
+    SlotImpl& operator=(SlotImpl&&) = delete;
 
     void Dispose() override
     {
@@ -80,9 +82,13 @@ public:
 
     ~SignalImpl() = default;
 
-    DISALLOW_COPY(SignalImpl);
+    SignalImpl(const SignalImpl&) = delete;
 
-    DISALLOW_MOVE(SignalImpl);
+    SignalImpl& operator=(const SignalImpl&) = delete;
+
+    SignalImpl(SignalImpl&&) = delete;
+
+    SignalImpl& operator=(SignalImpl&&) = delete;
 
     void AddSlot(const std::shared_ptr<SlotType>& slot)
     {
@@ -170,7 +176,9 @@ private:
 public:
     ~Slot() = default;
 
-    DISALLOW_COPY(Slot);
+    Slot(const Slot&) = delete;
+
+    Slot& operator=(const Slot&) = delete;
 
     Slot(Slot&& other) noexcept
         : impl_(std::move(other.impl_))
@@ -215,9 +223,13 @@ public:
 
     ~Signal() = default;
 
-    DISALLOW_COPY(Signal);
+    Signal(const Signal&) = delete;
 
-    DISALLOW_MOVE(Signal);
+    Signal& operator=(const Signal&) = delete;
+
+    Signal(Signal&&) = delete;
+
+    Signal& operator=(Signal&&) = delete;
 
     Slot Connect(const Func& fn)
     {

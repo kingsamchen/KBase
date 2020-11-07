@@ -45,9 +45,11 @@ public:
         }
     }
 
-    ScopeGuard& operator=(ScopeGuard&&) = delete;
+    ScopeGuard(const ScopeGuard&) = delete;
 
-    DISALLOW_COPY(ScopeGuard);
+    ScopeGuard& operator=(const ScopeGuard&) = delete;
+
+    ScopeGuard& operator=(ScopeGuard&&) = delete;
 
     void Dismiss() noexcept
     {

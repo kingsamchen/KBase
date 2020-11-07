@@ -36,9 +36,13 @@ public:
 
     ~Environment() = delete;
 
-    DISALLOW_COPY(Environment);
+    Environment(const Environment&) = delete;
 
-    DISALLOW_MOVE(Environment);
+    Environment& operator=(const Environment&) = delete;
+
+    Environment(Environment&&) = delete;
+
+    Environment& operator=(Environment&&) = delete;
 
     // Gets the value of an environment variable.
     // Returns empty string, if no such variable exists, or an error occurs, or even

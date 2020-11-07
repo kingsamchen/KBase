@@ -42,7 +42,9 @@ public:
 
     ~RegKey();
 
-    DISALLOW_COPY(RegKey);
+    RegKey(const RegKey&) = delete;
+
+    RegKey& operator=(const RegKey&) = delete;
 
     // Create or open a registry key, and return a RegKey instance to represent.
     // The `disposition` indicates the exact behavior.

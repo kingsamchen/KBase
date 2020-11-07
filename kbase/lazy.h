@@ -13,8 +13,6 @@
 #include <memory>
 #include <mutex>
 
-#include "kbase/basic_macros.h"
-
 namespace kbase {
 
 // Lazy<T> manages a single instance of type T, which will be lazily created on the
@@ -45,9 +43,13 @@ public:
 
     ~Lazy() = default;
 
-    DISALLOW_COPY(Lazy);
+    Lazy(const Lazy&) = delete;
 
-    DISALLOW_MOVE(Lazy);
+    Lazy& operator=(const Lazy&) = delete;
+
+    Lazy(Lazy&&) = delete;
+
+    Lazy& operator=(Lazy&&) = delete;
 
     T& value()
     {

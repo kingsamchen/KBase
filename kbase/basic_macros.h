@@ -27,14 +27,6 @@
 #error Compiler not supported
 #endif
 
-#define DISALLOW_COPY(classname)                        \
-    classname(const classname&) = delete;               \
-    classname& operator=(const classname&) = delete
-
-#define DISALLOW_MOVE(classname)                        \
-    classname(classname&&) = delete;                    \
-    classname& operator=(classname&&) = delete
-
 #define UNUSED_VAR(x)                                   \
     ::kbase::internal::SilenceUnusedVariableWarning(x)
 

@@ -12,7 +12,6 @@
 #include <sstream>
 #include <string>
 
-#include "kbase/basic_macros.h"
 #include "kbase/basic_types.h"
 
 namespace kbase {
@@ -122,9 +121,13 @@ public:
 
     ~LogMessage();
 
-    DISALLOW_COPY(LogMessage);
+    LogMessage(const LogMessage&) = delete;
 
-    DISALLOW_MOVE(LogMessage);
+    LogMessage& operator=(const LogMessage&) = delete;
+
+    LogMessage(LogMessage&&) = delete;
+
+    LogMessage& operator=(LogMessage&&) = delete;
 
     std::ostream& stream() noexcept
     {

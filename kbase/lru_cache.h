@@ -86,7 +86,9 @@ public:
 
     ~LRUCache() = default;
 
-    DISALLOW_COPY(LRUCache);
+    LRUCache(const LRUCache&) = delete;
+
+    LRUCache& operator=(const LRUCache&) = delete;
 
     // Add a pair of <key, entry> into the cache. If the key already exists, update
     // the entry.

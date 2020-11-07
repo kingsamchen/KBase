@@ -13,8 +13,6 @@
 #include <mutex>
 #include <stack>
 
-#include "kbase/basic_macros.h"
-
 namespace kbase {
 
 // We can control the execution time of cleanup callbacks via `AtExitManager`, especially in
@@ -29,9 +27,13 @@ public:
 
     ~AtExitManager();
 
-    DISALLOW_COPY(AtExitManager);
+    AtExitManager(const AtExitManager&) = delete;
 
-    DISALLOW_MOVE(AtExitManager);
+    AtExitManager& operator=(const AtExitManager&) = delete;
+
+    AtExitManager(AtExitManager&&) = delete;
+
+    AtExitManager& operator=(AtExitManager&&) = delete;
 
     static void RegisterCallback(ExitCallback callback);
 

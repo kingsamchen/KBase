@@ -60,9 +60,13 @@ public:
 
     ~OSInfo() = default;
 
-    DISALLOW_COPY(OSInfo);
+    OSInfo(const OSInfo&) = delete;
 
-    DISALLOW_MOVE(OSInfo);
+    OSInfo& operator=(const OSInfo&) = delete;
+
+    OSInfo(OSInfo&&) = delete;
+
+    OSInfo& operator=(OSInfo&&) = delete;
 
     static OSInfo* GetInstance();
 

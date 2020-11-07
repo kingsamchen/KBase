@@ -65,7 +65,9 @@ public:
         return *this;
     }
 
-    DISALLOW_COPY(GenericScopedHandle);
+    GenericScopedHandle(const GenericScopedHandle&) = delete;
+
+    GenericScopedHandle& operator=(const GenericScopedHandle&) = delete;
 
     explicit operator bool() const noexcept
     {

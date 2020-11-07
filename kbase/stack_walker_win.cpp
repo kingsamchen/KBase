@@ -44,9 +44,13 @@ class SymbolContext {
 public:
     ~SymbolContext() = default;
 
-    DISALLOW_COPY(SymbolContext);
+    SymbolContext(const SymbolContext&) = delete;
 
-    DISALLOW_MOVE(SymbolContext);
+    SymbolContext& operator=(const SymbolContext&) = delete;
+
+    SymbolContext(SymbolContext&&) = delete;
+
+    SymbolContext& operator=(SymbolContext&&) = delete;
 
     static SymbolContext* GetInstance()
     {
