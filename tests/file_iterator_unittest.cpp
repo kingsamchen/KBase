@@ -4,6 +4,7 @@
 
 #include "catch2/catch.hpp"
 
+#include <fstream>
 #include <iostream>
 
 #include "kbase/file_iterator.h"
@@ -52,6 +53,12 @@ TEST_CASE("List files on a path and its sub-directories", "[FileIterator]")
 
 TEST_CASE("Iterator should be copyable", "[FileIterator]")
 {
+    {
+        std::ofstream f1("file_iterator_test1");
+        std::ofstream f2("file_iterator_test2");
+        std::ofstream f3("file_iterator_test3");
+    }
+
     FileIterator it(Path(PATH_LITERAL(".")), false);
     auto first_entry = it->file_path();
 #if defined(OS_WIN)
@@ -60,21 +67,23 @@ TEST_CASE("Iterator should be copyable", "[FileIterator]")
     std::cout << "first entry: " << first_entry.value() << std::endl;
 #endif
 
+    // `cit` and `it` should both point to the same entry.
     auto cit = it;
     REQUIRE((cit == it));
     REQUIRE(cit->file_path().value() == it->file_path().value());
     REQUIRE(cit->file_path().value() == first_entry.value());
 
+    // After increment of cit, `it` is invalidated and is even no longer required to be
+    // dereferenceable.
     ++cit;
 #if defined(OS_WIN)
     std::cout << "++cit entry: " << WideToASCII(cit->file_path().value()) << std::endl;
 #else
     std::cout << "++cit entry: " << cit->file_path().value() << std::endl;
 #endif
-    REQUIRE(it->file_path().value() != cit->file_path().value());
-    REQUIRE(it->file_path().value() == first_entry.value());
-    REQUIRE((it == cit));
+    REQUIRE(cit->file_path().value() != first_entry.value());
 
+    it = cit;
     ++it;
 #if defined(OS_WIN)
     std::cout << "++it entry: " << WideToASCII(it->file_path().value()) << std::endl;
@@ -82,7 +91,6 @@ TEST_CASE("Iterator should be copyable", "[FileIterator]")
     std::cout << "++it entry: " << it->file_path().value() << std::endl;
 #endif
     REQUIRE(it->file_path() != first_entry);
-    REQUIRE(it->file_path() != cit->file_path());
 }
 
 }   // namespace kbase
