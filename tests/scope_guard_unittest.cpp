@@ -51,4 +51,19 @@ TEST_CASE("Use MakeScopedGuard function to explicitly control guard", "[ScopeGua
     REQUIRE(v.empty());
 }
 
+TEST_CASE("Guard function must be executed at most once", "[ScopeGuard]")
+{
+    int count = 0;
+
+    {
+        auto guard = MAKE_SCOPE_GUARD { ++count; };
+
+        {
+            auto defer(std::move(guard));
+        }
+    }
+
+    REQUIRE(count == 1);
+}
+
 }   // namespace kbase
